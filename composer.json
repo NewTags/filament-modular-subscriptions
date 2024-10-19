@@ -1,0 +1,78 @@
+{
+    "name": "hoceineel/filament-modular-subscriptions",
+    "description": "A Filament plugin for managing modular subscriptions with pricing and usage calculation.",
+    "keywords": [
+        "hoceineel",
+        "laravel",
+        "filament",
+        "filament-modular-subscriptions",
+        "subscriptions",
+        "plans",
+        "modules",
+        "filament-resources"
+    ],
+    "homepage": "https://github.com/hoceineel/filament-modular-subscriptions",
+    "support": {
+        "issues": "https://github.com/hoceineel/filament-modular-subscriptions/issues",
+        "source": "https://github.com/hoceineel/filament-modular-subscriptions"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hoceine El",
+            "email": "contact@hoceine.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "filament/filament": "^3.0",
+        "outerweb/filament-translatable-fields": "^2.0",
+        "spatie/laravel-package-tools": "^1.15.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.0",
+        "nunomaduro/collision": "^8.5",
+        "larastan/larastan": "^2.9.9",
+        "orchestra/testbench": "^9.5",
+        "pestphp/pest": "^3.4",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "spatie/laravel-ray": "^1.26"
+    },
+    "autoload": {
+        "psr-4": {
+            "HoceineEl\\FilamentModularSubscriptions\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "HoceineEl\\FilamentModularSubscriptions\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "HoceineEl\\FilamentModularSubscriptions\\FilamentModularSubscriptionsServiceProvider"
+            ],
+            "aliases": {
+                "FilamentModularSubscriptions": "HoceineEl\\FilamentModularSubscriptions\\FilamentModularSubscriptions"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
