@@ -30,8 +30,8 @@ return [
             'singular_name' => 'Subscription',
             'fields' => [
                 'plan_id' => 'Plan',
-                'subscribable_type' => 'Subscribable Type',
-                'subscribable_id' => 'Subscribable ID',
+                'subscribable_type' => 'Subscriber Type',
+                'subscribable_id' => 'Subscriber',
                 'starts_at' => 'Starts At',
                 'ends_at' => 'Ends At',
                 'trial_ends_at' => 'Trial Ends At',
