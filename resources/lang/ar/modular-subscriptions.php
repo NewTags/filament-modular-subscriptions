@@ -4,6 +4,7 @@ return [
     'resources' => [
         'plan' => [
             'name' => 'الخطط',
+            'singular_name' => 'خطة',
             'fields' => [
                 'name' => 'الاسم',
                 'slug' => 'الاسم المختصر',
@@ -20,7 +21,8 @@ return [
             ],
         ],
         'subscription' => [
-            'name' => 'الاشتراك',
+            'name' => 'الاشتراكات',
+            'singular_name' => 'الاشتراك',
             'fields' => [
                 'plan_id' => 'الخطة',
                 'subscribable_type' => 'نوع المشترك',
@@ -36,6 +38,7 @@ return [
         ],
         'module' => [
             'name' => 'الوحدات',
+            'singular_name' => 'الوحدة',
             'fields' => [
                 'name' => 'الاسم',
                 'class' => 'الفئة',
@@ -44,6 +47,7 @@ return [
         ],
         'module_usage' => [
             'name' => 'استخدامات الوحدات',
+            'singular_name' => 'استخدام الوحدة',
             'fields' => [
                 'subscription_id' => 'الاشتراك',
                 'module_id' => 'الوحدة',

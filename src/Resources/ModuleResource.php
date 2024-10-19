@@ -30,17 +30,17 @@ class ModuleResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.name')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.name')),
                 Forms\Components\Select::make('class')
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->options(function () {
                         return config('filament-modular-subscriptions.modules');
                     })
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.class')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.class')),
                 Forms\Components\Toggle::make('is_active')
                     ->default(true)
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.is_active')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.is_active')),
             ]);
     }
 
@@ -49,12 +49,12 @@ class ModuleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.name'))
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('class')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.class')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.class')),
                 Tables\Columns\ToggleColumn::make('is_active')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.is_active')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.is_active')),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('is_active')
@@ -62,7 +62,7 @@ class ModuleResource extends Resource
                         '1' => __('filament-modular-subscriptions::modular-subscriptions.active'),
                         '0' => __('filament-modular-subscriptions::modular-subscriptions.inactive'),
                     ])
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.is_active')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.is_active')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
