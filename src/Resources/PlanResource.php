@@ -48,7 +48,7 @@ class PlanResource extends Resource
                                     ->required()
                                     ->translatable(true, config('filament-modular-subscriptions.locales'))
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn(Set $set, $state) => $set('slug', str($state['name'][app()->getLocale() ?? config('filament-modular-subscriptions.locales')[0]])->slug()))
+                                    ->afterStateUpdated(fn (Set $set, $state) => $set('slug', str($state['name'][app()->getLocale() ?? config('filament-modular-subscriptions.locales')[0]])->slug()))
                                     ->columnSpanFull()
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.name')),
                                 Forms\Components\TextInput::make('slug')

@@ -6,7 +6,6 @@ use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -45,7 +44,7 @@ class SubscriptionResource extends Resource
                 Forms\Components\Select::make('subscribable_id')
                     ->relationship('subscriber', function () {
                         $tenantAttribute = config('filament-modular-subscriptions.tenant_attribute');
-                        if (!$tenantAttribute) {
+                        if (! $tenantAttribute) {
                             throw new \Exception('Tenant attribute not set in config/filament-modular-subscriptions.php');
                         }
 
@@ -56,7 +55,7 @@ class SubscriptionResource extends Resource
                 Hidden::make('subscribable_type')
                     ->default(config('filament-modular-subscriptions.tenant_model')),
                 Forms\Components\Select::make('plan_id')
-                    ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
+                    ->options(fn () => Plan::all()->mapWithKeys(function ($plan) {
                         return [$plan->id => $plan->trans_name . ' - ' . $plan->price . ' ' . $plan->currency];
                     }))
                     ->live(debounce: 500)
@@ -116,7 +115,7 @@ class SubscriptionResource extends Resource
                     ->options(SubscriptionStatus::class)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.status')),
                 Tables\Filters\SelectFilter::make('plan_id')
-                    ->options(fn() => Plan::all()->pluck('name', 'id'))
+                    ->options(fn () => Plan::all()->pluck('name', 'id'))
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.plan_id')),
                 Filter::make('dates')
                     ->form([

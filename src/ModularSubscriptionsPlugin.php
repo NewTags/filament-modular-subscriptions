@@ -3,8 +3,6 @@
 namespace HoceineEl\FilamentModularSubscriptions;
 
 use Filament\Contracts\Plugin;
-use Filament\Facades\Filament;
-use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource;
@@ -15,7 +13,6 @@ use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFie
 class ModularSubscriptionsPlugin implements Plugin
 {
     protected bool $hasSubscriptionStats = true;
-
 
     public static function make(): static
     {
@@ -37,8 +34,6 @@ class ModularSubscriptionsPlugin implements Plugin
                 ModuleResource::class,
                 ModuleUsageResource::class,
             ]);
-
-
 
         if ($this->hasSubscriptionStats) {
             $panel->widgets([
