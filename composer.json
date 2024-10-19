@@ -66,10 +66,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "HoceineEl\\FilamentModularSubscriptions\\FilamentModularSubscriptionsServiceProvider"
+                "HoceineEl\\FilamentModularSubscriptions\\ModularSubscriptionsServiceProvider"
             ],
             "aliases": {
-                "FilamentModularSubscriptions": "HoceineEl\\FilamentModularSubscriptions\\FilamentModularSubscriptions"
+                "FilamentModularSubscriptions": "HoceineEl\\FilamentModularSubscriptions\\ModularSubscriptions"
             }
         }
     },
