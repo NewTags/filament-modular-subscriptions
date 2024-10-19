@@ -7,6 +7,7 @@ use Filament\Facades\Filament;
 use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource;
+use HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource;
 use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
@@ -34,6 +35,7 @@ class ModularSubscriptionsPlugin implements Plugin
                 PlanResource::class,
                 SubscriptionResource::class,
                 ModuleResource::class,
+                ModuleUsageResource::class,
             ]);
 
 
@@ -50,17 +52,17 @@ class ModularSubscriptionsPlugin implements Plugin
         //
     }
 
-    // public function subscriptionStats(bool $condition = true): static
-    // {
-    //     $this->hasSubscriptionStats = $condition;
+    public function subscriptionStats(bool $condition = true): static
+    {
+        $this->hasSubscriptionStats = $condition;
 
-    //     return $this;
-    // }
+        return $this;
+    }
 
-    // public function hasSubscriptionStats(): bool
-    // {
-    //     return $this->hasSubscriptionStats;
-    // }
+    public function hasSubscriptionStats(): bool
+    {
+        return $this->hasSubscriptionStats;
+    }
 
     public static function get(): static
     {
