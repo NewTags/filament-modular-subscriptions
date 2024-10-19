@@ -23,10 +23,10 @@ trait Subscribable
     public function activeSubscription(): ?Subscription
     {
         return $this->subscriptions()
-            ->where('starts_at', '<=', now())
+            ->whereDate('starts_at', '<=', now())
             ->where(function ($query) {
                 $query->whereNull('ends_at')
-                    ->orWhere('ends_at', '>', now());
+                    ->orWhereDate('ends_at', '>', now());
             })
             ->where('status', SubscriptionStatus::ACTIVE)
             ->latest('starts_at')
