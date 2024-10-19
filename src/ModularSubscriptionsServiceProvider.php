@@ -36,12 +36,6 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
                     ->askToRunMigrations()
                     ->copyAndRegisterServiceProviderInApp()
                     ->askToStarRepoOnGitHub('hoceineel/filament-modular-subscriptions');
-
-                // Publish Filament resources
-                $command->call('vendor:publish', [
-                    '--tag' => 'filament-modular-subscriptions-resources',
-                    '--force' => true,
-                ]);
             });
 
         $configFileName = $package->shortName();
@@ -60,14 +54,6 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
 
         if (file_exists($package->basePath('/../resources/views'))) {
             $package->hasViews(static::$viewNamespace);
-        }
-
-        // Add this new condition to publish Filament resources
-        if (file_exists($package->basePath('/../src/Resources'))) {
-            $package->publishesServiceProvider('ModularSubscriptionsServiceProvider');
-            $package->publishes([
-                $package->basePath('/../src/Resources') => base_path('app/Filament'),
-            ], 'filament-modular-subscriptions-resources');
         }
     }
 
