@@ -5,7 +5,7 @@ namespace HoceineEl\FilamentModularSubscriptions\Resources;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use HoceineEl\LaravelModularSubscriptions\Models\Module;
+use HoceineEl\FilamentModularSubscriptions\Models\Module;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource\Pages;
 
 class ModuleResource extends Resource

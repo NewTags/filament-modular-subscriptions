@@ -1,10 +1,10 @@
 <?php
 
-namespace HoceineEl\LaravelModularSubscriptions\Models;
+namespace HoceineEl\FilamentModularSubscriptions\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use HoceineEl\LaravelModularSubscriptions\Enums\Interval;
+use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 

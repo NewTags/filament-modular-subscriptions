@@ -1,16 +1,16 @@
 <?php
 
-namespace HoceineEl\LaravelModularSubscriptions\Traits;
+namespace HoceineEl\FilamentModularSubscriptions\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
-use HoceineEl\LaravelModularSubscriptions\Models\Subscription;
-use HoceineEl\LaravelModularSubscriptions\Models\Plan;
-use HoceineEl\LaravelModularSubscriptions\Enums\Interval;
-use HoceineEl\LaravelModularSubscriptions\Facades\ModularSubscriptions;
+use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use HoceineEl\FilamentModularSubscriptions\Models\Plan;
+use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
+use HoceineEl\FilamentModularSubscriptions\Facades\ModularSubscriptions;
 use Illuminate\Support\Facades\DB;
-use HoceineEl\LaravelModularSubscriptions\Enums\SubscriptionStatus;
+use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 
 trait Subscribable
 {

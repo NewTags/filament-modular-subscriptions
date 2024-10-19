@@ -1,8 +1,8 @@
 <?php
 
-namespace HoceineEl\LaravelModularSubscriptions\Modules;
+namespace HoceineEl\FilamentModularSubscriptions\Modules;
 
-use HoceineEl\LaravelModularSubscriptions\Models\Subscription;
+use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 
 abstract class BaseModule
 {

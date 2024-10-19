@@ -5,10 +5,10 @@ return [
         // List all available module classes here
     ],
     'models' => [
-        'plan' => HoceineEl\LaravelModularSubscriptions\Models\Plan::class,
-        'subscription' => HoceineEl\LaravelModularSubscriptions\Models\Subscription::class,
-        'module' => HoceineEl\LaravelModularSubscriptions\Models\Module::class,
-        'usage' => HoceineEl\LaravelModularSubscriptions\Models\ModuleUsage::class,
+        'plan' => HoceineEl\FilamentModularSubscriptions\Models\Plan::class,
+        'subscription' => HoceineEl\FilamentModularSubscriptions\Models\Subscription::class,
+        'module' => HoceineEl\FilamentModularSubscriptions\Models\Module::class,
+        'usage' => HoceineEl\FilamentModularSubscriptions\Models\ModuleUsage::class,
     ],
     'resources' => [
         'plan' => HoceineEl\FilamentModularSubscriptions\Resources\PlanResource::class,

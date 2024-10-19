@@ -1,9 +1,9 @@
 <?php
 
-namespace HoceineEl\LaravelModularSubscriptions\Facades;
+namespace HoceineEl\FilamentModularSubscriptions\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use HoceineEl\LaravelModularSubscriptions\ModularSubscriptionManager;
+use HoceineEl\FilamentModularSubscriptions\ModularSubscriptionManager;
 use Illuminate\Support\Collection;
 
 /**
@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
  * @method static Collection getRegisteredModules()
  * @method static Collection getActiveModules()
  *
- * @see \HoceineEl\LaravelModularSubscriptions\ModularSubscriptionManager
+ * @see \HoceineEl\FilamentModularSubscriptions\ModularSubscriptionManager
  */
 class ModularSubscriptions extends Facade
 {

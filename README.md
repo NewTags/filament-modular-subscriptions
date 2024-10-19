@@ -69,8 +69,8 @@ class AdminPanelProvider extends PanelProvider
 To create a new module, extend the `BaseModule` class:
 
 ```php
-use HoceineEl\LaravelModularSubscriptions\Modules\BaseModule;
-use HoceineEl\LaravelModularSubscriptions\Models\Subscription;
+use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
+use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 
 class MyFeatureModule extends BaseModule
 {
@@ -134,7 +134,7 @@ Creating a Plan
 You can create a new subscription plan using the Plan model:
 
 ```php
-use HoceineEl\LaravelModularSubscriptions\Models\Plan;
+use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 
 $plan = Plan::create([
     'name' => ['en' => 'Pro Plan', 'es' => 'Plan Pro'],
@@ -152,7 +152,7 @@ $plan = Plan::create([
 ]);
 Creating a Subscription
 To create a new subscription for a user:
-phpCopyuse HoceineEl\LaravelModularSubscriptions\Models\Subscription;
+phpCopyuse HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 
 $user = User::find(1);
 $plan = Plan::where('slug', 'pro-plan')->first();
@@ -172,8 +172,8 @@ Using a Custom Module
 Here's an example of how to implement and use a custom module for tracking API calls:
 
 ```php
-use HoceineEl\LaravelModularSubscriptions\Modules\BaseModule;
-use HoceineEl\LaravelModularSubscriptions\Models\Subscription;
+use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
+use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 
 class ApiCallsModule extends BaseModule
 {
@@ -210,7 +210,7 @@ class ApiCallsModule extends BaseModule
 Then, in your application code:
 
 ```php
-use HoceineEl\LaravelModularSubscriptions\Facades\ModularSubscriptions;
+use HoceineEl\FilamentModularSubscriptions\Facades\ModularSubscriptions;
 
 $user = User::find(1);
 $subscription = $user->subscription;

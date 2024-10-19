@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\LaravelModularSubscriptions\Enums;
+namespace HoceineEl\FilamentModularSubscriptions\Enums;
 
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;

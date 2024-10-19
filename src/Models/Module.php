@@ -1,8 +1,8 @@
 <?php
 
-namespace HoceineEl\LaravelModularSubscriptions\Models;
+namespace HoceineEl\FilamentModularSubscriptions\Models;
 
-use HoceineEl\LaravelModularSubscriptions\Modules\BaseModule;
+use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 

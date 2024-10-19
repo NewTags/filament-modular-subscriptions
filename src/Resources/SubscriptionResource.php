@@ -10,10 +10,10 @@ use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
-use HoceineEl\LaravelModularSubscriptions\Models\Subscription;
-use HoceineEl\LaravelModularSubscriptions\Enums\SubscriptionStatus;
+use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource\Pages;
-use HoceineEl\LaravelModularSubscriptions\Models\Plan;
+use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use Illuminate\Database\Eloquent\Builder;
 
 class SubscriptionResource extends Resource
