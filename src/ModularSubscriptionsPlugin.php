@@ -12,7 +12,7 @@ use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource;
 use HoceineEl\FilamentModularSubscriptions\Widgets\SubscriptionStatsWidget;
 
-class FilamentModularSubscriptionsPlugin implements Plugin
+class ModularSubscriptionsPlugin implements Plugin
 {
     protected bool $hasSubscriptionStats = true;
 
