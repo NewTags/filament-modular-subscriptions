@@ -6,13 +6,17 @@ use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use HoceineEl\FilamentModularSubscriptions\Models\Module;
+use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource\Pages;
+use Illuminate\Support\Collection;
 
 class ModuleResource extends Resource
 {
     protected static ?string $model = Module::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
+
+    protected static ?Collection $moduleOptions = null;
 
     public static function getPluralModelLabel(): string
     {
@@ -39,10 +43,13 @@ class ModuleResource extends Resource
                 Forms\Components\Select::make('class')
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->options(function () {
-                        return config('filament-modular-subscriptions.modules');
-                    })
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.class')),
+                    ->options(fn() => self::getModuleOptions())
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.class'))
+                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, ?string $state) {
+                        if ($state && !$get('name')) {
+                            $set('name', self::getModuleOptions()->get($state));
+                        }
+                    }),
                 Forms\Components\Toggle::make('is_active')
                     ->default(true)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.is_active')),
@@ -57,6 +64,7 @@ class ModuleResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('class')
+                    ->formatStateUsing(fn($state) => self::getModuleOptions()->get($state, $state))
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.class')),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module.fields.is_active')),
@@ -93,5 +101,16 @@ class ModuleResource extends Resource
             'create' => Pages\CreateModule::route('/create'),
             'edit' => Pages\EditModule::route('/{record}/edit'),
         ];
+    }
+
+    protected static function getModuleOptions(): Collection
+    {
+        if (self::$moduleOptions === null) {
+            self::$moduleOptions = collect(config('filament-modular-subscriptions.modules'))
+                ->filter(fn($module) => is_subclass_of($module, BaseModule::class))
+                ->mapWithKeys(fn($module) => [$module => (new $module)->getName()]);
+        }
+
+        return self::$moduleOptions;
     }
 }

@@ -46,4 +46,34 @@ class Module extends Model
     {
         return new $this->class;
     }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getLabelKey(): string
+    {
+        return $this->getInstance()->getLabelKey();
+    }
+
+    public function calculateUsage(Subscription $subscription): int
+    {
+        return $this->getInstance()->calculateUsage($subscription);
+    }
+
+    public function getPricing(Subscription $subscription): float
+    {
+        return $this->getInstance()->getPricing($subscription);
+    }
+
+    public function canUse(Subscription $subscription): bool
+    {
+        return $this->getInstance()->canUse($subscription);
+    }
+
+    public function getLabel(): string
+    {
+        return __($this->getLabelKey());
+    }
 }

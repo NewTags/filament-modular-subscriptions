@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Facades\ModularSubscriptions;
+use HoceineEl\FilamentModularSubscriptions\Models\Module;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -151,26 +152,26 @@ trait Subscribable
         return $module->canUse($activeSubscription);
     }
 
-    public function recordUsage(string $moduleName, int $quantity = 1, bool $incremental = true): void
+    public function recordUsage(string $moduleClass, int $quantity = 1, bool $incremental = true): void
     {
         $activeSubscription = $this->activeSubscription();
         if (! $activeSubscription) {
             throw new \RuntimeException('No active subscription found');
         }
 
-        $module = ModularSubscriptions::getRegisteredModules()->get($moduleName);
+        $module = Module::where('class', $moduleClass)->first();
 
         if (! $module) {
-            throw new \InvalidArgumentException("Module {$moduleName} not found");
+            throw new \InvalidArgumentException("Module {$moduleClass} not found");
         }
 
         $moduleUsage = $activeSubscription->moduleUsages()
-            ->where('module_id', $module->getId())
+            ->where('module_id', $module->id)
             ->first();
 
         if (! $moduleUsage) {
             $moduleUsage = $activeSubscription->moduleUsages()->create([
-                'module_id' => $module->getId(),
+                'module_id' => $module->id,
                 'usage' => 0,
                 'calculated_at' => now(),
             ]);
