@@ -18,6 +18,7 @@ class ModuleResource extends Resource
     {
         return __('filament-modular-subscriptions::modular-subscriptions.resources.module.name');
     }
+
     public static function getModelLabel(): string
     {
         return __('filament-modular-subscriptions::modular-subscriptions.resources.module.singular_name');

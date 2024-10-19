@@ -54,6 +54,7 @@ class Plan extends Model
     {
         $locale = app()->getLocale();
         $names = json_decode($value, true);
+
         return $names[$locale] ?? $names['en'] ?? '';
     }
 }

@@ -25,6 +25,7 @@ class SubscriptionResource extends Resource
     {
         return __('filament-modular-subscriptions::modular-subscriptions.resources.subscription.name');
     }
+
     public static function getModelLabel(): string
     {
         return __('filament-modular-subscriptions::modular-subscriptions.resources.subscription.singular_name');
@@ -44,7 +45,7 @@ class SubscriptionResource extends Resource
                     ->required()
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.subscribable_id')),
                 Forms\Components\Select::make('plan_id')
-                    ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
+                    ->options(fn () => Plan::all()->mapWithKeys(function ($plan) {
                         return [$plan->id => $plan->name . ' - ' . $plan->price . ' ' . $plan->currency];
                     }))
                     ->live(debounce: 500)
@@ -104,7 +105,7 @@ class SubscriptionResource extends Resource
                     ->options(SubscriptionStatus::class)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.status')),
                 Tables\Filters\SelectFilter::make('plan_id')
-                    ->options(fn() => Plan::all()->pluck('name', 'id'))
+                    ->options(fn () => Plan::all()->pluck('name', 'id'))
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.plan_id')),
                 Filter::make('dates')
                     ->form([

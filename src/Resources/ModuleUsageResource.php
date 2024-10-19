@@ -19,6 +19,7 @@ class ModuleUsageResource extends Resource
     {
         return __('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.name');
     }
+
     public static function getModelLabel(): string
     {
         return __('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.singular_name');
