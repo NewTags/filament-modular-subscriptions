@@ -53,4 +53,7 @@ return [
             ],
         ],
     ],
+    'menu_group' => [
+        'subscription_management' => 'إدارة الإشتراكات',
+    ],
 ];
