@@ -10,6 +10,7 @@ use Filament\Panel;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource;
 use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource;
+use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
 class ModularSubscriptionsPlugin implements Plugin
 {
@@ -30,6 +31,7 @@ class ModularSubscriptionsPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel
+            ->plugin(FilamentTranslatableFieldsPlugin::make())
             ->resources([
                 PlanResource::class,
                 SubscriptionResource::class,
