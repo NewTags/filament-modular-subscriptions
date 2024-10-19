@@ -38,7 +38,16 @@ class Subscription extends Model
 
         return $this->belongsTo($planModel);
     }
+    public function subscriber(): BelongsTo
+    {
 
+        $tenantModel = config('filament-modular-subscriptions.tenant_model');
+        if (!$tenantModel) {
+            throw new \Exception('Tenant model not set in config/filament-modular-subscriptions.php');
+        }
+
+        return $this->belongsTo($tenantModel, 'subscribable_id');
+    }
     public function subscribable(): MorphTo
     {
         return $this->morphTo();

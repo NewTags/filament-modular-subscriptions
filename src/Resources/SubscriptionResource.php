@@ -40,12 +40,19 @@ class SubscriptionResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('subscribable_id')
-                    ->numeric()
+                Forms\Components\Select::make('subscribable_id')
+                    ->relationship('subscriber', function () {
+                        $tenantAttribute = config('filament-modular-subscriptions.tenant_attribute');
+                        if (!$tenantAttribute) {
+                            throw new \Exception('Tenant attribute not set in config/filament-modular-subscriptions.php');
+                        }
+
+                        return $tenantAttribute;
+                    })
                     ->required()
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.subscribable_id')),
                 Forms\Components\Select::make('plan_id')
-                    ->options(fn () => Plan::all()->mapWithKeys(function ($plan) {
+                    ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
                         return [$plan->id => $plan->name . ' - ' . $plan->price . ' ' . $plan->currency];
                     }))
                     ->live(debounce: 500)
@@ -53,9 +60,9 @@ class SubscriptionResource extends Resource
                         $plan = Plan::find($state);
                         $startDate = now();
                         $set('starts_at', $startDate);
-                        $set('ends_at', $startDate->copy()->add($plan->invoice_interval, $plan->invoice_period));
+                        $set('ends_at', $startDate->copy()->add($plan->invoice_interval->value, $plan->invoice_period));
                         $set('status', SubscriptionStatus::ACTIVE);
-                        $set('trial_ends_at', $startDate->copy()->add($plan->trial_interval, $plan->trial_period));
+                        $set('trial_ends_at', $startDate->copy()->add($plan->trial_interval->value, $plan->trial_period));
                     })
                     ->required()
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.plan_id')),
@@ -105,7 +112,7 @@ class SubscriptionResource extends Resource
                     ->options(SubscriptionStatus::class)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.status')),
                 Tables\Filters\SelectFilter::make('plan_id')
-                    ->options(fn () => Plan::all()->pluck('name', 'id'))
+                    ->options(fn() => Plan::all()->pluck('name', 'id'))
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.plan_id')),
                 Filter::make('dates')
                     ->form([
