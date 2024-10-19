@@ -21,7 +21,15 @@ class SubscriptionResource extends Resource
     protected static ?string $model = Subscription::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+    public static function getNavigationLabel(): string
+    {
+        return __('filament-modular-subscriptions.resources.subscription.name');
+    }
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Subscriptions Management');
+    }
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form

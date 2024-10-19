@@ -3,7 +3,7 @@
 return [
     'resources' => [
         'plan' => [
-            'name' => 'الخطة',
+            'name' => 'الخطط',
             'fields' => [
                 'name' => 'الاسم',
                 'slug' => 'الاسم المختصر',
@@ -35,7 +35,7 @@ return [
             ],
         ],
         'module' => [
-            'name' => 'الوحدة',
+            'name' => 'الوحدات',
             'fields' => [
                 'name' => 'الاسم',
                 'class' => 'الفئة',
@@ -43,7 +43,7 @@ return [
             ],
         ],
         'module_usage' => [
-            'name' => 'استخدام الوحدة',
+            'name' => 'استخدامات الوحدات',
             'fields' => [
                 'subscription_id' => 'الاشتراك',
                 'module_id' => 'الوحدة',

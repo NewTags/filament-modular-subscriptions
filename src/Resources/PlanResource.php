@@ -18,7 +18,18 @@ class PlanResource extends Resource
 {
     protected static ?string $model = Plan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-s-squares-plus';
+
+
+    public static function getNavigationLabel(): string
+    {
+        return __('filament-modular-subscriptions.resources.plan.name');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament-modular-subscriptions.menu_group.subscription');
+    }
 
     public static function form(Forms\Form $form): Forms\Form
     {

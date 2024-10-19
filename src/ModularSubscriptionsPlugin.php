@@ -10,7 +10,6 @@ use Filament\Panel;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource;
 use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource;
-use HoceineEl\FilamentModularSubscriptions\Widgets\SubscriptionStatsWidget;
 
 class ModularSubscriptionsPlugin implements Plugin
 {

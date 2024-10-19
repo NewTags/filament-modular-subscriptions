@@ -13,7 +13,15 @@ class ModuleResource extends Resource
     protected static ?string $model = Module::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
+    public static function getNavigationLabel(): string
+    {
+        return __('filament-modular-subscriptions.resources.module.name');
+    }
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament-modular-subscriptions.menu_group.subscription');
+    }
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form

@@ -49,7 +49,7 @@ The published config file `config/filament-modular-subscriptions.php` allows you
 Register the plugin in your Filament panel provider:
 
 ```php
-use HoceineEl\FilamentModularSubscriptions\FilamentModularSubscriptionsPlugin;
+use HoceineEl\FilamentModularSubscriptions\ModularSubscriptionsPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -58,7 +58,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             // ...
             ->plugins([
-                FilamentModularSubscriptionsPlugin::make(),
+                ModularSubscriptionsPlugin::make(),
             ]);
     }
 }
