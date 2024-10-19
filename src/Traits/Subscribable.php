@@ -152,6 +152,23 @@ trait Subscribable
         return $module->canUse($activeSubscription);
     }
 
+    public function moduleUsage(string $moduleClass): ?int
+    {
+        $activeSubscription = $this->activeSubscription();
+        if (! $activeSubscription) {
+            return null;
+        }
+
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+        $module = $moduleModel::where('class', $moduleClass)->first();
+
+        if (! $module) {
+            return null;
+        }
+
+        return $activeSubscription->moduleUsages()->where('module_id', $module->id)->first()->usage;
+    }
+
     public function recordUsage(string $moduleClass, int $quantity = 1, bool $incremental = true): void
     {
         $activeSubscription = $this->activeSubscription();
@@ -159,7 +176,8 @@ trait Subscribable
             throw new \RuntimeException('No active subscription found');
         }
 
-        $module = Module::where('class', $moduleClass)->first();
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+        $module = $moduleModel::where('class', $moduleClass)->first();
 
         if (! $module) {
             throw new \InvalidArgumentException("Module {$moduleClass} not found");
@@ -228,17 +246,19 @@ trait Subscribable
 
         $usage = [];
 
-        foreach (ModularSubscriptions::getRegisteredModules() as $moduleName => $module) {
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+
+        foreach ($moduleModel::get() as $module) {
             $moduleUsage = $module->calculateUsage($activeSubscription);
             $pricing = $module->getPricing($activeSubscription);
 
-            $usage[$moduleName] = [
+            $usage[$module->name] = [
                 'usage' => $moduleUsage,
                 'pricing' => $pricing,
             ];
 
             $activeSubscription->moduleUsages()->updateOrCreate(
-                ['module_id' => $module->getId()],
+                ['module_id' => $module->id],
                 [
                     'usage' => $moduleUsage,
                     'pricing' => $pricing,
