@@ -17,12 +17,12 @@ class ModuleUsageResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-modular-subscriptions::resources.module_usage.name');
+        return __('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.name');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-modular-subscriptions::menu_group.subscription');
+        return __('filament-modular-subscriptions::modular-subscriptions.menu_group.subscription');
     }
 
     public static function form(Forms\Form $form): Forms\Form
@@ -32,23 +32,23 @@ class ModuleUsageResource extends Resource
                 Forms\Components\Select::make('subscription_id')
                     ->relationship('subscription', 'id')
                     ->required()
-                    ->label(__('filament-modular-subscriptions::fields.subscription_id')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.subscription_id')),
                 Forms\Components\Select::make('module_id')
                     ->relationship('module', 'name')
                     ->required()
-                    ->label(__('filament-modular-subscriptions::fields.module_id')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.module_id')),
                 Forms\Components\TextInput::make('usage')
                     ->numeric()
                     ->required()
-                    ->label(__('filament-modular-subscriptions::fields.usage')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.usage')),
                 Forms\Components\TextInput::make('pricing')
                     ->numeric()
                     ->required()
-                    ->label(__('filament-modular-subscriptions::fields.pricing')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.pricing')),
                 Forms\Components\DateTimePicker::make('calculated_at')
                     ->required()
                     ->default(now())
-                    ->label(__('filament-modular-subscriptions::fields.calculated_at')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.calculated_at')),
             ]);
     }
 
@@ -57,21 +57,21 @@ class ModuleUsageResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('subscription.id')
-                    ->label(__('filament-modular-subscriptions::fields.subscription_id'))
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.subscription_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('module.name')
-                    ->label(__('filament-modular-subscriptions::fields.module_id'))
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.module_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('usage')
-                    ->label(__('filament-modular-subscriptions::fields.usage'))
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.usage'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pricing')
                     ->money('USD')
-                    ->label(__('filament-modular-subscriptions::fields.pricing'))
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.pricing'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('calculated_at')
                     ->dateTime()
-                    ->label(__('filament-modular-subscriptions::fields.calculated_at'))
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.calculated_at'))
                     ->sortable(),
             ])
             ->filters([

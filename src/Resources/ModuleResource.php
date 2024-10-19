@@ -16,12 +16,12 @@ class ModuleResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-modular-subscriptions::resources.module.name');
+        return __('filament-modular-subscriptions::modular-subscriptions.resources.module.name');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-modular-subscriptions::menu_group.subscription');
+        return __('filament-modular-subscriptions::modular-subscriptions.menu_group.subscription');
     }
 
     public static function form(Forms\Form $form): Forms\Form
@@ -30,17 +30,17 @@ class ModuleResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
-                    ->label(__('filament-modular-subscriptions::fields.name')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.name')),
                 Forms\Components\Select::make('class')
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->options(function () {
                         return config('filament-modular-subscriptions.modules');
                     })
-                    ->label(__('filament-modular-subscriptions::fields.class')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.class')),
                 Forms\Components\Toggle::make('is_active')
                     ->default(true)
-                    ->label(__('filament-modular-subscriptions::fields.is_active')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.is_active')),
             ]);
     }
 
@@ -49,20 +49,20 @@ class ModuleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label(__('filament-modular-subscriptions::fields.name'))
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('class')
-                    ->label(__('filament-modular-subscriptions::fields.class')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.class')),
                 Tables\Columns\ToggleColumn::make('is_active')
-                    ->label(__('filament-modular-subscriptions::fields.is_active')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.is_active')),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('is_active')
                     ->options([
-                        '1' => __('filament-modular-subscriptions::active'),
-                        '0' => __('filament-modular-subscriptions::inactive'),
+                        '1' => __('filament-modular-subscriptions::modular-subscriptions.active'),
+                        '0' => __('filament-modular-subscriptions::modular-subscriptions.inactive'),
                     ])
-                    ->label(__('filament-modular-subscriptions::fields.is_active')),
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.is_active')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
