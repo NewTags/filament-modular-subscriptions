@@ -50,7 +50,7 @@ class Plan extends Model
         return $this->hasMany($subscriptionModel);
     }
 
-    public function getNameAttribute($value)
+    public function getTransNameAttribute($value)
     {
         $locale = app()->getLocale();
         $names = json_decode($value, true);

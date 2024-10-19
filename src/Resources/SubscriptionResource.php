@@ -53,7 +53,7 @@ class SubscriptionResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.subscribable_id')),
                 Forms\Components\Select::make('plan_id')
                     ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
-                        return [$plan->id => $plan->name . ' - ' . $plan->price . ' ' . $plan->currency];
+                        return [$plan->id => $plan->trans_name . ' - ' . $plan->price . ' ' . $plan->currency];
                     }))
                     ->live(debounce: 500)
                     ->afterStateUpdated(function (Set $set, ?string $state) {

@@ -15,7 +15,6 @@ class ModularSubscriptionsPlugin implements Plugin
 {
     protected bool $hasSubscriptionStats = true;
 
-    protected ?string $tenantPanelId = null;
 
     public static function make(): static
     {
@@ -37,15 +36,7 @@ class ModularSubscriptionsPlugin implements Plugin
                 ModuleResource::class,
             ]);
 
-        if ($this->tenantPanelId) {
-            Filament::getPanel($this->tenantPanelId)
-                ->userMenuItems([
-                    MenuItem::make()
-                        ->label(__('Manage Your Subscription'))
-                        ->icon('heroicon-o-credit-card')
-                        ->url(fn (): string => '#'),
-                ]);
-        }
+
 
         if ($this->hasSubscriptionStats) {
             $panel->widgets([
@@ -57,13 +48,6 @@ class ModularSubscriptionsPlugin implements Plugin
     public function boot(Panel $panel): void
     {
         //
-    }
-
-    public function tenantPanelId(string $tenantPanelId): static
-    {
-        static::$tenantPanelId = $tenantPanelId;
-
-        return $this;
     }
 
     // public function subscriptionStats(bool $condition = true): static
