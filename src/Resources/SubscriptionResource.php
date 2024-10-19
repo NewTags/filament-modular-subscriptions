@@ -5,6 +5,8 @@ namespace HoceineEl\FilamentModularSubscriptions\Resources;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -33,7 +35,7 @@ class SubscriptionResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Subscriptions Management');
+        return __('filament-modular-subscriptions::modular-subscriptions.menu_group.subscription_management');
     }
 
     public static function form(Forms\Form $form): Forms\Form
@@ -51,6 +53,8 @@ class SubscriptionResource extends Resource
                     })
                     ->required()
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.subscribable_id')),
+                Hidden::make('subscribable_type')
+                    ->default(config('filament-modular-subscriptions.tenant_model')),
                 Forms\Components\Select::make('plan_id')
                     ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
                         return [$plan->id => $plan->trans_name . ' - ' . $plan->price . ' ' . $plan->currency];
