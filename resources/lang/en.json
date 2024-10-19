@@ -8,5 +8,57 @@
     "Billing": "Billing",
     "Details": "Details",
     "Usage": "Usage",
-    "Manage Your Subscription": "Manage Your Subscription"
+    "Manage Your Subscription": "Manage Your Subscription",
+    "resources": {
+        "plan": {
+            "name": "Plans",
+            "fields": {
+                "name": "Name",
+                "slug": "Slug",
+                "description": "Description",
+                "is_active": "Active",
+                "price": "Price",
+                "currency": "Currency",
+                "trial_period": "Trial Period",
+                "trial_interval": "Trial Interval",
+                "invoice_period": "Invoice Period",
+                "invoice_interval": "Invoice Interval",
+                "grace_period": "Grace Period",
+                "grace_interval": "Grace Interval"
+            }
+        },
+        "subscription": {
+            "name": "Subscription",
+            "fields": {
+                "plan_id": "Plan",
+                "subscribable_type": "Subscriber Type",
+                "subscribable_id": "Subscriber ID",
+                "starts_at": "Starts At",
+                "ends_at": "Ends At",
+                "trial_ends_at": "Trial Ends At",
+                "status": "Status"
+            },
+            "tabs": {
+                "billing": "Billing"
+            }
+        },
+        "module": {
+            "name": "Modules",
+            "fields": {
+                "name": "Name",
+                "class": "Class",
+                "is_active": "Active"
+            }
+        },
+        "module_usage": {
+            "name": "Module Usages",
+            "fields": {
+                "subscription_id": "Subscription",
+                "module_id": "Module",
+                "usage": "Usage",
+                "pricing": "Pricing",
+                "calculated_at": "Calculated At"
+            }
+        }
+    }
 }

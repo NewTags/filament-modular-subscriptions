@@ -23,7 +23,7 @@ class SubscriptionResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.resources.subscription.name');
+        return __('filament-modular-subscriptions::resources.subscription.name');
     }
 
     public static function getNavigationGroup(): ?string
@@ -38,7 +38,7 @@ class SubscriptionResource extends Resource
                 Forms\Components\TextInput::make('subscribable_id')
                     ->numeric()
                     ->required()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.subscribable_id')),
+                    ->label(__('filament-modular-subscriptions::fields.subscribable_id')),
                 Forms\Components\Select::make('plan_id')
                     ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
                         return [$plan->id => $plan->name . ' - ' . $plan->price . ' ' . $plan->currency];
@@ -53,21 +53,21 @@ class SubscriptionResource extends Resource
                         $set('trial_ends_at', $startDate->copy()->add($plan->trial_interval, $plan->trial_period));
                     })
                     ->required()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.plan_id')),
+                    ->label(__('filament-modular-subscriptions::fields.plan_id')),
                 Fieldset::make(__('Details'))
                     ->columns()
                     ->schema([
                         Forms\Components\DateTimePicker::make('starts_at')
                             ->required()
-                            ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.starts_at')),
+                            ->label(__('filament-modular-subscriptions::fields.starts_at')),
                         Forms\Components\DateTimePicker::make('ends_at')
-                            ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.ends_at')),
+                            ->label(__('filament-modular-subscriptions::fields.ends_at')),
                         Forms\Components\DateTimePicker::make('trial_ends_at')
-                            ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.trial_ends_at')),
+                            ->label(__('filament-modular-subscriptions::fields.trial_ends_at')),
                         Forms\Components\Select::make('status')
                             ->options(SubscriptionStatus::class)
                             ->required()
-                            ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.status')),
+                            ->label(__('filament-modular-subscriptions::fields.status')),
                     ]),
             ]);
     }
@@ -77,37 +77,37 @@ class SubscriptionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('plan.name')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.plan_id'))
+                    ->label(__('filament-modular-subscriptions::fields.plan_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('subscribable_type')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.subscribable_type')),
+                    ->label(__('filament-modular-subscriptions::fields.subscribable_type')),
                 Tables\Columns\TextColumn::make('subscribable_id')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.subscribable_id')),
+                    ->label(__('filament-modular-subscriptions::fields.subscribable_id')),
                 Tables\Columns\TextColumn::make('starts_at')
                     ->dateTime()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.starts_at'))
+                    ->label(__('filament-modular-subscriptions::fields.starts_at'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('ends_at')
                     ->dateTime()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.ends_at'))
+                    ->label(__('filament-modular-subscriptions::fields.ends_at'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.status')),
+                    ->label(__('filament-modular-subscriptions::fields.status')),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options(SubscriptionStatus::class)
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.status')),
+                    ->label(__('filament-modular-subscriptions::fields.status')),
                 Tables\Filters\SelectFilter::make('plan_id')
                     ->options(fn() => Plan::all()->pluck('name', 'id'))
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.plan_id')),
+                    ->label(__('filament-modular-subscriptions::fields.plan_id')),
                 Filter::make('dates')
                     ->form([
                         DatePicker::make('starts_at')
-                            ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.starts_at')),
+                            ->label(__('filament-modular-subscriptions::fields.starts_at')),
                         DatePicker::make('ends_at')
-                            ->label(__('filament-modular-subscriptions::modular-subscriptions.fields.ends_at')),
+                            ->label(__('filament-modular-subscriptions::fields.ends_at')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->whereBetween('starts_at', [$data['starts_at'], $data['ends_at']]);
