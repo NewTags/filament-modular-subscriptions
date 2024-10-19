@@ -18,9 +18,13 @@ class PlanResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-squares-plus';
 
-    public static function getNavigationLabel(): string
+    public static function getPluralModelLabel(): string
     {
         return __('filament-modular-subscriptions::modular-subscriptions.resources.plan.name');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('filament-modular-subscriptions::modular-subscriptions.resources.plan.singular_name');
     }
 
     public static function getNavigationGroup(): ?string

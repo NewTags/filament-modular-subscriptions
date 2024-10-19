@@ -14,9 +14,13 @@ class ModuleResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
 
-    public static function getNavigationLabel(): string
+    public static function getPluralModelLabel(): string
     {
         return __('filament-modular-subscriptions::modular-subscriptions.resources.module.name');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('filament-modular-subscriptions::modular-subscriptions.resources.module.singular_name');
     }
 
     public static function getNavigationGroup(): ?string

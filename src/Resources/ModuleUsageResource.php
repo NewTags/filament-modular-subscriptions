@@ -15,9 +15,13 @@ class ModuleUsageResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
-    public static function getNavigationLabel(): string
+    public static function getPluralModelLabel(): string
     {
         return __('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.name');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.singular_name');
     }
 
     public static function getNavigationGroup(): ?string
