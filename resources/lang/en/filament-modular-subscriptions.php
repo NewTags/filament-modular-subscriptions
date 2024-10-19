@@ -4,6 +4,7 @@ return [
     'resources' => [
         'plan' => [
             'name' => 'Plan',
+            'singular_name' => 'Plan',
             'fields' => [
                 'name' => 'Name',
                 'slug' => 'Slug',
@@ -26,6 +27,7 @@ return [
         ],
         'subscription' => [
             'name' => 'Subscription',
+            'singular_name' => 'Subscription',
             'fields' => [
                 'plan_id' => 'Plan',
                 'subscribable_type' => 'Subscribable Type',
@@ -38,6 +40,7 @@ return [
         ],
         'module' => [
             'name' => 'Module',
+            'singular_name' => 'Module',
             'fields' => [
                 'name' => 'Name',
                 'class' => 'Class',
@@ -46,6 +49,7 @@ return [
         ],
         'module_usage' => [
             'name' => 'Module Usage',
+            'singular_name' => 'Module Usage',
             'fields' => [
                 'subscription_id' => 'Subscription',
                 'module_id' => 'Module',
@@ -54,5 +58,20 @@ return [
                 'calculated_at' => 'Calculated At',
             ],
         ],
+    ],
+    'menu_group' => [
+        'subscription_management' => 'Subscription Management',
+    ],
+    'interval' => [
+        'day' => 'Day',
+        'week' => 'Week',
+        'month' => 'Month',
+        'year' => 'Year',
+    ],
+    'status' => [
+        'active' => 'Active',
+        'cancelled' => 'Cancelled',
+        'expired' => 'Expired',
+        'pending' => 'Pending',
     ],
 ];

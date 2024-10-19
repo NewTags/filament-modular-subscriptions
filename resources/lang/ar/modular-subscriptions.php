@@ -60,4 +60,16 @@ return [
     'menu_group' => [
         'subscription_management' => 'إدارة الإشتراكات',
     ],
+    'interval' => [
+        'day' => 'يوم',
+        'week' => 'أسبوع',
+        'month' => 'شهر',
+        'year' => 'سنة',
+    ],
+    'status' => [
+        'active' => 'نشط',
+        'cancelled' => 'ملغي',
+        'expired' => 'منتهي',
+        'pending' => 'قيد الانتظار',
+    ],
 ];
