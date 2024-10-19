@@ -42,7 +42,7 @@ return [
     ],
     'translatable' => true,
     'locales' => [
-        'en',
-        'ar',
+        'en' => 'English',
+        'ar' => 'Arabic',
     ],
 ];

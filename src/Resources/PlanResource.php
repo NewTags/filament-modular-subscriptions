@@ -41,19 +41,18 @@ class PlanResource extends Resource
                             ->schema([
                                 Forms\Components\TextInput::make('name')
                                     ->required()
-                                    ->translatable()
+                                    ->translatable(true, config('filament-modular-subscriptions.locales'))
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn(Set $set, ?string $state) => $set('slug', str($state)->slug()))
+                                    ->afterStateUpdated(fn(Set $set, ?string $state) => $set('slug', str($state[app()->getLocale()])->slug()))
                                     ->columnSpanFull()
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.name')),
                                 Forms\Components\TextInput::make('slug')
                                     ->required()
-                                    ->readOnly()
                                     ->unique(ignoreRecord: true)
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.slug')),
                                 Forms\Components\Textarea::make('description')
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.description'))
-                                    ->translatable()
+                                    ->translatable(true, config('filament-modular-subscriptions.locales'))
                                     ->columnSpanFull(),
                                 Forms\Components\Toggle::make('is_active')
                                     ->default(true)
