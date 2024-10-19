@@ -2,9 +2,9 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource\Pages;
 
-use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource;
 
 class EditSubscription extends EditRecord
 {

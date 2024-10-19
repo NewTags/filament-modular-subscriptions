@@ -31,7 +31,7 @@ class Module extends Model
 
     public static function registerModule(string $moduleClass): self
     {
-        $module = new $moduleClass();
+        $module = new $moduleClass;
 
         return self::updateOrCreate(
             ['name' => $module->getName()],

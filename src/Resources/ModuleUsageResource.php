@@ -7,8 +7,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use HoceineEl\FilamentModularSubscriptions\Models\ModuleUsage;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages;
 
 class ModuleUsageResource extends Resource
@@ -26,6 +24,7 @@ class ModuleUsageResource extends Resource
     {
         return __('filament-modular-subscriptions.menu_group.subscription');
     }
+
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form

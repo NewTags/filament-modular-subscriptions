@@ -2,21 +2,21 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Traits;
 
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
-use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
-use HoceineEl\FilamentModularSubscriptions\Facades\ModularSubscriptions;
-use Illuminate\Support\Facades\DB;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use HoceineEl\FilamentModularSubscriptions\Facades\ModularSubscriptions;
+use HoceineEl\FilamentModularSubscriptions\Models\Plan;
+use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 
 trait Subscribable
 {
     public function subscriptions(): MorphMany
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
+
         return $this->morphMany($subscriptionModel, 'subscribable');
     }
 
@@ -41,7 +41,7 @@ trait Subscribable
     public function daysLeft(): ?int
     {
         $activeSubscription = $this->activeSubscription();
-        if (!$activeSubscription) {
+        if (! $activeSubscription) {
             return null;
         }
 
@@ -53,7 +53,7 @@ trait Subscribable
     public function isExpired(): bool
     {
         $activeSubscription = $this->activeSubscription();
-        if (!$activeSubscription) {
+        if (! $activeSubscription) {
             return true;
         }
 
@@ -63,7 +63,7 @@ trait Subscribable
     public function cancel(): bool
     {
         $activeSubscription = $this->activeSubscription();
-        if (!$activeSubscription) {
+        if (! $activeSubscription) {
             return false;
         }
 
@@ -78,7 +78,7 @@ trait Subscribable
     public function renew(?int $days = null): bool
     {
         $activeSubscription = $this->activeSubscription();
-        if (!$activeSubscription) {
+        if (! $activeSubscription) {
             return false;
         }
 
@@ -108,7 +108,7 @@ trait Subscribable
     public function changePlan(int $newPlanId): bool
     {
         $activeSubscription = $this->activeSubscription();
-        if (!$activeSubscription) {
+        if (! $activeSubscription) {
             return false;
         }
 
@@ -131,19 +131,20 @@ trait Subscribable
     private function calculateEndDate(Plan $plan): Carbon
     {
         $days = $this->calculateDaysFromInterval($plan->invoice_period, $plan->invoice_interval);
+
         return now()->addDays($days);
     }
 
     public function canUseModule(string $moduleName): bool
     {
         $activeSubscription = $this->activeSubscription();
-        if (!$activeSubscription) {
+        if (! $activeSubscription) {
             return false;
         }
 
         $module = ModularSubscriptions::getRegisteredModules()->get($moduleName);
 
-        if (!$module) {
+        if (! $module) {
             return false;
         }
 
@@ -153,13 +154,13 @@ trait Subscribable
     public function recordUsage(string $moduleName, int $quantity = 1, bool $incremental = true): void
     {
         $activeSubscription = $this->activeSubscription();
-        if (!$activeSubscription) {
-            throw new \RuntimeException("No active subscription found");
+        if (! $activeSubscription) {
+            throw new \RuntimeException('No active subscription found');
         }
 
         $module = ModularSubscriptions::getRegisteredModules()->get($moduleName);
 
-        if (!$module) {
+        if (! $module) {
             throw new \InvalidArgumentException("Module {$moduleName} not found");
         }
 
@@ -167,7 +168,7 @@ trait Subscribable
             ->where('module_id', $module->getId())
             ->first();
 
-        if (!$moduleUsage) {
+        if (! $moduleUsage) {
             $moduleUsage = $activeSubscription->moduleUsages()->create([
                 'module_id' => $module->getId(),
                 'usage' => 0,
@@ -220,7 +221,7 @@ trait Subscribable
     public function calculateUsage(): array
     {
         $activeSubscription = $this->activeSubscription();
-        if (!$activeSubscription) {
+        if (! $activeSubscription) {
             return [];
         }
 
@@ -240,7 +241,7 @@ trait Subscribable
                 [
                     'usage' => $moduleUsage,
                     'pricing' => $pricing,
-                    'calculated_at' => now()
+                    'calculated_at' => now(),
                 ]
             );
         }
@@ -251,7 +252,7 @@ trait Subscribable
     public function totalUsage(): float
     {
         $activeSubscription = $this->activeSubscription();
-        if (!$activeSubscription) {
+        if (! $activeSubscription) {
             return 0;
         }
 
@@ -261,7 +262,7 @@ trait Subscribable
     public function totalPricing(): float
     {
         $activeSubscription = $this->activeSubscription();
-        if (!$activeSubscription) {
+        if (! $activeSubscription) {
             return 0;
         }
 
@@ -272,7 +273,6 @@ trait Subscribable
     {
         return $this->totalUsage() > $limit;
     }
-
 
     public function onTrial(): bool
     {
@@ -333,7 +333,7 @@ trait Subscribable
             case Interval::YEAR:
                 return $period * 365;
             default:
-                throw new \InvalidArgumentException("Invalid interval");
+                throw new \InvalidArgumentException('Invalid interval');
         }
     }
 }

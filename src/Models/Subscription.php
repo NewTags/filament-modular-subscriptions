@@ -2,18 +2,19 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Models;
 
+use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Facades\Config;
-use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Subscription extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
+
     protected $fillable = [
         'plan_id',
         'subscribable_id',
@@ -21,7 +22,7 @@ class Subscription extends Model
         'starts_at',
         'ends_at',
         'trial_ends_at',
-        'status'
+        'status',
     ];
 
     protected $casts = [
@@ -34,6 +35,7 @@ class Subscription extends Model
     public function plan(): BelongsTo
     {
         $planModel = config('filament-modular-subscriptions.models.plan');
+
         return $this->belongsTo($planModel);
     }
 
@@ -45,6 +47,7 @@ class Subscription extends Model
     public function moduleUsages(): HasMany
     {
         $moduleUsageModel = config('filament-modular-subscriptions.models.usage');
+
         return $this->hasMany($moduleUsageModel);
     }
 

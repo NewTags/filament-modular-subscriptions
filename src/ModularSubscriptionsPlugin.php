@@ -5,18 +5,17 @@ namespace HoceineEl\FilamentModularSubscriptions;
 use Filament\Contracts\Plugin;
 use Filament\Facades\Filament;
 use Filament\Navigation\MenuItem;
-use Filament\Navigation\UserMenuItem;
 use Filament\Panel;
+use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource;
 use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource;
-use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
 class ModularSubscriptionsPlugin implements Plugin
 {
     protected bool $hasSubscriptionStats = true;
 
-    protected  ?string $tenantPanelId = null;
+    protected ?string $tenantPanelId = null;
 
     public static function make(): static
     {
@@ -44,7 +43,7 @@ class ModularSubscriptionsPlugin implements Plugin
                     MenuItem::make()
                         ->label(__('Manage Your Subscription'))
                         ->icon('heroicon-o-credit-card')
-                        ->url(fn(): string => "#"),
+                        ->url(fn (): string => '#'),
                 ]);
         }
 

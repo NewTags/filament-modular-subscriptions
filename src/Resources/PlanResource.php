@@ -6,20 +6,17 @@ use Filament\Forms;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
+use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\CreatePlan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\EditPlan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\ListPlans;
-use HoceineEl\FilamentModularSubscriptions\Models\Plan;
-use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PlanResource extends Resource
 {
     protected static ?string $model = Plan::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-squares-plus';
-
 
     public static function getNavigationLabel(): string
     {
@@ -45,7 +42,7 @@ class PlanResource extends Resource
                                     ->required()
                                     ->translatable()
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn(Set $set, ?string $state) => $set('slug', str($state)->slug()))
+                                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', str($state)->slug()))
                                     ->columnSpanFull()
                                     ->label(__('filament-modular-subscriptions.fields.name')),
                                 Forms\Components\TextInput::make('slug')

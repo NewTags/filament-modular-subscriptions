@@ -2,17 +2,16 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Plan extends Model
 {
-    use HasFactory, SoftDeletes;
-
-
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -47,6 +46,7 @@ class Plan extends Model
     public function subscriptions(): HasMany
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
+
         return $this->hasMany($subscriptionModel);
     }
 }

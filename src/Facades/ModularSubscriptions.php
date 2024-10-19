@@ -2,9 +2,8 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Facades;
 
-use Illuminate\Support\Facades\Facade;
-use HoceineEl\FilamentModularSubscriptions\ModularSubscriptionManager;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static void registerModule(string $moduleClass)

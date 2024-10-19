@@ -2,7 +2,6 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
-use DateInterval;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
@@ -10,10 +9,10 @@ use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
-use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource\Pages;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
+use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource\Pages;
 use Illuminate\Database\Eloquent\Builder;
 
 class SubscriptionResource extends Resource
@@ -21,6 +20,7 @@ class SubscriptionResource extends Resource
     protected static ?string $model = Subscription::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+
     public static function getNavigationLabel(): string
     {
         return __('filament-modular-subscriptions.resources.subscription.name');
@@ -30,6 +30,7 @@ class SubscriptionResource extends Resource
     {
         return __('Subscriptions Management');
     }
+
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form
@@ -39,7 +40,7 @@ class SubscriptionResource extends Resource
                     ->required()
                     ->label(__('filament-modular-subscriptions.fields.subscribable_id')),
                 Forms\Components\Select::make('plan_id')
-                    ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
+                    ->options(fn () => Plan::all()->mapWithKeys(function ($plan) {
                         return [$plan->id => $plan->name . ' - ' . $plan->price . ' ' . $plan->currency];
                     }))
                     ->live(debounce: 500)
@@ -67,7 +68,7 @@ class SubscriptionResource extends Resource
                             ->options(SubscriptionStatus::class)
                             ->required()
                             ->label(__('filament-modular-subscriptions.fields.status')),
-                    ])
+                    ]),
             ]);
     }
 
@@ -99,7 +100,7 @@ class SubscriptionResource extends Resource
                     ->options(SubscriptionStatus::class)
                     ->label(__('filament-modular-subscriptions.fields.status')),
                 Tables\Filters\SelectFilter::make('plan_id')
-                    ->options(fn() => Plan::all()->pluck('name', 'id'))
+                    ->options(fn () => Plan::all()->pluck('name', 'id'))
                     ->label(__('filament-modular-subscriptions.fields.plan_id')),
                 Filter::make('dates')
                     ->form([
@@ -110,7 +111,7 @@ class SubscriptionResource extends Resource
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->whereBetween('starts_at', [$data['starts_at'], $data['ends_at']]);
-                    })
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

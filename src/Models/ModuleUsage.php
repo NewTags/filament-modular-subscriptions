@@ -4,7 +4,6 @@ namespace HoceineEl\FilamentModularSubscriptions\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Config;
 
 class ModuleUsage extends Model
 {
@@ -19,12 +18,14 @@ class ModuleUsage extends Model
     public function subscription(): BelongsTo
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
+
         return $this->belongsTo($subscriptionModel);
     }
 
     public function module(): BelongsTo
     {
         $moduleModel = config('filament-modular-subscriptions.models.module');
+
         return $this->belongsTo($moduleModel);
     }
 }

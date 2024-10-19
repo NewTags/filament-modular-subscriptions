@@ -2,9 +2,9 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource\Pages;
 
-use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource;
 
 class ListModules extends ListRecords
 {
