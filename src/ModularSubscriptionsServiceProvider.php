@@ -133,10 +133,10 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_plans_table',
-            'create_subscriptions_table',
-            'create_modules_table',
-            'create_module_usages_table',
+            '1_create_plans_table',
+            '2_create_subscriptions_table',
+            '3_create_modules_table',
+            '4_create_module_usages_table',
         ];
     }
 }
