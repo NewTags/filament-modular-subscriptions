@@ -5,14 +5,15 @@ namespace HoceineEl\FilamentModularSubscriptions;
 use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Navigation\MenuItem;
-use Filament\Navigation\UserMenuItem;
 use Filament\Panel;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
 class ModularSubscriptionsPlugin implements Plugin
 {
     protected bool $hasSubscriptionStats = true;
+
     protected bool $onTenantPanel = false;
+
     public static function make(): static
     {
         return app(static::class);
@@ -26,7 +27,7 @@ class ModularSubscriptionsPlugin implements Plugin
     public function register(Panel $panel): void
     {
 
-        if (!$this->onTenantPanel) {
+        if (! $this->onTenantPanel) {
             $panel
                 ->plugin(FilamentTranslatableFieldsPlugin::make())
                 ->resources(config('filament-modular-subscriptions.resources'));
@@ -35,7 +36,7 @@ class ModularSubscriptionsPlugin implements Plugin
                 ->userMenuItems([
                     MenuItem::make()
                         ->label('test')
-                        ->url('#')
+                        ->url('#'),
                 ]);
         }
 

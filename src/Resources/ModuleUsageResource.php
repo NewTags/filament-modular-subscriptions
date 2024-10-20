@@ -2,20 +2,17 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
-use Filament\Forms;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
-use HoceineEl\FilamentModularSubscriptions\Models\ModuleUsage;
 use HoceineEl\FilamentModularSubscriptions\ModularSubscription;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages;
 
 class ModuleUsageResource extends Resource
 {
-
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
     public static function getModel(): string
@@ -89,7 +86,7 @@ class ModuleUsageResource extends Resource
             ->headerActions([
                 Tables\Actions\Action::make('calculate_usage')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.actions.calculate_usage'))
-                    ->action(fn() => ModularSubscription::calculateUsageForAllModules())
+                    ->action(fn () => ModularSubscription::calculateUsageForAllModules())
                     ->successNotification(
                         Notification::make()
                             ->title(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.actions.calculate_usage_success'))

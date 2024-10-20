@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
+use Illuminate\Database\Seeder;
 
 class PlanSeeder extends Seeder
 {
@@ -30,7 +29,7 @@ class PlanSeeder extends Seeder
                 'modules' => [
                     ['limit' => 100, 'price' => 0.99],
                     ['limit' => 50, 'price' => 1.99],
-                ]
+                ],
             ],
             [
                 'name' => ['en' => 'Pro Plan', 'ar' => 'الخطة الاحترافية'],
@@ -48,7 +47,7 @@ class PlanSeeder extends Seeder
                 'modules' => [
                     ['limit' => null, 'price' => 1.99],
                     ['limit' => 200, 'price' => 2.99],
-                ]
+                ],
             ],
         ];
 

@@ -5,8 +5,8 @@ namespace HoceineEl\FilamentModularSubscriptions\Models;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Plan extends Model
@@ -47,6 +47,7 @@ class Plan extends Model
     public function subscriptions(): HasMany
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
+
         return $this->hasMany($subscriptionModel);
     }
 
@@ -54,6 +55,7 @@ class Plan extends Model
     {
         $locale = app()->getLocale();
         $names = $this->name;
+
         return $names[$locale] ?? $names['en'] ?? '';
     }
 
@@ -73,13 +75,13 @@ class Plan extends Model
         $moduleModel = config('filament-modular-subscriptions.models.module');
         $module = $module instanceof $moduleModel ? $module : $moduleModel::where('class', $module)->first();
 
-        if (!$module) {
+        if (! $module) {
             return -1;
         }
 
         $planModule = $this->planModules()->where('module_id', $module->id)->first();
 
-        if (!$planModule) {
+        if (! $planModule) {
             return -1;
         }
 
