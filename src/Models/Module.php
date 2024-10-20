@@ -5,7 +5,6 @@ namespace HoceineEl\FilamentModularSubscriptions\Models;
 use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Module extends Model
