@@ -8,6 +8,7 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
+use HoceineEl\FilamentModularSubscriptions\Commands\MakeModuleCommand;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -34,6 +35,11 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
                     ->askToRunMigrations()
                     ->copyAndRegisterServiceProviderInApp()
                     ->askToStarRepoOnGitHub('hoceineel/filament-modular-subscriptions');
+                if ($this->app->runningInConsole()) {
+                    $this->commands([
+                        MakeModuleCommand::class,
+                    ]);
+                }
             });
 
         $configFileName = $package->shortName();
