@@ -28,12 +28,7 @@ class ModularSubscriptionsPlugin implements Plugin
     {
         $panel
             ->plugin(FilamentTranslatableFieldsPlugin::make())
-            ->resources([
-                PlanResource::class,
-                SubscriptionResource::class,
-                ModuleResource::class,
-                ModuleUsageResource::class,
-            ]);
+            ->resources(config('filament-modular-subscriptions.resources'));
 
         if ($this->hasSubscriptionStats) {
             $panel->widgets([

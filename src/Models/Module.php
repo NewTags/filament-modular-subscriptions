@@ -5,6 +5,7 @@ namespace HoceineEl\FilamentModularSubscriptions\Models;
 use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 class Module extends Model
 {
@@ -22,6 +23,11 @@ class Module extends Model
     public function activate(): void
     {
         $this->update(['is_active' => true]);
+    }
+
+    public function scopeActive($query): Builder
+    {
+        return $query->where('is_active', true);
     }
 
     public function deactivate(): void

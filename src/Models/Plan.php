@@ -62,7 +62,25 @@ class Plan extends Model
     public function modules(): BelongsToMany
     {
         return $this->belongsToMany(Module::class, 'plan_modules')
-            ->withPivot('limit', 'settings')
+            ->withPivot('limit', 'settings', 'price')
             ->withTimestamps();
+    }
+
+    public function modulePrice(Model | string $module): float
+    {
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+        $module = $module instanceof $moduleModel ? $module : $moduleModel::where('class', $module)->first();
+
+        if (!$module) {
+            return -1;
+        }
+
+        $modulePrice = $this->modules()->where('module_id', $module->id)->first();
+
+        if (!$modulePrice) {
+            return -1;
+        }
+
+        return $modulePrice->pivot->price;
     }
 }
