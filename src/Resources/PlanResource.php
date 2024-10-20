@@ -18,9 +18,13 @@ use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\ListPlan
 
 class PlanResource extends Resource
 {
-    protected static ?string $model = Plan::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-squares-plus';
+
+    public static function getModel(): string
+    {
+        return config('filament-modular-subscriptions.models.plan');
+    }
 
     public static function getPluralModelLabel(): string
     {
@@ -52,7 +56,7 @@ class PlanResource extends Resource
                                     ->required()
                                     ->translatable(true, config('filament-modular-subscriptions.locales'))
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn (Set $set, $state) => $set('slug', str($state['name'][app()->getLocale() ?? config('filament-modular-subscriptions.locales')[0]])->slug()))
+                                    ->afterStateUpdated(fn(Set $set, $state) => $set('slug', str($state['name'][app()->getLocale() ?? config('filament-modular-subscriptions.locales')[0]])->slug()))
                                     ->columnSpanFull()
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.name')),
                                 Forms\Components\TextInput::make('slug')
@@ -114,12 +118,20 @@ class PlanResource extends Resource
                             ->icon('heroicon-o-puzzle-piece')
                             ->schema([
                                 Repeater::make('modules')
+                                    ->label('')
                                     ->relationship('modules')
+                                    ->columns(3)
                                     ->schema([
                                         Select::make('module_id')
                                             ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.module'))
-                                            ->relationship('module', 'name')
+                                            ->options(function () {
+                                                $modules = config('filament-modular-subscriptions.models.module')::all()->mapWithKeys(function ($module) {
+                                                    return [$module->id => $module->getLabel()];
+                                                });
+                                                return $modules;
+                                            })
                                             ->required()
+
                                             ->searchable(),
                                         TextInput::make('limit')
                                             ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.module_limit'))
@@ -139,11 +151,9 @@ class PlanResource extends Resource
                                         //     ->valuePlaceholder(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.placeholders.setting_value'))
                                         //     ->nullable(),
                                     ])
-                                    ->itemLabel(fn (array $state): ?string => Module::find($state['module_id'])?->name ?? null)
+                                    ->itemLabel(fn(array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
                                     ->collapsible()
-                                    ->collapseAllAction(
-                                        fn (Forms\Components\Actions\Action $action) => $action->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.actions.collapse_all_modules'))
-                                    )
+
                                     ->addActionLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.actions.add_module')),
                             ]),
                     ]),

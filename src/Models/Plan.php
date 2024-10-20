@@ -59,11 +59,9 @@ class Plan extends Model
         return $names[$locale] ?? $names['en'] ?? '';
     }
 
-    public function modules(): BelongsToMany
+    public function modules(): HasMany
     {
-        return $this->belongsToMany(Module::class, 'plan_modules')
-            ->withPivot('limit', 'settings', 'price')
-            ->withTimestamps();
+        return $this->hasMany(config('filament-modular-subscriptions.models.plan_module'));
     }
 
     public function modulePrice(Model | string $module): float

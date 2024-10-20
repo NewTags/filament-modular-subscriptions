@@ -27,7 +27,7 @@ return [
                 'module_price' => 'سعر الوحدة',
             ],
             'hints' => [
-                'module_limit' => 'اترك فارغ للاستخدام غير محدود',
+                'module_limit' => 'أتركه فارغا للاستخدام الغير محدود',
             ],
             'placeholders' => [
                 'setting_key' => 'أدخل مفتاح الإعداد',

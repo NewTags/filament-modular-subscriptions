@@ -5,6 +5,7 @@ namespace HoceineEl\FilamentModularSubscriptions\Models;
 use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Module extends Model
@@ -80,6 +81,16 @@ class Module extends Model
 
     public function getLabel(): string
     {
-        return __($this->getLabelKey());
+        return $this->getInstance()->getLabel();
+    }
+
+    public function planModules(): HasMany
+    {
+        return $this->hasMany(PlanModule::class);
+    }
+
+    public function plans(): HasMany
+    {
+        return $this->hasMany(config('filament-modular-subscriptions.models.plan_module'));
     }
 }

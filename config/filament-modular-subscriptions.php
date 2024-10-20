@@ -9,6 +9,7 @@ return [
         'subscription' => HoceineEl\FilamentModularSubscriptions\Models\Subscription::class,
         'module' => HoceineEl\FilamentModularSubscriptions\Models\Module::class,
         'usage' => HoceineEl\FilamentModularSubscriptions\Models\ModuleUsage::class,
+        'plan_module' => HoceineEl\FilamentModularSubscriptions\Models\PlanModule::class,
     ],
     // Tenant model and attribute to be used for the subscription relationship
     // 'tenant_model' => App\Models\User::class,
