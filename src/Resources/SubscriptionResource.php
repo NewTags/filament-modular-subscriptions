@@ -96,7 +96,7 @@ class SubscriptionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('plan.name')
+                Tables\Columns\TextColumn::make('plan.trans_name')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.plan_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('subscribable.name')

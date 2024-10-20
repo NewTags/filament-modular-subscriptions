@@ -82,6 +82,10 @@ return [
                 'calculated_at' => 'تاريخ الحساب',
                 'subscriber' => 'المشترك',
             ],
+            'actions' => [
+                'calculate_usage' => 'حساب الاستخدام',
+                'calculate_usage_success' => 'تم حساب الاستخدام بنجاح',
+            ],
         ],
     ],
     'menu_group' => [

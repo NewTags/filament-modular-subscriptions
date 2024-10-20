@@ -3,10 +3,14 @@
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
 use Filament\Forms;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use HoceineEl\FilamentModularSubscriptions\Models\ModuleUsage;
+use HoceineEl\FilamentModularSubscriptions\ModularSubscription;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages;
 
 class ModuleUsageResource extends Resource
@@ -34,29 +38,20 @@ class ModuleUsageResource extends Resource
         return __('filament-modular-subscriptions::modular-subscriptions.menu_group.subscription_management');
     }
 
-    public static function form(Forms\Form $form): Forms\Form
+    public static function infolist(Infolist $infolist): Infolist
     {
-        return $form
+        return $infolist
             ->schema([
-                Forms\Components\Select::make('subscription_id')
-                    ->relationship('subscription', 'id')
-                    ->required()
+                TextEntry::make('subscription.subscribable.name')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.fields.subscription_id')),
-                Forms\Components\Select::make('module_id')
-                    ->relationship('module', 'name')
-                    ->required()
+                TextEntry::make('module.name')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.fields.module_id')),
-                Forms\Components\TextInput::make('usage')
-                    ->numeric()
-                    ->required()
+                TextEntry::make('usage')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.fields.usage')),
-                Forms\Components\TextInput::make('pricing')
-                    ->numeric()
-                    ->required()
+                TextEntry::make('pricing')
+                    ->money(config('filament-modular-subscriptions.main_currency'), locale: 'en')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.fields.pricing')),
-                Forms\Components\DateTimePicker::make('calculated_at')
-                    ->required()
-                    ->default(now())
+                TextEntry::make('calculated_at')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.fields.calculated_at')),
             ]);
     }
@@ -75,7 +70,7 @@ class ModuleUsageResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.fields.usage'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pricing')
-                    ->money('USD')
+                    ->money(config('filament-modular-subscriptions.main_currency'), locale: 'en')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.fields.pricing'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('calculated_at')
@@ -88,7 +83,19 @@ class ModuleUsageResource extends Resource
                     ->relationship('module', 'name'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->modal(),
+            ])
+            ->headerActions([
+                Tables\Actions\Action::make('calculate_usage')
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.actions.calculate_usage'))
+                    ->action(fn() => ModularSubscription::calculateUsageForAllModules())
+                    ->successNotification(
+                        Notification::make()
+                            ->title(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.actions.calculate_usage_success'))
+                            ->success()
+                            ->send(),
+                    ),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -108,8 +115,6 @@ class ModuleUsageResource extends Resource
     {
         return [
             'index' => Pages\ListModuleUsages::route('/'),
-            'create' => Pages\CreateModuleUsage::route('/create'),
-            'edit' => Pages\EditModuleUsage::route('/{record}/edit'),
         ];
     }
 }
