@@ -27,7 +27,7 @@ class ModularSubscriptionsPlugin implements Plugin
     public function register(Panel $panel): void
     {
 
-        if (! $this->onTenantPanel) {
+        if (!$this->onTenantPanel) {
             $panel
                 ->plugin(FilamentTranslatableFieldsPlugin::make())
                 ->resources(config('filament-modular-subscriptions.resources'));
