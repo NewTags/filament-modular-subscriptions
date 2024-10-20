@@ -65,7 +65,6 @@ class Plan extends Model
     public function modules(): BelongsToMany
     {
         return $this->belongsToMany(config('filament-modular-subscriptions.models.module'), 'plan_modules')
-            ->using(PlanModule::class)
             ->withPivot(['limit', 'price', 'settings']);
     }
 
