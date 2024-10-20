@@ -6,12 +6,10 @@ use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
-use HoceineEl\FilamentModularSubscriptions\Models\ModuleUsage;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages;
 
 class ModuleUsageResource extends Resource
 {
-
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
     public static function getModel(): string
