@@ -39,8 +39,8 @@ class MakeModuleCommand extends Command
         $stub = $this->files->get(__DIR__ . '/../../stubs/Module.stub');
 
         $stub = str_replace(
-            ['{{ namespace }}', '{{ class }}', '{{ name }}', '{{ label_key }}'],
-            [$namespace, $className, $name, Str::snake($name) . '_module'],
+            ['{{ namespace }}', '{{ subscription_model }}', '{{ plan_model }}', '{{ class }}', '{{ name }}', '{{ label_key }}'],
+            [$namespace, config('filament-modular-subscriptions.models.subscription'), config('filament-modular-subscriptions.models.plan'), $className, $name, Str::snake($name) . '_module'],
             $stub
         );
 
