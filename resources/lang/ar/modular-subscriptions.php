@@ -18,6 +18,31 @@ return [
                 'invoice_interval' => 'وحدة مدة الفوترة',
                 'grace_period' => 'فترة السماح',
                 'grace_interval' => 'وحدة فترة السماح',
+                'module' => 'الوحدة',
+                'modules' => 'الوحدات',
+                'module_limit' => 'حدود الاستخدام',
+                'module_settings' => 'إعدادات الوحدة',
+                'setting_key' => 'مفتاح الإعداد',
+                'setting_value' => 'قيمة الإعداد',
+                'module_price' => 'سعر الوحدة',
+            ],
+            'hints' => [
+                'module_limit' => 'اترك فارغ للاستخدام غير محدود',
+            ],
+            'placeholders' => [
+                'setting_key' => 'أدخل مفتاح الإعداد',
+                'setting_value' => 'أدخل قيمة الإعداد',
+            ],
+            'actions' => [
+                'add_module' => 'إضافة الوحدة',
+                'collapse_all_modules' => 'إغلاق جميع الوحدات',
+            ],
+            'tabs' => [
+                'details' => 'التفاصيل',
+                'billing' => 'الفوترة',
+                'usage' => 'الاستخدام',
+                'pricing' => 'التسعير',
+                'modules' => 'الوحدات',
             ],
         ],
         'subscription' => [

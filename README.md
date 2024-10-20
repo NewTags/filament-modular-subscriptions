@@ -1,19 +1,25 @@
 # Filament Modular Subscriptions
 
-Filament Modular Subscriptions is a powerful and flexible package for managing subscription plans and modules in Laravel applications using the Filament admin panel.
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/hoceineel/filament-modular-subscriptions.svg?style=flat-square)](https://packagist.org/packages/hoceineel/filament-modular-subscriptions)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/hoceineel/filament-modular-subscriptions/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/hoceineel/filament-modular-subscriptions/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/hoceineel/filament-modular-subscriptions/fix-php-code-styling.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/hoceineel/filament-modular-subscriptions/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/hoceineel/filament-modular-subscriptions.svg?style=flat-square)](https://packagist.org/packages/hoceineel/filament-modular-subscriptions)
+
+A powerful Filament plugin for managing modular subscriptions with pricing and usage calculation.
 
 ## Features
 
-- Manage subscription plans with customizable attributes
-- Track user subscriptions and their statuses
-- Create and manage modules (features) that can be included in subscription plans
-- Monitor module usage for each subscription
-- Multilingual support for plan details
+- Manage subscription plans with flexible pricing options
+- Create and manage modules for granular feature control
+- Track module usage and calculate pricing based on usage
+- Support for trial periods, grace periods, and different billing intervals
+- Multi-currency support
+- Translatable fields for multilingual applications
 - Seamless integration with Filament admin panel
 
 ## Installation
 
-Install the package via Composer:
+You can install the package via composer:
 
 ```bash
 composer require hoceineel/filament-modular-subscriptions

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Facades\ModularSubscriptions;
+use HoceineEl\FilamentModularSubscriptions\Models\Module;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -75,6 +76,8 @@ trait Subscribable
         return true;
     }
 
+
+
     public function renew(?int $days = null): bool
     {
         $activeSubscription = $this->activeSubscription();
@@ -135,14 +138,15 @@ trait Subscribable
         return now()->addDays($days);
     }
 
-    public function canUseModule(string $moduleName): bool
+    public function canUseModule(string $moduleClass): bool
     {
         $activeSubscription = $this->activeSubscription();
         if (! $activeSubscription) {
             return false;
         }
 
-        $module = ModularSubscriptions::getRegisteredModules()->get($moduleName);
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+        $module = $moduleModel::where('class', $moduleClass)->first();
 
         if (! $module) {
             return false;

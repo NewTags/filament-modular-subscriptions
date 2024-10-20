@@ -135,6 +135,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             '2_create_subscriptions_table',
             '3_create_modules_table',
             '4_create_module_usages_table',
+            '5_create_plan_modules_table', // Add this line
         ];
     }
 }

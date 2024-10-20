@@ -5,6 +5,7 @@ namespace HoceineEl\FilamentModularSubscriptions\Models;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -56,5 +57,12 @@ class Plan extends Model
         $names = json_decode($value, true);
 
         return $names[$locale] ?? $names['en'] ?? '';
+    }
+
+    public function modules(): BelongsToMany
+    {
+        return $this->belongsToMany(Module::class, 'plan_modules')
+            ->withPivot('limit', 'settings')
+            ->withTimestamps();
     }
 }

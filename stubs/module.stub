@@ -1,0 +1,38 @@
+<?php
+
+namespace {{ namespace }};
+
+use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
+use HoceineEl\FilamentModularSubscriptions\Models\Plan;
+use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+
+class {{ class }} extends BaseModule
+{
+    public function getName(): string
+    {
+        return '{{ name }}';
+    }
+
+    public function getLabelKey(): string
+    {
+        return '{{ label_key }}';
+    }
+
+    public function calculateUsage(Subscription $subscription): int
+    {
+        // Implement your usage calculation logic here
+        return 0;
+    }
+
+    public function getPricing(Subscription $subscription): float
+    {
+        // Implement your pricing logic here
+        return $this->calculateUsage($subscription) * $subscription->plan->modules()->where('class', get_class($this))->first()->price;
+    }
+
+    public function canUse(Subscription $subscription): bool
+    {
+        // Implement your access control logic here
+        return $this->calculateUsage($subscription) < $subscription->plan->modules()->where('class', get_class($this))->first()->limit;
+    }
+}

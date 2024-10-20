@@ -18,6 +18,22 @@ return [
                 'invoice_interval' => 'Invoice Interval',
                 'grace_period' => 'Grace Period',
                 'grace_interval' => 'Grace Interval',
+                'module' => 'Module',
+                'module_limit' => 'Usage Limit',
+                'module_settings' => 'Module Settings',
+                'setting_key' => 'Setting Key',
+                'setting_value' => 'Setting Value',
+            ],
+            'hints' => [
+                'module_limit' => 'Leave empty for unlimited usage',
+            ],
+            'placeholders' => [
+                'setting_key' => 'Enter setting key',
+                'setting_value' => 'Enter setting value',
+            ],
+            'actions' => [
+                'add_module' => 'Add Module',
+                'collapse_all_modules' => 'Collapse All Modules',
             ],
             'tabs' => [
                 'details' => 'Details',

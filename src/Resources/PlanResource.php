@@ -11,6 +11,10 @@ use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\CreatePlan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\EditPlan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\ListPlans;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use HoceineEl\FilamentModularSubscriptions\Models\Module;
 
 class PlanResource extends Resource
 {
@@ -40,7 +44,7 @@ class PlanResource extends Resource
                 Forms\Components\Tabs::make('Plan Details')
                     ->columnSpanFull()
                     ->tabs([
-                        Forms\Components\Tabs\Tab::make(__('Basic Information'))
+                        Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.tabs.details'))
                             ->icon('heroicon-o-information-circle')
                             ->columns(2)
                             ->schema([
@@ -48,7 +52,7 @@ class PlanResource extends Resource
                                     ->required()
                                     ->translatable(true, config('filament-modular-subscriptions.locales'))
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn (Set $set, $state) => $set('slug', str($state['name'][app()->getLocale() ?? config('filament-modular-subscriptions.locales')[0]])->slug()))
+                                    ->afterStateUpdated(fn(Set $set, $state) => $set('slug', str($state['name'][app()->getLocale() ?? config('filament-modular-subscriptions.locales')[0]])->slug()))
                                     ->columnSpanFull()
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.name')),
                                 Forms\Components\TextInput::make('slug')
@@ -63,7 +67,7 @@ class PlanResource extends Resource
                                     ->default(true)
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.is_active')),
                             ]),
-                        Forms\Components\Tabs\Tab::make(__('Pricing'))
+                        Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.tabs.pricing'))
                             ->columns()
                             ->icon('heroicon-o-currency-dollar')
                             ->schema([
@@ -77,7 +81,7 @@ class PlanResource extends Resource
                                     ->required()
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.currency')),
                             ]),
-                        Forms\Components\Tabs\Tab::make(__('Billing'))
+                        Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.tabs.billing'))
                             ->columns()
                             ->schema([
                                 Forms\Components\TextInput::make('trial_period')
@@ -105,6 +109,42 @@ class PlanResource extends Resource
                                     ->options(Interval::class)
                                     ->default(Interval::DAY)
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.grace_interval')),
+                            ]),
+                        Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.modules'))
+                            ->icon('heroicon-o-puzzle-piece')
+                            ->schema([
+                                Repeater::make('modules')
+                                    ->relationship('modules')
+                                    ->schema([
+                                        Select::make('module_id')
+                                            ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.module'))
+                                            ->relationship('module', 'name')
+                                            ->required()
+                                            ->searchable(),
+                                        TextInput::make('limit')
+                                            ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.module_limit'))
+                                            ->numeric()
+                                            ->nullable()
+                                            ->hint(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.hints.module_limit')),
+                                        Forms\Components\TextInput::make('price')
+                                            ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.module_price'))
+                                            ->numeric()
+                                            ->nullable(),
+
+                                        // Forms\Components\KeyValue::make('settings')
+                                        //     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.module_settings'))
+                                        //     ->keyLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.setting_key'))
+                                        //     ->valueLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.setting_value'))
+                                        //     ->keyPlaceholder(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.placeholders.setting_key'))
+                                        //     ->valuePlaceholder(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.placeholders.setting_value'))
+                                        //     ->nullable(),
+                                    ])
+                                    ->itemLabel(fn(array $state): ?string => Module::find($state['module_id'])?->name ?? null)
+                                    ->collapsible()
+                                    ->collapseAllAction(
+                                        fn(Forms\Components\Actions\Action $action) => $action->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.actions.collapse_all_modules'))
+                                    )
+                                    ->addActionLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.actions.add_module')),
                             ]),
                     ]),
             ]);
