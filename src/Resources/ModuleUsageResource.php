@@ -6,10 +6,12 @@ use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
+use HoceineEl\FilamentModularSubscriptions\Models\ModuleUsage;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages;
 
 class ModuleUsageResource extends Resource
 {
+
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
     public static function getModel(): string
@@ -63,8 +65,8 @@ class ModuleUsageResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('subscription.id')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.fields.subscription_id'))
+                Tables\Columns\TextColumn::make('subscription.subscribable.name')
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.fields.subscriber'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('module.name')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.fields.module_id'))

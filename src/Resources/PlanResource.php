@@ -55,7 +55,7 @@ class PlanResource extends Resource
                                     ->required()
                                     ->translatable(true, config('filament-modular-subscriptions.locales'))
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn (Set $set, $state) => $set('slug', str($state['name'][config('filament-modular-subscriptions.locales')[0] ?? app()->getLocale()])->slug()))
+                                    ->afterStateUpdated(fn(Set $set, $state) => $set('slug', str($state['name'][config('filament-modular-subscriptions.locales')[0] ?? app()->getLocale()])->slug()))
                                     ->columnSpanFull()
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.name')),
                                 Forms\Components\TextInput::make('slug')
@@ -80,7 +80,7 @@ class PlanResource extends Resource
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.price')),
                                 Forms\Components\Select::make('currency')
                                     ->options(config('filament-modular-subscriptions.currencies'))
-                                    ->default(config('filament-modular-subscriptions.currencies')[0])
+                                    ->default(config('filament-modular-subscriptions.main_currency'))
                                     ->required()
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.currency')),
                             ]),
@@ -152,7 +152,7 @@ class PlanResource extends Resource
                                         //     ->nullable(),
                                     ])
 
-                                    ->itemLabel(fn (array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
+                                    ->itemLabel(fn(array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
                                     ->collapsible()
                                     ->addActionLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.actions.add_module')),
                             ]),
@@ -168,7 +168,7 @@ class PlanResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->money('currency')
+                    ->money(config('filament-modular-subscriptions.main_currency'), locale: 'en')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.price'))
                     ->sortable(),
                 Tables\Columns\ToggleColumn::make('is_active')

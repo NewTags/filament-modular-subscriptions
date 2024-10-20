@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Filters\Filter;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
+use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource\Pages;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -57,17 +58,19 @@ class SubscriptionResource extends Resource
                 Hidden::make('subscribable_type')
                     ->default(config('filament-modular-subscriptions.tenant_model')),
                 Forms\Components\Select::make('plan_id')
-                    ->options(fn () => Plan::all()->mapWithKeys(function ($plan) {
+                    ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
                         return [$plan->id => $plan->trans_name . ' - ' . $plan->price . ' ' . $plan->currency];
                     }))
                     ->live(debounce: 500)
                     ->afterStateUpdated(function (Set $set, ?string $state) {
                         $plan = Plan::find($state);
-                        $startDate = now();
-                        $set('starts_at', $startDate);
-                        $set('ends_at', $startDate->copy()->add($plan->invoice_interval->value, $plan->invoice_period));
-                        $set('status', SubscriptionStatus::ACTIVE);
-                        $set('trial_ends_at', $startDate->copy()->add($plan->trial_interval->value, $plan->trial_period));
+                        if ($plan) {
+                            $startDate = now();
+                            $set('starts_at', $startDate->format('Y-m-d H:i:s'));
+                            $set('ends_at', $startDate->copy()->add($plan->invoice_interval->value, $plan->invoice_period)->format('Y-m-d H:i:s'));
+                            $set('status', SubscriptionStatus::ACTIVE);
+                            $set('trial_ends_at', $startDate->copy()->add($plan->trial_interval->value, $plan->trial_period)->format('Y-m-d H:i:s'));
+                        }
                     })
                     ->required()
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.plan_id')),
@@ -96,9 +99,7 @@ class SubscriptionResource extends Resource
                 Tables\Columns\TextColumn::make('plan.name')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.plan_id'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('subscribable_type')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.subscribable_type')),
-                Tables\Columns\TextColumn::make('subscribable_id')
+                Tables\Columns\TextColumn::make('subscribable.name')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.subscribable_id')),
                 Tables\Columns\TextColumn::make('starts_at')
                     ->dateTime()
@@ -117,7 +118,7 @@ class SubscriptionResource extends Resource
                     ->options(SubscriptionStatus::class)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.status')),
                 Tables\Filters\SelectFilter::make('plan_id')
-                    ->options(fn () => Plan::all()->pluck('name', 'id'))
+                    ->options(fn() => Plan::all()->pluck('name', 'id'))
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.plan_id')),
                 Filter::make('dates')
                     ->form([
@@ -127,7 +128,13 @@ class SubscriptionResource extends Resource
                             ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.ends_at')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        return $query->whereBetween('starts_at', [$data['starts_at'], $data['ends_at']]);
+                        if ($data['starts_at']) {
+                            $query->where('starts_at', '>=', $data['starts_at']);
+                        }
+                        if ($data['ends_at']) {
+                            $query->where('ends_at', '<=', $data['ends_at']);
+                        }
+                        return $query;
                     }),
             ])
             ->actions([

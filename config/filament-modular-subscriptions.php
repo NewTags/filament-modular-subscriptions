@@ -44,6 +44,7 @@ return [
         'MMK',
         'MNT',
     ],
+    'main_currency' => 'USD',
     'translatable' => true,
     'locales' => [
         'en' => 'English',

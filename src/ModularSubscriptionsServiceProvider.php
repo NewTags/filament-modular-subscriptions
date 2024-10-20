@@ -144,4 +144,13 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             '5_create_plan_modules_table', // Add this line
         ];
     }
+
+    public function bootingPackage()
+    {
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__ . '/../database/seeders' => database_path('seeders'),
+            ], 'filament-modular-subscriptions-seeders');
+        }
+    }
 }

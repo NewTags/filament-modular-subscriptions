@@ -80,6 +80,7 @@ return [
                 'usage' => 'الاستخدام',
                 'pricing' => 'التسعير',
                 'calculated_at' => 'تاريخ الحساب',
+                'subscriber' => 'المشترك',
             ],
         ],
     ],
