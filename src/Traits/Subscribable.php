@@ -5,8 +5,6 @@ namespace HoceineEl\FilamentModularSubscriptions\Traits;
 use Carbon\Carbon;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
-use HoceineEl\FilamentModularSubscriptions\Facades\ModularSubscriptions;
-use HoceineEl\FilamentModularSubscriptions\Models\Module;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -75,8 +73,6 @@ trait Subscribable
 
         return true;
     }
-
-
 
     public function renew(?int $days = null): bool
     {

@@ -7,11 +7,9 @@ use Illuminate\Support\Collection;
 /**
  * @method static Collection getRegisteredModules()
  * @method static Collection getActiveModules()
- *
  */
 class ModularSubscription
 {
-
     public static function getRegisteredModules(): Collection
     {
         $moduleModel = config('filament-modular-subscriptions.models.module');

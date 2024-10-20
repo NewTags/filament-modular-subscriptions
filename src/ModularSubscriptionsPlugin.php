@@ -4,10 +4,6 @@ namespace HoceineEl\FilamentModularSubscriptions;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
-use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource;
-use HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource;
-use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource;
-use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
 class ModularSubscriptionsPlugin implements Plugin

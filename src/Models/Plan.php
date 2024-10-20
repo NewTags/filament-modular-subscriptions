@@ -71,13 +71,13 @@ class Plan extends Model
         $moduleModel = config('filament-modular-subscriptions.models.module');
         $module = $module instanceof $moduleModel ? $module : $moduleModel::where('class', $module)->first();
 
-        if (!$module) {
+        if (! $module) {
             return -1;
         }
 
         $modulePrice = $this->modules()->where('module_id', $module->id)->first();
 
-        if (!$modulePrice) {
+        if (! $modulePrice) {
             return -1;
         }
 

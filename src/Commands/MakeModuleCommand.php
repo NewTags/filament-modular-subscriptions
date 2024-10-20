@@ -3,8 +3,8 @@
 namespace HoceineEl\FilamentModularSubscriptions\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Str;
 
 class MakeModuleCommand extends Command
 {
@@ -30,6 +30,7 @@ class MakeModuleCommand extends Command
 
         if ($this->files->exists($path)) {
             $this->error('Module already exists!');
+
             return false;
         }
 
@@ -54,7 +55,7 @@ class MakeModuleCommand extends Command
 
     protected function makeDirectory($path)
     {
-        if (!$this->files->isDirectory(dirname($path))) {
+        if (! $this->files->isDirectory(dirname($path))) {
             $this->files->makeDirectory(dirname($path), 0777, true, true);
         }
 

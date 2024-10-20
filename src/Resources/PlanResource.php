@@ -3,18 +3,18 @@
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
 use Filament\Forms;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
+use HoceineEl\FilamentModularSubscriptions\Models\Module;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\CreatePlan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\EditPlan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\ListPlans;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use HoceineEl\FilamentModularSubscriptions\Models\Module;
 
 class PlanResource extends Resource
 {
@@ -52,7 +52,7 @@ class PlanResource extends Resource
                                     ->required()
                                     ->translatable(true, config('filament-modular-subscriptions.locales'))
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn(Set $set, $state) => $set('slug', str($state['name'][app()->getLocale() ?? config('filament-modular-subscriptions.locales')[0]])->slug()))
+                                    ->afterStateUpdated(fn (Set $set, $state) => $set('slug', str($state['name'][app()->getLocale() ?? config('filament-modular-subscriptions.locales')[0]])->slug()))
                                     ->columnSpanFull()
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.name')),
                                 Forms\Components\TextInput::make('slug')
@@ -139,10 +139,10 @@ class PlanResource extends Resource
                                         //     ->valuePlaceholder(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.placeholders.setting_value'))
                                         //     ->nullable(),
                                     ])
-                                    ->itemLabel(fn(array $state): ?string => Module::find($state['module_id'])?->name ?? null)
+                                    ->itemLabel(fn (array $state): ?string => Module::find($state['module_id'])?->name ?? null)
                                     ->collapsible()
                                     ->collapseAllAction(
-                                        fn(Forms\Components\Actions\Action $action) => $action->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.actions.collapse_all_modules'))
+                                        fn (Forms\Components\Actions\Action $action) => $action->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.actions.collapse_all_modules'))
                                     )
                                     ->addActionLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.actions.add_module')),
                             ]),

@@ -3,9 +3,9 @@
 namespace HoceineEl\FilamentModularSubscriptions\Models;
 
 use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
 
 class Module extends Model
 {
