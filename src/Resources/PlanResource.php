@@ -18,6 +18,7 @@ use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\ListPlan
 
 class PlanResource extends Resource
 {
+
     protected static ?string $navigationIcon = 'heroicon-s-squares-plus';
 
     public static function getModel(): string
@@ -55,7 +56,7 @@ class PlanResource extends Resource
                                     ->required()
                                     ->translatable(true, config('filament-modular-subscriptions.locales'))
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn (Set $set, $state) => $set('slug', str($state['name'][app()->getLocale() ?? config('filament-modular-subscriptions.locales')[0]])->slug()))
+                                    ->afterStateUpdated(fn(Set $set, $state) => $set('slug', str($state['name'][config('filament-modular-subscriptions.locales')[0] ?? app()->getLocale()])->slug()))
                                     ->columnSpanFull()
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.name')),
                                 Forms\Components\TextInput::make('slug')
@@ -118,7 +119,7 @@ class PlanResource extends Resource
                             ->schema([
                                 Repeater::make('modules')
                                     ->label('')
-                                    ->relationship('modules')
+                                    ->relationship()
                                     ->columns(3)
                                     ->schema([
                                         Select::make('module_id')
@@ -127,7 +128,6 @@ class PlanResource extends Resource
                                                 $modules = config('filament-modular-subscriptions.models.module')::all()->mapWithKeys(function ($module) {
                                                     return [$module->id => $module->getLabel()];
                                                 });
-
                                                 return $modules;
                                             })
                                             ->required()
@@ -151,9 +151,9 @@ class PlanResource extends Resource
                                         //     ->valuePlaceholder(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.placeholders.setting_value'))
                                         //     ->nullable(),
                                     ])
-                                    ->itemLabel(fn (array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
-                                    ->collapsible()
 
+                                    ->itemLabel(fn(array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
+                                    ->collapsible()
                                     ->addActionLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.actions.add_module')),
                             ]),
                     ]),
@@ -178,6 +178,9 @@ class PlanResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_interval')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.invoice_interval')),
+                Tables\Columns\TextColumn::make('modules_count')
+                    ->counts('modules')
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.modules_count')),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('is_active')

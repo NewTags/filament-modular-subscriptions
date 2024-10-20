@@ -25,6 +25,7 @@ return [
                 'setting_key' => 'مفتاح الإعداد',
                 'setting_value' => 'قيمة الإعداد',
                 'module_price' => 'سعر الوحدة',
+                'modules_count' => 'عدد الوحدات',
             ],
             'hints' => [
                 'module_limit' => 'أتركه فارغا للاستخدام الغير محدود',

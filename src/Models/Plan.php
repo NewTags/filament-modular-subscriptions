@@ -6,6 +6,7 @@ use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Plan extends Model
@@ -46,7 +47,6 @@ class Plan extends Model
     public function subscriptions(): HasMany
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
-
         return $this->hasMany($subscriptionModel);
     }
 
@@ -54,13 +54,19 @@ class Plan extends Model
     {
         $locale = app()->getLocale();
         $names = json_decode($value, true);
-
         return $names[$locale] ?? $names['en'] ?? '';
     }
 
-    public function modules(): HasMany
+    public function planModules(): HasMany
     {
-        return $this->hasMany(config('filament-modular-subscriptions.models.plan_module'));
+        return $this->hasMany(PlanModule::class);
+    }
+
+    public function modules(): BelongsToMany
+    {
+        return $this->belongsToMany(config('filament-modular-subscriptions.models.module'), 'plan_modules')
+            ->using(PlanModule::class)
+            ->withPivot(['limit', 'price', 'settings']);
     }
 
     public function modulePrice(Model | string $module): float
@@ -68,16 +74,16 @@ class Plan extends Model
         $moduleModel = config('filament-modular-subscriptions.models.module');
         $module = $module instanceof $moduleModel ? $module : $moduleModel::where('class', $module)->first();
 
-        if (! $module) {
+        if (!$module) {
             return -1;
         }
 
-        $modulePrice = $this->modules()->where('module_id', $module->id)->first();
+        $planModule = $this->planModules()->where('module_id', $module->id)->first();
 
-        if (! $modulePrice) {
+        if (!$planModule) {
             return -1;
         }
 
-        return $modulePrice->pivot->price;
+        return $planModule->price;
     }
 }

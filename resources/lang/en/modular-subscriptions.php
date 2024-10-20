@@ -23,6 +23,7 @@ return [
                 'module_settings' => 'Module Settings',
                 'setting_key' => 'Setting Key',
                 'setting_value' => 'Setting Value',
+                'modules_count' => 'Modules Count',
             ],
             'hints' => [
                 'module_limit' => 'Leave empty for unlimited usage',

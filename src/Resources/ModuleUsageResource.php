@@ -11,9 +11,13 @@ use HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages;
 
 class ModuleUsageResource extends Resource
 {
-    protected static ?string $model = ModuleUsage::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+
+    public static function getModel(): string
+    {
+        return config('filament-modular-subscriptions.models.usage');
+    }
 
     public static function getPluralModelLabel(): string
     {
