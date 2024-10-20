@@ -2,14 +2,17 @@
 
 namespace HoceineEl\FilamentModularSubscriptions;
 
+use Closure;
 use Filament\Contracts\Plugin;
+use Filament\Navigation\MenuItem;
+use Filament\Navigation\UserMenuItem;
 use Filament\Panel;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
 class ModularSubscriptionsPlugin implements Plugin
 {
     protected bool $hasSubscriptionStats = true;
-
+    protected bool $onTenantPanel = false;
     public static function make(): static
     {
         return app(static::class);
@@ -22,9 +25,19 @@ class ModularSubscriptionsPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel
-            ->plugin(FilamentTranslatableFieldsPlugin::make())
-            ->resources(config('filament-modular-subscriptions.resources'));
+
+        if (!$this->onTenantPanel) {
+            $panel
+                ->plugin(FilamentTranslatableFieldsPlugin::make())
+                ->resources(config('filament-modular-subscriptions.resources'));
+        } else {
+            $panel
+                ->userMenuItems([
+                    MenuItem::make()
+                        ->label('test')
+                        ->url('#')
+                ]);
+        }
 
         if ($this->hasSubscriptionStats) {
             $panel->widgets([
@@ -36,6 +49,13 @@ class ModularSubscriptionsPlugin implements Plugin
     public function boot(Panel $panel): void
     {
         //
+    }
+
+    public function onTenantPanel(Closure | bool $condition = true): static
+    {
+        $this->onTenantPanel = $condition instanceof Closure ? $condition() : $condition;
+
+        return $this;
     }
 
     public function subscriptionStats(bool $condition = true): static
