@@ -1,9 +1,8 @@
 <?php
 
-namespace Database\Seeders\FilamentModularSubscriptions;
+namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use HoceineEl\FilamentModularSubscriptions\Models\Module;
 
 class ModuleSeeder extends Seeder
 {

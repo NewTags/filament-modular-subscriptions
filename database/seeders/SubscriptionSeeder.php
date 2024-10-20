@@ -1,10 +1,8 @@
 <?php
 
-namespace Database\Seeders\FilamentModularSubscriptions;
+namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use HoceineEl\FilamentModularSubscriptions\Models\Plan;
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 
 class SubscriptionSeeder extends Seeder

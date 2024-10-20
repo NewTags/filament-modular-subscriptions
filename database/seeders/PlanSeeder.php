@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders\FilamentModularSubscriptions;
+namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;

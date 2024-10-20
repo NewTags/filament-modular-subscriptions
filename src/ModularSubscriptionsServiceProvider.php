@@ -151,6 +151,13 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             $this->publishes([
                 __DIR__ . '/../database/seeders' => database_path('seeders'),
             ], 'filament-modular-subscriptions-seeders');
+            $this->info('Modular Subscriptions seeders published successfully.');
+            $this->info('Please make sure to add the following lines to your DatabaseSeeder class:');
+            $this->info('$this->call([
+                ModuleSeeder::class,
+                PlanSeeder::class,
+                SubscriptionSeeder::class,
+            ]);');
         }
     }
 }
