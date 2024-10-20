@@ -103,5 +103,5 @@ return [
         'expired' => 'منتهي',
         'pending' => 'قيد الانتظار',
     ],
-    'your_subscription_details' => 'تفاصيل الاشتراك',
+    'your_subscription' => 'تفاصيل الاشتراك',
 ];

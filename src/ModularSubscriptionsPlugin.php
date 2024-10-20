@@ -4,6 +4,7 @@ namespace HoceineEl\FilamentModularSubscriptions;
 
 use Closure;
 use Filament\Contracts\Plugin;
+use Filament\Facades\Filament;
 use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use HoceineEl\FilamentModularSubscriptions\Pages\TenantSubscription;
@@ -37,7 +38,7 @@ class ModularSubscriptionsPlugin implements Plugin
                 ->userMenuItems([
                     MenuItem::make()
                         ->label(__('filament-modular-subscriptions::modular-subscriptions.user_menu.your_subscription'))
-                        ->url(fn() => TenantSubscription::getUrl()),
+                        ->url(fn() => TenantSubscription::getUrl(panel: $panel->getId(), tenant: Filament::getTenant())),
                 ]);
         }
 

@@ -1,6 +1,7 @@
 <x-filament-panels::page>
+    Hello World {{ $this->currentSubscription->plan->name }}
     <div class="space-y-6">
-        @if ($this->currentSubscription)
+        {{-- @if ($this->currentSubscription)
             <x-filament::section>
                 <x-slot
                     name="heading">{{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.current_subscription') }}</x-slot>
@@ -107,6 +108,6 @@
                     </div>
                 @endforeach
             </div>
-        </x-filament::section>
+        </x-filament::section> --}}
     </div>
 </x-filament-panels::page>

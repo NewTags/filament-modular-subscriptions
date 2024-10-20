@@ -2,15 +2,16 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Pages;
 
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\ActionSize;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 
@@ -18,7 +19,7 @@ class TenantSubscription extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
-    protected static string $view = 'filament.pages.tenant-subscription';
+    protected static string $view = 'filament-modular-subscriptions::filament.pages.tenant-subscription';
 
 
     public ?string $selectedPlanId = null;
@@ -39,42 +40,33 @@ class TenantSubscription extends Page
     }
 
     #[Computed]
-    public function availablePlans()
+    public function availablePlans(): Collection
     {
-        return Plan::where('is_active', true)->get();
+        $planModel = config('filament-modular-subscriptions.models.plan');
+
+        return $planModel::where('is_active', true)->get();
     }
 
     public function switchPlan(): void
     {
-        $newPlan = Plan::findOrFail($this->selectedPlanId);
+        $planModel = config('filament-modular-subscriptions.models.plan');
+        $newPlan = $planModel::findOrFail($this->selectedPlanId);
 
         // Implement your plan switching logic here
         // This is a simplified example
-        $this->currentSubscription->update([
-            'plan_id' => $newPlan->id,
-            'ends_at' => now()->add($newPlan->invoice_interval, $newPlan->invoice_period),
-        ]);
+        $this->currentSubscription->subscriber()->switchPlan($newPlan);
 
         Notification::make()
             ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switched_success'))
             ->success()
             ->send();
 
-        $this->redirect(TenantSubscription::getUrl());
+        redirect()->back();
     }
 
-    protected function getFormSchema(): array
-    {
-        return [
-            Select::make('selectedPlanId')
-                ->label(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.select_new_plan'))
-                ->options($this->availablePlans->pluck('name', 'id'))
-                ->required()
-                ->live(),
-        ];
-    }
 
-    protected function getActions(): array
+
+    protected function getHeaderActions(): array
     {
         return [
             Action::make('switchPlan')
