@@ -67,12 +67,9 @@
         "laravel": {
             "providers": [
                 "HoceineEl\\FilamentModularSubscriptions\\ModularSubscriptionsServiceProvider"
-            ],
-            "aliases": {
-                "FilamentModularSubscriptions": "HoceineEl\\FilamentModularSubscriptions\\ModularSubscriptions"
-            }
-        }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+            ]
+        },
+        "minimum-stability": "dev",
+        "prefer-stable": true
+    }
 }
