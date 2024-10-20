@@ -6,6 +6,7 @@ use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Navigation\MenuItem;
 use Filament\Panel;
+use HoceineEl\FilamentModularSubscriptions\Pages\TenantSubscription;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
 class ModularSubscriptionsPlugin implements Plugin
@@ -35,8 +36,8 @@ class ModularSubscriptionsPlugin implements Plugin
             $panel
                 ->userMenuItems([
                     MenuItem::make()
-                        ->label('test')
-                        ->url('#'),
+                        ->label(__('filament-modular-subscriptions::modular-subscriptions.user_menu.your_subscription'))
+                        ->url(fn() => TenantSubscription::getUrl()),
                 ]);
         }
 
