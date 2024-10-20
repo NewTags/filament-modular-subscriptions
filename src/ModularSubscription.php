@@ -31,7 +31,7 @@ class ModularSubscription
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
 
-        $subscriptionModel::all()->each(function ($subscription) {
+        $subscriptionModel::with('subscriber')->get()->each(function ($subscription) {
             $subscription->subscriber->calculateUsage();
         });
     }
