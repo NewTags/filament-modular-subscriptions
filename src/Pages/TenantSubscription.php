@@ -4,11 +4,11 @@ namespace HoceineEl\FilamentModularSubscriptions\Pages;
 
 use Filament\Actions\Action;
 use Filament\Pages\Page;
-use Filament\Support\Enums\ActionSize;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Illuminate\Contracts\Support\Htmlable;
-use HoceineEl\FilamentModularSubscriptions\Widgets\CurrentSubscriptionWidget;
-use HoceineEl\FilamentModularSubscriptions\Widgets\SubscriptionDaysLeftWidget;
-use HoceineEl\FilamentModularSubscriptions\Widgets\AvailablePlansWidget;
+use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 
 class TenantSubscription extends Page
 {
@@ -21,12 +21,16 @@ class TenantSubscription extends Page
         return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.your_subscription');
     }
 
-    protected function getHeaderWidgets(): array
+    public function getViewData(): array
     {
+        $tenant = Filament::getTenant();
+        $activeSubscription = $tenant->activeSubscription();
+        $planModel = config('filament-modular-subscriptions.models.plan');
+
         return [
-            CurrentSubscriptionWidget::class,
-            SubscriptionDaysLeftWidget::class,
-            AvailablePlansWidget::class,
+            'tenant' => $tenant,
+            'activeSubscription' => $activeSubscription,
+            'availablePlans' => $planModel::active()->orderBy('sort_order')->get(),
         ];
     }
 
@@ -35,14 +39,28 @@ class TenantSubscription extends Page
         return [
             Action::make('switchPlan')
                 ->label(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.switch_plan_button'))
-                ->action('switchPlan')
-                ->size(ActionSize::Large)
-                ->color('primary'),
-        ];
-    }
+                ->form([
+                    Select::make('plan_id')
+                        ->label(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.select_plan'))
+                        ->options(config('filament-modular-subscriptions.models.plan')::active()->pluck('name', 'id'))
+                        ->required(),
+                ])
+                ->action(function (array $data): void {
+                    $tenant = Filament::getTenant();
+                    $success = $tenant->switchPlan($data['plan_id']);
 
-    public function switchPlan()
-    {
-        // Implement the logic for switching plans here
+                    if ($success) {
+                        Notification::make()
+                            ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switched_successfully'))
+                            ->success()
+                            ->send();
+                    } else {
+                        Notification::make()
+                            ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switch_failed'))
+                            ->danger()
+                            ->send();
+                    }
+                }),
+        ];
     }
 }

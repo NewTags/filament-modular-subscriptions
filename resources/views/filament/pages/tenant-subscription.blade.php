@@ -1,6 +1,6 @@
 <x-filament-panels::page>
-    {{-- <div class="space-y-6">
-        @if ($this->currentSubscription)
+    <div class="space-y-6">
+        @if ($activeSubscription)
             <x-filament::section>
                 <x-slot
                     name="heading">{{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.current_subscription') }}</x-slot>
@@ -11,13 +11,15 @@
                             {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan') }}
                         </h3>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            {{ $this->currentSubscription->plan->name }}</p>
+                            {{ $activeSubscription->plan->trans_name }}
+                        </p>
                     </div>
                     <div>
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                             {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.status') }}
                         </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $this->currentSubscription->status }}
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.statuses.' . $activeSubscription->status) }}
                         </p>
                     </div>
                     <div>
@@ -25,29 +27,50 @@
                             {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.started_on') }}
                         </h3>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            {{ $this->currentSubscription->starts_at->format('M d, Y') }}</p>
+                            {{ $activeSubscription->starts_at->format('M d, Y') }}
+                        </p>
                     </div>
                     <div>
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                             {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.ends_on') }}
                         </h3>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            {{ $this->currentSubscription->ends_at->format('M d, Y') }}</p>
+                            {{ $activeSubscription->ends_at->format('M d, Y') }}
+                        </p>
                     </div>
                 </div>
-            </x-filament::section>
 
-            <x-filament::section>
-                <x-slot
-                    name="heading">{{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.switch_plan') }}</x-slot>
-
-                <form wire:submit="switchPlan" class="space-y-6">
-                    {{ $this->form }}
-
-                    <div class="flex justify-end">
-                        {{ $this->switchPlanAction }}
-                    </div>
-                </form>
+                <div class="mt-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                        {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription_details') }}
+                    </h3>
+                    <dl class="mt-2 divide-y divide-gray-200 dark:divide-gray-700">
+                        <div class="flex justify-between py-3 text-sm font-medium">
+                            <dt class="text-gray-500 dark:text-gray-400">
+                                {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.days_left') }}
+                            </dt>
+                            <dd class="text-gray-900 dark:text-gray-100">
+                                {{ $activeSubscription->ends_at->diffInDays(now()) }}</dd>
+                        </div>
+                        <div class="flex justify-between py-3 text-sm font-medium">
+                            <dt class="text-gray-500 dark:text-gray-400">
+                                {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.on_trial') }}
+                            </dt>
+                            <dd class="text-gray-900 dark:text-gray-100">
+                                {{ $activeSubscription->onTrial() ? __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.yes') : __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.no') }}
+                            </dd>
+                        </div>
+                        @if ($activeSubscription->onTrial())
+                            <div class="flex justify-between py-3 text-sm font-medium">
+                                <dt class="text-gray-500 dark:text-gray-400">
+                                    {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.trial_ends_at') }}
+                                </dt>
+                                <dd class="text-gray-900 dark:text-gray-100">
+                                    {{ $activeSubscription->trial_ends_at->format('M d, Y') }}</dd>
+                            </div>
+                        @endif
+                    </dl>
+                </div>
             </x-filament::section>
         @else
             <x-filament::section>
@@ -57,13 +80,6 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.no_subscription_message') }}
                 </p>
-
-                <div class="mt-4">
-                    <x-filament::button tag="a" href="{{ route('filament.resources.plans.index') }}"
-                        color="primary">
-                        {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.view_available_plans') }}
-                    </x-filament::button>
-                </div>
             </x-filament::section>
         @endif
 
@@ -72,20 +88,23 @@
                 name="heading">{{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.available_plans') }}</x-slot>
 
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($this->availablePlans as $plan)
+                @foreach ($availablePlans as $plan)
                     <div
                         class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
                         <div class="px-4 py-5 sm:p-6">
                             <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
-                                {{ $plan->name }}</h3>
+                                {{ $plan->trans_name }}
+                            </h3>
                             <div
                                 class="mt-2 flex items-baseline text-3xl font-semibold text-indigo-600 dark:text-indigo-400">
                                 {{ $plan->price }} {{ $plan->currency }}
-                                <span class="ml-1 text-xl font-medium text-gray-500 dark:text-gray-400">/
+                                <span class="ml-1 text-xl font-medium text-gray-500 dark:text-gray-400">
+                                    /
                                     {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.per') }}
-                                    {{ $plan->invoice_interval }}</span>
+                                    {{ __('filament-modular-subscriptions::modular-subscriptions.intervals.' . $plan->invoice_interval->value) }}
+                                </span>
                             </div>
-                            <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">{{ $plan->description }}</p>
+                            <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">{{ $plan->trans_description }}</p>
                         </div>
                         <div class="px-4 py-4 sm:px-6">
                             <ul role="list" class="mt-4 space-y-2">
@@ -98,8 +117,8 @@
                                                     clip-rule="evenodd" />
                                             </svg>
                                         </div>
-                                        <p class="ml-3 text-sm text-gray-700 dark:text-gray-300">{{ $module->name }}
-                                        </p>
+                                        <p class="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                                            {{ $module->trans_name }}</p>
                                     </li>
                                 @endforeach
                             </ul>
@@ -108,5 +127,5 @@
                 @endforeach
             </div>
         </x-filament::section>
-    </div> --}}
+    </div>
 </x-filament-panels::page>

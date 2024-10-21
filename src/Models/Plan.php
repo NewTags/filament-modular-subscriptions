@@ -3,6 +3,7 @@
 namespace HoceineEl\FilamentModularSubscriptions\Models;
 
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -66,7 +67,9 @@ class Plan extends Model
 
     public function modules(): BelongsToMany
     {
-        return $this->belongsToMany(config('filament-modular-subscriptions.models.module'), 'plan_modules')
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+
+        return $this->belongsToMany($moduleModel, 'plan_modules')
             ->withPivot(['limit', 'price', 'settings']);
     }
 
@@ -86,5 +89,10 @@ class Plan extends Model
         }
 
         return $planModule->price;
+    }
+
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
     }
 }

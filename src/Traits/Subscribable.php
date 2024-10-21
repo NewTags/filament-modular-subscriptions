@@ -104,7 +104,7 @@ trait Subscribable
         return true;
     }
 
-    public function changePlan(int $newPlanId): bool
+    public function switchPlan(int $newPlanId): bool
     {
         $activeSubscription = $this->activeSubscription();
         if (! $activeSubscription) {
