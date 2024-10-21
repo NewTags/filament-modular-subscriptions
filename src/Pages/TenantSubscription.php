@@ -3,17 +3,12 @@
 namespace HoceineEl\FilamentModularSubscriptions\Pages;
 
 use Filament\Actions\Action;
-use Filament\Facades\Filament;
 use Filament\Pages\Page;
-use Filament\Forms\Components\Select;
-use Filament\Notifications\Notification;
 use Filament\Support\Enums\ActionSize;
-use HoceineEl\FilamentModularSubscriptions\Models\Plan;
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Computed;
+use HoceineEl\FilamentModularSubscriptions\Widgets\CurrentSubscriptionWidget;
+use HoceineEl\FilamentModularSubscriptions\Widgets\SubscriptionDaysLeftWidget;
+use HoceineEl\FilamentModularSubscriptions\Widgets\AvailablePlansWidget;
 
 class TenantSubscription extends Page
 {
@@ -26,6 +21,15 @@ class TenantSubscription extends Page
         return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.your_subscription');
     }
 
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            CurrentSubscriptionWidget::class,
+            SubscriptionDaysLeftWidget::class,
+            AvailablePlansWidget::class,
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -35,5 +39,10 @@ class TenantSubscription extends Page
                 ->size(ActionSize::Large)
                 ->color('primary'),
         ];
+    }
+
+    public function switchPlan()
+    {
+        // Implement the logic for switching plans here
     }
 }
