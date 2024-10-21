@@ -6,6 +6,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Colors\Color;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use HoceineEl\FilamentModularSubscriptions\ModularSubscription;
@@ -77,6 +78,7 @@ class ModuleUsageResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('module_id')
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.fields.module_id'))
                     ->relationship('module', 'name'),
             ])
             ->actions([
@@ -86,13 +88,15 @@ class ModuleUsageResource extends Resource
             ->headerActions([
                 Tables\Actions\Action::make('calculate_usage')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.actions.calculate_usage'))
-                    ->action(fn () => ModularSubscription::calculateUsageForAllModules())
-                    ->successNotification(
+                    ->color(Color::Indigo)
+                    ->icon('heroicon-o-arrow-path-rounded-square')
+                    ->action(function () {
+                        ModularSubscription::calculateUsageForAllModules();
                         Notification::make()
                             ->title(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.actions.calculate_usage_success'))
                             ->success()
-                            ->send(),
-                    ),
+                            ->send();
+                    })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -35,10 +35,8 @@ class ModularSubscriptionsPlugin implements Plugin
                 ->resources(config('filament-modular-subscriptions.resources'));
         } else {
             $panel
-                ->userMenuItems([
-                    MenuItem::make()
-                        ->label(__('filament-modular-subscriptions::modular-subscriptions.user_menu.your_subscription'))
-                        ->url(fn() => TenantSubscription::getUrl(panel: $panel->getId(), tenant: Filament::getTenant())),
+                ->pages([
+                    TenantSubscription::class,
                 ]);
         }
 

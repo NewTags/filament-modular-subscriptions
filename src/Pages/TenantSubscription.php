@@ -31,7 +31,7 @@ class TenantSubscription extends Page
 
     public function getTitle(): string|Htmlable
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.your_subscription_details');
+        return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.your_subscription');
     }
     #[Computed]
     public function currentSubscription(): ?Subscription
