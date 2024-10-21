@@ -53,7 +53,7 @@
                                 {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.days_left') }}
                             </dt>
                             <dd class="text-primary-600 dark:text-primary-400">
-                                {{ $activeSubscription->ends_at->diffInDays(now()) }}
+                                {{ $tenant->daysLeft() }}
                             </dd>
                         </div>
                         <div class="flex justify-between py-3 text-sm font-medium">

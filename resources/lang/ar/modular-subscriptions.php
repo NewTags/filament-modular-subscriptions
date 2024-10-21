@@ -110,6 +110,8 @@ return [
         'per' => 'لكل',
         'switch_plan_button' => 'تغيير الخطة',
         'select_plan' => 'اختر الخطة',
+        'switch_to_plan' => 'تغيير إلى هذه الخطة',
+        'current_plan' => 'الخطة الحالية',
         'plan_switched_successfully' => 'تم تغيير الخطة بنجاح',
         'plan_switch_failed' => 'فشل في تغيير الخطة',
         'statuses' => [
