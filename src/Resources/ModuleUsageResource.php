@@ -96,7 +96,7 @@ class ModuleUsageResource extends Resource
                             ->title(__('filament-modular-subscriptions::modular-subscriptions.resources.module_usage.actions.calculate_usage_success'))
                             ->success()
                             ->send();
-                    })
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -4,8 +4,6 @@ namespace HoceineEl\FilamentModularSubscriptions;
 
 use Closure;
 use Filament\Contracts\Plugin;
-use Filament\Facades\Filament;
-use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use HoceineEl\FilamentModularSubscriptions\Pages\TenantSubscription;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
@@ -29,7 +27,7 @@ class ModularSubscriptionsPlugin implements Plugin
     public function register(Panel $panel): void
     {
 
-        if (!$this->onTenantPanel) {
+        if (! $this->onTenantPanel) {
             $panel
                 ->plugin(FilamentTranslatableFieldsPlugin::make())
                 ->resources(config('filament-modular-subscriptions.resources'));

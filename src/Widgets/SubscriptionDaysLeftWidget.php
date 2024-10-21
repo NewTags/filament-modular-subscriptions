@@ -5,7 +5,6 @@ namespace HoceineEl\FilamentModularSubscriptions\Widgets;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 
 class SubscriptionDaysLeftWidget extends BaseWidget
 {
