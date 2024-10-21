@@ -4,7 +4,6 @@ namespace HoceineEl\FilamentModularSubscriptions\Services;
 
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
-use HoceineEl\FilamentModularSubscriptions\Models\InvoiceItem;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 
 class InvoiceService
@@ -42,7 +41,6 @@ class InvoiceService
     private function createInvoiceItems(Invoice $invoice, Subscription $subscription): void
     {
         $invoiceItemModel = config('filament-modular-subscriptions.models.invoice_item');
-
 
         if ($subscription->plan->is_pay_as_you_go) {
             foreach ($subscription->moduleUsages as $moduleUsage) {

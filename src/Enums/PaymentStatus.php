@@ -12,7 +12,6 @@ enum PaymentStatus: string implements HasColor, HasIcon, HasLabel
     case UNPAID = 'unpaid';
     case PARTIALLY_PAID = 'partially_paid';
 
-
     public function getLabel(): string
     {
         return match ($this) {

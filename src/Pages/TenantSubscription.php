@@ -11,10 +11,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
 use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
 
 class TenantSubscription extends Page implements HasTable
 {
@@ -93,7 +91,7 @@ class TenantSubscription extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('amount')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.amount'))
-                    ->money(fn($record) => $record->subscription->plan->currency, locale: 'en')
+                    ->money(fn ($record) => $record->subscription->plan->currency, locale: 'en')
                     ->sortable(),
                 TextColumn::make('status')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.status'))
@@ -107,7 +105,7 @@ class TenantSubscription extends Page implements HasTable
             ->actions([
                 Action::make('view')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.view'))
-                    ->url(fn($record): string => InvoiceDetails::getUrl(['record' => $record]))
+                    ->url(fn ($record): string => InvoiceDetails::getUrl(['record' => $record]))
                     ->openUrlInNewTab(),
             ])
             ->defaultSort('created_at', 'desc');
