@@ -22,7 +22,10 @@ class PlanModule extends Model
         'price' => 'float',
         'settings' => 'json',
     ];
-
+    public function getTable()
+    {
+        return config('filament-modular-subscriptions.tables.plan_module');
+    }
     public function plan(): BelongsTo
     {
         return $this->belongsTo(config('filament-modular-subscriptions.models.plan'));

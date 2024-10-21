@@ -8,10 +8,10 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('module_usages', function (Blueprint $table) {
+        Schema::create(config('filament-modular-subscriptions.tables.usage'), function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subscription_id')->constrained()->onDelete('cascade');
-            $table->foreignId('module_id')->constrained()->onDelete('cascade');
+            $table->foreignId('subscription_id')->constrained(config('filament-modular-subscriptions.tables.subscription'))->onDelete('cascade');
+            $table->foreignId('module_id')->constrained(config('filament-modular-subscriptions.tables.module'))->onDelete('cascade');
             $table->integer('usage');
             $table->decimal('pricing', 10, 2)->default(0);
             $table->timestamp('calculated_at');
@@ -21,6 +21,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('module_usages');
+        Schema::dropIfExists(config('filament-modular-subscriptions.tables.usage'));
     }
 };

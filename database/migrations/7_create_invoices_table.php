@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('invoices', function (Blueprint $table) {
+        Schema::create(config('filament-modular-subscriptions.tables.invoice'), function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subscription_id')->constrained('subscriptions')->cascadeOnDelete();
+            $table->foreignId('subscription_id')->constrained(config('filament-modular-subscriptions.tables.subscription'))->cascadeOnDelete();
             $table->foreignId('tenant_id')->constrained(config('filament-modular-subscriptions.tenant_table', 'users'))->cascadeOnDelete();
             $table->decimal('amount', 10, 2);
             $table->string('status');

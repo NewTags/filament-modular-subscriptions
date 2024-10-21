@@ -23,6 +23,17 @@ return [
         'module' => HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource::class,
         'usage' => HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource::class,
     ],
+    'tables' => [
+        'plan' => 'fms_plans',
+        'subscription' => 'fms_subscriptions',
+        'module' => 'fms_modules',
+        'usage' => 'fms_module_usages',
+        'plan_module' => 'fms_plan_modules',
+        'invoice' => 'fms_invoices',
+        'invoice_item' => 'fms_invoice_items',
+        'payment' => 'fms_payments',
+
+    ],
     'invoice_due_date_days' => 7,
     'currencies' => [
         'USD',

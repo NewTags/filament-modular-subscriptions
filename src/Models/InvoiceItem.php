@@ -14,7 +14,10 @@ class InvoiceItem extends Model
         'unit_price',
         'total',
     ];
-
+    public function getTable()
+    {
+        return config('filament-modular-subscriptions.tables.invoice_item');
+    }
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);

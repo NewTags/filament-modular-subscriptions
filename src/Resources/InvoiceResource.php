@@ -14,9 +14,18 @@ use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 
 class InvoiceResource extends Resource
 {
-    protected static ?string $model = Invoice::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
+    protected static ?string $tenantOwnershipRelationshipName = 'tenant';
+
+    protected static ?string $slug = 'your-invoices';
+
+
+    public static function getModel(): string
+    {
+        return config('filament-modular-subscriptions.models.invoice');
+    }
 
     public static function getModelLabel(): string
     {
@@ -40,7 +49,7 @@ class InvoiceResource extends Resource
                 TextEntry::make('subscription.subscriber.name')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.subscription_id')),
                 TextEntry::make('amount')
-                    ->money(fn ($record) => $record->subscription->plan->currency, locale: 'en')
+                    ->money(fn($record) => $record->subscription->plan->currency, locale: 'en')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.amount')),
                 TextEntry::make('status')
                     ->badge()
@@ -64,7 +73,7 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.subscription_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn ($record) => $record->subscription->plan->currency)
+                    ->money(fn($record) => $record->subscription->plan->currency)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.amount'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
@@ -89,7 +98,7 @@ class InvoiceResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Action::make('pay')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.actions.pay'))
-                    ->url(fn ($record) => InvoiceDetails::getUrl(['record' => $record]))
+                    ->url(fn($record) => InvoiceDetails::getUrl(['record' => $record]))
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([]);

@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('invoice_items', function (Blueprint $table) {
+        Schema::create(config('filament-modular-subscriptions.tables.invoice_item'), function (Blueprint $table) {
             $table->id();
-            $table->foreignId('invoice_id')->constrained('invoices')->cascadeOnDelete();
+            $table->foreignId('invoice_id')->constrained(config('filament-modular-subscriptions.tables.invoice'))->cascadeOnDelete();
             $table->string('description');
             $table->integer('quantity');
             $table->decimal('unit_price', 10, 2);
@@ -21,6 +21,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('invoice_items');
+        Schema::dropIfExists(config('filament-modular-subscriptions.tables.invoice_item'));
     }
 };

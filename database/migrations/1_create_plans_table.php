@@ -9,7 +9,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('plans', function (Blueprint $table) {
+        Schema::create(config('filament-modular-subscriptions.tables.plan'), function (Blueprint $table) {
             $table->id();
             $table->json('name');
             $table->string('slug')->unique();
@@ -31,6 +31,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('plans');
+        Schema::dropIfExists(config('filament-modular-subscriptions.tables.plan'));
     }
 };

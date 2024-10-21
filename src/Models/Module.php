@@ -14,7 +14,10 @@ class Module extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
-
+    public function getTable()
+    {
+        return config('filament-modular-subscriptions.tables.module');
+    }
     public function moduleUsages(): HasMany
     {
         return $this->hasMany(config('filament-modular-subscriptions.models.usage'));

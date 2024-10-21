@@ -141,7 +141,10 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             '2_create_subscriptions_table',
             '3_create_modules_table',
             '4_create_module_usages_table',
-            '5_create_plan_modules_table', // Add this line
+            '5_create_plan_modules_table',
+            '6_add_is_pay_as_you_go_to_plans_table',
+            '7_create_invoices_table',
+            '8_create_invoice_items_table',
         ];
     }
 

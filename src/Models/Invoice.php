@@ -23,6 +23,11 @@ class Invoice extends Model
         'paid_at' => 'datetime',
     ];
 
+    public function getTable()
+    {
+        return config('filament-modular-subscriptions.tables.invoice');
+    }
+
     public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
