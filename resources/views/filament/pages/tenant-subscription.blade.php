@@ -19,7 +19,7 @@
                             {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.status') }}
                         </h3>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.statuses.' . $activeSubscription->status) }}
+                            {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.statuses.' . $activeSubscription->status->value) }}
                         </p>
                     </div>
                     <div>

@@ -117,6 +117,7 @@ return [
             'canceled' => 'ملغي',
             'expired' => 'منتهي',
         ],
+        'subscription' => 'الاشتراك',
     ],
     'intervals' => [
         'day' => 'يوم',
