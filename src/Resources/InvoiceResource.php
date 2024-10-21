@@ -2,6 +2,7 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
@@ -94,11 +95,21 @@ class InvoiceResource extends Resource
             ])
             ->actions([
                 Action::make('view')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.actions.view'))
                     ->slideOver()
                     ->modalHeading(fn($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
-                        return View::make('filament-modular-subscriptions::pages.invoice-details', ['invoice' => $record])->render();
+                        $invoice = $record;
+                        return View::make('filament-modular-subscriptions::pages.invoice-details', compact('invoice'));
+                    }),
+                Action::make('download')
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.download_pdf'))
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function ($record) {
+                        $invoice = $record;
+                        $pdf = Pdf::loadView('filament-modular-subscriptions::pages.invoice-pdf', compact('invoice'));
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf->output();
+                        }, "invoice-{$invoice->id}-{$invoice->created_at->format('Y-m-d')}.pdf");
                     }),
                 Action::make('pay')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.actions.pay'))

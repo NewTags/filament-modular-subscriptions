@@ -92,9 +92,11 @@ return [
                 'due_date' => 'تاريخ الاستحقاق',
                 'paid_at' => 'تاريخ الدفع',
             ],
+            'no_items' => 'لا يوجد عناصر لهذه الفاتورة',
             'actions' => [
                 'pay' => 'دفع المستحقات',
             ],
+
         ],
     ],
     'menu_group' => [
@@ -178,5 +180,8 @@ return [
         'total' => 'الإجمالي',
         'subscription_fee' => 'رسوم الاشتراك لخطة :plan',
         'module_usage' => 'استخدام وحدة :module',
+        'download_pdf' => 'تحميل PDF',
+        'items' => 'العناصر',
+        'thank_you_message' => 'شكرًا لك على عملك معنا!',
     ],
 ];
