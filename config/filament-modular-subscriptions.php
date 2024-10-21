@@ -10,6 +10,9 @@ return [
         'module' => HoceineEl\FilamentModularSubscriptions\Models\Module::class,
         'usage' => HoceineEl\FilamentModularSubscriptions\Models\ModuleUsage::class,
         'plan_module' => HoceineEl\FilamentModularSubscriptions\Models\PlanModule::class,
+        'invoice' => HoceineEl\FilamentModularSubscriptions\Models\Invoice::class,
+        'invoice_item' => HoceineEl\FilamentModularSubscriptions\Models\InvoiceItem::class,
+        'payment' => HoceineEl\FilamentModularSubscriptions\Models\Payment::class,
     ],
     // Tenant model and attribute to be used for the subscription relationship
     // 'tenant_model' => App\Models\User::class,
@@ -20,6 +23,7 @@ return [
         'module' => HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource::class,
         'usage' => HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource::class,
     ],
+    'invoice_due_date_days' => 7,
     'currencies' => [
         'USD',
         'SAR',

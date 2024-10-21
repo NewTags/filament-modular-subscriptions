@@ -7,10 +7,19 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
+use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 
-class TenantSubscription extends Page
+class TenantSubscription extends Page implements HasTable
 {
+    use InteractsWithTable;
+
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     protected static string $view = 'filament-modular-subscriptions::filament.pages.tenant-subscription';
@@ -51,29 +60,13 @@ class TenantSubscription extends Page
                 ->form([
                     Select::make('plan_id')
                         ->label(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.select_plan'))
-                        ->options(function () {
-                            $planModel = config('filament-modular-subscriptions.models.plan');
-
-                            return $planModel::active()->get()
-                                ->mapWithKeys(function ($plan) {
-                                    $invoiceInterval = $plan->invoice_interval->value;
-                                    $period = $plan->invoice_period;
-                                    $name = $plan->trans_name;
-                                    $price = $plan->price;
-                                    $currency = $plan->currency;
-                                    $per = __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.per');
-                                    $interval = __('filament-modular-subscriptions::modular-subscriptions.intervals.' . $invoiceInterval);
-
-                                    return [
-                                        $plan->id => $name . ' (' . $price . ' ' . $currency . ') ' . $per . ' ' . $period . ' ' . $interval,
-                                    ];
-                                });
-                        })
+                        ->options(config('filament-modular-subscriptions.models.plan')::active()->pluck('name', 'id'))
                         ->required(),
                 ])
                 ->action(function (array $data): void {
                     $tenant = Filament::getTenant();
-                    $success = $tenant->switchPlan($data['plan_id']);
+                    $invoiceService = app(InvoiceService::class);
+                    $success = $invoiceService->renewSubscription($tenant->activeSubscription(), $data['plan_id']);
 
                     if ($success) {
                         Notification::make()
@@ -90,23 +83,33 @@ class TenantSubscription extends Page
         ];
     }
 
-    public function switchPlan($planId)
+    public function table(Table $table): Table
     {
-        $tenant = Filament::getTenant();
-        $success = $tenant->switchPlan($planId);
-
-        if ($success) {
-            Notification::make()
-                ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switched_successfully'))
-                ->success()
-                ->send();
-
-            $this->redirect(TenantSubscription::getUrl());
-        } else {
-            Notification::make()
-                ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switch_failed'))
-                ->danger()
-                ->send();
-        }
+        return $table
+            ->query(config('filament-modular-subscriptions.models.invoice')::query()->where('tenant_id', Filament::getTenant()->id))
+            ->columns([
+                TextColumn::make('id')
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.number'))
+                    ->sortable(),
+                TextColumn::make('amount')
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.amount'))
+                    ->money(fn($record) => $record->subscription->plan->currency, locale: 'en')
+                    ->sortable(),
+                TextColumn::make('status')
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.status'))
+                    ->badge()
+                    ->sortable(),
+                TextColumn::make('due_date')
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.due_date'))
+                    ->date()
+                    ->sortable(),
+            ])
+            ->actions([
+                Action::make('view')
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.view'))
+                    ->url(fn($record): string => InvoiceDetails::getUrl(['record' => $record]))
+                    ->openUrlInNewTab(),
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 }

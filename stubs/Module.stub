@@ -21,18 +21,18 @@ class {{ class }} extends BaseModule
     public function calculateUsage(Subscription $subscription): int
     {
         // Implement your usage calculation logic here
-        return 0;
+        return tenant()->moduleUsage(get_class($this));
     }
 
     public function getPricing(Subscription $subscription): float
     {
         // Implement your pricing logic here
-        return $this->calculateUsage($subscription) * $subscription->plan->modules()->where('class', get_class($this))->first()->price;
+        return $this->calculateUsage($subscription) * $subscription->plan->modulePrice(get_class($this));
     }
 
     public function canUse(Subscription $subscription): bool
     {
         // Implement your access control logic here
-        return $this->calculateUsage($subscription) < $subscription->plan->modules()->where('class', get_class($this))->first()->limit;
+        return $this->calculateUsage($subscription) < $subscription->plan->moduleLimit(get_class($this));
     }
 }

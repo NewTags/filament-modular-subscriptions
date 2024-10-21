@@ -62,6 +62,11 @@ class Subscription extends Model
         return $this->hasMany($moduleUsageModel);
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     public function onTrial(): bool
     {
         return $this->trial_ends_at && $this->trial_ends_at->isFuture();

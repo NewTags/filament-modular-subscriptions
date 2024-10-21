@@ -29,6 +29,7 @@ class Plan extends Model
         'grace_period',
         'grace_interval',
         'sort_order',
+        'is_pay_as_you_go',
     ];
 
     protected $casts = [
@@ -43,6 +44,7 @@ class Plan extends Model
         'trial_interval' => Interval::class,
         'invoice_interval' => Interval::class,
         'grace_interval' => Interval::class,
+        'is_pay_as_you_go' => 'boolean',
     ];
 
     public function subscriptions(): HasMany
@@ -94,5 +96,15 @@ class Plan extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    public function isPayAsYouGo(): bool
+    {
+        return $this->is_pay_as_you_go;
+    }
+
+    public function scopePayAsYouGo(Builder $query): Builder
+    {
+        return $query->where('is_pay_as_you_go', true);
     }
 }
