@@ -105,5 +105,6 @@ return [
     ],
     'tenant_subscription' => [
         'your_subscription' => 'تفاصيل الاشتراك',
+        'switch_plan_button' => 'تغيير الخطة الحالية',
     ],
 ];
