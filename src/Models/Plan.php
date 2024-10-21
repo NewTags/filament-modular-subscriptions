@@ -15,6 +15,7 @@ class Plan extends Model
     use HasFactory;
     use SoftDeletes;
 
+
     protected $fillable = [
         'name',
         'slug',
@@ -76,7 +77,7 @@ class Plan extends Model
     {
         $moduleModel = config('filament-modular-subscriptions.models.module');
 
-        return $this->belongsToMany($moduleModel, 'plan_modules')
+        return $this->belongsToMany($moduleModel, config('filament-modular-subscriptions.tables.plan_module'))
             ->withPivot(['limit', 'price', 'settings']);
     }
 

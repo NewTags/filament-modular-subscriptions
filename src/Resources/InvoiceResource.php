@@ -7,9 +7,10 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ViewAction;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
-use HoceineEl\FilamentModularSubscriptions\Pages\InvoiceDetails;
 use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
+use Illuminate\Support\Facades\View;
 
 class InvoiceResource extends Resource
 {
@@ -46,7 +47,7 @@ class InvoiceResource extends Resource
                 TextEntry::make('subscription.subscriber.name')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.subscription_id')),
                 TextEntry::make('amount')
-                    ->money(fn ($record) => $record->subscription->plan->currency, locale: 'en')
+                    ->money(fn($record) => $record->subscription->plan->currency, locale: 'en')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.amount')),
                 TextEntry::make('status')
                     ->badge()
@@ -70,7 +71,7 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.subscription_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn ($record) => $record->subscription->plan->currency)
+                    ->money(fn($record) => $record->subscription->plan->currency)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.amount'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
@@ -92,10 +93,16 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.status')),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                Action::make('view')
+                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.actions.view'))
+                    ->slideOver()
+                    ->modalHeading(fn($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
+                    ->modalContent(function ($record) {
+                        return View::make('filament-modular-subscriptions::pages.invoice-details', ['invoice' => $record])->render();
+                    }),
                 Action::make('pay')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.actions.pay'))
-                    ->url(fn ($record) => InvoiceDetails::getUrl(['record' => $record]))
+                    // ->url(fn($record) => route('filament.resources.invoices.pay', $record))
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([]);
@@ -112,7 +119,6 @@ class InvoiceResource extends Resource
     {
         return [
             'index' => Pages\ListInvoices::route('/'),
-            'view' => InvoiceDetails::route('/{record}'),
         ];
     }
 }

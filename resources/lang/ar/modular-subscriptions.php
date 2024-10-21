@@ -74,6 +74,7 @@ return [
                 'usage' => 'الاستخدام',
                 'pricing' => 'التسعير',
                 'calculated_at' => 'تاريخ الحساب',
+                'subscriber' => 'المشترك',
             ],
             'actions' => [
                 'calculate' => 'حساب',
@@ -90,6 +91,9 @@ return [
                 'status' => 'الحالة',
                 'due_date' => 'تاريخ الاستحقاق',
                 'paid_at' => 'تاريخ الدفع',
+            ],
+            'actions' => [
+                'pay' => 'دفع المستحقات',
             ],
         ],
     ],
