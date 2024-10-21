@@ -24,10 +24,12 @@ class Subscription extends Model
         'trial_ends_at',
         'status',
     ];
+
     public function getTable()
     {
         return config('filament-modular-subscriptions.tables.subscription');
     }
+
     protected $casts = [
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',

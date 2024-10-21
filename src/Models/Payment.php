@@ -15,10 +15,12 @@ class Payment extends Model
         'transaction_id',
         'status',
     ];
+
     public function getTable()
     {
         return config('filament-modular-subscriptions.tables.payment');
     }
+
     protected $casts = [
         'status' => PaymentStatus::class,
     ];

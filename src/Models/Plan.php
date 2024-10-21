@@ -46,10 +46,12 @@ class Plan extends Model
         'grace_interval' => Interval::class,
         'is_pay_as_you_go' => 'boolean',
     ];
+
     public function getTable()
     {
         return config('filament-modular-subscriptions.tables.plan');
     }
+
     public function subscriptions(): HasMany
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');

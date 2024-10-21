@@ -14,10 +14,12 @@ class ModuleUsage extends Model
         'usage' => 'integer',
         'pricing' => 'float',
     ];
+
     public function getTable()
     {
         return config('filament-modular-subscriptions.tables.usage');
     }
+
     public function subscription(): BelongsTo
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
