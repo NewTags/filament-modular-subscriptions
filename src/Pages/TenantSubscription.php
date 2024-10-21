@@ -3,13 +3,11 @@
 namespace HoceineEl\FilamentModularSubscriptions\Pages;
 
 use Filament\Actions\Action;
-use Filament\Pages\Page;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
+use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
-use HoceineEl\FilamentModularSubscriptions\Models\Plan;
-use Illuminate\Database\Eloquent\Collection;
 
 class TenantSubscription extends Page
 {
@@ -17,7 +15,7 @@ class TenantSubscription extends Page
 
     protected static string $view = 'filament-modular-subscriptions::filament.pages.tenant-subscription';
 
-    public function getTitle(): string|Htmlable
+    public function getTitle(): string | Htmlable
     {
         return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.your_subscription');
     }
@@ -67,7 +65,7 @@ class TenantSubscription extends Page
                                     $interval = __('filament-modular-subscriptions::modular-subscriptions.intervals.' . $invoiceInterval);
 
                                     return [
-                                        $plan->id => $name . ' (' . $price . ' ' . $currency . ') ' . $per . ' ' . $period . ' ' . $interval
+                                        $plan->id => $name . ' (' . $price . ' ' . $currency . ') ' . $per . ' ' . $period . ' ' . $interval,
                                     ];
                                 });
                         })
