@@ -69,7 +69,7 @@ class ProcessSubscriptionInvoices extends Command
     {
         $subscription->status = $status;
         if ($status === SubscriptionStatus::ACTIVE) {
-            $subscription->ends_at = now()->add($subscription->plan->invoice_interval);
+            $subscription->ends_at = now()->add($subscription->plan->invoice_interval->value);
         }
         $subscription->save();
 
