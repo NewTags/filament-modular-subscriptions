@@ -5,6 +5,8 @@ namespace HoceineEl\FilamentModularSubscriptions\Services;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Mail;
 
 class InvoiceService
 {
@@ -82,5 +84,40 @@ class InvoiceService
         $invoice->save();
 
         return true;
+    }
+
+    public function generateAndSendInvoicePdf(Invoice $invoice)
+    {
+        $pdf = $this->generateInvoicePdf($invoice);
+        $this->sendInvoiceEmail($invoice, $pdf);
+    }
+
+    private function generateInvoicePdf(Invoice $invoice)
+    {
+        $pdf = Pdf::loadView('filament-modular-subscriptions::pages.invoice-pdf', compact('invoice'));
+
+        $pdf->setOption('enable-local-file-access', true);
+        $pdf->setOption('enable-unicode', true);
+        $pdf->setOption('encoding', 'UTF-8');
+        $pdf->setOption('font-family', 'Cairo');
+        $pdf->setOption('margin-top', 10);
+        $pdf->setOption('margin-right', 10);
+        $pdf->setOption('margin-bottom', 10);
+        $pdf->setOption('margin-left', 10);
+        $pdf->setOption('direction', 'rtl');
+
+        return $pdf;
+    }
+
+    private function sendInvoiceEmail(Invoice $invoice, $pdf)
+    {
+        $subscriber = $invoice->subscription->subscribable;
+        $emailAddress = $subscriber->email ?? $subscriber->{config('filament-modular-subscriptions.tenant_attribute')};
+
+        Mail::send('filament-modular-subscriptions::emails.invoice', ['invoice' => $invoice], function ($message) use ($invoice, $pdf, $emailAddress) {
+            $message->to($emailAddress)
+                ->subject(__('filament-modular-subscriptions::modular-subscriptions.invoice.email_subject', ['number' => $invoice->id]))
+                ->attachData($pdf->output(), "invoice-{$invoice->id}.pdf");
+        });
     }
 }

@@ -103,7 +103,8 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
-            // SkeletonCommand::class,
+            Commands\ProcessSubscriptionInvoices::class,
+            Commands\MakeModuleCommand::class,
         ];
     }
 

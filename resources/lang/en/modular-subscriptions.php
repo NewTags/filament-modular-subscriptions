@@ -159,6 +159,12 @@ return [
         'total' => 'Total',
         'subscription_fee' => 'Subscription Fee for :plan',
         'module_usage' => 'Usage for :module',
+        'email_subject' => 'Invoice #:number for Your Subscription',
+        'email_greeting' => 'Dear Valued Customer,',
+        'email_body' => 'Please find attached the invoice #:number for your subscription.',
+        'email_amount' => 'The total amount due is :amount :currency.',
+        'email_due_date' => 'Please ensure payment is made by :date.',
+        'email_closing' => 'Thank you for your business.',
     ],
     'navigation' => [
         'group' => 'Subscriptions',
