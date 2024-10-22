@@ -2,6 +2,7 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Pages;
 
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -25,7 +26,6 @@ class TenantSubscription extends Page implements HasTable
     {
         return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.your_subscription');
     }
-
     public static function getNavigationLabel(): string
     {
         return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.your_subscription');
@@ -49,16 +49,32 @@ class TenantSubscription extends Page implements HasTable
         ];
     }
 
-    public function switchPlan(int $planId): void
+    public function switchPlanAction(): Action
     {
-        $tenant = Filament::getTenant();
+        return Action::make('switchPlanAction')
+            ->requiresConfirmation()
+            ->label(function ($arguments) {
+                $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
+                return $plan->is_pay_as_you_go
+                    ? __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.start_using_pay_as_you_go')
+                    : __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.switch_to_plan');
+            })
+            ->color(function ($arguments) {
+                $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
+                return $plan->is_pay_as_you_go ? 'success' : 'primary';
+            })
 
-        $tenant->switchPlan($planId);
+            ->action(function (array $arguments) {
+                $planId = $arguments['plan_id'];
+                $tenant = Filament::getTenant();
 
-        Notification::make()
-            ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switched_successfully'))
-            ->success()
-            ->send();
+                $tenant->switchPlan($planId);
+
+                Notification::make()
+                    ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switched_successfully'))
+                    ->success()
+                    ->send();
+            });
     }
 
     public function table(Table $table): Table

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Database\Seeder;
+use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 
 class SubscriptionSeeder extends Seeder
 {
@@ -11,9 +11,8 @@ class SubscriptionSeeder extends Seeder
     {
         $tenantModel = config('filament-modular-subscriptions.tenant_model');
 
-        if (! $tenantModel) {
+        if (!$tenantModel) {
             $this->command->warn('Tenant model not set in config. Skipping subscription seeding.');
-
             return;
         }
         $planModel = config('filament-modular-subscriptions.models.plan');
@@ -29,7 +28,7 @@ class SubscriptionSeeder extends Seeder
                 'subscribable_id' => $tenant->id,
                 'subscribable_type' => get_class($tenant),
                 'starts_at' => now(),
-                'ends_at' => $plan->period,
+                'ends_at' => now()->addDays($plan->period),
                 'trial_ends_at' => now()->addDays($plan->period_trial),
                 'status' => SubscriptionStatus::ACTIVE,
             ]);

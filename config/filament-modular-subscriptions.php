@@ -67,4 +67,18 @@ return [
         'en' => 'English',
         'ar' => 'Arabic',
     ],
+    'payment_methods' => [
+        'paypal' => [
+            'enabled' => env('PAYPAL_ENABLED', false),
+            'client_id' => env('PAYPAL_CLIENT_ID'),
+            'secret' => env('PAYPAL_SECRET'),
+            'mode' => env('PAYPAL_MODE', 'sandbox'), // or 'live'
+        ],
+        'stripe' => [
+            'enabled' => env('STRIPE_ENABLED', false),
+            'key' => env('STRIPE_KEY'),
+            'secret' => env('STRIPE_SECRET'),
+        ],
+        // Add other payment method configurations here
+    ],
 ];

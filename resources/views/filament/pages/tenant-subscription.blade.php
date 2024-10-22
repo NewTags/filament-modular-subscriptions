@@ -259,18 +259,9 @@
                             @endif
 
                             <!-- Action Button -->
-                            <div class="px-6 pb-8 mt-auto">
-                                @if ($activeSubscription && $activeSubscription->plan_id === $plan->id)
-                                    <x-filament::button disabled class="w-full justify-center text-lg py-3">
-                                        {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.current_plan') }}
-                                    </x-filament::button>
-                                @else
-                                    <x-filament::button wire:click="switchPlan({{ $plan->id }})" :color="$plan->is_pay_as_you_go ? 'success' : 'primary'"
-                                        class="w-full justify-center text-lg py-3">
-                                        {{ $plan->is_pay_as_you_go
-                                            ? __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.start_using_pay_as_you_go')
-                                            : __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.switch_to_plan') }}
-                                    </x-filament::button>
+                            <div class="px-6 pb-8 mx-auto">
+                                @if ($activeSubscription && $activeSubscription->plan_id !== $plan->id)
+                                    {{ ($this->switchPlanAction)(['plan_id' => $plan->id]) }}
                                 @endif
                             </div>
                         </div>

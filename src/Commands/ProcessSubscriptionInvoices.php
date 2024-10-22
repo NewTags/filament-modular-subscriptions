@@ -6,8 +6,8 @@ use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use Illuminate\Console\Command;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
-use HoceineEl\FilamentModularSubscriptions\Services\PaymentService;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use HoceineEl\FilamentModularSubscriptions\Services\Payments\PaymentService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 

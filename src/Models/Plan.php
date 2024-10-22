@@ -111,6 +111,13 @@ class Plan extends Model
         return $planModule->price;
     }
 
+    public function moduleLimit(Model | string $module): int
+    {
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+        $module = $module instanceof $moduleModel ? $module : $moduleModel::where('class', $module)->first();
+
+        return $this->planModules()->where('module_id', $module->id)->first()->limit;
+    }
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);

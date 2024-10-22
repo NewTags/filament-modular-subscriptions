@@ -12,7 +12,7 @@ use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Support\Facades\View;
 
-class InvoiceResource extends Resource
+class   InvoiceResource extends Resource
 {
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 

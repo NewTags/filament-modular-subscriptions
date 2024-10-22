@@ -135,21 +135,17 @@ trait Subscribable
 
     public function canUseModule(string $moduleClass): bool
     {
-        return Cache::remember($this->getCacheKey($moduleClass), now()->addMinutes(5), function () use ($moduleClass) {
-            $activeSubscription = $this->activeSubscription();
-            if (! $activeSubscription) {
-                return false;
-            }
+        $activeSubscription = $this->activeSubscription();
+        if (! $activeSubscription) {
+            return false;
+        }
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+        $module = $moduleModel::where('class', $moduleClass)->first();
 
-            $moduleModel = config('filament-modular-subscriptions.models.module');
-            $module = $moduleModel::where('class', $moduleClass)->first();
-
-            if (! $module) {
-                return false;
-            }
-
-            return $module->canUse($activeSubscription);
-        });
+        if (! $module) {
+            return false;
+        }
+        return $module->canUse($activeSubscription);
     }
 
     public function getCacheKey(string $moduleClass): string
@@ -170,8 +166,12 @@ trait Subscribable
         if (! $module) {
             return null;
         }
+        $moduleUsage = $activeSubscription->moduleUsages()->where('module_id', $module->id)->first();
+        if (! $moduleUsage) {
+            return 0;
+        }
 
-        return $activeSubscription->moduleUsages()->where('module_id', $module->id)->first()->usage;
+        return $moduleUsage->usage;
     }
 
     public function recordUsage(string $moduleClass, int $quantity = 1, bool $incremental = true): void
