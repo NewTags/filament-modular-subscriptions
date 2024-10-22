@@ -32,7 +32,7 @@ class TenantSubscription extends Page implements HasTable
 
     public static function getNavigationGroup(): string
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription');
+        return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription_navigation_label');
     }
 
     public function getViewData(): array
@@ -70,7 +70,7 @@ class TenantSubscription extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('amount')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.amount'))
-                    ->money(fn ($record) => $record->subscription->plan->currency, locale: 'en')
+                    ->money(fn($record) => $record->subscription->plan->currency, locale: 'en')
                     ->sortable(),
                 TextColumn::make('status')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.status'))
@@ -84,7 +84,7 @@ class TenantSubscription extends Page implements HasTable
             ->actions([
                 ViewAction::make('view')
                     ->slideOver()
-                    ->modalHeading(fn ($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
+                    ->modalHeading(fn($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
                         $invoice = $record;
 

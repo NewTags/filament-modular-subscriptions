@@ -55,7 +55,7 @@ class PlanResource extends Resource
                                     ->required()
                                     ->translatable(true, config('filament-modular-subscriptions.locales'))
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn (Set $set, $state) => $set('slug', str($state['name'][config('filament-modular-subscriptions.locales')[0] ?? app()->getLocale()])->slug()))
+                                    ->afterStateUpdated(fn(Set $set, $state) => $set('slug', str($state['name'][config('filament-modular-subscriptions.locales')[0] ?? app()->getLocale()])->slug()))
                                     ->columnSpanFull()
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.name')),
                                 Forms\Components\TextInput::make('slug')
@@ -116,7 +116,7 @@ class PlanResource extends Resource
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.modules'))
                             ->icon('heroicon-o-puzzle-piece')
                             ->schema([
-                                Repeater::make('modules')
+                                Repeater::make('planModules')
                                     ->label('')
                                     ->relationship()
                                     ->columns(3)
@@ -152,7 +152,7 @@ class PlanResource extends Resource
                                         //     ->nullable(),
                                     ])
 
-                                    ->itemLabel(fn (array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
+                                    ->itemLabel(fn(array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
                                     ->collapsible()
                                     ->addActionLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.actions.add_module')),
                             ]),

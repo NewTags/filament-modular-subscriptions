@@ -141,21 +141,21 @@
 
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($availablePlans as $plan)
-                    <div class="relative group">
+                    <div class="relative group h-full">
                         <div
-                            class="absolute -inset-0.5 bg-gradient-to-r {{ $plan->is_pay_as_you_go ? 'from-emerald-600 to-teal-600' : 'from-primary-600 to-secondary-600' }} rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-200">
+                            class="absolute -inset-2 bg-gradient-to-r {{ $plan->is_pay_as_you_go ? 'from-emerald-600 to-teal-600' : 'from-primary-600 to-secondary-600' }} rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-200 ">
                         </div>
                         <div
-                            class="relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg transform transition duration-200 group-hover:scale-[1.02] {{ $activeSubscription && $activeSubscription->plan_id === $plan->id ? 'ring-2 ring-primary-500' : '' }}">
+                            class=" relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg transform transition duration-200 group-hover:scale-[1.001] {{ $activeSubscription && $activeSubscription->plan_id === $plan->id ? 'ring-2 ring-primary-500' : '' }} flex flex-col h-full">
                             <!-- Plan Badge -->
-                            <div class="absolute top-4 right-4">
+                            <div class="">
                                 <x-filament::badge :color="$plan->is_pay_as_you_go ? 'success' : 'primary'" class="text-xs font-medium">
                                     {{ $plan->is_pay_as_you_go ? __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.pay_as_you_go') : __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription') }}
                                 </x-filament::badge>
                             </div>
 
                             <!-- Plan Header -->
-                            <div class="px-6 py-8">
+                            <div class="px-6 py-8 flex-grow">
                                 <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                     {{ $plan->trans_name }}
                                 </h3>
@@ -204,7 +204,7 @@
                             </div>
 
                             <!-- Features List -->
-                            <div class="px-6 pb-6">
+                            <div class="px-6 pb-6 flex-grow">
                                 <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mb-4">
                                     <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
                                         {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.included_features') }}
@@ -259,7 +259,7 @@
                             @endif
 
                             <!-- Action Button -->
-                            <div class="px-6 pb-8">
+                            <div class="px-6 pb-8 mt-auto">
                                 @if ($activeSubscription && $activeSubscription->plan_id === $plan->id)
                                     <x-filament::button disabled class="w-full justify-center text-lg py-3">
                                         {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.current_plan') }}

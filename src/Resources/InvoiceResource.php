@@ -37,6 +37,10 @@ class InvoiceResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
+        if (Filament::getTenant()) {
+            return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription_navigation_label');
+        }
+
         return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription');
     }
 
@@ -56,7 +60,7 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.subscription_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn ($record) => $record->subscription->plan->currency)
+                    ->money(fn($record) => $record->subscription->plan->currency)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.amount'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
@@ -80,7 +84,7 @@ class InvoiceResource extends Resource
             ->actions([
                 ViewAction::make()
                     ->slideOver()
-                    ->modalHeading(fn ($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
+                    ->modalHeading(fn($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
                         $invoice = $record;
 
