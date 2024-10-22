@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use Carbon\Carbon;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class InvoiceSeeder extends Seeder
 {

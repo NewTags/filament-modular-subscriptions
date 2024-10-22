@@ -2,9 +2,8 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
 
-use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource;
 
 class ListPayments extends ListRecords
 {

@@ -2,18 +2,16 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
-use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Infolists;
-use Filament\Infolists\Infolist;
+use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
 
 class PaymentResource extends Resource
 {
-
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-
 
     public static function getModel(): string
     {
@@ -43,7 +41,7 @@ class PaymentResource extends Resource
                     ->sortable()
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.payment.fields.subscriber')),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn($record) => $record->invoice->subscription->plan->currency, locale: 'en')
+                    ->money(fn ($record) => $record->invoice->subscription->plan->currency, locale: 'en')
                     ->sortable()
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.payment.fields.amount')),
                 Tables\Columns\TextColumn::make('payment_method')
@@ -82,7 +80,7 @@ class PaymentResource extends Resource
                         Infolists\Components\TextEntry::make('invoice.subscription.subscriber.name')
                             ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.payment.fields.subscriber')),
                         Infolists\Components\TextEntry::make('amount')
-                            ->money(fn($record) => $record->invoice->subscription->plan->currency)
+                            ->money(fn ($record) => $record->invoice->subscription->plan->currency)
                             ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.payment.fields.amount')),
                         Infolists\Components\TextEntry::make('payment_method')
                             ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.payment.fields.payment_method')),

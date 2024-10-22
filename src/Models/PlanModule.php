@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PlanModule extends Model
 {
-
     protected $fillable = [
         'plan_id',
         'module_id',

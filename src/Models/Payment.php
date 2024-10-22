@@ -25,7 +25,6 @@ class Payment extends Model
         return config('filament-modular-subscriptions.tables.payment');
     }
 
-
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);

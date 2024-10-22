@@ -222,7 +222,7 @@ trait Subscribable
         $plan = $subscription->plan;
         $planModule = $plan->planModules()->where('module_id', $module->id)->first();
 
-        if (!$planModule) {
+        if (! $planModule) {
             return 0;
         }
 
@@ -324,6 +324,7 @@ trait Subscribable
             return (float) number_format($basePlanPrice + $moduleUsagePricing, 2, '.', '');
         } catch (\Exception $e) {
             report($e);
+
             return 0.0;
         }
     }

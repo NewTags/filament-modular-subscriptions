@@ -25,6 +25,7 @@ class InvoiceDetails extends Page
     {
         return __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $this->invoice->id]);
     }
+
     public function getDownloadAction(): Action
     {
         return Action::make('download')
@@ -33,6 +34,7 @@ class InvoiceDetails extends Page
             ->action(function ($arguments) {
                 $invoice = $arguments['invoice'];
                 $pdf = Pdf::loadView('filament-modular-subscriptions::pages.invoice-pdf', compact('invoice'));
+
                 return response()->streamDownload(function () use ($pdf) {
                     echo $pdf->output();
                 }, "invoice-{$invoice->id}.pdf");
