@@ -2,18 +2,14 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Pages;
 
-use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Tables\Actions\Action as TableAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
 use Illuminate\Contracts\Support\Htmlable;
 
 class TenantSubscription extends Page implements HasTable
@@ -39,8 +35,6 @@ class TenantSubscription extends Page implements HasTable
         return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription');
     }
 
-
-
     public function getViewData(): array
     {
         $tenant = Filament::getTenant();
@@ -53,6 +47,7 @@ class TenantSubscription extends Page implements HasTable
             'availablePlans' => $planModel::with('modules')->active()->orderBy('sort_order')->get(),
         ];
     }
+
     public function switchPlan(int $planId): void
     {
         $tenant = Filament::getTenant();
@@ -75,7 +70,7 @@ class TenantSubscription extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('amount')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.amount'))
-                    ->money(fn($record) => $record->subscription->plan->currency, locale: 'en')
+                    ->money(fn ($record) => $record->subscription->plan->currency, locale: 'en')
                     ->sortable(),
                 TextColumn::make('status')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.status'))
@@ -89,9 +84,10 @@ class TenantSubscription extends Page implements HasTable
             ->actions([
                 ViewAction::make('view')
                     ->slideOver()
-                    ->modalHeading(fn($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
+                    ->modalHeading(fn ($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
                         $invoice = $record;
+
                         return view('filament-modular-subscriptions::pages.invoice-details', compact('invoice'));
                     })->modalFooterActions([]),
             ])
