@@ -22,15 +22,28 @@ class ProcessSubscriptionInvoices extends Command
 
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
         $expiringSubscriptions = $subscriptionModel::query()
-            ->where('ends_at', '<=', now()->addDays(7))
+            ->where('ends_at', '<=', now()->addDays(config('filament-modular-subscriptions.invoice_due_date_days')))
             ->where('status', SubscriptionStatus::ACTIVE)
             ->get();
 
         foreach ($expiringSubscriptions as $subscription) {
-            $this->processSubscription($subscription, $invoiceService, $paymentService);
+            if (!$this->hasInvoiceForCurrentPeriod($subscription)) {
+                $this->processSubscription($subscription, $invoiceService, $paymentService);
+            } else {
+                $this->info("Subscription {$subscription->id} already has an invoice for the current period. Skipping.");
+            }
         }
 
         $this->info('Subscription invoices processed successfully.');
+    }
+
+    private function hasInvoiceForCurrentPeriod($subscription): bool
+    {
+        $currentPeriodStart = $subscription->ends_at->subDays($subscription->plan->period);
+
+        return $subscription->invoices()
+            ->where('created_at', '>=', $currentPeriodStart)
+            ->exists();
     }
 
     private function processSubscription($subscription, InvoiceService $invoiceService, PaymentService $paymentService)
@@ -69,7 +82,7 @@ class ProcessSubscriptionInvoices extends Command
     {
         $subscription->status = $status;
         if ($status === SubscriptionStatus::ACTIVE) {
-            $subscription->ends_at = now()->add($subscription->plan->invoice_interval->value);
+            $subscription->ends_at = now()->addDays($subscription->plan->period);
         }
         $subscription->save();
 

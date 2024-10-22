@@ -74,7 +74,7 @@ class InvoiceService
         }
 
         $subscription->starts_at = now();
-        $subscription->ends_at = $subscription->starts_at->add($subscription->plan->invoice_interval);
+        $subscription->ends_at = $subscription->starts_at->addDays($subscription->plan->period);
         $subscription->save();
 
         //@todo: trigger payment process (Stripe, etc...)

@@ -72,6 +72,19 @@ class Plan extends Model
         return $this->hasMany(PlanModule::class);
     }
 
+    public function getPeriodAttribute()
+    {
+        return $this->invoice_interval->days() * $this->invoice_period;
+    }
+    public function getPeriodTrialAttribute()
+    {
+        return $this->trial_interval->days() * $this->trial_period;
+    }
+    public function getPeriodGraceAttribute()
+    {
+        return $this->grace_interval->days() * $this->grace_period;
+    }
+
     public function modules(): BelongsToMany
     {
         $moduleModel = config('filament-modular-subscriptions.models.module');

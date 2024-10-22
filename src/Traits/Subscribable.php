@@ -85,7 +85,7 @@ trait Subscribable
         $plan = $activeSubscription->plan;
 
         if ($days === null) {
-            $days = $this->calculateDaysFromInterval($plan->invoice_period, $plan->invoice_interval);
+            $days = $plan->period;
         }
 
         $newEndsAt = $activeSubscription->ends_at && $activeSubscription->ends_at->isFuture()
@@ -130,9 +130,7 @@ trait Subscribable
 
     private function calculateEndDate(Plan $plan): Carbon
     {
-        $days = $this->calculateDaysFromInterval($plan->invoice_period, $plan->invoice_interval);
-
-        return now()->addDays($days);
+        return now()->addDays($plan->period);
     }
 
     public function canUseModule(string $moduleClass): bool
@@ -244,7 +242,7 @@ trait Subscribable
         $startDate = $startDate ?? now();
 
         if ($endDate === null) {
-            $days = $this->calculateDaysFromInterval($plan->invoice_period, $plan->invoice_interval);
+            $days = $plan->period;
             $endDate = $startDate->copy()->addDays($days);
         }
 
@@ -257,8 +255,8 @@ trait Subscribable
             'status' => SubscriptionStatus::ACTIVE,
         ]);
 
-        if ($trialDays || $plan->trial_period > 0) {
-            $trialDays = $trialDays ?? $this->calculateDaysFromInterval($plan->trial_period, $plan->trial_interval);
+        if ($trialDays || $plan->period_trial > 0) {
+            $trialDays = $trialDays ?? $plan->period_trial;
             $subscription->trial_ends_at = $startDate->copy()->addDays($trialDays);
         }
 
