@@ -2,7 +2,9 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Models;
 
+use Filament\Facades\Filament;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;

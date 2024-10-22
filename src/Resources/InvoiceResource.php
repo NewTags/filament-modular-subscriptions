@@ -4,6 +4,7 @@ namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\StaticAction;
+use Filament\Facades\Filament;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
@@ -47,6 +48,13 @@ class InvoiceResource extends Resource
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table
+            ->modifyQueryUsing(function ($query) {
+                if (Filament::getTenant()) {
+                    $query->where('tenant_id', Filament::getTenant()->id);
+                }
+
+                return $query;
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.invoice_number'))
