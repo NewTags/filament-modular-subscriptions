@@ -56,10 +56,8 @@ class InvoiceResource extends Resource
                 return $query;
             })
             ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.invoice_number'))
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('subscription.id')
+
+                Tables\Columns\TextColumn::make('subscription.subscriber.name')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.subscription_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
