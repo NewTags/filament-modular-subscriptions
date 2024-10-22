@@ -36,8 +36,6 @@ class ModularSubscriptionsPlugin implements Plugin
             $panel
                 ->pages([
                     TenantSubscription::class,
-                ])->resources([
-                    InvoiceResource::class,
                 ]);
         }
 

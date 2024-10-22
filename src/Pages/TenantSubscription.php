@@ -10,6 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource;
 use Illuminate\Contracts\Support\Htmlable;
 
 class TenantSubscription extends Page implements HasTable
@@ -62,35 +63,6 @@ class TenantSubscription extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-        return $table
-            ->query(config('filament-modular-subscriptions.models.invoice')::query()->where('tenant_id', Filament::getTenant()->id))
-            ->columns([
-                TextColumn::make('id')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.number'))
-                    ->sortable(),
-                TextColumn::make('amount')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.amount'))
-                    ->money(fn($record) => $record->subscription->plan->currency, locale: 'en')
-                    ->sortable(),
-                TextColumn::make('status')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.status'))
-                    ->badge()
-                    ->sortable(),
-                TextColumn::make('due_date')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.due_date'))
-                    ->date()
-                    ->sortable(),
-            ])
-            ->actions([
-                ViewAction::make('view')
-                    ->slideOver()
-                    ->modalHeading(fn($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
-                    ->modalContent(function ($record) {
-                        $invoice = $record;
-
-                        return view('filament-modular-subscriptions::pages.invoice-details', compact('invoice'));
-                    })->modalFooterActions([]),
-            ])
-            ->defaultSort('created_at', 'desc');
+        return (new InvoiceResource)->table($table)->query(config('filament-modular-subscriptions.models.invoice')::query()->where('tenant_id', Filament::getTenant()->id));
     }
 }

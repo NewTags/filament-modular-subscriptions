@@ -10,15 +10,4 @@ use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource;
 class ListInvoices extends ListRecords
 {
     protected static string $resource = InvoiceResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make()
-                ->action(function (array $data) {
-                    $data['tenant_id'] = Filament::getTenant()->id;
-                    config('filament-modular-subscriptions.models.invoice')::create($data);
-                }),
-        ];
-    }
 }

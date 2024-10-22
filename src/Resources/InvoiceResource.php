@@ -18,7 +18,7 @@ class InvoiceResource extends Resource
 
     protected static ?string $tenantOwnershipRelationshipName = 'tenant';
 
-    protected static ?string $slug = 'your-invoices';
+    protected static ?string $slug = 'ms-nvoices';
 
     public static function getModel(): string
     {
@@ -52,7 +52,7 @@ class InvoiceResource extends Resource
                     $query->where('tenant_id', Filament::getTenant()->id);
                 }
 
-                return $query;
+                return $query->with('subscription.subscriber', 'subscription.plan');
             })
             ->columns([
 

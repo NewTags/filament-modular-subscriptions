@@ -11,6 +11,7 @@ return [
                 'description' => 'الوصف',
                 'is_active' => 'نشط',
                 'price' => 'السعر',
+                'modules' => 'الوحدات',
                 'currency' => 'العملة',
                 'trial_period' => 'فترة التجربة',
                 'trial_interval' => 'وحدة فترة التجربة',
