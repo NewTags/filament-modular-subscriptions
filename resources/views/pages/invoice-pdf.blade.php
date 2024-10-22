@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice #{{ $invoice->id }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Cairo', sans-serif;
             line-height: 1.6;
             color: #333;
+            direction: rtl;
+            font-size: 14px;
         }
 
         .container {
@@ -38,7 +41,7 @@
         td {
             border: 1px solid #ddd;
             padding: 10px;
-            text-align: left;
+            text-align: right;
         }
 
         th {
@@ -46,7 +49,7 @@
         }
 
         .total {
-            text-align: right;
+            text-align: left;
             font-weight: bold;
         }
     </style>
@@ -55,16 +58,17 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Invoice #{{ $invoice->id }}</h1>
+            <h1>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.invoice_number', ['number' => $invoice->id]) }}
+            </h1>
         </div>
 
         <div class="invoice-details">
             <p><strong>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.billing_to') }}:</strong>
                 {{ $invoice->tenant->{config('filament-modular-subscriptions.tenant_attribute')} }}</p>
             <p><strong>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.date') }}:</strong>
-                {{ $invoice->created_at->format('M d, Y') }}</p>
+                {{ $invoice->created_at->format('Y-m-d') }}</p>
             <p><strong>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.due_date') }}:</strong>
-                {{ $invoice->due_date->format('M d, Y') }}</p>
+                {{ $invoice->due_date->format('Y-m-d') }}</p>
             <p><strong>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.status') }}:</strong>
                 {{ $invoice->status->getLabel() }}</p>
         </div>
@@ -92,7 +96,7 @@
                 <tr>
                     <td colspan="3" class="total">
                         {{ __('filament-modular-subscriptions::modular-subscriptions.invoice.total') }}</td>
-                    <td>{{ number_format($invoice->amount, 2) }}</td>
+                    <td>{{ number_format($invoice->amount, 2) . ' ' . $invoice->subscription->plan->currency }}</td>
                 </tr>
             </tfoot>
         </table>

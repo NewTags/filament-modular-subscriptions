@@ -8,6 +8,7 @@ use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 trait Subscribable
@@ -136,19 +137,26 @@ trait Subscribable
 
     public function canUseModule(string $moduleClass): bool
     {
-        $activeSubscription = $this->activeSubscription();
-        if (! $activeSubscription) {
-            return false;
-        }
+        return Cache::remember($this->getCacheKey($moduleClass), now()->addMinutes(5), function () use ($moduleClass) {
+            $activeSubscription = $this->activeSubscription();
+            if (! $activeSubscription) {
+                return false;
+            }
 
-        $moduleModel = config('filament-modular-subscriptions.models.module');
-        $module = $moduleModel::where('class', $moduleClass)->first();
+            $moduleModel = config('filament-modular-subscriptions.models.module');
+            $module = $moduleModel::where('class', $moduleClass)->first();
 
-        if (! $module) {
-            return false;
-        }
+            if (! $module) {
+                return false;
+            }
 
-        return $module->canUse($activeSubscription);
+            return $module->canUse($activeSubscription);
+        });
+    }
+
+    public function getCacheKey(string $moduleClass): string
+    {
+        return "module_access_{$this->id}_{$moduleClass}";
     }
 
     public function moduleUsage(string $moduleClass): ?int
@@ -203,8 +211,31 @@ trait Subscribable
         $moduleUsage->calculated_at = now();
         $moduleUsage->save();
 
-        $pricing = $module->getPricing($activeSubscription);
+        $pricing = $this->calculateModulePricing($activeSubscription, $module, $moduleUsage->usage);
         $moduleUsage->update(['pricing' => $pricing]);
+
+        Cache::forget($this->getCacheKey($moduleClass));
+    }
+
+    private function calculateModulePricing(Subscription $subscription, $module, int $usage): float
+    {
+        $plan = $subscription->plan;
+        $planModule = $plan->planModules()->where('module_id', $module->id)->first();
+
+        if (!$planModule) {
+            return 0;
+        }
+
+        if ($plan->is_pay_as_you_go) {
+            return $usage * $planModule->price;
+        } else {
+            $limit = $planModule->limit;
+            if ($limit === null || $usage <= $limit) {
+                return 0; // Included in the plan
+            } else {
+                return ($usage - $limit) * $planModule->price; // Charge for overuse
+            }
+        }
     }
 
     public function subscribe(Plan $plan, ?Carbon $startDate = null, ?Carbon $endDate = null, ?int $trialDays = null): Subscription
@@ -249,7 +280,7 @@ trait Subscribable
 
         foreach ($moduleModel::get() as $module) {
             $moduleUsage = $module->calculateUsage($activeSubscription);
-            $pricing = $module->getPricing($activeSubscription);
+            $pricing = $this->calculateModulePricing($activeSubscription, $module, $moduleUsage);
 
             $usage[$module->name] = [
                 'usage' => $moduleUsage,
@@ -283,10 +314,18 @@ trait Subscribable
     {
         $activeSubscription = $this->activeSubscription();
         if (! $activeSubscription) {
-            return 0;
+            return 0.0;
         }
 
-        return $activeSubscription->moduleUsages()->sum('pricing');
+        try {
+            $basePlanPrice = $activeSubscription->plan->is_pay_as_you_go ? 0 : $activeSubscription->plan->price;
+            $moduleUsagePricing = $activeSubscription->moduleUsages()->sum('pricing');
+
+            return (float) number_format($basePlanPrice + $moduleUsagePricing, 2, '.', '');
+        } catch (\Exception $e) {
+            report($e);
+            return 0.0;
+        }
     }
 
     public function isOverLimit(int $limit): bool

@@ -1,15 +1,12 @@
-<x-filament::page>
-    <x-filament::card class="mb-6">
-        <div class="flex justify-between items-start">
-            <div>
-                <h2 class="text-2xl font-bold text-primary-600">
-                    {{ __('filament-modular-subscriptions::modular-subscriptions.invoice.invoice_number', ['number' => $invoice->id]) }}
-                </h2>
-                <p class="text-sm text-gray-500">{{ $invoice->created_at->format('F d, Y') }}</p>
-            </div>
-            {{ $this->getDownloadAction()(['invoice' => $invoice]) }}
+<x-filament::card>
+    <div class="flex justify-between items-start mb-4">
+        <div>
+            <h2 class="text-2xl font-bold text-primary-600">
+                {{ __('filament-modular-subscriptions::modular-subscriptions.invoice.invoice_number', ['number' => $invoice->id]) }}
+            </h2>
+            <p class="text-sm text-gray-500">{{ $invoice->created_at->translatedFormat('F d, Y') }}</p>
         </div>
-    </x-filament::card>
+    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <x-filament::card>
@@ -25,16 +22,16 @@
             <h3 class="text-lg font-semibold mb-3 text-primary-600">
                 {{ __('filament-modular-subscriptions::modular-subscriptions.invoice.invoice_details') }}
             </h3>
-            <div class="space-y-2">
+            <div class="space-y-2 mb-4">
                 <div class="flex justify-between">
                     <span
                         class="text-gray-600">{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.date') }}:</span>
-                    <span class="font-medium">{{ $invoice->created_at->format('M d, Y') }}</span>
+                    <span class="font-medium">{{ $invoice->created_at->translatedFormat('F d, Y') }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span
                         class="text-gray-600">{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.due_date') }}:</span>
-                    <span class="font-medium">{{ $invoice->due_date->format('M d, Y') }}</span>
+                    <span class="font-medium">{{ $invoice->due_date->translatedFormat('M d, Y') }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span
@@ -48,10 +45,10 @@
     </div>
 
     <x-filament::card>
-        <h3 class="text-lg font-semibold mb-4 text-primary-600">
+        <h3 class="text-lg font-semibold mb-4 text-primary-600 ">
             {{ __('filament-modular-subscriptions::modular-subscriptions.invoice.items') }}
         </h3>
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto mb-4">
             <table class="w-full text-sm text-left text-gray-500">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
@@ -104,4 +101,4 @@
     <div class="mt-8 text-center text-sm text-gray-500">
         {{ __('filament-modular-subscriptions::modular-subscriptions.invoice.thank_you_message') }}
     </div>
-</x-filament::page>
+</x-filament::card>

@@ -16,14 +16,15 @@ class Payment extends Model
         'status',
     ];
 
+    protected $casts = [
+        'status' => PaymentStatus::class,
+    ];
+
     public function getTable()
     {
         return config('filament-modular-subscriptions.tables.payment');
     }
 
-    protected $casts = [
-        'status' => PaymentStatus::class,
-    ];
 
     public function invoice(): BelongsTo
     {

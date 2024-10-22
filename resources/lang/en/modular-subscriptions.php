@@ -75,6 +75,21 @@ return [
                 'calculated_at' => 'Calculated At',
             ],
         ],
+        'payment' => [
+            'name' => 'Payments',
+            'singular_name' => 'Payment',
+            'fields' => [
+                'invoice_id' => 'Invoice ID',
+                'amount' => 'Amount',
+                'payment_method' => 'Payment Method',
+                'transaction_id' => 'Transaction ID',
+                'status' => 'Status',
+                'created_at' => 'Created At',
+            ],
+            'sections' => [
+                'payment_details' => 'Payment Details',
+            ],
+        ],
     ],
     'menu_group' => [
         'subscription_management' => 'Subscription Management',
@@ -90,6 +105,9 @@ return [
         'cancelled' => 'Cancelled',
         'expired' => 'Expired',
         'pending' => 'Pending',
+        'paid' => 'Paid',
+        'unpaid' => 'Unpaid',
+        'partially_paid' => 'Partially Paid',
     ],
     'tenant_subscription' => [
         'your_subscription' => 'Your Subscription',
@@ -141,5 +159,8 @@ return [
         'total' => 'Total',
         'subscription_fee' => 'Subscription Fee for :plan',
         'module_usage' => 'Usage for :module',
+    ],
+    'navigation' => [
+        'group' => 'Subscriptions',
     ],
 ];

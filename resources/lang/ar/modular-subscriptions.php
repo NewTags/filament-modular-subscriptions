@@ -98,6 +98,23 @@ return [
             ],
 
         ],
+        'payment' => [
+            'name' => 'المدفوعات',
+            'singular_name' => 'الدفع',
+            'fields' => [
+                'invoice_id' => 'رقم الفاتورة',
+                'amount' => 'المبلغ',
+                'payment_method' => 'طريقة الدفع',
+                'transaction_id' => 'رقم المعاملة',
+                'status' => 'الحالة',
+                'created_at' => 'تاريخ الإنشاء',
+                'subscribable_name' => 'اسم المشترك',
+                'subscriber' => 'المشترك',
+            ],
+            'sections' => [
+                'payment_details' => 'تفاصيل الدفع',
+            ],
+        ],
     ],
     'menu_group' => [
         'subscription_management' => 'إدارة الاشتراكات',

@@ -3,6 +3,7 @@
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Actions\StaticAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
@@ -38,28 +39,10 @@ class InvoiceResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.menu_group.subscription_management');
+        return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription');
     }
 
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                TextEntry::make('subscription.subscriber.name')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.subscription_id')),
-                TextEntry::make('amount')
-                    ->money(fn($record) => $record->subscription->plan->currency, locale: 'en')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.amount')),
-                TextEntry::make('status')
-                    ->badge()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.status')),
-                TextEntry::make('due_date')
-                    ->date()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.due_date')),
-                TextEntry::make('paid_at')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.paid_at')),
-            ]);
-    }
+
 
     public static function table(Tables\Table $table): Tables\Table
     {
@@ -94,22 +77,41 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.status')),
             ])
             ->actions([
-                Action::make('view')
+                ViewAction::make()
                     ->slideOver()
                     ->modalHeading(fn($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
                         $invoice = $record;
                         return View::make('filament-modular-subscriptions::pages.invoice-details', compact('invoice'));
-                    }),
+                    })->modalFooterActions([]),
                 Action::make('download')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.download_pdf'))
                     ->icon('heroicon-o-arrow-down-tray')
+                    ->modalFooterActions(null)
                     ->action(function ($record) {
                         $invoice = $record;
                         $pdf = Pdf::loadView('filament-modular-subscriptions::pages.invoice-pdf', compact('invoice'));
+
+                        // Set PDF options for RTL and Arabic support
+                        $pdf->setOption('enable-local-file-access', true);
+                        $pdf->setOption('enable-unicode', true);
+                        $pdf->setOption('encoding', 'UTF-8');
+                        $pdf->setOption('font-family', 'Cairo');
+                        $pdf->setOption('margin-top', 10);
+                        $pdf->setOption('margin-right', 10);
+                        $pdf->setOption('margin-bottom', 10);
+                        $pdf->setOption('margin-left', 10);
+
+                        // Set RTL direction
+                        $pdf->setOption('direction', 'rtl');
+
                         return response()->streamDownload(function () use ($pdf) {
                             echo $pdf->output();
-                        }, "invoice-{$invoice->id}-{$invoice->created_at->format('Y-m-d')}.pdf");
+                        }, "invoice-{$invoice->id}-{$invoice->created_at->format('Y-m-d')}.pdf", [
+                            'Content-Type' => 'application/pdf',
+                            'Content-Disposition' => 'attachment',
+                            'charset' => 'utf-8',
+                        ]);
                     }),
                 Action::make('pay')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.actions.pay'))
