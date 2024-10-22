@@ -140,6 +140,7 @@ return [
         'plan' => 'الخطة',
         'status' => 'الحالة',
         'started_on' => 'تاريخ البدء',
+        'unlimited' => 'غير محدود',
         'ends_on' => 'تاريخ الانتهاء',
         'subscription_details' => 'تفاصيل الاشتراك',
         'days_left' => 'الأيام المتبقية',
@@ -162,7 +163,7 @@ return [
             'canceled' => 'ملغي',
             'expired' => 'منتهي',
         ],
-        'subscription' => 'الاشتراك',
+        'subscription' => 'إدارة إشتراكك وخطتك الحالية',
     ],
     'intervals' => [
         'day' => 'يوم',

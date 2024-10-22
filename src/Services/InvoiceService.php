@@ -15,7 +15,7 @@ class InvoiceService
             'subscription_id' => $subscription->id,
             'tenant_id' => $subscription->subscribable_id,
             'amount' => $this->calculateTotalAmount($subscription),
-            'status' => 'pending',
+            'status' => PaymentStatus::UNPAID,
             'due_date' => now()->addDays(config('filament-modular-subscriptions.invoice_due_date_days')),
         ]);
 
