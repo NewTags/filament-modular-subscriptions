@@ -9,6 +9,7 @@ use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use HoceineEl\FilamentModularSubscriptions\Commands\MakeModuleCommand;
+use HoceineEl\FilamentModularSubscriptions\Commands\ProcessSubscriptionInvoices;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -27,7 +28,6 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package->name(static::$name)
-            ->hasCommands($this->getCommands())
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
@@ -38,6 +38,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
                 if ($this->app->runningInConsole()) {
                     $this->commands([
                         MakeModuleCommand::class,
+                        ProcessSubscriptionInvoices::class,
                     ]);
                 }
             });
@@ -94,17 +95,6 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             // AlpineComponent::make('skeleton', __DIR__ . '/../resources/dist/components/skeleton.js'),
             // Css::make('skeleton-styles', __DIR__ . '/../resources/dist/skeleton.css'),
             // Js::make('skeleton-scripts', __DIR__ . '/../resources/dist/skeleton.js'),
-        ];
-    }
-
-    /**
-     * @return array<class-string>
-     */
-    protected function getCommands(): array
-    {
-        return [
-            Commands\ProcessSubscriptionInvoices::class,
-            Commands\MakeModuleCommand::class,
         ];
     }
 
