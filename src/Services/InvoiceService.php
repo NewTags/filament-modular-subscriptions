@@ -7,6 +7,8 @@ use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Support\Facades\Mail;
+use Spatie\Browsershot\Browsershot;
+use Illuminate\Contracts\View\View;
 
 class InvoiceService
 {
@@ -94,19 +96,18 @@ class InvoiceService
 
     private function generateInvoicePdf(Invoice $invoice)
     {
-        $pdf = Pdf::loadView('filament-modular-subscriptions::pages.invoice-pdf', compact('invoice'));
+        $html = View::make('filament-modular-subscriptions::pages.invoice-pdf', compact('invoice'))->render();
 
-        $pdf->setOption('enable-local-file-access', true);
-        $pdf->setOption('enable-unicode', true);
-        $pdf->setOption('encoding', 'UTF-8');
-        $pdf->setOption('font-family', 'Cairo');
-        $pdf->setOption('margin-top', 10);
-        $pdf->setOption('margin-right', 10);
-        $pdf->setOption('margin-bottom', 10);
-        $pdf->setOption('margin-left', 10);
-        $pdf->setOption('direction', 'rtl');
-
-        return $pdf;
+        return Browsershot::html($html)
+            ->format('A4')
+            ->showBackground()
+            ->margins(10, 10, 10, 10)
+            ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36')
+            ->setOption('args', ['--no-sandbox', '--disable-setuid-sandbox'])
+            ->waitUntilNetworkIdle()
+            ->emulateMedia('screen')
+            ->deviceScaleFactor(2)
+            ->pdf();
     }
 
     private function sendInvoiceEmail(Invoice $invoice, $pdf)
@@ -117,7 +118,9 @@ class InvoiceService
         Mail::send('filament-modular-subscriptions::emails.invoice', ['invoice' => $invoice], function ($message) use ($invoice, $pdf, $emailAddress) {
             $message->to($emailAddress)
                 ->subject(__('filament-modular-subscriptions::modular-subscriptions.invoice.email_subject', ['number' => $invoice->id]))
-                ->attachData($pdf->output(), "invoice-{$invoice->id}.pdf");
+                ->attachData($pdf, "invoice-{$invoice->id}.pdf", [
+                    'mime' => 'application/pdf',
+                ]);
         });
     }
 }

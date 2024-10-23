@@ -11,6 +11,7 @@ use Filament\Tables\Actions\ViewAction;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Support\Facades\View;
+use Spatie\Browsershot\Browsershot;
 
 class InvoiceResource extends Resource
 {
@@ -60,7 +61,7 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.subscription_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn ($record) => $record->subscription->plan->currency)
+                    ->money(fn($record) => $record->subscription->plan->currency)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.amount'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
@@ -84,7 +85,7 @@ class InvoiceResource extends Resource
             ->actions([
                 ViewAction::make()
                     ->slideOver()
-                    ->modalHeading(fn ($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
+                    ->modalHeading(fn($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
                         $invoice = $record;
 
@@ -93,30 +94,23 @@ class InvoiceResource extends Resource
                 Action::make('download')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.download_pdf'))
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->modalFooterActions(null)
                     ->action(function ($record) {
                         $invoice = $record;
-                        $pdf = Pdf::loadView('filament-modular-subscriptions::pages.invoice-pdf', compact('invoice'));
+                        $html = view('filament-modular-subscriptions::pages.invoice-pdf', compact('invoice'))->render();
 
-                        // Set PDF options for RTL and Arabic support
-                        $pdf->setOption('enable-local-file-access', true);
-                        $pdf->setOption('enable-unicode', true);
-                        $pdf->setOption('encoding', 'UTF-8');
-                        $pdf->setOption('font-family', 'Cairo');
-                        $pdf->setOption('margin-top', 10);
-                        $pdf->setOption('margin-right', 10);
-                        $pdf->setOption('margin-bottom', 10);
-                        $pdf->setOption('margin-left', 10);
-
-                        // Set RTL direction
-                        $pdf->setOption('direction', 'rtl');
+                        $pdf = Browsershot::html($html)
+                            ->format('A4')
+                            ->showBackground()
+                            ->margins(10, 10, 10, 10)
+                            ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36')
+                            ->setOption('args', ['--no-sandbox', '--disable-setuid-sandbox'])
+                            ->pdf();
 
                         return response()->streamDownload(function () use ($pdf) {
-                            echo $pdf->output();
+                            echo $pdf;
                         }, "invoice-{$invoice->id}-{$invoice->created_at->format('Y-m-d')}.pdf", [
                             'Content-Type' => 'application/pdf',
                             'Content-Disposition' => 'attachment',
-                            'charset' => 'utf-8',
                         ]);
                     }),
                 Action::make('pay')
