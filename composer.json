@@ -26,6 +26,7 @@
     ],
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.0",
         "filament/filament": "^3.0",
         "outerweb/filament-translatable-fields": "^2.0",
         "spatie/laravel-package-tools": "^1.15.0"

@@ -9,9 +9,9 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('subscriptions', function (Blueprint $table) {
+        Schema::create(config('filament-modular-subscriptions.tables.subscription'), function (Blueprint $table) {
             $table->id();
-            $table->foreignId('plan_id')->constrained()->onDelete('cascade');
+            $table->foreignId('plan_id')->constrained(config('filament-modular-subscriptions.tables.plan'))->onDelete('cascade');
             $table->morphs('subscribable');
             $table->timestamp('starts_at');
             $table->timestamp('ends_at')->nullable();
@@ -25,6 +25,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('subscriptions');
+        Schema::dropIfExists(config('filament-modular-subscriptions.tables.subscription'));
     }
 };

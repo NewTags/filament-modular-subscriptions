@@ -9,6 +9,7 @@ use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use HoceineEl\FilamentModularSubscriptions\Commands\MakeModuleCommand;
+use HoceineEl\FilamentModularSubscriptions\Commands\ProcessSubscriptionInvoices;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -27,7 +28,6 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package->name(static::$name)
-            ->hasCommands($this->getCommands())
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
@@ -38,6 +38,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
                 if ($this->app->runningInConsole()) {
                     $this->commands([
                         MakeModuleCommand::class,
+                        ProcessSubscriptionInvoices::class,
                     ]);
                 }
             });
@@ -98,16 +99,6 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
     }
 
     /**
-     * @return array<class-string>
-     */
-    protected function getCommands(): array
-    {
-        return [
-            // SkeletonCommand::class,
-        ];
-    }
-
-    /**
      * @return array<string>
      */
     protected function getIcons(): array
@@ -141,7 +132,11 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             '2_create_subscriptions_table',
             '3_create_modules_table',
             '4_create_module_usages_table',
-            '5_create_plan_modules_table', // Add this line
+            '5_create_plan_modules_table',
+            '6_add_is_pay_as_you_go_to_plans_table',
+            '7_create_invoices_table',
+            '8_create_invoice_items_table',
+            '9_create_payments_table',
         ];
     }
 

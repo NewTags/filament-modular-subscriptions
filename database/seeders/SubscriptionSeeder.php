@@ -29,8 +29,8 @@ class SubscriptionSeeder extends Seeder
                 'subscribable_id' => $tenant->id,
                 'subscribable_type' => get_class($tenant),
                 'starts_at' => now(),
-                'ends_at' => now()->addDays(30),
-                'trial_ends_at' => now()->addDays($plan->trial_period),
+                'ends_at' => now()->addDays($plan->period),
+                'trial_ends_at' => now()->addDays($plan->period_trial),
                 'status' => SubscriptionStatus::ACTIVE,
             ]);
         }

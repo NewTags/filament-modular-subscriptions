@@ -32,11 +32,12 @@ class PlanSeeder extends Seeder
                 ],
             ],
             [
-                'name' => ['en' => 'Pro Plan', 'ar' => 'الخطة الاحترافية'],
-                'slug' => 'pro-plan',
-                'description' => ['en' => 'Advanced features for growing businesses', 'ar' => 'ميزات متقدمة للشركات النامية'],
+                'name' => ['en' => 'Pay As You Go', 'ar' => 'إدفع حسب إستخدامك'],
+                'slug' => 'pay-as-you-go',
+                'is_pay_as_you_go' => true,
+                'description' => ['en' => 'Pay as you go features', 'ar' => 'إدفع حسب إستخدامك'],
                 'is_active' => true,
-                'price' => 29.99,
+                'price' => 0,
                 'currency' => config('filament-modular-subscriptions.main_currency'),
                 'trial_period' => 14,
                 'trial_interval' => Interval::DAY,
@@ -46,7 +47,7 @@ class PlanSeeder extends Seeder
                 'grace_interval' => Interval::DAY,
                 'modules' => [
                     ['limit' => null, 'price' => 1.99],
-                    ['limit' => 200, 'price' => 2.99],
+                    ['limit' => null, 'price' => 2.99],
                 ],
             ],
         ];

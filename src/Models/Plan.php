@@ -29,6 +29,7 @@ class Plan extends Model
         'grace_period',
         'grace_interval',
         'sort_order',
+        'is_pay_as_you_go',
     ];
 
     protected $casts = [
@@ -43,7 +44,13 @@ class Plan extends Model
         'trial_interval' => Interval::class,
         'invoice_interval' => Interval::class,
         'grace_interval' => Interval::class,
+        'is_pay_as_you_go' => 'boolean',
     ];
+
+    public function getTable()
+    {
+        return config('filament-modular-subscriptions.tables.plan');
+    }
 
     public function subscriptions(): HasMany
     {
@@ -65,11 +72,26 @@ class Plan extends Model
         return $this->hasMany(PlanModule::class);
     }
 
+    public function getPeriodAttribute()
+    {
+        return $this->invoice_interval->days() * $this->invoice_period;
+    }
+
+    public function getPeriodTrialAttribute()
+    {
+        return $this->trial_interval->days() * $this->trial_period;
+    }
+
+    public function getPeriodGraceAttribute()
+    {
+        return $this->grace_interval->days() * $this->grace_period;
+    }
+
     public function modules(): BelongsToMany
     {
         $moduleModel = config('filament-modular-subscriptions.models.module');
 
-        return $this->belongsToMany($moduleModel, 'plan_modules')
+        return $this->belongsToMany($moduleModel, config('filament-modular-subscriptions.tables.plan_module'))
             ->withPivot(['limit', 'price', 'settings']);
     }
 
@@ -91,8 +113,26 @@ class Plan extends Model
         return $planModule->price;
     }
 
+    public function moduleLimit(Model | string $module): int
+    {
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+        $module = $module instanceof $moduleModel ? $module : $moduleModel::where('class', $module)->first();
+
+        return $this->planModules()->where('module_id', $module->id)->first()->limit;
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    public function isPayAsYouGo(): bool
+    {
+        return $this->is_pay_as_you_go;
+    }
+
+    public function scopePayAsYouGo(Builder $query): Builder
+    {
+        return $query->where('is_pay_as_you_go', true);
     }
 }

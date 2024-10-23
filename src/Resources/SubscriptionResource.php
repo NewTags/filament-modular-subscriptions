@@ -19,6 +19,8 @@ class SubscriptionResource extends Resource
 {
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
+    protected static ?string $slug = 'subscriptions-management';
+
     public static function getModel(): string
     {
         return config('filament-modular-subscriptions.models.subscription');
@@ -57,7 +59,7 @@ class SubscriptionResource extends Resource
                 Hidden::make('subscribable_type')
                     ->default(config('filament-modular-subscriptions.tenant_model')),
                 Forms\Components\Select::make('plan_id')
-                    ->options(fn () => Plan::all()->mapWithKeys(function ($plan) {
+                    ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
                         return [$plan->id => $plan->trans_name . ' - ' . $plan->price . ' ' . $plan->currency];
                     }))
                     ->live(debounce: 500)
@@ -66,9 +68,9 @@ class SubscriptionResource extends Resource
                         if ($plan) {
                             $startDate = now();
                             $set('starts_at', $startDate->format('Y-m-d H:i:s'));
-                            $set('ends_at', $startDate->copy()->add($plan->invoice_interval->value, $plan->invoice_period)->format('Y-m-d H:i:s'));
+                            $set('ends_at', $startDate->copy()->addDays($plan->period)->format('Y-m-d H:i:s'));
                             $set('status', SubscriptionStatus::ACTIVE);
-                            $set('trial_ends_at', $startDate->copy()->add($plan->trial_interval->value, $plan->trial_period)->format('Y-m-d H:i:s'));
+                            $set('trial_ends_at', $startDate->copy()->addDays($plan->period_trial)->format('Y-m-d H:i:s'));
                         }
                     })
                     ->required()
@@ -117,7 +119,7 @@ class SubscriptionResource extends Resource
                     ->options(SubscriptionStatus::class)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.status')),
                 Tables\Filters\SelectFilter::make('plan_id')
-                    ->options(fn () => Plan::all()->pluck('name', 'id'))
+                    ->options(fn() => Plan::all()->pluck('name', 'id'))
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.plan_id')),
                 Filter::make('dates')
                     ->form([

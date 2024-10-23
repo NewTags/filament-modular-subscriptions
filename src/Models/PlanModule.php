@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PlanModule extends Model
 {
-    protected $table = 'plan_modules';
-
     protected $fillable = [
         'plan_id',
         'module_id',
@@ -22,6 +20,11 @@ class PlanModule extends Model
         'price' => 'float',
         'settings' => 'json',
     ];
+
+    public function getTable()
+    {
+        return config('filament-modular-subscriptions.tables.plan_module');
+    }
 
     public function plan(): BelongsTo
     {

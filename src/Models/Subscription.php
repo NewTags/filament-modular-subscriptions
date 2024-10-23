@@ -25,6 +25,11 @@ class Subscription extends Model
         'status',
     ];
 
+    public function getTable()
+    {
+        return config('filament-modular-subscriptions.tables.subscription');
+    }
+
     protected $casts = [
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
@@ -60,6 +65,11 @@ class Subscription extends Model
         $moduleUsageModel = config('filament-modular-subscriptions.models.usage');
 
         return $this->hasMany($moduleUsageModel);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
     }
 
     public function onTrial(): bool

@@ -8,6 +8,7 @@ use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 trait Subscribable
@@ -84,7 +85,7 @@ trait Subscribable
         $plan = $activeSubscription->plan;
 
         if ($days === null) {
-            $days = $this->calculateDaysFromInterval($plan->invoice_period, $plan->invoice_interval);
+            $days = $plan->period;
         }
 
         $newEndsAt = $activeSubscription->ends_at && $activeSubscription->ends_at->isFuture()
@@ -129,9 +130,7 @@ trait Subscribable
 
     private function calculateEndDate(Plan $plan): Carbon
     {
-        $days = $this->calculateDaysFromInterval($plan->invoice_period, $plan->invoice_interval);
-
-        return now()->addDays($days);
+        return now()->addDays($plan->period);
     }
 
     public function canUseModule(string $moduleClass): bool
@@ -140,7 +139,6 @@ trait Subscribable
         if (! $activeSubscription) {
             return false;
         }
-
         $moduleModel = config('filament-modular-subscriptions.models.module');
         $module = $moduleModel::where('class', $moduleClass)->first();
 
@@ -149,6 +147,11 @@ trait Subscribable
         }
 
         return $module->canUse($activeSubscription);
+    }
+
+    public function getCacheKey(string $moduleClass): string
+    {
+        return "module_access_{$this->id}_{$moduleClass}";
     }
 
     public function moduleUsage(string $moduleClass): ?int
@@ -164,8 +167,12 @@ trait Subscribable
         if (! $module) {
             return null;
         }
+        $moduleUsage = $activeSubscription->moduleUsages()->where('module_id', $module->id)->first();
+        if (! $moduleUsage) {
+            return 0;
+        }
 
-        return $activeSubscription->moduleUsages()->where('module_id', $module->id)->first()->usage;
+        return $moduleUsage->usage;
     }
 
     public function recordUsage(string $moduleClass, int $quantity = 1, bool $incremental = true): void
@@ -203,8 +210,31 @@ trait Subscribable
         $moduleUsage->calculated_at = now();
         $moduleUsage->save();
 
-        $pricing = $module->getPricing($activeSubscription);
+        $pricing = $this->calculateModulePricing($activeSubscription, $module, $moduleUsage->usage);
         $moduleUsage->update(['pricing' => $pricing]);
+
+        Cache::forget($this->getCacheKey($moduleClass));
+    }
+
+    private function calculateModulePricing(Subscription $subscription, $module, int $usage): float
+    {
+        $plan = $subscription->plan;
+        $planModule = $plan->planModules()->where('module_id', $module->id)->first();
+
+        if (! $planModule) {
+            return 0;
+        }
+
+        if ($plan->is_pay_as_you_go) {
+            return $usage * $planModule->price;
+        } else {
+            $limit = $planModule->limit;
+            if ($limit === null || $usage <= $limit) {
+                return 0; // Included in the plan
+            } else {
+                return ($usage - $limit) * $planModule->price; // Charge for overuse
+            }
+        }
     }
 
     public function subscribe(Plan $plan, ?Carbon $startDate = null, ?Carbon $endDate = null, ?int $trialDays = null): Subscription
@@ -213,7 +243,7 @@ trait Subscribable
         $startDate = $startDate ?? now();
 
         if ($endDate === null) {
-            $days = $this->calculateDaysFromInterval($plan->invoice_period, $plan->invoice_interval);
+            $days = $plan->period;
             $endDate = $startDate->copy()->addDays($days);
         }
 
@@ -226,8 +256,8 @@ trait Subscribable
             'status' => SubscriptionStatus::ACTIVE,
         ]);
 
-        if ($trialDays || $plan->trial_period > 0) {
-            $trialDays = $trialDays ?? $this->calculateDaysFromInterval($plan->trial_period, $plan->trial_interval);
+        if ($trialDays || $plan->period_trial > 0) {
+            $trialDays = $trialDays ?? $plan->period_trial;
             $subscription->trial_ends_at = $startDate->copy()->addDays($trialDays);
         }
 
@@ -249,7 +279,7 @@ trait Subscribable
 
         foreach ($moduleModel::get() as $module) {
             $moduleUsage = $module->calculateUsage($activeSubscription);
-            $pricing = $module->getPricing($activeSubscription);
+            $pricing = $this->calculateModulePricing($activeSubscription, $module, $moduleUsage);
 
             $usage[$module->name] = [
                 'usage' => $moduleUsage,
@@ -283,10 +313,19 @@ trait Subscribable
     {
         $activeSubscription = $this->activeSubscription();
         if (! $activeSubscription) {
-            return 0;
+            return 0.0;
         }
 
-        return $activeSubscription->moduleUsages()->sum('pricing');
+        try {
+            $basePlanPrice = $activeSubscription->plan->is_pay_as_you_go ? 0 : $activeSubscription->plan->price;
+            $moduleUsagePricing = $activeSubscription->moduleUsages()->sum('pricing');
+
+            return (float) number_format($basePlanPrice + $moduleUsagePricing, 2, '.', '');
+        } catch (\Exception $e) {
+            report($e);
+
+            return 0.0;
+        }
     }
 
     public function isOverLimit(int $limit): bool

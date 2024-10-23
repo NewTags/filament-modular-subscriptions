@@ -15,6 +15,8 @@ use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\CreatePlan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\EditPlan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\ListPlans;
+use Illuminate\Database\Eloquent\Model;
+use Livewire\Component;
 
 class PlanResource extends Resource
 {
@@ -39,7 +41,10 @@ class PlanResource extends Resource
     {
         return __('filament-modular-subscriptions::modular-subscriptions.menu_group.subscription_management');
     }
-
+    public static function canDelete(Model $record): bool
+    {
+        return $record->subscriptions()->count() === 0;
+    }
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form
@@ -55,7 +60,7 @@ class PlanResource extends Resource
                                     ->required()
                                     ->translatable(true, config('filament-modular-subscriptions.locales'))
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn (Set $set, $state) => $set('slug', str($state['name'][config('filament-modular-subscriptions.locales')[0] ?? app()->getLocale()])->slug()))
+                                    ->afterStateUpdated(fn(Set $set, $state) => $set('slug', str($state['name'][config('filament-modular-subscriptions.locales')[0] ?? app()->getLocale()])->slug()))
                                     ->columnSpanFull()
                                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.name')),
                                 Forms\Components\TextInput::make('slug')
@@ -116,7 +121,7 @@ class PlanResource extends Resource
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.fields.modules'))
                             ->icon('heroicon-o-puzzle-piece')
                             ->schema([
-                                Repeater::make('modules')
+                                Repeater::make('planModules')
                                     ->label('')
                                     ->relationship()
                                     ->columns(3)
@@ -152,7 +157,7 @@ class PlanResource extends Resource
                                         //     ->nullable(),
                                     ])
 
-                                    ->itemLabel(fn (array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
+                                    ->itemLabel(fn(array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
                                     ->collapsible()
                                     ->addActionLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.plan.actions.add_module')),
                             ]),
@@ -193,11 +198,7 @@ class PlanResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->bulkActions([]);
     }
 
     public static function getRelations(): array
@@ -206,6 +207,8 @@ class PlanResource extends Resource
             //
         ];
     }
+
+
 
     public static function getPages(): array
     {

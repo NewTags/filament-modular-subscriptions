@@ -20,4 +20,14 @@ enum Interval: string implements HasLabel
             self::YEAR => __('filament-modular-subscriptions::modular-subscriptions.interval.year'),
         };
     }
+
+    public function days(): int
+    {
+        return match ($this) {
+            self::DAY => 1,
+            self::WEEK => 7,
+            self::MONTH => 30,
+            self::YEAR => 365,
+        };
+    }
 }

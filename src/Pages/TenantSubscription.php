@@ -4,13 +4,18 @@ namespace HoceineEl\FilamentModularSubscriptions\Pages;
 
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource;
 use Illuminate\Contracts\Support\Htmlable;
 
-class TenantSubscription extends Page
+class TenantSubscription extends Page implements HasTable
 {
+    use InteractsWithTable;
+
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     protected static string $view = 'filament-modular-subscriptions::filament.pages.tenant-subscription';
@@ -27,7 +32,7 @@ class TenantSubscription extends Page
 
     public static function getNavigationGroup(): string
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription');
+        return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription_navigation_label');
     }
 
     public function getViewData(): array
@@ -43,70 +48,38 @@ class TenantSubscription extends Page
         ];
     }
 
-    protected function getHeaderActions(): array
+    public function switchPlanAction(): Action
     {
-        return [
-            Action::make('switchPlan')
-                ->label(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.switch_plan_button'))
-                ->form([
-                    Select::make('plan_id')
-                        ->label(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.select_plan'))
-                        ->options(function () {
-                            $planModel = config('filament-modular-subscriptions.models.plan');
+        return Action::make('switchPlanAction')
+            ->requiresConfirmation()
+            ->label(function ($arguments) {
+                $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
 
-                            return $planModel::active()->get()
-                                ->mapWithKeys(function ($plan) {
-                                    $invoiceInterval = $plan->invoice_interval->value;
-                                    $period = $plan->invoice_period;
-                                    $name = $plan->trans_name;
-                                    $price = $plan->price;
-                                    $currency = $plan->currency;
-                                    $per = __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.per');
-                                    $interval = __('filament-modular-subscriptions::modular-subscriptions.intervals.' . $invoiceInterval);
+                return $plan->is_pay_as_you_go
+                    ? __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.start_using_pay_as_you_go')
+                    : __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.switch_to_plan');
+            })
+            ->color(function ($arguments) {
+                $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
 
-                                    return [
-                                        $plan->id => $name . ' (' . $price . ' ' . $currency . ') ' . $per . ' ' . $period . ' ' . $interval,
-                                    ];
-                                });
-                        })
-                        ->required(),
-                ])
-                ->action(function (array $data): void {
-                    $tenant = Filament::getTenant();
-                    $success = $tenant->switchPlan($data['plan_id']);
+                return $plan->is_pay_as_you_go ? 'success' : 'primary';
+            })
 
-                    if ($success) {
-                        Notification::make()
-                            ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switched_successfully'))
-                            ->success()
-                            ->send();
-                    } else {
-                        Notification::make()
-                            ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switch_failed'))
-                            ->danger()
-                            ->send();
-                    }
-                }),
-        ];
+            ->action(function (array $arguments) {
+                $planId = $arguments['plan_id'];
+                $tenant = Filament::getTenant();
+
+                $tenant->switchPlan($planId);
+
+                Notification::make()
+                    ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switched_successfully'))
+                    ->success()
+                    ->send();
+            });
     }
 
-    public function switchPlan($planId)
+    public function table(Table $table): Table
     {
-        $tenant = Filament::getTenant();
-        $success = $tenant->switchPlan($planId);
-
-        if ($success) {
-            Notification::make()
-                ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switched_successfully'))
-                ->success()
-                ->send();
-
-            $this->redirect(TenantSubscription::getUrl());
-        } else {
-            Notification::make()
-                ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switch_failed'))
-                ->danger()
-                ->send();
-        }
+        return (new InvoiceResource)->table($table)->query(config('filament-modular-subscriptions.models.invoice')::query()->where('tenant_id', Filament::getTenant()->id));
     }
 }
