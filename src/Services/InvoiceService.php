@@ -9,6 +9,7 @@ use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Support\Facades\Mail;
 use Spatie\Browsershot\Browsershot;
 use Illuminate\Contracts\View\View;
+use Mpdf\Mpdf;
 
 class InvoiceService
 {
@@ -98,16 +99,36 @@ class InvoiceService
     {
         $html = View::make('filament-modular-subscriptions::pages.invoice-pdf', compact('invoice'))->render();
 
-        return Browsershot::html($html)
-            ->format('A4')
-            ->showBackground()
-            ->margins(10, 10, 10, 10)
-            ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36')
-            ->setOption('args', ['--no-sandbox', '--disable-setuid-sandbox'])
-            ->waitUntilNetworkIdle()
-            ->emulateMedia('screen')
-            ->deviceScaleFactor(2)
-            ->pdf();
+        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'P',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+            'fontDir' => array_merge($fontDirs, [
+                config('filament-modular-subscriptions.font_path'),
+            ]),
+            'fontdata' => $fontData + [
+                'cairo' => [
+                    'R' => 'Cairo-Regular.ttf',
+                    'B' => 'Cairo-Bold.ttf',
+                ],
+            ],
+            'default_font' => 'cairo',
+        ]);
+
+        $mpdf->SetTitle(__('filament-modular-subscriptions::modular-subscriptions.invoice.invoice_number', ['number' => $invoice->id]));
+        $mpdf->WriteHTML($html);
+
+        return $mpdf->Output('', 'S');
     }
 
     private function sendInvoiceEmail(Invoice $invoice, $pdf)

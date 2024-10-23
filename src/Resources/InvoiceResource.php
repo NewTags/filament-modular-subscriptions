@@ -2,7 +2,6 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
-use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -11,7 +10,7 @@ use Filament\Tables\Actions\ViewAction;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Support\Facades\View;
-use Spatie\Browsershot\Browsershot;
+use Mpdf\Mpdf;
 
 class InvoiceResource extends Resource
 {
@@ -88,7 +87,6 @@ class InvoiceResource extends Resource
                     ->modalHeading(fn($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
                         $invoice = $record;
-
                         return View::make('filament-modular-subscriptions::pages.invoice-details', compact('invoice'));
                     })->modalFooterActions([]),
                 Action::make('download')
@@ -98,24 +96,41 @@ class InvoiceResource extends Resource
                         $invoice = $record;
                         $html = view('filament-modular-subscriptions::pages.invoice-pdf', compact('invoice'))->render();
 
-                        $pdf = Browsershot::html($html)
-                            ->format('A4')
-                            ->showBackground()
-                            ->margins(10, 10, 10, 10)
-                            ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36')
-                            ->setOption('args', ['--no-sandbox', '--disable-setuid-sandbox'])
-                            ->pdf();
+                        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+                        $fontDirs = $defaultConfig['fontDir'];
 
-                        return response()->streamDownload(function () use ($pdf) {
-                            echo $pdf;
-                        }, "invoice-{$invoice->id}-{$invoice->created_at->format('Y-m-d')}.pdf", [
-                            'Content-Type' => 'application/pdf',
-                            'Content-Disposition' => 'attachment',
+                        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+                        $fontData = $defaultFontConfig['fontdata'];
+
+                        $mpdf = new Mpdf([
+                            'mode' => 'utf-8',
+                            'format' => 'A4',
+                            'orientation' => 'P',
+                            'margin_left' => 10,
+                            'margin_right' => 10,
+                            'margin_top' => 10,
+                            'margin_bottom' => 10,
+                            'fontDir' => array_merge($fontDirs, [
+                                config('filament-modular-subscriptions.font_path'),
+                            ]),
+                            'fontdata' => $fontData + [
+                                'cairo' => [
+                                    'R' => 'Cairo-Regular.ttf',
+                                    'B' => 'Cairo-Bold.ttf',
+                                ],
+                            ],
+                            'default_font' => 'cairo',
                         ]);
+
+                        $mpdf->SetTitle(__('filament-modular-subscriptions::modular-subscriptions.invoice.invoice_number', ['number' => $invoice->id]));
+                        $mpdf->WriteHTML($html);
+
+                        return response($mpdf->Output('', 'S'))
+                            ->header('Content-Type', 'application/pdf')
+                            ->header('Content-Disposition', "attachment; filename=invoice-{$invoice->id}-{$invoice->created_at->format('Y-m-d')}.pdf");
                     }),
                 Action::make('pay')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.actions.pay'))
-                    // ->url(fn($record) => route('filament.resources.invoices.pay', $record))
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([]);

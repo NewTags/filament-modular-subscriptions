@@ -79,6 +79,7 @@ return [
             'key' => env('STRIPE_KEY'),
             'secret' => env('STRIPE_SECRET'),
         ],
-        // Add other payment method configurations here
+        // Add other payment method configurations here,
     ],
+    'font_path' => resource_path('fonts/Cairo'),
 ];
