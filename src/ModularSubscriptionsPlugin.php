@@ -6,7 +6,6 @@ use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use HoceineEl\FilamentModularSubscriptions\Pages\TenantSubscription;
-use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
 class ModularSubscriptionsPlugin implements Plugin

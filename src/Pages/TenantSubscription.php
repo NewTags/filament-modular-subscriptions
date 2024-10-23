@@ -6,8 +6,6 @@ use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -26,6 +24,7 @@ class TenantSubscription extends Page implements HasTable
     {
         return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.your_subscription');
     }
+
     public static function getNavigationLabel(): string
     {
         return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.your_subscription');
@@ -55,12 +54,14 @@ class TenantSubscription extends Page implements HasTable
             ->requiresConfirmation()
             ->label(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
+
                 return $plan->is_pay_as_you_go
                     ? __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.start_using_pay_as_you_go')
                     : __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.switch_to_plan');
             })
             ->color(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
+
                 return $plan->is_pay_as_you_go ? 'success' : 'primary';
             })
 

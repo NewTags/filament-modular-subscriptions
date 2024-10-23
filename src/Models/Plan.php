@@ -76,10 +76,12 @@ class Plan extends Model
     {
         return $this->invoice_interval->days() * $this->invoice_period;
     }
+
     public function getPeriodTrialAttribute()
     {
         return $this->trial_interval->days() * $this->trial_period;
     }
+
     public function getPeriodGraceAttribute()
     {
         return $this->grace_interval->days() * $this->grace_period;
@@ -118,6 +120,7 @@ class Plan extends Model
 
         return $this->planModules()->where('module_id', $module->id)->first()->limit;
     }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);

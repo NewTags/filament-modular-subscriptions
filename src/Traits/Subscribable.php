@@ -145,6 +145,7 @@ trait Subscribable
         if (! $module) {
             return false;
         }
+
         return $module->canUse($activeSubscription);
     }
 

@@ -3,17 +3,17 @@
 namespace HoceineEl\FilamentModularSubscriptions\Commands;
 
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
-use Illuminate\Console\Command;
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
-use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
 use HoceineEl\FilamentModularSubscriptions\Services\Payments\PaymentService;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ProcessSubscriptionInvoices extends Command
 {
     protected $signature = 'subscriptions:process-invoices';
+
     protected $description = 'Process invoices for expiring subscriptions';
 
     public function handle(InvoiceService $invoiceService, PaymentService $paymentService)
@@ -27,7 +27,7 @@ class ProcessSubscriptionInvoices extends Command
             ->get();
 
         foreach ($expiringSubscriptions as $subscription) {
-            if (!$this->hasInvoiceForCurrentPeriod($subscription)) {
+            if (! $this->hasInvoiceForCurrentPeriod($subscription)) {
                 $this->processSubscription($subscription, $invoiceService, $paymentService);
             } else {
                 $this->info("Subscription {$subscription->id} already has an invoice for the current period. Skipping.");

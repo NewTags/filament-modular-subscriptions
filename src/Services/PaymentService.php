@@ -12,7 +12,7 @@ abstract class PaymentService
 
     abstract public function getPaymentMethod(): string;
 
-    protected function createPaymentRecord(Invoice $invoice, bool $successful, array $log = []): Payment
+    protected function createPaymentRecord(Invoice $invoice, bool $successful): Payment
     {
         return Payment::create([
             'invoice_id' => $invoice->id,
@@ -20,7 +20,6 @@ abstract class PaymentService
             'payment_method' => $this->getPaymentMethod(),
             'transaction_id' => $this->generateTransactionId(),
             'status' => $successful ? PaymentStatus::PAID : PaymentStatus::UNPAID,
-            'log' => $log,
         ]);
     }
 

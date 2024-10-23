@@ -15,6 +15,8 @@ use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\CreatePlan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\EditPlan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\ListPlans;
+use Illuminate\Database\Eloquent\Model;
+use Livewire\Component;
 
 class PlanResource extends Resource
 {
@@ -39,7 +41,10 @@ class PlanResource extends Resource
     {
         return __('filament-modular-subscriptions::modular-subscriptions.menu_group.subscription_management');
     }
-
+    public static function canDelete(Model $record): bool
+    {
+        return $record->subscriptions()->count() === 0;
+    }
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form
@@ -193,11 +198,7 @@ class PlanResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->bulkActions([]);
     }
 
     public static function getRelations(): array
@@ -206,6 +207,8 @@ class PlanResource extends Resource
             //
         ];
     }
+
+
 
     public static function getPages(): array
     {

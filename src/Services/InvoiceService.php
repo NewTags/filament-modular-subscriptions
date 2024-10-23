@@ -2,10 +2,10 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Services;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Mail;
 
 class InvoiceService
