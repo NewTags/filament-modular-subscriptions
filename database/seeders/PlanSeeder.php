@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders;
+namespace HoceineEl\FilamentModularSubscriptions\Database\Seeders;
 
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use Illuminate\Database\Seeder;
