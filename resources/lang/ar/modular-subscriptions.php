@@ -100,7 +100,7 @@ return [
             'actions' => [
                 'pay' => 'دفع المستحقات',
             ],
-
+            'invoice_title' => 'فاتورة :subscriber - :id - :date',
         ],
         'payment' => [
             'name' => 'المدفوعات',

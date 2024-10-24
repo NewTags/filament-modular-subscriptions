@@ -49,4 +49,9 @@ class Invoice extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function getTitleAttribute()
+    {
+        return __('filament-modular-subscriptions::modular-subscriptions.invoice.invoice_title', ['subscriber' => $this->subscription->subscriber->{config('filament-modular-subscriptions.tenant_attribute')}, 'id' => $this->id, 'date' => $this->created_at->translatedFormat('Y-m-d')]);
+    }
 }

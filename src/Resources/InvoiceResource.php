@@ -96,38 +96,31 @@ class InvoiceResource extends Resource
                         $invoice = $record;
                         $html = view('filament-modular-subscriptions::pages.invoice-pdf', compact('invoice'))->render();
 
-                        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
-                        $fontDirs = $defaultConfig['fontDir'];
-
-                        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
-                        $fontData = $defaultFontConfig['fontdata'];
-
+                        // Configure mPDF with RTL support
                         $mpdf = new Mpdf([
                             'mode' => 'utf-8',
                             'format' => 'A4',
                             'orientation' => 'P',
-                            'margin_left' => 10,
-                            'margin_right' => 10,
-                            'margin_top' => 10,
-                            'margin_bottom' => 10,
-                            'fontDir' => array_merge($fontDirs, [
-                                config('filament-modular-subscriptions.font_path'),
-                            ]),
-                            'fontdata' => $fontData + [
-                                'cairo' => [
-                                    'R' => 'Cairo-Regular.ttf',
-                                    'B' => 'Cairo-Bold.ttf',
-                                ],
-                            ],
-                            'default_font' => 'cairo',
+                            'margin_left' => 0,
+                            'margin_right' => 0,
+                            'margin_top' => 0,
+                            'margin_bottom' => 0,
+                            'default_font' => 'dejavusans',
+                            'tempDir' => storage_path('tmp'),
                         ]);
 
-                        $mpdf->SetTitle(__('filament-modular-subscriptions::modular-subscriptions.invoice.invoice_number', ['number' => $invoice->id]));
+                        $mpdf->SetDirectionality('rtl');
+                        $mpdf->autoScriptToLang = true;
+                        $mpdf->autoLangToFont = true;
+
+
                         $mpdf->WriteHTML($html);
 
-                        return response($mpdf->Output('', 'S'))
-                            ->header('Content-Type', 'application/pdf')
-                            ->header('Content-Disposition', "attachment; filename=invoice-{$invoice->id}-{$invoice->created_at->format('Y-m-d')}.pdf");
+                        return response()->streamDownload(function () use ($mpdf) {
+                            echo $mpdf->Output('', 'S');
+                        }, "invoice_{$record->id}-{$record->created_at->format('Y-m-d H-i-s')}.pdf", [
+                            'Content-Type' => 'application/pdf',
+                        ]);
                     }),
                 Action::make('pay')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.actions.pay'))

@@ -17,7 +17,6 @@ class InvoiceSeeder extends Seeder
         $subscriptions = $subscriptionModel::with(['plan', 'subscribable', 'moduleUsages.module'])->get();
 
         foreach ($subscriptions as $subscription) {
-            // Generate 1-3 invoices per subscription
             $invoiceCount = rand(1, 3);
 
             for ($i = 0; $i < $invoiceCount; $i++) {
@@ -27,7 +26,7 @@ class InvoiceSeeder extends Seeder
                 $invoice = $invoiceModel::create([
                     'subscription_id' => $subscription->id,
                     'tenant_id' => $subscription->subscribable_id,
-                    'amount' => 0, // We'll calculate this after adding items
+                    'amount' => 0,
                     'status' => $this->getRandomStatus(),
                     'due_date' => $dueDate,
                     'paid_at' => $this->getPaidAtDate($dueDate),
@@ -44,23 +43,22 @@ class InvoiceSeeder extends Seeder
                     'total' => $subscription->plan->price,
                 ]);
 
-                // Add module usage items
-                foreach ($subscription->moduleUsages as $moduleUsage) {
-                    if ($moduleUsage->usage > 0) {
-                        $unitPrice = $subscription->plan->modulePrice($moduleUsage->module);
-                        $total = $moduleUsage->usage * $unitPrice;
+                if ($subscription->plan->is_pay_as_you_go) {
+                    foreach ($subscription->moduleUsages as $moduleUsage) {
+                        if ($moduleUsage->usage > 0) {
+                            $unitPrice = $subscription->plan->modulePrice($moduleUsage->module);
+                            $total = $moduleUsage->usage * $unitPrice;
 
-                        $invoiceItemModel::create([
-                            'invoice_id' => $invoice->id,
-                            'description' => __('filament-modular-subscriptions::modular-subscriptions.invoice.module_usage', ['module' => $moduleUsage->module->getName()]),
-                            'quantity' => $moduleUsage->usage,
-                            'unit_price' => $unitPrice,
-                            'total' => $total,
-                        ]);
+                            $invoiceItemModel::create([
+                                'invoice_id' => $invoice->id,
+                                'description' => __('filament-modular-subscriptions::modular-subscriptions.invoice.module_usage', ['module' => $moduleUsage->module->getName()]),
+                                'quantity' => $moduleUsage->usage,
+                                'unit_price' => $unitPrice,
+                                'total' => $total,
+                            ]);
+                        }
                     }
                 }
-
-                // Update invoice total amount
                 $totalAmount = $invoice->items()->sum('total');
                 $invoice->update(['amount' => $totalAmount]);
             }
