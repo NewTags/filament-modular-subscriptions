@@ -240,5 +240,6 @@ return [
         'download_pdf' => 'تحميل PDF',
         'items' => 'العناصر',
         'thank_you_message' => 'شكرًا لك على عملك معنا!',
+        'invoice_title' => 'فاتورة :subscriber - رقم :id - بتاريخ :date',
     ],
 ];

@@ -26,7 +26,8 @@ trait Subscribable
             ->whereDate('starts_at', '<=', now())
             ->where(function ($query) {
                 $query->whereNull('ends_at')
-                    ->orWhereDate('ends_at', '>', now());
+                    ->orWhereDate('ends_at', '>', now())
+                    ->orWhereDate('ends_at', '>=', now()->subDays($this->plan->period_grace));
             })
             ->where('status', SubscriptionStatus::ACTIVE)
             ->latest('starts_at')
@@ -45,8 +46,9 @@ trait Subscribable
             return null;
         }
 
-        return $activeSubscription->ends_at
-            ? now()->diffInDays($activeSubscription->ends_at, false)
+        $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
+        return $gracePeriodEndDate
+            ? now()->diffInDays($gracePeriodEndDate, false)
             : null;
     }
 
@@ -57,7 +59,8 @@ trait Subscribable
             return true;
         }
 
-        return $activeSubscription->ends_at && $activeSubscription->ends_at->isPast();
+        $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
+        return $gracePeriodEndDate && $gracePeriodEndDate->isPast();
     }
 
     public function cancel(): bool
@@ -394,5 +397,16 @@ trait Subscribable
             default:
                 throw new \InvalidArgumentException('Invalid interval');
         }
+    }
+
+    // Add a method to calculate the grace period end date
+    private function getGracePeriodEndDate(Subscription $subscription): ?Carbon
+    {
+        if (!$subscription->ends_at) {
+            return null;
+        }
+
+        $gracePeriodDays = $subscription->plan->period_grace;
+        return $subscription->ends_at->copy()->addDays($gracePeriodDays);
     }
 }

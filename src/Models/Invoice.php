@@ -52,6 +52,14 @@ class Invoice extends Model
 
     public function getTitleAttribute()
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.invoice.invoice_title', ['subscriber' => $this->subscription->subscriber->{config('filament-modular-subscriptions.tenant_attribute')}, 'id' => $this->id, 'date' => $this->created_at->translatedFormat('Y-m-d')]);
+        $subscriber = $this->subscription ? $this->subscription->subscriber : null;
+        $tenantAttribute = config('filament-modular-subscriptions.tenant_attribute');
+        $subscriberName = $subscriber ? $subscriber->{$tenantAttribute} : __('N/A');
+
+        return __('filament-modular-subscriptions::modular-subscriptions.invoice.invoice_title', [
+            'subscriber' => $subscriberName,
+            'id' => $this->id,
+            'date' => $this->created_at->translatedFormat('Y-m-d')
+        ]);
     }
 }
