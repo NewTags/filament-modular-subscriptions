@@ -74,7 +74,7 @@ return [
             'enabled' => env('PAYPAL_ENABLED', false),
             'client_id' => env('PAYPAL_CLIENT_ID'),
             'secret' => env('PAYPAL_SECRET'),
-            'mode' => env('PAYPAL_MODE', 'sandbox'), // or 'live'
+            'mode' => env('PAYPAL_MODE', 'sandbox'),
         ],
         'stripe' => [
             'enabled' => env('STRIPE_ENABLED', false),

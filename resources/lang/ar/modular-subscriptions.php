@@ -242,4 +242,12 @@ return [
         'thank_you_message' => 'شكرًا لك على عملك معنا!',
         'invoice_title' => 'فاتورة :subscriber - رقم :id - بتاريخ :date',
     ],
+    'payment' => [
+        'select_method' => 'اختر طريقة الدفع',
+        'select_method_description' => 'اختر طريقة الدفع المفضلة لإتمام المعاملة.',
+        'method' => 'طريقة الدفع',
+        'success' => 'تم الدفع بنجاح!',
+        'error' => 'فشل الدفع. يرجى المحاولة مرة أخرى.',
+        'cancelled' => 'تم إلغاء الدفع.',
+    ],
 ];

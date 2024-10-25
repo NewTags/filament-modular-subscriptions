@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Services\Payments;
+namespace HoceineEl\FilamentModularSubscriptions\Services\Concerns;
 
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Invoice;

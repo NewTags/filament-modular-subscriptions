@@ -89,6 +89,12 @@ return [
             'sections' => [
                 'payment_details' => 'Payment Details',
             ],
+            'select_method' => 'Select Payment Method',
+            'select_method_description' => 'Choose your preferred payment method to complete the transaction.',
+            'method' => 'Payment Method',
+            'success' => 'Payment completed successfully!',
+            'error' => 'Payment failed. Please try again.',
+            'cancelled' => 'Payment was cancelled.',
         ],
     ],
     'menu_group' => [
