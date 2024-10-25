@@ -60,7 +60,7 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.subscription_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn($record) => $record->subscription->plan->currency)
+                    ->money(fn ($record) => $record->subscription->plan->currency)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.amount'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
@@ -81,12 +81,15 @@ class InvoiceResource extends Resource
                     ->options(PaymentStatus::class)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.status')),
             ])
+            ->modelLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.singular_name'))
+            ->pluralModelLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.name'))
             ->actions([
                 ViewAction::make()
                     ->slideOver()
-                    ->modalHeading(fn($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
+                    ->modalHeading(fn ($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
                         $invoice = $record;
+
                         return View::make('filament-modular-subscriptions::pages.invoice-details', compact('invoice'));
                     })->modalFooterActions([]),
                 Action::make('download')
@@ -112,7 +115,6 @@ class InvoiceResource extends Resource
                         $mpdf->SetDirectionality('rtl');
                         $mpdf->autoScriptToLang = true;
                         $mpdf->autoLangToFont = true;
-
 
                         $mpdf->WriteHTML($html);
 

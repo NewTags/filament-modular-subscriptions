@@ -7,6 +7,7 @@ use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,14 @@ trait Subscribable
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
 
         return $this->morphMany($subscriptionModel, 'subscribable');
+    }
+
+    public function plan(): HasOneThrough
+    {
+        $planModel = config('filament-modular-subscriptions.models.plan');
+        $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
+
+        return $this->hasOneThrough($planModel, $subscriptionModel, 'subscribable_id', 'id', 'id', 'plan_id');
     }
 
     public function activeSubscription(): ?Subscription
@@ -47,6 +56,7 @@ trait Subscribable
         }
 
         $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
+
         return $gracePeriodEndDate
             ? now()->diffInDays($gracePeriodEndDate, false)
             : null;
@@ -60,6 +70,7 @@ trait Subscribable
         }
 
         $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
+
         return $gracePeriodEndDate && $gracePeriodEndDate->isPast();
     }
 
@@ -402,11 +413,12 @@ trait Subscribable
     // Add a method to calculate the grace period end date
     private function getGracePeriodEndDate(Subscription $subscription): ?Carbon
     {
-        if (!$subscription->ends_at) {
+        if (! $subscription->ends_at) {
             return null;
         }
 
         $gracePeriodDays = $subscription->plan->period_grace;
+
         return $subscription->ends_at->copy()->addDays($gracePeriodDays);
     }
 }

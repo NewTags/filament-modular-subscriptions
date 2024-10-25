@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Database\Seeders;
+namespace Database\Seeders;
 
 use Carbon\Carbon;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
@@ -35,15 +35,15 @@ class InvoiceSeeder extends Seeder
                 ]);
 
                 // Add subscription fee as an invoice item
-                $invoiceItemModel::create([
-                    'invoice_id' => $invoice->id,
-                    'description' => __('filament-modular-subscriptions::modular-subscriptions.invoice.subscription_fee', ['plan' => $subscription->plan->trans_name]),
-                    'quantity' => 1,
-                    'unit_price' => $subscription->plan->price,
-                    'total' => $subscription->plan->price,
-                ]);
-
-                if ($subscription->plan->is_pay_as_you_go) {
+                if (! $subscription->plan->is_pay_as_you_go) {
+                    $invoiceItemModel::create([
+                        'invoice_id' => $invoice->id,
+                        'description' => __('filament-modular-subscriptions::modular-subscriptions.invoice.subscription_fee', ['plan' => $subscription->plan->trans_name]),
+                        'quantity' => 1,
+                        'unit_price' => $subscription->plan->price,
+                        'total' => $subscription->plan->price,
+                    ]);
+                } else {
                     foreach ($subscription->moduleUsages as $moduleUsage) {
                         if ($moduleUsage->usage > 0) {
                             $unitPrice = $subscription->plan->modulePrice($moduleUsage->module);

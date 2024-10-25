@@ -56,9 +56,13 @@ class ProcessSubscriptionInvoices extends Command
             // Generate invoice
             $invoice = $invoiceService->generateInvoice($subscription);
 
-            // Attempt payment
-            $paymentResult = $paymentService->processPayment($invoice);
-
+            if (config('filament-modular-subscriptions.payment_enabled')) {
+                // Attempt payment
+                $paymentResult = $paymentService->processPayment($invoice);
+            }
+            if (app()->isLocal() && !config('filament-modular-subscriptions.payment_enabled')) {
+                $paymentResult = random_int(0, 1) === 1;
+            }
             if ($paymentResult->success) {
                 $this->updateSubscriptionStatus($subscription, $invoice, SubscriptionStatus::ACTIVE);
                 $this->info("Payment successful for subscription {$subscription->id}");

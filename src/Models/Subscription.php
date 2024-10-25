@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Subscription extends Model
 {
@@ -80,5 +81,32 @@ class Subscription extends Model
     public function hasExpiredTrial(): bool
     {
         return $this->trial_ends_at && $this->trial_ends_at->isPast();
+    }
+
+    public function renew(?int $days = null): bool
+    {
+        $plan = $this->plan;
+
+        $subscription = $this;
+
+        if ($days === null) {
+            $days = $plan->period;
+        }
+
+        $newEndsAt = $subscription->ends_at && $subscription->ends_at->isFuture()
+            ? $subscription->ends_at->addDays($days)
+            : now()->addDays($days);
+
+        DB::transaction(function () use ($subscription, $newEndsAt) {
+            // Delete old usage data
+            $subscription->moduleUsages()->delete();
+
+            $subscription->update([
+                'ends_at' => $newEndsAt,
+                'starts_at' => now(),
+            ]);
+        });
+
+        return true;
     }
 }

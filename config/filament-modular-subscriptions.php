@@ -67,6 +67,8 @@ return [
         'en' => 'English',
         'ar' => 'Arabic',
     ],
+    'sends_invoice_email' => false,
+    'payment_enabled' => false,
     'payment_methods' => [
         'paypal' => [
             'enabled' => env('PAYPAL_ENABLED', false),
