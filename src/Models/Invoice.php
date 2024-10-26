@@ -52,6 +52,7 @@ class Invoice extends Model
 
     public function notPaid(): bool
     {
+        $this->load('payments');
         $totalPayments = $this->payments->sum('amount');
         return $this->status === PaymentStatus::UNPAID || $this->status === PaymentStatus::PARTIALLY_PAID || $this->status === PaymentStatus::PENDING || $totalPayments < $this->amount;
     }

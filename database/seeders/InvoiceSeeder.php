@@ -67,11 +67,7 @@ class InvoiceSeeder extends Seeder
 
     private function getRandomStatus(): string
     {
-        $statuses = [
-            PaymentStatus::PAID,
-            PaymentStatus::UNPAID,
-            PaymentStatus::PARTIALLY_PAID,
-        ];
+        $statuses = PaymentStatus::cases();
 
         return $statuses[array_rand($statuses)]->value;
     }

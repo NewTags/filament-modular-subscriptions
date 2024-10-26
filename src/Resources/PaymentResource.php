@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
+use FileEntry;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
 use Illuminate\Support\HtmlString;
@@ -130,9 +131,9 @@ class PaymentResource extends Resource
                     ]),
                 Infolists\Components\Section::make(__('filament-modular-subscriptions::modular-subscriptions.resources.payment.sections.receipt'))
                     ->schema([
-                        Infolists\Components\Entry::make('receipt_file')
+                        FileEntry::make('receipt_file')
                             ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.payment.fields.receipt_file'))
-                            ->formatStateUsing(fn($state) => $state ? new HtmlString('<a href="' . $state . '" target="_blank">' . __('filament-modular-subscriptions::modular-subscriptions.resources.payment.fields.receipt_file') . '</a>') : null),
+                            ->getStateUsing(fn($record) => $record->receipt_file ? new HtmlString('<a href="' . $record->receipt_file . '" target="_blank">' . __('filament-modular-subscriptions::modular-subscriptions.resources.payment.fields.receipt_file') . '</a>') : null),
                     ])
                     ->visible(fn($record) => $record->receipt_file)
                     ->columns(2),

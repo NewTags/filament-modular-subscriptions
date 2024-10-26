@@ -80,11 +80,12 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.paid_at'))
                     ->sortable(),
             ])
-            ->filters([
-                Tables\Filters\SelectFilter::make('status')
-                    ->options(PaymentStatus::class)
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.status')),
-            ])
+            //@todo : to fix this unhandled state
+            // ->filters([
+            //     Tables\Filters\SelectFilter::make('status')
+            //         ->options(PaymentStatus::class)
+            //         ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.status')),
+            // ])
             ->modelLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.singular_name'))
             ->pluralModelLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.name'))
             ->actions([
@@ -151,6 +152,7 @@ class InvoiceResource extends Resource
                             'receipt_file' => $data['receipt_file'],
                             'payment_method' => PaymentMethod::BANK_TRANSFER,
                             'status' => PaymentStatus::PENDING,
+                            'transaction_id' => 'PAY-' . (string) uuid_create(),
                         ]);
 
                         Notification::make()

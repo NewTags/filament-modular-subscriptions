@@ -123,9 +123,7 @@ return [
             'sections' => [
                 'payment_details' => 'تفاصيل الدفع',
             ],
-            'approved' => 'تم التأكيد  الدفع بنجاح',
-            'subscription_renewed' => 'تم تجديد الاشتراك بنجاح',
-            'partially_paid' => 'تم الدفع جزئيا',
+
         ],
     ],
     'menu_group' => [
@@ -257,5 +255,8 @@ return [
         'success' => 'تم الدفع بنجاح!',
         'error' => 'فشل الدفع. يرجى المحاولة مرة أخرى.',
         'cancelled' => 'تم إلغاء الدفع.',
+        'approved' => 'تم التأكيد  الدفع بنجاح',
+        'subscription_renewed' => 'تم تجديد الاشتراك بنجاح',
+        'partially_paid' => 'تم الدفع جزئيا',
     ],
 ];
