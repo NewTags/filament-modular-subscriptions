@@ -244,6 +244,8 @@ trait Subscribable
         if ($plan->is_pay_as_you_go) {
             return $usage * $planModule->price;
         }
+
+        return 0;
         //@todo: add overuse pricing
         // else {
         //     $limit = $planModule->limit;
