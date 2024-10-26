@@ -101,6 +101,7 @@ return [
                 'pay' => 'دفع المستحقات',
             ],
             'invoice_title' => 'فاتورة :subscriber - :id - :date',
+            'payment_pending' => 'تم إرسال الفاتورة بنجاح. في انتظار التأكيد من الجهة المختصة',
         ],
         'payment' => [
             'name' => 'المدفوعات',
@@ -114,10 +115,17 @@ return [
                 'created_at' => 'تاريخ الإنشاء',
                 'subscribable_name' => 'اسم المشترك',
                 'subscriber' => 'المشترك',
+                'receipt_file' => 'إيصال الدفع',
+            ],
+            'actions' => [
+                'approve' => 'تأكيد',
             ],
             'sections' => [
                 'payment_details' => 'تفاصيل الدفع',
             ],
+            'approved' => 'تم التأكيد  الدفع بنجاح',
+            'subscription_renewed' => 'تم تجديد الاشتراك بنجاح',
+            'partially_paid' => 'تم الدفع جزئيا',
         ],
     ],
     'menu_group' => [

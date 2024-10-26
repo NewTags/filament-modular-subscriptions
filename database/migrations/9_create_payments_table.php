@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('payment_method');
             $table->string('transaction_id');
             $table->string('status');
+            $table->string('receipt_file')->nullable();
             $table->json('metadata')->nullable();
             $table->timestamps();
         });

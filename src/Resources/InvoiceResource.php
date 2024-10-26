@@ -3,10 +3,14 @@
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
 use Filament\Facades\Filament;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ViewAction;
+use HoceineEl\FilamentModularSubscriptions\Enums\PaymentMethod;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Support\Facades\View;
@@ -60,7 +64,7 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.subscription_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn ($record) => $record->subscription->plan->currency)
+                    ->money(fn($record) => $record->subscription->plan->currency)
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.amount'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
@@ -86,7 +90,7 @@ class InvoiceResource extends Resource
             ->actions([
                 ViewAction::make()
                     ->slideOver()
-                    ->modalHeading(fn ($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
+                    ->modalHeading(fn($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
                         $invoice = $record;
 
@@ -126,7 +130,34 @@ class InvoiceResource extends Resource
                     }),
                 Action::make('pay')
                     ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.actions.pay'))
-                    ->openUrlInNewTab(),
+                    ->slideOver()
+                    ->modalWidth('5xl')
+                    ->visible(fn($record) => Filament::getTenant() && $record->notPaid())
+                    ->form(function ($record) {
+                        return [
+                            TextInput::make('amount')
+                                ->default(fn() => $record->amount)
+                                ->numeric()
+                                ->required()
+                                ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.payment.fileds.amount')),
+                            FileUpload::make('receipt_file')
+                                ->required()
+                                ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.payment.fileds.receipt_file'))
+                        ];
+                    })
+                    ->action(function (array $data, $record) {
+                        $record->payments()->create([
+                            'amount' => $data['amount'],
+                            'receipt_file' => $data['receipt_file'],
+                            'payment_method' => PaymentMethod::BANK_TRANSFER,
+                            'status' => PaymentStatus::PENDING,
+                        ]);
+
+                        Notification::make()
+                            ->title(__('filament-modular-subscriptions::modular-subscriptions.invoice.payment_pending'))
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([]);
     }

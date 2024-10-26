@@ -50,6 +50,17 @@ class Invoice extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function notPaid(): bool
+    {
+        $totalPayments = $this->payments->sum('amount');
+        return $this->status === PaymentStatus::UNPAID || $this->status === PaymentStatus::PARTIALLY_PAID || $this->status === PaymentStatus::PENDING || $totalPayments < $this->amount;
+    }
+
+    public function paid(): bool
+    {
+        return $this->status === PaymentStatus::PAID;
+    }
+
     public function getTitleAttribute()
     {
         $subscriber = $this->subscription ? $this->subscription->subscriber : null;

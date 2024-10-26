@@ -34,6 +34,7 @@ trait Subscribable
         return $this->subscriptions()
             ->whereDate('starts_at', '<=', now())
             ->where(function ($query) {
+                $this->load('plan');
                 $query->whereNull('ends_at')
                     ->orWhereDate('ends_at', '>', now())
                     ->orWhereDate('ends_at', '>=', now()->subDays($this->plan->period_grace));
@@ -232,6 +233,7 @@ trait Subscribable
 
     private function calculateModulePricing(Subscription $subscription, $module, int $usage): float
     {
+
         $plan = $subscription->plan;
         $planModule = $plan->planModules()->where('module_id', $module->id)->first();
 
@@ -241,14 +243,16 @@ trait Subscribable
 
         if ($plan->is_pay_as_you_go) {
             return $usage * $planModule->price;
-        } else {
-            $limit = $planModule->limit;
-            if ($limit === null || $usage <= $limit) {
-                return 0; // Included in the plan
-            } else {
-                return ($usage - $limit) * $planModule->price; // Charge for overuse
-            }
         }
+        //@todo: add overuse pricing
+        // else {
+        //     $limit = $planModule->limit;
+        //     if ($limit === null || $usage <= $limit) {
+        //         return 0; // Included in the plan
+        //     } else {
+        //         return ($usage - $limit) * $planModule->price; // Charge for overuse
+        //     }
+        // }
     }
 
     public function subscribe(Plan $plan, ?Carbon $startDate = null, ?Carbon $endDate = null, ?int $trialDays = null): Subscription
