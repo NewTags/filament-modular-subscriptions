@@ -1,5 +1,7 @@
 <?php
 
+namespace HoceineEl\FilamentModularSubscriptions\Components;
+
 use Filament\Infolists\Components\Entry;
 
 class FileEntry extends Entry

@@ -31,21 +31,21 @@ class InvoiceResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.resources.invoice.singular_name');
+        return __('filament-modular-subscriptions::fms.resources.invoice.singular_name');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.resources.invoice.name');
+        return __('filament-modular-subscriptions::fms.resources.invoice.name');
     }
 
     public static function getNavigationGroup(): ?string
     {
         if (Filament::getTenant()) {
-            return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription_navigation_label');
+            return __('filament-modular-subscriptions::fms.tenant_subscription.subscription_navigation_label');
         }
 
-        return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription');
+        return __('filament-modular-subscriptions::fms.tenant_subscription.subscription');
     }
 
     public static function table(Tables\Table $table): Tables\Table
@@ -61,44 +61,44 @@ class InvoiceResource extends Resource
             ->columns([
 
                 Tables\Columns\TextColumn::make('subscription.subscriber.name')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.subscription_id'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subscription_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->money(fn($record) => $record->subscription->plan->currency)
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.amount'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.amount'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.status'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.status'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('due_date')
                     ->date()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.due_date'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.due_date'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('paid_at')
                     ->dateTime()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.paid_at'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.paid_at'))
                     ->sortable(),
             ])
             //@todo : to fix this unhandled state
             // ->filters([
             //     Tables\Filters\SelectFilter::make('status')
             //         ->options(PaymentStatus::class)
-            //         ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.fields.status')),
+            //         ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.status')),
             // ])
-            ->modelLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.singular_name'))
-            ->pluralModelLabel(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.name'))
+            ->modelLabel(__('filament-modular-subscriptions::fms.resources.invoice.singular_name'))
+            ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.invoice.name'))
             ->actions([
                 ViewAction::make()
                     ->slideOver()
-                    ->modalHeading(fn($record) => __('filament-modular-subscriptions::modular-subscriptions.invoice.details_title', ['number' => $record->id]))
+                    ->modalHeading(fn($record) => __('filament-modular-subscriptions::fms.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
                         $invoice = $record;
 
                         return View::make('filament-modular-subscriptions::pages.invoice-details', compact('invoice'));
                     })->modalFooterActions([]),
                 Action::make('download')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.invoice.download_pdf'))
+                    ->label(__('filament-modular-subscriptions::fms.invoice.download_pdf'))
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($record) {
                         $invoice = $record;
@@ -130,7 +130,7 @@ class InvoiceResource extends Resource
                         ]);
                     }),
                 Action::make('pay')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.invoice.actions.pay'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.actions.pay'))
                     ->slideOver()
                     ->modalWidth('5xl')
                     ->visible(fn($record) => Filament::getTenant() && $record->notPaid())
@@ -140,10 +140,11 @@ class InvoiceResource extends Resource
                                 ->default(fn() => $record->amount)
                                 ->numeric()
                                 ->required()
-                                ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.payment.fileds.amount')),
+                                ->suffix(fn() => $record->subscription->plan->currency)
+                                ->label(__('filament-modular-subscriptions::fms.resources.payment.fileds.amount')),
                             FileUpload::make('receipt_file')
                                 ->required()
-                                ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.payment.fileds.receipt_file'))
+                                ->label(__('filament-modular-subscriptions::fms.resources.payment.fileds.receipt_file'))
                         ];
                     })
                     ->action(function (array $data, $record) {
@@ -156,7 +157,7 @@ class InvoiceResource extends Resource
                         ]);
 
                         Notification::make()
-                            ->title(__('filament-modular-subscriptions::modular-subscriptions.invoice.payment_pending'))
+                            ->title(__('filament-modular-subscriptions::fms.invoice.payment_pending'))
                             ->success()
                             ->send();
                     }),

@@ -63,23 +63,23 @@
         </div>
 
         <div class="invoice-details">
-            <p><strong>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.billing_to') }}:</strong>
+            <p><strong>{{ __('filament-modular-subscriptions::fms.invoice.billing_to') }}:</strong>
                 {{ $invoice->tenant->{config('filament-modular-subscriptions.tenant_attribute')} }}</p>
-            <p><strong>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.date') }}:</strong>
+            <p><strong>{{ __('filament-modular-subscriptions::fms.invoice.date') }}:</strong>
                 {{ $invoice->created_at->format('Y-m-d') }}</p>
-            <p><strong>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.due_date') }}:</strong>
+            <p><strong>{{ __('filament-modular-subscriptions::fms.invoice.due_date') }}:</strong>
                 {{ $invoice->due_date->format('Y-m-d') }}</p>
-            <p><strong>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.status') }}:</strong>
+            <p><strong>{{ __('filament-modular-subscriptions::fms.invoice.status') }}:</strong>
                 {{ $invoice->status->getLabel() }}</p>
         </div>
 
         <table>
             <thead>
                 <tr>
-                    <th>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.description') }}</th>
-                    <th>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.quantity') }}</th>
-                    <th>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.unit_price') }}</th>
-                    <th>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.total') }}</th>
+                    <th>{{ __('filament-modular-subscriptions::fms.invoice.description') }}</th>
+                    <th>{{ __('filament-modular-subscriptions::fms.invoice.quantity') }}</th>
+                    <th>{{ __('filament-modular-subscriptions::fms.invoice.unit_price') }}</th>
+                    <th>{{ __('filament-modular-subscriptions::fms.invoice.total') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -95,14 +95,14 @@
             <tfoot>
                 <tr>
                     <td colspan="3" class="total">
-                        {{ __('filament-modular-subscriptions::modular-subscriptions.invoice.total') }}</td>
+                        {{ __('filament-modular-subscriptions::fms.invoice.total') }}</td>
                     <td>{{ number_format($invoice->amount, 2) . ' ' . $invoice->subscription->plan->currency }}</td>
                 </tr>
             </tfoot>
         </table>
 
         <div class="footer">
-            <p>{{ __('filament-modular-subscriptions::modular-subscriptions.invoice.thank_you_message') }}</p>
+            <p>{{ __('filament-modular-subscriptions::fms.invoice.thank_you_message') }}</p>
         </div>
     </div>
 </body>

@@ -6,7 +6,7 @@
                     <div class="flex items-center space-x-2">
                         <x-filament::icon icon="heroicon-o-credit-card" class="w-6 h-6 text-primary-500" />
                         <span class="text-xl font-bold">
-                            {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.current_subscription') }}
+                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.current_subscription') }}
                         </span>
                     </div>
                 </x-slot>
@@ -15,7 +15,7 @@
                     <!-- Plan Info Card -->
                     <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
                         <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                            {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan') }}
+                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.plan') }}
                         </h3>
                         <p class="mt-2 text-2xl font-bold text-primary-600 dark:text-primary-400">
                             {{ $activeSubscription->plan->trans_name }}
@@ -25,11 +25,11 @@
                     <!-- Status Card -->
                     <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
                         <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                            {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.status') }}
+                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.status') }}
                         </h3>
                         <div class="mt-2">
                             <x-filament::badge size="xl" :color="$activeSubscription->status->getColor()" class="text-lg">
-                                {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.statuses.' . $activeSubscription->status->value) }}
+                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.statuses.' . $activeSubscription->status->value) }}
                             </x-filament::badge>
                         </div>
                     </div>
@@ -37,7 +37,7 @@
                     <!-- Start Date Card -->
                     <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
                         <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                            {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.started_on') }}
+                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.started_on') }}
                         </h3>
                         <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
                             {{ $activeSubscription->starts_at->translatedFormat('M d, Y') }}
@@ -50,7 +50,7 @@
                     <!-- End Date Card -->
                     <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
                         <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                            {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.ends_on') }}
+                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.ends_on') }}
                         </h3>
                         <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
                             {{ $activeSubscription->ends_at->translatedFormat('M d, Y') }}
@@ -64,7 +64,7 @@
                 <!-- Subscription Details -->
                 <div class="mt-8">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                        {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription_details') }}
+                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.subscription_details') }}
                     </h3>
                     <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 space-y-4">
                         <!-- Days Left -->
@@ -72,7 +72,7 @@
                             <div class="flex items-center space-x-2">
                                 <x-filament::icon icon="heroicon-o-clock" class="w-5 h-5 text-gray-400" />
                                 <span class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.days_left') }}
+                                    {{ __('filament-modular-subscriptions::fms.tenant_subscription.days_left') }}
                                 </span>
                             </div>
                             <span class="text-lg font-bold text-primary-600 dark:text-primary-400">
@@ -85,13 +85,11 @@
                             <div class="flex items-center space-x-2">
                                 <x-filament::icon icon="heroicon-o-beaker" class="w-5 h-5 text-gray-400" />
                                 <span class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.on_trial') }}
+                                    {{ __('filament-modular-subscriptions::fms.tenant_subscription.on_trial') }}
                                 </span>
                             </div>
                             <x-filament::badge :color="$activeSubscription->onTrial() ? 'warning' : 'success'" class="text-sm">
-                                {{ $activeSubscription->onTrial()
-                                    ? __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.yes')
-                                    : __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.no') }}
+                                {{ $activeSubscription->onTrial() ? __('filament-modular-subscriptions::fms.tenant_subscription.yes') : __('filament-modular-subscriptions::fms.tenant_subscription.no') }}
                             </x-filament::badge>
                         </div>
 
@@ -100,7 +98,7 @@
                                 <div class="flex items-center space-x-2">
                                     <x-filament::icon icon="heroicon-o-calendar" class="w-5 h-5 text-gray-400" />
                                     <span class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.trial_ends_at') }}
+                                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.trial_ends_at') }}
                                     </span>
                                 </div>
                                 <span class="text-lg font-semibold text-warning-600 dark:text-warning-400">
@@ -117,13 +115,13 @@
                     <div class="flex items-center space-x-2">
                         <x-filament::icon icon="heroicon-o-exclamation-circle" class="w-6 h-6 text-warning-500" />
                         <span class="text-xl font-bold">
-                            {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.no_active_subscription') }}
+                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.no_active_subscription') }}
                         </span>
                     </div>
                 </x-slot>
 
                 <p class="text-gray-500 dark:text-gray-400">
-                    {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.no_subscription_message') }}
+                    {{ __('filament-modular-subscriptions::fms.tenant_subscription.no_subscription_message') }}
                 </p>
             </x-filament::section>
         @endif
@@ -134,7 +132,7 @@
                 <div class="flex items-center space-x-2">
                     <x-filament::icon icon="heroicon-o-currency-dollar" class="w-6 h-6 text-primary-500" />
                     <span class="text-xl font-bold">
-                        {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.available_plans') }}
+                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.available_plans') }}
                     </span>
                 </div>
             </x-slot>
@@ -150,7 +148,7 @@
                             <!-- Plan Badge -->
                             <div class="">
                                 <x-filament::badge :color="$plan->is_pay_as_you_go ? 'success' : 'primary'" class="text-xs font-medium">
-                                    {{ $plan->is_pay_as_you_go ? __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.pay_as_you_go') : __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription') }}
+                                    {{ $plan->is_pay_as_you_go ? __('filament-modular-subscriptions::fms.tenant_subscription.pay_as_you_go') : __('filament-modular-subscriptions::fms.tenant_subscription.subscription') }}
                                 </x-filament::badge>
                             </div>
 
@@ -174,11 +172,11 @@
                                                     {{ $plan->currency }}
                                                 </span>
                                                 <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.per_unit') }}
+                                                    {{ __('filament-modular-subscriptions::fms.tenant_subscription.per_unit') }}
                                                 </span>
                                             </div>
                                             <p class="text-sm text-emerald-600 dark:text-emerald-400">
-                                                {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.only_pay_for_what_you_use') }}
+                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.only_pay_for_what_you_use') }}
                                             </p>
                                         </div>
                                     @else
@@ -192,7 +190,7 @@
                                                 {{ $plan->currency }}
                                             </span>
                                             <span class="ml-2 text-gray-500 dark:text-gray-400">
-                                                /{{ __('filament-modular-subscriptions::modular-subscriptions.intervals.' . $plan->invoice_interval->value) }}
+                                                /{{ __('filament-modular-subscriptions::fms.intervals.' . $plan->invoice_interval->value) }}
                                             </span>
                                         </div>
                                     @endif
@@ -207,7 +205,7 @@
                             <div class="px-6 pb-6 flex-grow">
                                 <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mb-4">
                                     <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
-                                        {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.included_features') }}
+                                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.included_features') }}
                                     </h4>
                                     <ul class="space-y-4">
                                         @foreach ($plan->modules as $module)
@@ -226,7 +224,7 @@
                                                                 </span>
                                                             @endif
                                                         @else
-                                                            {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.unlimited') }}
+                                                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.unlimited') }}
                                                         @endif
                                                     </span>
                                                 </span>
@@ -241,17 +239,17 @@
                                 <div class="px-6 pb-4">
                                     <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4">
                                         <h4 class="text-sm font-medium text-emerald-800 dark:text-emerald-300 mb-2">
-                                            {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.usage_information') }}
+                                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.usage_information') }}
                                         </h4>
                                         <ul class="space-y-2 text-sm text-emerald-700 dark:text-emerald-300">
                                             <li>•
-                                                {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.billed_monthly') }}
+                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.billed_monthly') }}
                                             </li>
                                             <li>•
-                                                {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.no_minimum_commitment') }}
+                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.no_minimum_commitment') }}
                                             </li>
                                             <li>•
-                                                {{ __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.usage_tracked_realtime') }}
+                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.usage_tracked_realtime') }}
                                             </li>
                                         </ul>
                                     </div>

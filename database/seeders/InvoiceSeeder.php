@@ -38,7 +38,7 @@ class InvoiceSeeder extends Seeder
                 if (! $subscription->plan->is_pay_as_you_go) {
                     $invoiceItemModel::create([
                         'invoice_id' => $invoice->id,
-                        'description' => __('filament-modular-subscriptions::modular-subscriptions.invoice.subscription_fee', ['plan' => $subscription->plan->trans_name]),
+                        'description' => __('filament-modular-subscriptions::fms.invoice.subscription_fee', ['plan' => $subscription->plan->trans_name]),
                         'quantity' => 1,
                         'unit_price' => $subscription->plan->price,
                         'total' => $subscription->plan->price,
@@ -51,7 +51,7 @@ class InvoiceSeeder extends Seeder
 
                             $invoiceItemModel::create([
                                 'invoice_id' => $invoice->id,
-                                'description' => __('filament-modular-subscriptions::modular-subscriptions.invoice.module_usage', ['module' => $moduleUsage->module->getName()]),
+                                'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', ['module' => $moduleUsage->module->getName()]),
                                 'quantity' => $moduleUsage->usage,
                                 'unit_price' => $unitPrice,
                                 'total' => $total,

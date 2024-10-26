@@ -28,17 +28,17 @@ class SubscriptionResource extends Resource
 
     public static function getPluralModelLabel(): string
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.resources.subscription.name');
+        return __('filament-modular-subscriptions::fms.resources.subscription.name');
     }
 
     public static function getModelLabel(): string
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.resources.subscription.singular_name');
+        return __('filament-modular-subscriptions::fms.resources.subscription.singular_name');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.menu_group.subscription_management');
+        return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
     }
 
     public static function form(Forms\Form $form): Forms\Form
@@ -55,11 +55,11 @@ class SubscriptionResource extends Resource
                         return $tenantAttribute;
                     })
                     ->required()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.subscribable_id')),
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.subscribable_id')),
                 Hidden::make('subscribable_type')
                     ->default(config('filament-modular-subscriptions.tenant_model')),
                 Forms\Components\Select::make('plan_id')
-                    ->options(fn () => Plan::all()->mapWithKeys(function ($plan) {
+                    ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
                         return [$plan->id => $plan->trans_name . ' - ' . $plan->price . ' ' . $plan->currency];
                     }))
                     ->live(debounce: 500)
@@ -74,21 +74,21 @@ class SubscriptionResource extends Resource
                         }
                     })
                     ->required()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.plan_id')),
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.plan_id')),
                 Fieldset::make(__('Details'))
                     ->columns()
                     ->schema([
                         Forms\Components\DateTimePicker::make('starts_at')
                             ->required()
-                            ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.starts_at')),
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.starts_at')),
                         Forms\Components\DateTimePicker::make('ends_at')
-                            ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.ends_at')),
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.ends_at')),
                         Forms\Components\DateTimePicker::make('trial_ends_at')
-                            ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.trial_ends_at')),
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.trial_ends_at')),
                         Forms\Components\Select::make('status')
                             ->options(SubscriptionStatus::class)
                             ->required()
-                            ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.status')),
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.status')),
                     ]),
             ]);
     }
@@ -98,35 +98,35 @@ class SubscriptionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('plan.trans_name')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.plan_id'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.plan_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('subscribable.name')
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.subscribable_id')),
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.subscribable_id')),
                 Tables\Columns\TextColumn::make('starts_at')
                     ->dateTime()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.starts_at'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.starts_at'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('ends_at')
                     ->dateTime()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.ends_at'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.ends_at'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.status')),
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.status')),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options(SubscriptionStatus::class)
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.status')),
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.status')),
                 Tables\Filters\SelectFilter::make('plan_id')
-                    ->options(fn () => Plan::all()->pluck('name', 'id'))
-                    ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.plan_id')),
+                    ->options(fn() => Plan::all()->pluck('name', 'id'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.plan_id')),
                 Filter::make('dates')
                     ->form([
                         DatePicker::make('starts_at')
-                            ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.starts_at')),
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.starts_at')),
                         DatePicker::make('ends_at')
-                            ->label(__('filament-modular-subscriptions::modular-subscriptions.resources.subscription.fields.ends_at')),
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.ends_at')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         if ($data['starts_at']) {

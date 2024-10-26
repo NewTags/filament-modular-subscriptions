@@ -16,10 +16,10 @@ enum SubscriptionStatus: string implements HasColor, HasIcon, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::ACTIVE => __('filament-modular-subscriptions::modular-subscriptions.status.active'),
-            self::CANCELLED => __('filament-modular-subscriptions::modular-subscriptions.status.cancelled'),
-            self::EXPIRED => __('filament-modular-subscriptions::modular-subscriptions.status.expired'),
-            self::PENDING => __('filament-modular-subscriptions::modular-subscriptions.status.pending'),
+            self::ACTIVE => __('filament-modular-subscriptions::fms.status.active'),
+            self::CANCELLED => __('filament-modular-subscriptions::fms.status.cancelled'),
+            self::EXPIRED => __('filament-modular-subscriptions::fms.status.expired'),
+            self::PENDING => __('filament-modular-subscriptions::fms.status.pending'),
         };
     }
 

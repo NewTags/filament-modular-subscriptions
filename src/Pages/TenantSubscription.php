@@ -22,17 +22,17 @@ class TenantSubscription extends Page implements HasTable
 
     public function getTitle(): string | Htmlable
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.your_subscription');
+        return __('filament-modular-subscriptions::fms.tenant_subscription.your_subscription');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.your_subscription');
+        return __('filament-modular-subscriptions::fms.tenant_subscription.your_subscription');
     }
 
     public static function getNavigationGroup(): string
     {
-        return __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.subscription_navigation_label');
+        return __('filament-modular-subscriptions::fms.tenant_subscription.subscription_navigation_label');
     }
 
     public function getViewData(): array
@@ -56,8 +56,8 @@ class TenantSubscription extends Page implements HasTable
                 $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
 
                 return $plan->is_pay_as_you_go
-                    ? __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.start_using_pay_as_you_go')
-                    : __('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.switch_to_plan');
+                    ? __('filament-modular-subscriptions::fms.tenant_subscription.start_using_pay_as_you_go')
+                    : __('filament-modular-subscriptions::fms.tenant_subscription.switch_to_plan');
             })
             ->color(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
@@ -72,7 +72,7 @@ class TenantSubscription extends Page implements HasTable
                 $tenant->switchPlan($planId);
 
                 Notification::make()
-                    ->title(__('filament-modular-subscriptions::modular-subscriptions.tenant_subscription.plan_switched_successfully'))
+                    ->title(__('filament-modular-subscriptions::fms.tenant_subscription.plan_switched_successfully'))
                     ->success()
                     ->send();
             });

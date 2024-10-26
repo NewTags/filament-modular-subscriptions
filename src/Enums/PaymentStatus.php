@@ -17,10 +17,10 @@ enum PaymentStatus: string implements HasColor, HasIcon, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::PAID => __('filament-modular-subscriptions::modular-subscriptions.status.paid'),
-            self::UNPAID => __('filament-modular-subscriptions::modular-subscriptions.status.unpaid'),
-            self::PARTIALLY_PAID => __('filament-modular-subscriptions::modular-subscriptions.status.partially_paid'),
-            self::PENDING => __('filament-modular-subscriptions::modular-subscriptions.status.pending'),
+            self::PAID => __('filament-modular-subscriptions::fms.status.paid'),
+            self::UNPAID => __('filament-modular-subscriptions::fms.status.unpaid'),
+            self::PARTIALLY_PAID => __('filament-modular-subscriptions::fms.status.partially_paid'),
+            self::PENDING => __('filament-modular-subscriptions::fms.status.pending'),
         };
     }
 

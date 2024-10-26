@@ -14,10 +14,10 @@ enum Interval: string implements HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::DAY => __('filament-modular-subscriptions::modular-subscriptions.interval.day'),
-            self::WEEK => __('filament-modular-subscriptions::modular-subscriptions.interval.week'),
-            self::MONTH => __('filament-modular-subscriptions::modular-subscriptions.interval.month'),
-            self::YEAR => __('filament-modular-subscriptions::modular-subscriptions.interval.year'),
+            self::DAY => __('filament-modular-subscriptions::fms.interval.day'),
+            self::WEEK => __('filament-modular-subscriptions::fms.interval.week'),
+            self::MONTH => __('filament-modular-subscriptions::fms.interval.month'),
+            self::YEAR => __('filament-modular-subscriptions::fms.interval.year'),
         };
     }
 

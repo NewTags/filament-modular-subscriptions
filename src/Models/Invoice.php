@@ -68,7 +68,7 @@ class Invoice extends Model
         $tenantAttribute = config('filament-modular-subscriptions.tenant_attribute');
         $subscriberName = $subscriber ? $subscriber->{$tenantAttribute} : __('N/A');
 
-        return __('filament-modular-subscriptions::modular-subscriptions.invoice.invoice_title', [
+        return __('filament-modular-subscriptions::fms.invoice.invoice_title', [
             'subscriber' => $subscriberName,
             'id' => $this->id,
             'date' => $this->created_at->translatedFormat('Y-m-d'),
