@@ -1,4 +1,7 @@
 <x-filament-panels::page class="bg-gray-50 dark:bg-gray-900">
+    <div class="mb-8">
+        {{ $this->getTable() }}
+    </div>
     <div class="max-w-7xl mx-auto space-y-8 px-4 sm:px-6 lg:px-8">
         @if ($activeSubscription)
             <x-filament::section class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden">
@@ -269,7 +272,5 @@
         </x-filament::section>
     </div>
 
-    <div class="mt-8">
-        {{ $this->getTable() }}
-    </div>
+
 </x-filament-panels::page>

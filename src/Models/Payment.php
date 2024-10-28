@@ -2,6 +2,7 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Models;
 
+use HoceineEl\FilamentModularSubscriptions\Enums\PaymentMethod;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +19,9 @@ class Payment extends Model
 
     protected $casts = [
         'status' => PaymentStatus::class,
+        'metadata' => 'array',
+        'amount' => 'decimal:2',
+        'payment_method' => PaymentMethod::class,
     ];
 
     public function getTable()

@@ -30,6 +30,13 @@ class Invoice extends Model
         return config('filament-modular-subscriptions.tables.invoice');
     }
 
+
+    public function getRemainingAmountAttribute()
+    {
+        $totalPayments = $this->payments()->where('status', PaymentStatus::PAID)->sum('amount');
+        return $this->amount - $totalPayments;
+    }
+
     public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
@@ -52,8 +59,7 @@ class Invoice extends Model
 
     public function notPaid(): bool
     {
-        $this->load('payments');
-        $totalPayments = $this->payments->sum('amount');
+        $totalPayments = $this->payments()->where('status', PaymentStatus::PAID)->sum('amount');
         return $this->status === PaymentStatus::UNPAID || $this->status === PaymentStatus::PARTIALLY_PAID || $this->status === PaymentStatus::PENDING || $totalPayments < $this->amount;
     }
 

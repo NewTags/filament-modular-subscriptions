@@ -114,12 +114,17 @@ return [
                 'transaction_id' => 'رقم المعاملة',
                 'status' => 'الحالة',
                 'created_at' => 'تاريخ الإنشاء',
+                'reviewed_at' => 'تاريخ المراجعة',
+                'admin_notes' => 'ملاحظات المسؤول',
+                'notes' => 'ملاحظات',
+                'reviewed_by' => 'مراجعة بواسطة',
                 'subscribable_name' => 'اسم المشترك',
                 'subscriber' => 'المشترك',
                 'receipt_file' => 'إيصال الدفع',
             ],
             'actions' => [
                 'approve' => 'تأكيد',
+                'reject' => 'رفض',
             ],
             'sections' => [
                 'payment_details' => 'تفاصيل الدفع',
@@ -143,6 +148,7 @@ return [
         'pending' => 'قيد الانتظار',
         'paid' => 'مدفوع',
         'unpaid' => 'غير مدفوع',
+        'rejected' => 'مرفوض',
         'partially_paid' => 'مدفوع جزئيا',
     ],
     'tenant_subscription' => [
@@ -258,6 +264,12 @@ return [
         'success' => 'تم الدفع بنجاح!',
         'error' => 'فشل الدفع. يرجى المحاولة مرة أخرى.',
         'cancelled' => 'تم إلغاء الدفع.',
+        'amount' => 'المبلغ',
+        'rejected' => 'تم رفض الدفع',
+        'admin_notes' => 'ملاحظات المسؤول',
+        'submitted_by' => 'بواسطة',
+        'receipt_file' => 'إيصال الدفع',
+        'submitted_at' => 'في',
         'approved' => 'تم التأكيد  الدفع بنجاح',
         'subscription_renewed' => 'تم تجديد الاشتراك بنجاح',
         'partially_paid' => 'تم الدفع جزئيا',
@@ -265,5 +277,11 @@ return [
     'file_entry' => [
         'view_file' => 'عرض الملف',
         'no_file' => 'لا يوجد ملف',
+    ],
+    'payment_methods' => [
+        'bank_transfer' => 'تحويل بنكي',
+        'cash' => 'نقدي',
+        'paypal' => 'باي بال',
+        'stripe' => 'سترايب',
     ],
 ];
