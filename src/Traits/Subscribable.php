@@ -12,8 +12,22 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Trait Subscribable
+ * 
+ * Provides subscription management functionality for models.
+ * 
+ * @property-read \Illuminate\Database\Eloquent\Collection $subscriptions
+ * @property-read \HoceineEl\FilamentModularSubscriptions\Models\Plan|null $plan
+ * @property \Carbon\Carbon|null $trial_ends_at
+ */
 trait Subscribable
 {
+    /**
+     * Get all subscriptions associated with the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
     public function subscriptions(): MorphMany
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
@@ -21,6 +35,11 @@ trait Subscribable
         return $this->morphMany($subscriptionModel, 'subscribable');
     }
 
+    /**
+     * Get the current plan associated with the model through its active subscription.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
+     */
     public function plan(): HasOneThrough
     {
         $planModel = config('filament-modular-subscriptions.models.plan');
@@ -29,6 +48,11 @@ trait Subscribable
         return $this->hasOneThrough($planModel, $subscriptionModel, 'subscribable_id', 'id', 'id', 'plan_id');
     }
 
+    /**
+     * Get the currently active subscription for the model.
+     *
+     * @return \HoceineEl\FilamentModularSubscriptions\Models\Subscription|null
+     */
     public function activeSubscription(): ?Subscription
     {
         return $this->subscriptions()
@@ -44,11 +68,21 @@ trait Subscribable
             ->first();
     }
 
+    /**
+     * Check if the model has an active subscription.
+     *
+     * @return bool
+     */
     public function hasSubscription(): bool
     {
         return $this->activeSubscription() !== null;
     }
 
+    /**
+     * Get the number of days left in the current subscription period including grace period.
+     *
+     * @return int|null
+     */
     public function daysLeft(): ?int
     {
         $activeSubscription = $this->activeSubscription();
@@ -63,6 +97,11 @@ trait Subscribable
             : null;
     }
 
+    /**
+     * Check if the subscription has expired.
+     *
+     * @return bool
+     */
     public function isExpired(): bool
     {
         $activeSubscription = $this->activeSubscription();
@@ -75,6 +114,11 @@ trait Subscribable
         return $gracePeriodEndDate && $gracePeriodEndDate->isPast();
     }
 
+    /**
+     * Cancel the current subscription.
+     *
+     * @return bool
+     */
     public function cancel(): bool
     {
         $activeSubscription = $this->activeSubscription();
@@ -90,6 +134,12 @@ trait Subscribable
         return true;
     }
 
+    /**
+     * Renew the current subscription.
+     *
+     * @param int|null $days Number of days to renew for. If null, uses plan's default period.
+     * @return bool
+     */
     public function renew(?int $days = null): bool
     {
         $activeSubscription = $this->activeSubscription();
@@ -120,6 +170,12 @@ trait Subscribable
         return true;
     }
 
+    /**
+     * Switch to a different subscription plan.
+     *
+     * @param int $newPlanId ID of the new plan
+     * @return bool
+     */
     public function switchPlan(int $newPlanId): bool
     {
         $activeSubscription = $this->activeSubscription();
@@ -143,11 +199,23 @@ trait Subscribable
         return true;
     }
 
+    /**
+     * Calculate the end date for a given plan.
+     *
+     * @param \HoceineEl\FilamentModularSubscriptions\Models\Plan $plan
+     * @return \Carbon\Carbon
+     */
     private function calculateEndDate(Plan $plan): Carbon
     {
         return now()->addDays($plan->period);
     }
 
+    /**
+     * Check if the model can use a specific module.
+     *
+     * @param string $moduleClass
+     * @return bool
+     */
     public function canUseModule(string $moduleClass): bool
     {
         $activeSubscription = $this->activeSubscription();
@@ -164,11 +232,23 @@ trait Subscribable
         return $module->canUse($activeSubscription);
     }
 
+    /**
+     * Get the cache key for module access.
+     *
+     * @param string $moduleClass
+     * @return string
+     */
     public function getCacheKey(string $moduleClass): string
     {
         return "module_access_{$this->id}_{$moduleClass}";
     }
 
+    /**
+     * Get the usage count for a specific module.
+     *
+     * @param string $moduleClass
+     * @return int|null
+     */
     public function moduleUsage(string $moduleClass): ?int
     {
         $activeSubscription = $this->activeSubscription();
@@ -190,6 +270,16 @@ trait Subscribable
         return $moduleUsage->usage;
     }
 
+    /**
+     * Record usage for a specific module.
+     *
+     * @param string $moduleClass
+     * @param int $quantity
+     * @param bool $incremental
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     * @return void
+     */
     public function recordUsage(string $moduleClass, int $quantity = 1, bool $incremental = true): void
     {
         $activeSubscription = $this->activeSubscription();
@@ -231,6 +321,14 @@ trait Subscribable
         Cache::forget($this->getCacheKey($moduleClass));
     }
 
+    /**
+     * Calculate pricing for module usage.
+     *
+     * @param \HoceineEl\FilamentModularSubscriptions\Models\Subscription $subscription
+     * @param mixed $module
+     * @param int $usage
+     * @return float
+     */
     private function calculateModulePricing(Subscription $subscription, $module, int $usage): float
     {
 
@@ -257,6 +355,15 @@ trait Subscribable
         // }
     }
 
+    /**
+     * Create a new subscription for the model.
+     *
+     * @param \HoceineEl\FilamentModularSubscriptions\Models\Plan $plan
+     * @param \Carbon\Carbon|null $startDate
+     * @param \Carbon\Carbon|null $endDate
+     * @param int|null $trialDays
+     * @return \HoceineEl\FilamentModularSubscriptions\Models\Subscription
+     */
     public function subscribe(Plan $plan, ?Carbon $startDate = null, ?Carbon $endDate = null, ?int $trialDays = null): Subscription
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
@@ -286,6 +393,11 @@ trait Subscribable
         return $subscription;
     }
 
+    /**
+     * Calculate usage for all modules.
+     *
+     * @return array<string, array<string, int|float>>
+     */
     public function calculateUsage(): array
     {
         $activeSubscription = $this->activeSubscription();
@@ -319,6 +431,11 @@ trait Subscribable
         return $usage;
     }
 
+    /**
+     * Get total usage across all modules.
+     *
+     * @return float
+     */
     public function totalUsage(): float
     {
         $activeSubscription = $this->activeSubscription();
@@ -329,6 +446,11 @@ trait Subscribable
         return $activeSubscription->moduleUsages()->sum('usage');
     }
 
+    /**
+     * Calculate total pricing including base plan and module usage.
+     *
+     * @return float
+     */
     public function totalPricing(): float
     {
         $activeSubscription = $this->activeSubscription();
@@ -348,21 +470,42 @@ trait Subscribable
         }
     }
 
+    /**
+     * Check if total usage exceeds given limit.
+     *
+     * @param int $limit
+     * @return bool
+     */
     public function isOverLimit(int $limit): bool
     {
         return $this->totalUsage() > $limit;
     }
 
+    /**
+     * Check if subscription is currently in trial period.
+     *
+     * @return bool
+     */
     public function onTrial(): bool
     {
         return $this->activeSubscription() && $this->activeSubscription()->onTrial();
     }
 
+    /**
+     * Check if model has a generic trial period.
+     *
+     * @return bool
+     */
     public function onGenericTrial(): bool
     {
         return $this->trial_ends_at && $this->trial_ends_at->isFuture();
     }
 
+    /**
+     * Get remaining trial days.
+     *
+     * @return int
+     */
     public function trialDaysLeft(): int
     {
         if ($this->onTrial()) {
@@ -376,6 +519,12 @@ trait Subscribable
         return 0;
     }
 
+    /**
+     * Extend trial period by specified number of days.
+     *
+     * @param int $days
+     * @return void
+     */
     public function extendTrial(int $days): void
     {
         if ($this->onTrial()) {
@@ -388,6 +537,11 @@ trait Subscribable
         }
     }
 
+    /**
+     * End trial period immediately.
+     *
+     * @return void
+     */
     public function endTrial(): void
     {
         if ($this->onTrial()) {
@@ -400,6 +554,14 @@ trait Subscribable
         }
     }
 
+    /**
+     * Convert interval period to days.
+     *
+     * @param int $period
+     * @param \HoceineEl\FilamentModularSubscriptions\Enums\Interval $interval
+     * @return int
+     * @throws \InvalidArgumentException
+     */
     private function calculateDaysFromInterval(int $period, Interval $interval): int
     {
         switch ($interval) {
@@ -416,7 +578,12 @@ trait Subscribable
         }
     }
 
-    // Add a method to calculate the grace period end date
+    /**
+     * Calculate the end date including grace period.
+     *
+     * @param \HoceineEl\FilamentModularSubscriptions\Models\Subscription $subscription
+     * @return \Carbon\Carbon|null
+     */
     private function getGracePeriodEndDate(Subscription $subscription): ?Carbon
     {
         if (! $subscription->ends_at) {
