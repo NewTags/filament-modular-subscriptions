@@ -69,7 +69,7 @@ class InvoiceSeeder extends Seeder
     {
         $statuses = PaymentStatus::cases();
 
-        return $statuses[array_rand($statuses)]->value;
+        return array_rand($statuses);
     }
 
     private function getPaidAtDate(?Carbon $dueDate): ?Carbon

@@ -83,6 +83,7 @@ return [
             'actions' => [
                 'calculate' => 'حساب',
                 'calculate_usage' => 'حساب الاستخدام',
+                'calculate_usage_success' => 'تم حساب الاستخدام بنجاح',
             ],
         ],
         'invoice' => [
@@ -184,6 +185,7 @@ return [
             'past_due' => 'متأخر الدفع',
             'pending' => 'قيد الانتظار',
             'trialing' => 'في فترة التجربة',
+            'rejected' => 'مرفوض',
         ],
         'started_on' => 'تاريخ البدء',
         'ends_on' => 'تاريخ الانتهاء',
@@ -228,6 +230,7 @@ return [
     ],
     'invoice' => [
         'number' => 'رقم الفاتورة',
+        'payment_pending' => 'تم إرسال الفاتورة بنجاح. في انتظار التأكيد من الجهة المختصة',
         'amount' => 'المبلغ',
         'status' => 'الحالة',
         'due_date' => 'تاريخ الاستحقاق',
@@ -258,5 +261,9 @@ return [
         'approved' => 'تم التأكيد  الدفع بنجاح',
         'subscription_renewed' => 'تم تجديد الاشتراك بنجاح',
         'partially_paid' => 'تم الدفع جزئيا',
+    ],
+    'file_entry' => [
+        'view_file' => 'عرض الملف',
+        'no_file' => 'لا يوجد ملف',
     ],
 ];

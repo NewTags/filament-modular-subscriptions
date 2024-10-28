@@ -80,12 +80,11 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.paid_at'))
                     ->sortable(),
             ])
-            //@todo : to fix this unhandled state
-            // ->filters([
-            //     Tables\Filters\SelectFilter::make('status')
-            //         ->options(PaymentStatus::class)
-            //         ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.status')),
-            // ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->options(PaymentStatus::class)
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.status')),
+            ])
             ->modelLabel(__('filament-modular-subscriptions::fms.resources.invoice.singular_name'))
             ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.invoice.name'))
             ->actions([
@@ -134,19 +133,26 @@ class InvoiceResource extends Resource
                     ->slideOver()
                     ->modalWidth('5xl')
                     ->visible(fn($record) => Filament::getTenant() && $record->notPaid())
-                    ->form(function ($record) {
-                        return [
-                            TextInput::make('amount')
-                                ->default(fn() => $record->amount)
-                                ->numeric()
-                                ->required()
-                                ->suffix(fn() => $record->subscription->plan->currency)
-                                ->label(__('filament-modular-subscriptions::fms.resources.payment.fileds.amount')),
-                            FileUpload::make('receipt_file')
-                                ->required()
-                                ->label(__('filament-modular-subscriptions::fms.resources.payment.fileds.receipt_file'))
-                        ];
-                    })
+                    ->form([
+                        TextInput::make('amount')
+                            ->default(fn($record) => $record->getRemainingAmount())
+                            ->numeric()
+                            ->required()
+                            ->suffix(fn($record) => $record->subscription->plan->currency)
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
+                            ->maxValue(fn($record) => $record->getRemainingAmount())
+                            ->minValue(1),
+                        FileUpload::make('receipt_file')
+                            ->required()
+                            ->image()
+                            ->maxSize(5120) // 5MB
+                            ->directory('payment-receipts')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.receipt_file'))
+                            ->helperText(__('filament-modular-subscriptions::fms.resources.payment.receipt_help_text')),
+                        TextInput::make('notes')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.notes'))
+                            ->placeholder(__('filament-modular-subscriptions::fms.resources.payment.placeholders.notes'))
+                    ])
                     ->action(function (array $data, $record) {
                         $record->payments()->create([
                             'amount' => $data['amount'],
@@ -154,6 +160,11 @@ class InvoiceResource extends Resource
                             'payment_method' => PaymentMethod::BANK_TRANSFER,
                             'status' => PaymentStatus::PENDING,
                             'transaction_id' => 'PAY-' . (string) uuid_create(),
+                            'metadata' => [
+                                'notes' => $data['notes'] ?? null,
+                                'submitted_by' => auth()->id(),
+                                'submitted_at' => now(),
+                            ],
                         ]);
 
                         Notification::make()

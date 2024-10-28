@@ -2,6 +2,7 @@
 
 namespace HoceineEl\FilamentModularSubscriptions;
 
+use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 
 class ModularSubscription
@@ -34,5 +35,10 @@ class ModularSubscription
         $subscriptionModel::with('subscriber')->get()->each(function ($subscription) {
             $subscription->subscriber->calculateUsage();
         });
+
+        Notification::make()
+            ->title(__('filament-modular-subscriptions::fms.resources.module_usage.actions.calculate_usage_success'))
+            ->success()
+            ->send();
     }
 }

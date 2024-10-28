@@ -13,6 +13,7 @@ enum PaymentStatus: string implements HasColor, HasIcon, HasLabel
     case PARTIALLY_PAID = 'partially_paid';
     case PENDING = 'pending';
     case CANCELLED = 'cancelled';
+    case REJECTED = 'rejected';
 
     public function getLabel(): string
     {
@@ -21,6 +22,8 @@ enum PaymentStatus: string implements HasColor, HasIcon, HasLabel
             self::UNPAID => __('filament-modular-subscriptions::fms.status.unpaid'),
             self::PARTIALLY_PAID => __('filament-modular-subscriptions::fms.status.partially_paid'),
             self::PENDING => __('filament-modular-subscriptions::fms.status.pending'),
+            self::CANCELLED => __('filament-modular-subscriptions::fms.status.cancelled'),
+            self::REJECTED => __('filament-modular-subscriptions::fms.status.rejected'),
         };
     }
 
@@ -32,6 +35,7 @@ enum PaymentStatus: string implements HasColor, HasIcon, HasLabel
             self::PARTIALLY_PAID => 'heroicon-o-clock',
             self::PENDING => 'heroicon-o-clock',
             self::CANCELLED => 'heroicon-o-x-circle',
+            self::REJECTED => 'heroicon-o-x-circle',
         };
     }
 
@@ -43,6 +47,7 @@ enum PaymentStatus: string implements HasColor, HasIcon, HasLabel
             self::PARTIALLY_PAID => 'warning',
             self::PENDING => 'warning',
             self::CANCELLED => 'danger',
+            self::REJECTED => 'danger',
         };
     }
 }
