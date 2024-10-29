@@ -86,17 +86,17 @@ class ModuleUsageResource extends Resource
                     ->modal(),
             ])
             ->headerActions([
-                Tables\Actions\Action::make('calculate_usage')
-                    ->label(__('filament-modular-subscriptions::fms.resources.module_usage.actions.calculate_usage'))
-                    ->color(Color::Indigo)
-                    ->icon('heroicon-o-arrow-path-rounded-square')
-                    ->action(function () {
-                        ModularSubscription::calculateUsageForAllModules();
-                        Notification::make()
-                            ->title(__('filament-modular-subscriptions::fms.resources.module_usage.actions.calculate_usage_success'))
-                            ->success()
-                            ->send();
-                    }),
+                // Tables\Actions\Action::make('calculate_usage')
+                //     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.actions.calculate_usage'))
+                //     ->color(Color::Indigo)
+                //     ->icon('heroicon-o-arrow-path-rounded-square')
+                //     ->action(function () {
+                //         ModularSubscription::calculateUsageForAllModules();
+                //         Notification::make()
+                //             ->title(__('filament-modular-subscriptions::fms.resources.module_usage.actions.calculate_usage_success'))
+                //             ->success()
+                //             ->send();
+                //     }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

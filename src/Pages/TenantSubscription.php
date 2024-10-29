@@ -9,7 +9,9 @@ use Filament\Pages\Page;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use HoceineEl\FilamentModularSubscriptions\ModularSubscription;
 use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource;
+use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
 use Illuminate\Contracts\Support\Htmlable;
 
 class TenantSubscription extends Page implements HasTable
@@ -40,6 +42,11 @@ class TenantSubscription extends Page implements HasTable
         $tenant = Filament::getTenant();
         $activeSubscription = $tenant->activeSubscription();
         $planModel = config('filament-modular-subscriptions.models.plan');
+
+        defer(function () use ($tenant) {
+            $invoiceService = app(InvoiceService::class);
+            $invoiceService->generateInvoice($tenant->activeSubscription());
+        });
 
         return [
             'tenant' => $tenant,

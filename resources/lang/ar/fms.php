@@ -284,4 +284,16 @@ return [
         'paypal' => 'باي بال',
         'stripe' => 'سترايب',
     ],
+    'invoice_status' => [
+        'paid' => 'مدفوع',
+        'partially_paid' => 'مدفوع جزئياً',
+        'unpaid' => 'غير مدفوع',
+        'overdue' => 'متأخر',
+        'cancelled' => 'ملغي',
+        'refunded' => 'مسترد',
+    ],
+    'messages' => [
+        'you_ve_reached_your_limit_for_this_module' => 'لقد وصلت إلى حد الاستخدام لهذه الوحدة',
+        'you_have_to_renew_your_subscription_to_use_this_module' => 'عليك تجديد اشتراكك لاستخدام هذه الوحدة',
+    ],
 ];

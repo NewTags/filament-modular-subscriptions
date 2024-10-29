@@ -2,6 +2,7 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Models;
 
+use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,7 +23,7 @@ class Invoice extends Model
     protected $casts = [
         'due_date' => 'datetime',
         'paid_at' => 'datetime',
-        'status' => PaymentStatus::class,
+        'status' => InvoiceStatus::class,
     ];
 
     public function getTable()

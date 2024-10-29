@@ -3,12 +3,14 @@
 namespace HoceineEl\FilamentModularSubscriptions\Traits;
 
 use Carbon\Carbon;
+use Filament\Notifications\Notification;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -17,7 +19,7 @@ use Illuminate\Support\Facades\DB;
  * 
  * Provides subscription management functionality for models.
  * 
- * @property-read \Illuminate\Database\Eloquent\Collection $subscriptions
+ * @property-read \HoceineEl\FilamentModularSubscriptions\Models\Subscription|null $subscription
  * @property-read \HoceineEl\FilamentModularSubscriptions\Models\Plan|null $plan
  * @property \Carbon\Carbon|null $trial_ends_at
  */
@@ -28,11 +30,11 @@ trait Subscribable
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function subscriptions(): MorphMany
+    public function subscription(): MorphOne
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
 
-        return $this->morphMany($subscriptionModel, 'subscribable');
+        return $this->morphOne($subscriptionModel, 'subscribable');
     }
 
     /**
@@ -55,7 +57,7 @@ trait Subscribable
      */
     public function activeSubscription(): ?Subscription
     {
-        return $this->subscriptions()
+        return $this->subscription()
             ->whereDate('starts_at', '<=', now())
             ->where(function ($query) {
                 $this->load('plan');
@@ -142,7 +144,7 @@ trait Subscribable
      */
     public function renew(?int $days = null): bool
     {
-        $activeSubscription = $this->activeSubscription();
+        $activeSubscription = $this->subscription;
         if (! $activeSubscription) {
             return false;
         }
@@ -178,7 +180,7 @@ trait Subscribable
      */
     public function switchPlan(int $newPlanId): bool
     {
-        $activeSubscription = $this->activeSubscription();
+        $activeSubscription = $this->subscription;
         if (! $activeSubscription) {
             return false;
         }
@@ -229,7 +231,17 @@ trait Subscribable
             return false;
         }
 
-        return $module->canUse($activeSubscription);
+        $canUse = $module->canUse($activeSubscription);
+
+        if (!$canUse) {
+            Notification::make()
+                ->title(__('filament-modular-subscriptions::fms.messages.you_ve_reached_your_limit_for_this_module'))
+                ->body(__('filament-modular-subscriptions::fms.messages.you_have_to_renew_your_subscription_to_use_this_module'))
+                ->danger()
+                ->persistent()
+                ->send();
+        }
+        return $canUse;
     }
 
     /**
@@ -431,20 +443,7 @@ trait Subscribable
         return $usage;
     }
 
-    /**
-     * Get total usage across all modules.
-     *
-     * @return float
-     */
-    public function totalUsage(): float
-    {
-        $activeSubscription = $this->activeSubscription();
-        if (! $activeSubscription) {
-            return 0;
-        }
 
-        return $activeSubscription->moduleUsages()->sum('usage');
-    }
 
     /**
      * Calculate total pricing including base plan and module usage.
@@ -470,16 +469,6 @@ trait Subscribable
         }
     }
 
-    /**
-     * Check if total usage exceeds given limit.
-     *
-     * @param int $limit
-     * @return bool
-     */
-    public function isOverLimit(int $limit): bool
-    {
-        return $this->totalUsage() > $limit;
-    }
 
     /**
      * Check if subscription is currently in trial period.
@@ -584,8 +573,9 @@ trait Subscribable
      * @param \HoceineEl\FilamentModularSubscriptions\Models\Subscription $subscription
      * @return \Carbon\Carbon|null
      */
-    private function getGracePeriodEndDate(Subscription $subscription): ?Carbon
+    private function getGracePeriodEndDate(Subscription $subscription = null): ?Carbon
     {
+        $subscription = $subscription ?? $this->subscription;
         if (! $subscription->ends_at) {
             return null;
         }

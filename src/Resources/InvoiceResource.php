@@ -10,6 +10,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Enums\FiltersLayout;
+use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentMethod;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
@@ -82,9 +84,10 @@ class InvoiceResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->options(PaymentStatus::class)
+                    ->options(InvoiceStatus::class)
+                    ->default(InvoiceStatus::UNPAID)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.status')),
-            ])
+            ], FiltersLayout::AboveContent)
             ->modelLabel(__('filament-modular-subscriptions::fms.resources.invoice.singular_name'))
             ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.invoice.name'))
             ->actions([
@@ -132,7 +135,7 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.actions.pay'))
                     ->slideOver()
                     ->modalWidth('5xl')
-                    ->visible(fn($record) => Filament::getTenant() && $record->notPaid())
+                    ->visible(fn($record) => Filament::getTenant() && in_array($record->status, [InvoiceStatus::UNPAID->value, InvoiceStatus::PARTIALLY_PAID->value]))
                     ->form([
                         TextInput::make('amount')
                             ->default(fn($record) => $record->remaining_amount)

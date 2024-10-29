@@ -66,9 +66,9 @@
             <p><strong>{{ __('filament-modular-subscriptions::fms.invoice.billing_to') }}:</strong>
                 {{ $invoice->tenant->{config('filament-modular-subscriptions.tenant_attribute')} }}</p>
             <p><strong>{{ __('filament-modular-subscriptions::fms.invoice.date') }}:</strong>
-                {{ $invoice->created_at->format('Y-m-d') }}</p>
+                {{ $invoice->created_at->translatedFormat('F d, Y') }}</p>
             <p><strong>{{ __('filament-modular-subscriptions::fms.invoice.due_date') }}:</strong>
-                {{ $invoice->due_date->format('Y-m-d') }}</p>
+                {{ $invoice->due_date->translatedFormat('F d, Y') }}</p>
             <p><strong>{{ __('filament-modular-subscriptions::fms.invoice.status') }}:</strong>
                 {{ $invoice->status->getLabel() }}</p>
         </div>
@@ -78,8 +78,10 @@
                 <tr>
                     <th>{{ __('filament-modular-subscriptions::fms.invoice.description') }}</th>
                     <th>{{ __('filament-modular-subscriptions::fms.invoice.quantity') }}</th>
-                    <th>{{ __('filament-modular-subscriptions::fms.invoice.unit_price') }}</th>
-                    <th>{{ __('filament-modular-subscriptions::fms.invoice.total') }}</th>
+                    <th>{{ __('filament-modular-subscriptions::fms.invoice.unit_price') . ' (' . $invoice->subscription->plan->currency . ')' }}
+                    </th>
+                    <th>{{ __('filament-modular-subscriptions::fms.invoice.total') . ' (' . $invoice->subscription->plan->currency . ')' }}
+                    </th>
                 </tr>
             </thead>
             <tbody>
