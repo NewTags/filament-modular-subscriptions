@@ -3,7 +3,7 @@
 namespace HoceineEl\FilamentModularSubscriptions\Traits;
 
 use Carbon\Carbon;
-use Filament\Actions\Action;
+use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Notifications\Notification;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
@@ -213,11 +213,16 @@ trait Subscribable
 
         $expired = $subscription->subscriber->isExpired();
 
+        if ($subscription->plan->is_pay_as_you_go) {
+            return $expired;
+        }
+
         $moduleUsages = $subscription->moduleUsages;
         $anyModuleReachLimit = false;
 
         foreach ($moduleUsages as $moduleUsage) {
-            if ($moduleUsage->usage >= $moduleUsage->module->limit) {
+            $limit = $moduleUsage->module->planModules()->where('plan_id', $subscription->plan_id)->first()->limit;
+            if ($limit !== null && $moduleUsage->usage >= $limit) {
                 $anyModuleReachLimit = true;
                 break;
             }
@@ -264,7 +269,7 @@ trait Subscribable
                 ->body(__('filament-modular-subscriptions::fms.messages.you_have_to_renew_your_subscription_to_use_this_module'))
                 ->danger()
                 ->actions([
-                    Action::make('view_invoice')
+                    NotificationAction::make('view_invoice')
                         ->label(__('filament-modular-subscriptions::fms.messages.view_invoice'))
                         ->url(fn() => TenantSubscription::getUrl())
                         ->openUrlInNewTab()
@@ -332,6 +337,17 @@ trait Subscribable
             throw new \RuntimeException('No active subscription found');
         }
 
+        if (version_compare(app()->version(), '11.23', '>=')) {
+            defer(function () use ($moduleClass, $quantity, $incremental, $activeSubscription) {
+                $this->record($moduleClass, $quantity, $incremental, $activeSubscription);
+            });
+        } else {
+            $this->record($moduleClass, $quantity, $incremental, $activeSubscription);
+        }
+    }
+
+    public function record(string $moduleClass, int $quantity = 1, bool $incremental = true, Subscription $activeSubscription): void
+    {
         $moduleModel = config('filament-modular-subscriptions.models.module');
         $module = $moduleModel::where('class', $moduleClass)->first();
 
@@ -362,6 +378,9 @@ trait Subscribable
 
         $pricing = $this->calculateModulePricing($activeSubscription, $module, $moduleUsage->usage);
         $moduleUsage->update(['pricing' => $pricing]);
+
+        // Log the usage record
+        \Log::info("Module usage recorded for {$moduleClass}: {$moduleUsage->usage}.");
 
         Cache::forget($this->getCacheKey($moduleClass));
     }

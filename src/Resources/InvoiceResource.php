@@ -181,6 +181,7 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-eye')
                     ->slideOver()
                     ->modalWidth('5xl')
+                    ->visible(fn($record) => $record->payments()->exists())
                     ->infolist(function ($record) {
                         $payments = $record->payments;
                         $schema = [];
