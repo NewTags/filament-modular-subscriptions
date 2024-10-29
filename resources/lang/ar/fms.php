@@ -295,5 +295,6 @@ return [
     'messages' => [
         'you_ve_reached_your_limit_for_this_module' => 'لقد وصلت إلى حد الاستخدام لهذه الوحدة',
         'you_have_to_renew_your_subscription_to_use_this_module' => 'عليك تجديد اشتراكك لاستخدام هذه الوحدة',
+        'view_invoice' => 'عرض الفاتورة',
     ],
 ];

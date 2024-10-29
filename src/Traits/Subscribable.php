@@ -3,11 +3,13 @@
 namespace HoceineEl\FilamentModularSubscriptions\Traits;
 
 use Carbon\Carbon;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use HoceineEl\FilamentModularSubscriptions\Pages\TenantSubscription;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -238,6 +240,14 @@ trait Subscribable
                 ->title(__('filament-modular-subscriptions::fms.messages.you_ve_reached_your_limit_for_this_module'))
                 ->body(__('filament-modular-subscriptions::fms.messages.you_have_to_renew_your_subscription_to_use_this_module'))
                 ->danger()
+                ->actions([
+                    Action::make('view_invoice')
+                        ->label(__('filament-modular-subscriptions::fms.messages.view_invoice'))
+                        ->url(fn() => TenantSubscription::getUrl())
+                        ->openUrlInNewTab()
+                        ->icon('heroicon-o-credit-card')
+                        ->color('success')
+                ])
                 ->persistent()
                 ->send();
         }
