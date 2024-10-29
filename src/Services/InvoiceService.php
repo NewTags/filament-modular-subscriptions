@@ -20,7 +20,7 @@ class InvoiceService
         if ($subscription->subscriber->shouldGenerateInvoice()) {
             $invoice = $this->getInvoiceModel()::query()
                 ->where('subscription_id', $subscription->id)
-                ->where('status', InvoiceStatus::UNPAID)
+                ->whereIn('status', [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID])
                 ->first();
 
             if ($invoice) {

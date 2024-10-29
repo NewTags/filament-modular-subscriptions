@@ -92,7 +92,6 @@ class PaymentResource extends Resource
                     ->form([
                         TextInput::make('admin_notes')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.admin_notes'))
-                            ->placeholder(__('filament-modular-subscriptions::fms.resources.payment.placeholders.admin_notes'))
                     ])
                     ->action(function ($record, array $data) {
                         DB::transaction(function () use ($record, $data) {

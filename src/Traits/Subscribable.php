@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Notifications\Notification;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
+use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
@@ -228,6 +229,7 @@ trait Subscribable
             }
         }
 
+
         return $expired || $anyModuleReachLimit;
     }
 
@@ -379,8 +381,6 @@ trait Subscribable
         $pricing = $this->calculateModulePricing($activeSubscription, $module, $moduleUsage->usage);
         $moduleUsage->update(['pricing' => $pricing]);
 
-        // Log the usage record
-        \Log::info("Module usage recorded for {$moduleClass}: {$moduleUsage->usage}.");
 
         Cache::forget($this->getCacheKey($moduleClass));
     }
