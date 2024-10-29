@@ -72,7 +72,7 @@
                     <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 space-y-4">
                         <!-- Days Left -->
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
+                            <div class="flex items-center space-x-2 gap-2">
                                 <x-filament::icon icon="heroicon-o-clock" class="w-5 h-5 text-gray-400" />
                                 <span class="text-sm text-gray-500 dark:text-gray-400">
                                     {{ __('filament-modular-subscriptions::fms.tenant_subscription.days_left') }}
@@ -85,7 +85,7 @@
 
                         <!-- Trial Status -->
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
+                            <div class="flex items-center space-x-2 gap-2">
                                 <x-filament::icon icon="heroicon-o-beaker" class="w-5 h-5 text-gray-400" />
                                 <span class="text-sm text-gray-500 dark:text-gray-400">
                                     {{ __('filament-modular-subscriptions::fms.tenant_subscription.on_trial') }}
@@ -98,7 +98,7 @@
 
                         @if ($activeSubscription->onTrial())
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-2">
+                                <div class="flex items-center space-x-2 gap-2">
                                     <x-filament::icon icon="heroicon-o-calendar" class="w-5 h-5 text-gray-400" />
                                     <span class="text-sm text-gray-500 dark:text-gray-400">
                                         {{ __('filament-modular-subscriptions::fms.tenant_subscription.trial_ends_at') }}
@@ -115,7 +115,7 @@
         @else
             <x-filament::section class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6">
                 <x-slot name="heading">
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2 gap-2">
                         <x-filament::icon icon="heroicon-o-exclamation-circle" class="w-6 h-6 text-warning-500" />
                         <span class="text-xl font-bold">
                             {{ __('filament-modular-subscriptions::fms.tenant_subscription.no_active_subscription') }}
@@ -129,10 +129,10 @@
             </x-filament::section>
         @endif
 
-        <!-- Available Plans Section -->
+        {{-- <!-- Available Plans Section -->
         <x-filament::section class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl">
             <x-slot name="heading">
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 gap-2">
                     <x-filament::icon icon="heroicon-o-currency-dollar" class="w-6 h-6 text-primary-500" />
                     <span class="text-xl font-bold">
                         {{ __('filament-modular-subscriptions::fms.tenant_subscription.available_plans') }}
@@ -237,27 +237,6 @@
                                 </div>
                             </div>
 
-                            <!-- Usage Information for Pay As You Go -->
-                            @if ($plan->is_pay_as_you_go)
-                                <div class="px-6 pb-4">
-                                    <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4">
-                                        <h4 class="text-sm font-medium text-emerald-800 dark:text-emerald-300 mb-2">
-                                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.usage_information') }}
-                                        </h4>
-                                        <ul class="space-y-2 text-sm text-emerald-700 dark:text-emerald-300">
-                                            <li>•
-                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.billed_monthly') }}
-                                            </li>
-                                            <li>•
-                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.no_minimum_commitment') }}
-                                            </li>
-                                            <li>•
-                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.usage_tracked_realtime') }}
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            @endif
 
                             <!-- Action Button -->
                             <div class="px-6 pb-8 mx-auto">
@@ -269,7 +248,7 @@
                     </div>
                 @endforeach
             </div>
-        </x-filament::section>
+        </x-filament::section> --}}
     </div>
 
 

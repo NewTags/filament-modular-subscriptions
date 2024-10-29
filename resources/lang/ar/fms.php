@@ -129,6 +129,7 @@ return [
             'sections' => [
                 'payment_details' => 'تفاصيل الدفع',
             ],
+            'receipt_help_text' => 'يرجى رفع ملف لإيصال الدفع الخاص بك لتأكيد الدفع.',
 
         ],
     ],
@@ -256,6 +257,7 @@ return [
         'items' => 'العناصر',
         'thank_you_message' => 'شكرًا لك على عملك معنا!',
         'invoice_title' => 'فاتورة :subscriber - رقم :id - بتاريخ :date',
+        'view_payments' => 'عرض المدفوعات',
     ],
     'payment' => [
         'select_method' => 'اختر طريقة الدفع',

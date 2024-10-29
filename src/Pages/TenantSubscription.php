@@ -43,10 +43,8 @@ class TenantSubscription extends Page implements HasTable
         $activeSubscription = $tenant->activeSubscription();
         $planModel = config('filament-modular-subscriptions.models.plan');
 
-        defer(function () use ($tenant) {
-            $invoiceService = app(InvoiceService::class);
-            $invoiceService->generateInvoice($tenant->activeSubscription());
-        });
+        $invoiceService = app(InvoiceService::class);
+        $invoiceService->generateInvoice($tenant->activeSubscription());
 
         return [
             'tenant' => $tenant,

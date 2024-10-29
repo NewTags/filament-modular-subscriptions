@@ -15,18 +15,22 @@ class InvoiceService
      * @param Subscription $subscription
      * @return Invoice
      */
-    public function generateInvoice(Subscription $subscription): Invoice
+    public function generateInvoice(Subscription $subscription): ?Invoice
     {
-        $invoice = $this->getInvoiceModel()::query()
-            ->where('subscription_id', $subscription->id)
-            ->where('status', InvoiceStatus::UNPAID)
-            ->first();
+        if ($subscription->subscriber->shouldGenerateInvoice()) {
+            $invoice = $this->getInvoiceModel()::query()
+                ->where('subscription_id', $subscription->id)
+                ->where('status', InvoiceStatus::UNPAID)
+                ->first();
 
-        if ($invoice) {
-            return $this->updateInvoice($invoice, $subscription);
+            if ($invoice) {
+                return $this->updateInvoice($invoice, $subscription);
+            }
+
+            return $this->createNewInvoice($subscription);
         }
 
-        return $this->createNewInvoice($subscription);
+        return null;
     }
 
     /**
@@ -62,7 +66,7 @@ class InvoiceService
             'subscription_id' => $subscription->id,
             'tenant_id' => $subscription->subscribable_id,
             'amount' => $this->calculateTotalAmount($subscription),
-            'status' => PaymentStatus::UNPAID,
+            'status' => InvoiceStatus::UNPAID,
             'due_date' => now()->addDays($this->getInvoiceDueDays()),
         ]);
 

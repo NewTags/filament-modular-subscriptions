@@ -5,6 +5,8 @@ namespace HoceineEl\FilamentModularSubscriptions\Resources;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\Fieldset;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -85,7 +87,6 @@ class InvoiceResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options(InvoiceStatus::class)
-                    ->default(InvoiceStatus::UNPAID)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.status')),
             ], FiltersLayout::AboveContent)
             ->modelLabel(__('filament-modular-subscriptions::fms.resources.invoice.singular_name'))
@@ -135,7 +136,9 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.actions.pay'))
                     ->slideOver()
                     ->modalWidth('5xl')
-                    ->visible(fn($record) => Filament::getTenant() && in_array($record->status, [InvoiceStatus::UNPAID->value, InvoiceStatus::PARTIALLY_PAID->value]))
+                    ->icon('heroicon-o-credit-card')
+                    ->color('success')
+                    ->visible(fn($record) => Filament::getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
                     ->form([
                         TextInput::make('amount')
                             ->default(fn($record) => $record->remaining_amount)
@@ -153,7 +156,6 @@ class InvoiceResource extends Resource
                             ->helperText(__('filament-modular-subscriptions::fms.resources.payment.receipt_help_text')),
                         TextInput::make('notes')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.notes'))
-                            ->placeholder(__('filament-modular-subscriptions::fms.resources.payment.placeholders.notes'))
                     ])
                     ->action(function (array $data, $record) {
                         $record->payments()->create([
@@ -173,6 +175,38 @@ class InvoiceResource extends Resource
                             ->title(__('filament-modular-subscriptions::fms.invoice.payment_pending'))
                             ->success()
                             ->send();
+                    }),
+                Action::make('view_payments')
+                    ->label(__('filament-modular-subscriptions::fms.invoice.view_payments'))
+                    ->icon('heroicon-o-eye')
+                    ->slideOver()
+                    ->modalWidth('5xl')
+                    ->infolist(function ($record) {
+                        $payments = $record->payments;
+                        $schema = [];
+
+                        foreach ($payments as $payment) {
+                            $schema[] = Fieldset::make($payment->created_at->translatedFormat('M d, Y'))
+                                ->schema([
+                                    TextEntry::make('amount')
+                                        ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
+                                        ->money(fn($record) => $record->subscription->plan->currency)
+                                        ->getStateUsing(fn($record) => $record->amount),
+                                    TextEntry::make('payment_method')
+                                        ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.payment_method'))
+                                        ->badge()
+                                        ->getStateUsing(fn($record) => $record->payment_method),
+                                    TextEntry::make('status')
+                                        ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.status'))
+                                        ->badge()
+                                        ->getStateUsing(fn($record) => $record->status),
+                                    TextEntry::make('created_at')
+                                        ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_at'))
+                                        ->getStateUsing(fn($record) => $record->created_at->translatedFormat('M d, Y')),
+                                ]);
+                        }
+
+                        return $schema;
                     }),
             ])
             ->bulkActions([]);

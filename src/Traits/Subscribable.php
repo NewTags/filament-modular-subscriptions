@@ -97,7 +97,7 @@ trait Subscribable
         $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
 
         return $gracePeriodEndDate
-            ? now()->diffInDays($gracePeriodEndDate, false)
+            ? number_format(now()->diffInDays($gracePeriodEndDate, false), 1)
             : null;
     }
 
@@ -201,6 +201,29 @@ trait Subscribable
         });
 
         return true;
+    }
+
+    public function shouldGenerateInvoice(): bool
+    {
+        $subscription = $this->subscription()->with('moduleUsages')->first();
+
+        if (!$subscription) {
+            return false;
+        }
+
+        $expired = $subscription->subscriber->isExpired();
+
+        $moduleUsages = $subscription->moduleUsages;
+        $anyModuleReachLimit = false;
+
+        foreach ($moduleUsages as $moduleUsage) {
+            if ($moduleUsage->usage >= $moduleUsage->module->limit) {
+                $anyModuleReachLimit = true;
+                break;
+            }
+        }
+
+        return $expired || $anyModuleReachLimit;
     }
 
     /**

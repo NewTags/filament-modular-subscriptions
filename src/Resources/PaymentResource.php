@@ -11,6 +11,7 @@ use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use HoceineEl\FilamentModularSubscriptions\Components\FileEntry;
+use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
 use Illuminate\Support\Facades\Storage;
@@ -107,7 +108,7 @@ class PaymentResource extends Resource
 
                             if ($totalPaid >= $invoice->amount) {
                                 $invoice->update([
-                                    'status' => PaymentStatus::PAID,
+                                    'status' => InvoiceStatus::PAID,
                                     'paid_at' => now(),
                                 ]);
 
@@ -118,7 +119,7 @@ class PaymentResource extends Resource
                                     ->success()
                                     ->send();
                             } elseif ($totalPaid > 0) {
-                                $invoice->update(['status' => PaymentStatus::PARTIALLY_PAID]);
+                                $invoice->update(['status' => InvoiceStatus::PARTIALLY_PAID]);
 
                                 Notification::make()
                                     ->title(__('filament-modular-subscriptions::fms.payment.partially_paid'))
