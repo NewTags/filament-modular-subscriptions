@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('class');
             $table->boolean('is_active')->default(true);
+            $table->boolean('is_persistent')->default(true);
             $table->timestamps();
         });
     }

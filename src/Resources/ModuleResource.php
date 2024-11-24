@@ -61,6 +61,10 @@ class ModuleResource extends Resource
                 Forms\Components\Toggle::make('is_active')
                     ->default(true)
                     ->label(__('filament-modular-subscriptions::fms.resources.module.fields.is_active')),
+                Forms\Components\Toggle::make('is_persistent')
+                    ->label(__('filament-modular-subscriptions::fms.resources.module.fields.is_persistent'))
+                    ->helperText(__('filament-modular-subscriptions::fms.resources.module.fields.is_persistent_help'))
+                    ->default(true),
             ]);
     }
 
@@ -76,6 +80,9 @@ class ModuleResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.module.fields.class')),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->label(__('filament-modular-subscriptions::fms.resources.module.fields.is_active')),
+                Tables\Columns\IconColumn::make('is_persistent')
+                    ->label(__('filament-modular-subscriptions::fms.resources.module.fields.is_persistent'))
+                    ->boolean(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('is_active')

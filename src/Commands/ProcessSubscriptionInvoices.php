@@ -4,8 +4,8 @@ namespace HoceineEl\FilamentModularSubscriptions\Commands;
 
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use HoceineEl\FilamentModularSubscriptions\Services\Concerns\PaymentService;
 use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
-use HoceineEl\FilamentModularSubscriptions\Services\Payments\PaymentService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

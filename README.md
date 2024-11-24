@@ -367,7 +367,7 @@ $subscription = Subscription::create([
 
 ### Step 4: Check Module Access
 
-```php
+```php 
 $student = Student::find(1);
 $subscription = $student->subscription;
 

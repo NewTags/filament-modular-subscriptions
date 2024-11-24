@@ -148,26 +148,22 @@ trait Subscribable
     public function renew(?int $days = null): bool
     {
         $activeSubscription = $this->subscription;
-        if (! $activeSubscription) {
+        if (!$activeSubscription) {
             return false;
         }
 
         $plan = $activeSubscription->plan;
 
-        if ($days === null) {
-            $days = $plan->period;
-        }
-
-        $newEndsAt = $activeSubscription->ends_at && $activeSubscription->ends_at->isFuture()
-            ? $activeSubscription->ends_at->addDays($days)
-            : now()->addDays($days);
-
-        DB::transaction(function () use ($activeSubscription, $newEndsAt) {
-            // Delete old usage data
-            $activeSubscription->moduleUsages()->delete();
+        DB::transaction(function () use ($activeSubscription, $days, $plan) {
+            // Only delete non-persistent module usages
+            $activeSubscription->moduleUsages()
+                ->whereHas('module', function ($query) {
+                    $query->where('is_persistent', false);
+                })
+                ->delete();
 
             $activeSubscription->update([
-                'ends_at' => $newEndsAt,
+                'ends_at' => $this->calculateEndDate($plan, $days),
                 'starts_at' => now(),
             ]);
         });
@@ -253,35 +249,51 @@ trait Subscribable
     public function canUseModule(string $moduleClass): bool
     {
         $activeSubscription = $this->activeSubscription();
-        if (! $activeSubscription) {
+        if (!$activeSubscription) {
             return false;
         }
+
         $moduleModel = config('filament-modular-subscriptions.models.module');
         $module = $moduleModel::where('class', $moduleClass)->first();
 
-        if (! $module) {
+        if (!$module) {
             return false;
         }
 
         $canUse = $module->canUse($activeSubscription);
 
         if (!$canUse) {
+            $nextPlan = $this->getNextSuitablePlan();
+
             Notification::make()
-                ->title(__('filament-modular-subscriptions::fms.messages.you_ve_reached_your_limit_for_this_module'))
-                ->body(__('filament-modular-subscriptions::fms.messages.you_have_to_renew_your_subscription_to_use_this_module'))
-                ->danger()
+                ->title(__('filament-modular-subscriptions::fms.messages.upgrade_required'))
+                ->body(__('filament-modular-subscriptions::fms.messages.upgrade_to_continue_using', [
+                    'module' => $module->getName(),
+                    'plan' => $nextPlan?->name
+                ]))
                 ->actions([
-                    NotificationAction::make('view_invoice')
-                        ->label(__('filament-modular-subscriptions::fms.messages.view_invoice'))
-                        ->url(fn() => TenantSubscription::getUrl())
-                        ->openUrlInNewTab()
-                        ->icon('heroicon-o-credit-card')
+                    NotificationAction::make('upgrade')
+                        ->label(__('filament-modular-subscriptions::fms.messages.upgrade_now'))
+                        ->url(fn() => TenantSubscription::getUrl(['plan' => $nextPlan?->id]))
                         ->color('success')
                 ])
                 ->persistent()
                 ->send();
         }
+
         return $canUse;
+    }
+
+    protected function getNextSuitablePlan(): ?Plan
+    {
+        $currentPlan = $this->subscription?->plan;
+        if (!$currentPlan) {
+            return null;
+        }
+
+        return Plan::where('price', '>', $currentPlan->price)
+            ->orderBy('price')
+            ->first();
     }
 
     /**
@@ -635,5 +647,28 @@ trait Subscribable
         $gracePeriodDays = $subscription->plan->period_grace;
 
         return $subscription->ends_at->copy()->addDays($gracePeriodDays);
+    }
+
+    public function decrementUsage(string $moduleClass, int $quantity = 1): void
+    {
+        $activeSubscription = $this->activeSubscription();
+        if (!$activeSubscription) {
+            return;
+        }
+
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+        $module = $moduleModel::where('class', $moduleClass)->first();
+
+        if (!$module) {
+            return;
+        }
+
+        $moduleUsage = $activeSubscription->moduleUsages()
+            ->where('module_id', $module->id)
+            ->first();
+
+        if ($moduleUsage) {
+            $moduleUsage->decrement('usage', $quantity);
+        }
     }
 }

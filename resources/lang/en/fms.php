@@ -62,6 +62,8 @@ return [
                 'name' => 'Name',
                 'class' => 'Class',
                 'is_active' => 'Is Active',
+                'is_persistent' => 'Persistent Usage',
+                'is_persistent_help' => 'If enabled, usage data will be preserved when subscription renews',
             ],
         ],
         'module_usage' => [

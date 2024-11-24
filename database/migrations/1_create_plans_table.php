@@ -24,6 +24,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('grace_period')->default(0);
             $table->string('grace_interval')->default(Interval::DAY->value);
             $table->unsignedSmallInteger('sort_order')->default(0);
+            $table->boolean('is_pay_as_you_go')->default(false);
             $table->softDeletes();
             $table->timestamps();
         });
