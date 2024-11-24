@@ -291,9 +291,23 @@ trait Subscribable
             return null;
         }
 
-        return Plan::where('price', '>', $currentPlan->price)
+        $plans = Plan::query();
+        if ($plans->where('is_active', true)->where('id', '!=', $currentPlan->id)->count() === 0) {
+            return null;
+        }
+
+        $nextPricePlan = Plan::where('price', '>', $currentPlan->price)
+            ->where('is_active', true)
             ->orderBy('price')
             ->first();
+
+        if (!$nextPricePlan) {
+            $payAsYouGoPlan = Plan::where('is_pay_as_you_go', true)
+                ->where('is_active', true)
+                ->first();
+            return $payAsYouGoPlan;
+        }
+        return $nextPricePlan;
     }
 
     /**

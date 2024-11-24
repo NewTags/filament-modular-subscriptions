@@ -38,7 +38,7 @@ class ModuleResource extends Resource
 
     public static function canDelete(Model $record): bool
     {
-        return $record->subscriptions()->count() === 0;
+        return $record->plans()->count() === 0;
     }
 
     public static function form(Forms\Form $form): Forms\Form

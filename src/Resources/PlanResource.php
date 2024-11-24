@@ -147,6 +147,7 @@ class PlanResource extends Resource
                                         Forms\Components\TextInput::make('price')
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.module_price'))
                                             ->numeric()
+                                            ->suffix(config('filament-modular-subscriptions.main_currency'))
                                             ->nullable(),
 
                                         // Forms\Components\KeyValue::make('settings')
