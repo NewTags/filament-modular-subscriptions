@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Carbon\Carbon;
+use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use Illuminate\Database\Seeder;
 
@@ -22,7 +23,7 @@ class InvoiceSeeder extends Seeder
 
             for ($i = 0; $i < $invoiceCount; $i++) {
                 $invoiceDate = $subscription->starts_at->addMonths($i);
-                
+
                 // Calculate due date based on plan settings
                 if ($plan->fixed_invoice_day) {
                     // If fixed invoice day is set, use it for the next month
@@ -45,7 +46,6 @@ class InvoiceSeeder extends Seeder
                     'created_at' => $invoiceDate,
                     'updated_at' => $invoiceDate,
                 ]);
-
                 // Add subscription fee as an invoice item
                 if (! $plan->is_pay_as_you_go) {
                     $invoiceItemModel::create([
@@ -71,17 +71,17 @@ class InvoiceSeeder extends Seeder
                         }
                     }
                 }
-                
+
                 $totalAmount = $invoice->items()->sum('total');
                 $invoice->update(['amount' => $totalAmount]);
             }
         }
     }
 
-    private function getRandomStatus(): string
+    private function getRandomStatus(): InvoiceStatus
     {
-        $statuses = PaymentStatus::cases();
-        return $statuses[array_rand($statuses)]->value;
+        $statuses = InvoiceStatus::cases();
+        return $statuses[array_rand($statuses)];
     }
 
     private function getPaidAtDate(?Carbon $dueDate): ?Carbon
