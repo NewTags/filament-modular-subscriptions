@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('grace_interval')->default(Interval::DAY->value);
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('is_pay_as_you_go')->default(false);
+            $table->unsignedSmallInteger('fixed_invoice_day')->nullable();
+            $table->unsignedSmallInteger('due_days')->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

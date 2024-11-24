@@ -118,6 +118,18 @@ class PlanResource extends Resource
                                     ->options(Interval::class)
                                     ->default(Interval::DAY)
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_interval')),
+                                Forms\Components\TextInput::make('due_days')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.due_days'))
+                                    ->helperText(__('filament-modular-subscriptions::fms.resources.plan.hints.due_days')),
+                                Forms\Components\TextInput::make('fixed_invoice_day')
+                                    ->numeric()
+                                    ->default(null)
+                                    ->minValue(1)
+                                    ->maxValue(30)
+                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.fixed_invoice_day'))
+                                    ->helperText(__('filament-modular-subscriptions::fms.resources.plan.hints.fixed_invoice_day')),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.fields.modules'))
                             ->icon('heroicon-o-puzzle-piece')
@@ -187,6 +199,12 @@ class PlanResource extends Resource
                 Tables\Columns\TextColumn::make('modules_count')
                     ->counts('modules')
                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.modules_count')),
+                Tables\Columns\TextColumn::make('due_days')
+                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.due_days'))
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('fixed_invoice_day')
+                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.fixed_invoice_day'))
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('is_active')
