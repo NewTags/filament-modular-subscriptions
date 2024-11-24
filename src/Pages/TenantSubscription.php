@@ -17,6 +17,7 @@ use Illuminate\Contracts\Support\Htmlable;
 class TenantSubscription extends Page implements HasTable
 {
     use InteractsWithTable;
+    protected static ?int $navigationSort = 500;
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 

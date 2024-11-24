@@ -146,7 +146,7 @@ return [
     ],
     'status' => [
         'active' => 'نشط',
-        'cancelled' => '��لغي',
+        'cancelled' => 'لغي',
         'expired' => 'منتهي',
         'pending' => 'قيد الانتظار',
         'paid' => 'مدفوع',
@@ -276,7 +276,7 @@ return [
         'submitted_at' => 'في',
         'approved' => 'تم التأكيد  الدفع بنجاح',
         'subscription_renewed' => 'تم تجديد الاشتراك بنجاح',
-        'partially_paid' => 'ت�� الدفع جزئيا',
+        'partially_paid' => 'ت الدفع جزئيا',
     ],
     'file_entry' => [
         'view_file' => 'عرض الملف',

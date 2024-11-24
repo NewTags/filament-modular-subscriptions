@@ -87,13 +87,12 @@ class ModularSubscriptionsPlugin implements Plugin
     protected function renderSubscriptionAlerts(): string
     {
         // Early return if no tenant
-        if (!filament()->getTenant()) {
+        if (!$this->onTenantPanel) {
             return '';
         }
 
         // Cache subscription status checks for 5 minutes per tenant
         $cacheKey = 'subscription_alerts_' . filament()->getTenant()->id;
-
         $alerts = Cache::remember($cacheKey, now()->addMinutes(30), function () {
             $alerts = [];
             $tenant = filament()->getTenant();
@@ -127,11 +126,11 @@ class ModularSubscriptionsPlugin implements Plugin
             }
 
             // Check if subscription is ending soon (within 7 days)
-            if ($subscription->ends_at && $subscription->ends_at->diffInDays(now()) <= 7) {
+            if ($subscription->ends_at && $subscription->daysLeft() <= 7) {
                 $alerts[] = [
                     'type' => 'warning',
                     'title' => __('filament-modular-subscriptions::fms.messages.subscription_ending_soon'),
-                    'body' => __('filament-modular-subscriptions::fms.tenant_subscription.days_left') . ': ' . $subscription->ends_at->diffInDays(now()),
+                    'body' => __('filament-modular-subscriptions::fms.tenant_subscription.days_left') . ': ' . $subscription->daysLeft(),
                     'action' => [
                         'label' => __('filament-modular-subscriptions::fms.tenant_subscription.select_plan'),
                         'url' => TenantSubscription::getUrl(),
@@ -139,7 +138,7 @@ class ModularSubscriptionsPlugin implements Plugin
                 ];
             }
 
-            // Check module limits
+            // Check module limits and suggest next plan
             foreach ($subscription->moduleUsages as $moduleUsage) {
                 $module = $moduleUsage->module;
                 $limit = $module->planModules()
@@ -147,8 +146,8 @@ class ModularSubscriptionsPlugin implements Plugin
                     ->first()
                     ?->limit;
 
-                if ($limit && $moduleUsage->usage >= $limit * 0.9) {
-                    $percentageUsed = round(($moduleUsage->usage / $limit) * 100);
+                if (!$tenant->canUseModule($module->class)) {
+                    $nextPlan = $this->getNextSuitablePlan($subscription, $module);
                     $alerts[] = [
                         'type' => 'warning',
                         'title' => __('filament-modular-subscriptions::fms.messages.module_limit_warning'),
@@ -157,7 +156,7 @@ class ModularSubscriptionsPlugin implements Plugin
                             $module->getName(),
                             $moduleUsage->usage,
                             $limit,
-                            $percentageUsed
+                            100
                         ),
                         'action' => [
                             'label' => __('filament-modular-subscriptions::fms.messages.upgrade_now'),
@@ -173,5 +172,23 @@ class ModularSubscriptionsPlugin implements Plugin
         return view('filament-modular-subscriptions::components.subscription-alerts', [
             'alerts' => $alerts,
         ])->render();
+    }
+
+    protected function getNextSuitablePlan($subscription, $module)
+    {
+        $planModel = config('filament-modular-subscriptions.models.plan');
+        $currentPlan = $subscription->plan;
+
+        // Find a plan with a higher limit for the module or a pay-as-you-go plan
+        return $planModel::where('id', '!=', $currentPlan->id)
+            ->where(function ($query) use ($module, $currentPlan) {
+                $query->whereHas('planModules', function ($query) use ($module, $currentPlan) {
+                    $query->where('module_id', $module->id)
+                        ->where('limit', '>', $module->planModules()->where('plan_id', $currentPlan->id)->first()->limit);
+                })
+                    ->orWhere('is_pay_as_you_go', true);
+            })
+            ->orderBy('price', 'asc')
+            ->first();
     }
 }
