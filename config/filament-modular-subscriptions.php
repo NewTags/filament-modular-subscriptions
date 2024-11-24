@@ -36,7 +36,6 @@ return [
         'payment' => 'fms_payments',
 
     ],
-    'invoice_due_date_days' => 7,
     'currencies' => [
         'USD',
         'SAR',

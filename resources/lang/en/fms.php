@@ -24,13 +24,9 @@ return [
                 'setting_key' => 'Setting Key',
                 'setting_value' => 'Setting Value',
                 'modules_count' => 'Modules Count',
-                'due_days' => 'Due Days',
-                'fixed_invoice_day' => 'Fixed Invoice Day',
             ],
             'hints' => [
                 'module_limit' => 'Leave empty for unlimited usage',
-                'due_days' => 'Number of days until invoice is due after generation',
-                'fixed_invoice_day' => 'Day of month to generate invoice (1-31, leave empty for subscription start date)',
             ],
             'placeholders' => [
                 'setting_key' => 'Enter setting key',
@@ -181,6 +177,4 @@ return [
     'navigation' => [
         'group' => 'Subscriptions',
     ],
-    'persistent' => 'Persistent',
-    'non_persistent' => 'Non-Persistent',
 ];

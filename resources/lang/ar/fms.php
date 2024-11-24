@@ -27,13 +27,9 @@ return [
                 'setting_value' => 'قيمة الإعداد',
                 'modules_count' => 'عدد الوحدات',
                 'is_pay_as_you_go' => 'الدفع حسب الاستخدام',
-                'due_days' => 'أيام الاستحقاق',
-                'fixed_invoice_day' => 'يوم الفاتورة الثابت',
             ],
             'hints' => [
                 'module_limit' => 'اتركه فارغًا للاستخدام غير المحدود',
-                'due_days' => 'عدد الأيام حتى استحقاق الفاتورة بعد إنشائها',
-                'fixed_invoice_day' => 'يوم الشهر لإنشاء الفاتورة (1-31، اتركه فارغاً لاستخدام تاريخ بدء الاشتراك)',
             ],
             'placeholders' => [
                 'setting_key' => 'أدخل مفتاح الإعداد',
@@ -228,7 +224,7 @@ return [
     'intervals' => [
         'day' => 'يوم',
         'week' => 'أسبوع',
-        
+        'month' => 'شهر',
         'year' => 'سنة',
     ],
     'widgets' => [
@@ -305,6 +301,4 @@ return [
         'you_have_to_renew_your_subscription_to_use_this_module' => 'عليك تجديد اشتراكك لاستخدام هذه الوحدة',
         'view_invoice' => 'عرض الفاتورة',
     ],
-    'persistent' => 'مستمر',
-    'non_persistent' => 'غير مستمر',
 ];
