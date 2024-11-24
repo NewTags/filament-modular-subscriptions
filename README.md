@@ -134,7 +134,7 @@ class ApiCallsModule extends BaseModule
 
     public function calculateUsage(Subscription $subscription): int
     {
-        return Filament::getTenant()->moduleUsage(get_class($this));
+        return filament()->getTenant()->moduleUsage(get_class($this));
     }
 
    public function getPricing(Subscription $subscription): float
@@ -397,6 +397,11 @@ foreach (Subscription::active()->get() as $subscription) {
     // Send invoice to student
 }
 ```
+
+
+#todo add in readme desc
+
+- customizing seeders
 
 ## Testing
 

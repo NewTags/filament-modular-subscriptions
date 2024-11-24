@@ -45,19 +45,19 @@ class InvoiceResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        if (Filament::getTenant()) {
+        if (filament()->getTenant()) {
             return __('filament-modular-subscriptions::fms.tenant_subscription.subscription_navigation_label');
         }
 
-        return __('filament-modular-subscriptions::fms.tenant_subscription.subscription');
+        return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
     }
 
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table
             ->modifyQueryUsing(function ($query) {
-                if (Filament::getTenant()) {
-                    $query->where('tenant_id', Filament::getTenant()->id);
+                if (filament()->getTenant()) {
+                    $query->where('tenant_id', filament()->getTenant()->id);
                 }
 
                 return $query->with('subscription.subscriber', 'subscription.plan');
@@ -138,7 +138,7 @@ class InvoiceResource extends Resource
                     ->modalWidth('5xl')
                     ->icon('heroicon-o-credit-card')
                     ->color('success')
-                    ->visible(fn($record) => Filament::getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
+                    ->visible(fn($record) => filament()->getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
                     ->form([
                         TextInput::make('amount')
                             ->default(fn($record) => $record->remaining_amount)

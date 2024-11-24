@@ -175,8 +175,8 @@ class PlanResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->money(config('filament-modular-subscriptions.main_currency'), locale: 'en')
                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.price'))
+                    ->getStateUsing(fn($record) => $record->is_pay_as_you_go ? __('filament-modular-subscriptions::fms.pay_as_you_go') : $record->price . ' ' . config('filament-modular-subscriptions.main_currency'))
                     ->sortable(),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.is_active')),

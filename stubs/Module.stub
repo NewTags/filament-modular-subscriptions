@@ -21,7 +21,7 @@ class {{ class }} extends BaseModule
     public function calculateUsage(Subscription $subscription): int
     {
         // Implement your usage calculation logic here
-        return Filament::getTenant()->moduleUsage(get_class($this));
+        return filament()->getTenant()->moduleUsage(get_class($this));
     }
 
     public function getPricing(Subscription $subscription): float

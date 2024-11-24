@@ -39,7 +39,7 @@ class TenantSubscription extends Page implements HasTable
 
     public function getViewData(): array
     {
-        $tenant = Filament::getTenant();
+        $tenant = filament()->getTenant();
         $activeSubscription = $tenant->activeSubscription();
         $planModel = config('filament-modular-subscriptions.models.plan');
 
@@ -72,7 +72,7 @@ class TenantSubscription extends Page implements HasTable
 
             ->action(function (array $arguments) {
                 $planId = $arguments['plan_id'];
-                $tenant = Filament::getTenant();
+                $tenant = filament()->getTenant();
 
                 $tenant->switchPlan($planId);
 
@@ -85,6 +85,6 @@ class TenantSubscription extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-        return (new InvoiceResource)->table($table)->query(config('filament-modular-subscriptions.models.invoice')::query()->where('tenant_id', Filament::getTenant()->id));
+        return (new InvoiceResource)->table($table)->query(config('filament-modular-subscriptions.models.invoice')::query()->where('tenant_id', filament()->getTenant()->id));
     }
 }

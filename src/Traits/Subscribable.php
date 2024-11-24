@@ -2,9 +2,11 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Traits;
 
+use Blade;
 use Carbon\Carbon;
 use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Notifications\Notification;
+use Filament\View\PanelsRenderHook;
 use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
@@ -254,6 +256,7 @@ trait Subscribable
         }
 
         $moduleModel = config('filament-modular-subscriptions.models.module');
+        /** @var \HoceineEl\FilamentModularSubscriptions\Models\Module $module */
         $module = $moduleModel::where('class', $moduleClass)->first();
 
         if (!$module) {
@@ -261,24 +264,8 @@ trait Subscribable
         }
 
         $canUse = $module->canUse($activeSubscription);
-
         if (!$canUse) {
-            $nextPlan = $this->getNextSuitablePlan();
-
-            Notification::make()
-                ->title(__('filament-modular-subscriptions::fms.messages.upgrade_required'))
-                ->body(__('filament-modular-subscriptions::fms.messages.upgrade_to_continue_using', [
-                    'module' => $module->getName(),
-                    'plan' => $nextPlan?->name
-                ]))
-                ->actions([
-                    NotificationAction::make('upgrade')
-                        ->label(__('filament-modular-subscriptions::fms.messages.upgrade_now'))
-                        ->url(fn() => TenantSubscription::getUrl(['plan' => $nextPlan?->id]))
-                        ->color('success')
-                ])
-                ->persistent()
-                ->send();
+            Cache::forget('subscription_alerts_' . filament()->getTenant()->id);
         }
 
         return $canUse;

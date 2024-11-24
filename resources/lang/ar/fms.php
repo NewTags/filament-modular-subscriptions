@@ -146,7 +146,7 @@ return [
     ],
     'status' => [
         'active' => 'نشط',
-        'cancelled' => 'ملغي',
+        'cancelled' => '��لغي',
         'expired' => 'منتهي',
         'pending' => 'قيد الانتظار',
         'paid' => 'مدفوع',
@@ -276,7 +276,7 @@ return [
         'submitted_at' => 'في',
         'approved' => 'تم التأكيد  الدفع بنجاح',
         'subscription_renewed' => 'تم تجديد الاشتراك بنجاح',
-        'partially_paid' => 'تم الدفع جزئيا',
+        'partially_paid' => 'ت�� الدفع جزئيا',
     ],
     'file_entry' => [
         'view_file' => 'عرض الملف',
@@ -297,8 +297,13 @@ return [
         'refunded' => 'مسترد',
     ],
     'messages' => [
+        'upgrade_required' => 'عليك ترقية الخطة لاستخدام هذه الوحدة',
+        'upgrade_to_continue_using' => 'يجب ترقية خطتك إلى :plan للتمكن من استخدام وحدة :module',
+        'upgrade_now' => 'ترقية الخطة',
         'you_ve_reached_your_limit_for_this_module' => 'لقد وصلت إلى حد الاستخدام لهذه الوحدة',
         'you_have_to_renew_your_subscription_to_use_this_module' => 'عليك تجديد اشتراكك لاستخدام هذه الوحدة',
         'view_invoice' => 'عرض الفاتورة',
+        'module_limit_warning' => 'تحذير: أنت تقترب من حد استخدام الوحدة',
+        'subscription_ending_soon' => 'اشتراكك سينتهي قريباً',
     ],
 ];
