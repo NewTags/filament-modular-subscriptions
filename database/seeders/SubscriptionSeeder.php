@@ -13,9 +13,9 @@ class SubscriptionSeeder extends Seeder
 
         if (! $tenantModel) {
             $this->command->warn('Tenant model not set in config. Skipping subscription seeding.');
-
             return;
         }
+
         $planModel = config('filament-modular-subscriptions.models.plan');
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
         $tenants = $tenantModel::all();
@@ -23,14 +23,29 @@ class SubscriptionSeeder extends Seeder
 
         foreach ($tenants as $tenant) {
             $plan = $plans->random();
+            $startDate = now();
+
+            // Calculate end date based on plan's invoice period and interval
+            $endDate = $startDate->copy()->add(
+                $plan->invoice_interval->value,
+                $plan->invoice_period
+            );
+
+            // Calculate trial end date if trial period exists
+            $trialEndDate = $plan->trial_period > 0 
+                ? $startDate->copy()->add(
+                    $plan->trial_interval->value,
+                    $plan->trial_period
+                )
+                : null;
 
             $subscriptionModel::create([
                 'plan_id' => $plan->id,
                 'subscribable_id' => $tenant->id,
                 'subscribable_type' => get_class($tenant),
-                'starts_at' => now(),
-                'ends_at' => now()->addDays($plan->period),
-                'trial_ends_at' => now()->addDays($plan->period_trial),
+                'starts_at' => $startDate,
+                'ends_at' => $endDate,
+                'trial_ends_at' => $trialEndDate,
                 'status' => SubscriptionStatus::ACTIVE,
             ]);
         }

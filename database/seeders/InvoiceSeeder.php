@@ -18,10 +18,22 @@ class InvoiceSeeder extends Seeder
 
         foreach ($subscriptions as $subscription) {
             $invoiceCount = rand(1, 3);
+            $plan = $subscription->plan;
 
             for ($i = 0; $i < $invoiceCount; $i++) {
                 $invoiceDate = $subscription->starts_at->addMonths($i);
-                $dueDate = $invoiceDate->copy()->addDays(config('filament-modular-subscriptions.invoice_due_date_days', 7));
+                
+                // Calculate due date based on plan settings
+                if ($plan->fixed_invoice_day) {
+                    // If fixed invoice day is set, use it for the next month
+                    $dueDate = $invoiceDate->copy()
+                        ->addMonth()
+                        ->setDay($plan->fixed_invoice_day);
+                } else {
+                    // Otherwise use the plan's due days setting or default
+                    $dueDate = $invoiceDate->copy()
+                        ->addDays($plan->due_days ?: config('filament-modular-subscriptions.invoice_due_date_days', 7));
+                }
 
                 $invoice = $invoiceModel::create([
                     'subscription_id' => $subscription->id,
@@ -35,18 +47,18 @@ class InvoiceSeeder extends Seeder
                 ]);
 
                 // Add subscription fee as an invoice item
-                if (! $subscription->plan->is_pay_as_you_go) {
+                if (! $plan->is_pay_as_you_go) {
                     $invoiceItemModel::create([
                         'invoice_id' => $invoice->id,
-                        'description' => __('filament-modular-subscriptions::fms.invoice.subscription_fee', ['plan' => $subscription->plan->trans_name]),
+                        'description' => __('filament-modular-subscriptions::fms.invoice.subscription_fee', ['plan' => $plan->trans_name]),
                         'quantity' => 1,
-                        'unit_price' => $subscription->plan->price,
-                        'total' => $subscription->plan->price,
+                        'unit_price' => $plan->price,
+                        'total' => $plan->price,
                     ]);
                 } else {
                     foreach ($subscription->moduleUsages as $moduleUsage) {
                         if ($moduleUsage->usage > 0) {
-                            $unitPrice = $subscription->plan->modulePrice($moduleUsage->module);
+                            $unitPrice = $plan->modulePrice($moduleUsage->module);
                             $total = $moduleUsage->usage * $unitPrice;
 
                             $invoiceItemModel::create([
@@ -59,6 +71,7 @@ class InvoiceSeeder extends Seeder
                         }
                     }
                 }
+                
                 $totalAmount = $invoice->items()->sum('total');
                 $invoice->update(['amount' => $totalAmount]);
             }
@@ -68,8 +81,7 @@ class InvoiceSeeder extends Seeder
     private function getRandomStatus(): string
     {
         $statuses = PaymentStatus::cases();
-
-        return array_rand($statuses);
+        return $statuses[array_rand($statuses)]->value;
     }
 
     private function getPaidAtDate(?Carbon $dueDate): ?Carbon
