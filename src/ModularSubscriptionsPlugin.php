@@ -44,6 +44,7 @@ class ModularSubscriptionsPlugin implements Plugin
                 ->pages([
                     TenantSubscription::class,
                 ])->bootUsing(function () {
+                    $this->tenant = filament()->getTenant();
                     FilamentView::registerRenderHook(
                         PanelsRenderHook::PAGE_START,
                         fn(): string => $this->renderSubscriptionAlerts()
@@ -66,9 +67,6 @@ class ModularSubscriptionsPlugin implements Plugin
     public function onTenantPanel(Closure | bool $condition = true): static
     {
         $this->onTenantPanel = $condition instanceof Closure ? $condition() : $condition;
-        if ($this->onTenantPanel) {
-            $this->tenant = filament()->getTenant();
-        }
         return $this;
     }
 
@@ -91,83 +89,68 @@ class ModularSubscriptionsPlugin implements Plugin
 
     protected function renderSubscriptionAlerts(): string
     {
-        // Early return if no tenant
-        if (!$this->onTenantPanel) {
+        if (!$this->onTenantPanel || !$this->tenant) {
             return '';
         }
 
-        // Cache subscription status checks for 5 minutes per tenant
         $cacheKey = 'subscription_alerts_' . $this->tenant->id;
+
         $alerts = Cache::remember($cacheKey, now()->addMinutes(30), function () {
             $alerts = [];
             $tenant = $this->tenant;
             $subscription = $tenant->activeSubscription();
 
             if (!$subscription) {
-                $alerts[] = [
-                    'type' => 'warning',
-                    'title' => __('filament-modular-subscriptions::fms.tenant_subscription.no_active_subscription'),
-                    'body' => __('filament-modular-subscriptions::fms.tenant_subscription.no_subscription_message'),
-                    'action' => [
-                        'label' => __('filament-modular-subscriptions::fms.tenant_subscription.select_plan'),
-                        'url' => TenantSubscription::getUrl(),
-                    ],
-                ];
+                $alerts[] = $this->createAlert(
+                    'warning',
+                    __('filament-modular-subscriptions::fms.tenant_subscription.no_active_subscription'),
+                    __('filament-modular-subscriptions::fms.tenant_subscription.no_subscription_message'),
+                    __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
+                );
                 return $alerts;
             }
 
-            // Check subscription expiration
             if ($subscription->ends_at && $subscription->ends_at->isPast()) {
-                $alerts[] = [
-                    'type' => 'danger',
-                    'title' => __('filament-modular-subscriptions::fms.status.expired'),
-                    'body' => __('filament-modular-subscriptions::fms.messages.you_have_to_renew_your_subscription_to_use_this_module'),
-                    'action' => [
-                        'label' => __('filament-modular-subscriptions::fms.tenant_subscription.select_plan'),
-                        'url' => TenantSubscription::getUrl(),
-                    ],
-                ];
+                $alerts[] = $this->createAlert(
+                    'danger',
+                    __('filament-modular-subscriptions::fms.status.expired'),
+                    __('filament-modular-subscriptions::fms.messages.you_have_to_renew_your_subscription_to_use_this_module'),
+                    __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
+                );
                 return $alerts;
             }
 
-            // Check if subscription is ending soon (within 7 days)
             if ($subscription->ends_at && $subscription->daysLeft() <= 7) {
-                $alerts[] = [
-                    'type' => 'warning',
-                    'title' => __('filament-modular-subscriptions::fms.messages.subscription_ending_soon'),
-                    'body' => __('filament-modular-subscriptions::fms.tenant_subscription.days_left') . ': ' . $subscription->daysLeft(),
-                    'action' => [
-                        'label' => __('filament-modular-subscriptions::fms.tenant_subscription.select_plan'),
-                        'url' => TenantSubscription::getUrl(),
-                    ],
-                ];
+                $alerts[] = $this->createAlert(
+                    'warning',
+                    __('filament-modular-subscriptions::fms.messages.subscription_ending_soon'),
+                    __('filament-modular-subscriptions::fms.tenant_subscription.days_left') . ': ' . $subscription->daysLeft(),
+                    __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
+                );
             }
 
-            // Check module limits and suggest next plan
             foreach ($subscription->moduleUsages as $moduleUsage) {
                 $module = $moduleUsage->module;
-                $limit = $module->planModules()
+                $planModule = $module->planModules()
                     ->where('plan_id', $subscription->plan_id)
-                    ->first()
-                    ?->limit;
+                    ->first();
+
+                $limit = $planModule?->limit;
 
                 if (!$tenant->canUseModule($module->class)) {
                     $nextPlan = $this->getNextSuitablePlan($subscription, $module);
-                    $alerts[] = [
-                        'type' => 'warning',
-                        'title' => __('filament-modular-subscriptions::fms.messages.module_limit_warning'),
-                        'body' => sprintf(
+                    $alerts[] = $this->createAlert(
+                        'warning',
+                        __('filament-modular-subscriptions::fms.messages.module_limit_warning'),
+                        sprintf(
                             '%s: %d/%d (%d%%)',
                             $module->getName(),
                             $moduleUsage->usage,
                             $limit,
-                            100
+                            ($moduleUsage->usage / $limit) * 100
                         ),
-                        'action' => [
-                            'label' => __('filament-modular-subscriptions::fms.messages.upgrade_now'),
-                            'url' => TenantSubscription::getUrl(),
-                        ],
-                    ];
+                        __('filament-modular-subscriptions::fms.messages.upgrade_now')
+                    );
                 }
             }
 
@@ -179,17 +162,32 @@ class ModularSubscriptionsPlugin implements Plugin
         ])->render();
     }
 
-    protected function getNextSuitablePlan($subscription, $module)
+    protected function createAlert(string $type, string $title, string $body, string $actionLabel): array
+    {
+        return [
+            'type' => $type,
+            'title' => $title,
+            'body' => $body,
+            'action' => [
+                'label' => $actionLabel,
+                'url' => TenantSubscription::getUrl(),
+            ],
+        ];
+    }
+
+    protected function getNextSuitablePlan($subscription, $module): ?Model
     {
         $planModel = config('filament-modular-subscriptions.models.plan');
         $currentPlan = $subscription->plan;
+        $currentLimit = $module->planModules()
+            ->where('plan_id', $currentPlan->id)
+            ->first()?->limit ?? 0;
 
-        // Find a plan with a higher limit for the module or a pay-as-you-go plan
         return $planModel::where('id', '!=', $currentPlan->id)
-            ->where(function ($query) use ($module, $currentPlan) {
-                $query->whereHas('planModules', function ($query) use ($module, $currentPlan) {
+            ->where(function ($query) use ($module, $currentLimit) {
+                $query->whereHas('planModules', function ($query) use ($module, $currentLimit) {
                     $query->where('module_id', $module->id)
-                        ->where('limit', '>', $module->planModules()->where('plan_id', $currentPlan->id)->first()->limit);
+                        ->where('limit', '>', $currentLimit);
                 })
                     ->orWhere('is_pay_as_you_go', true);
             })

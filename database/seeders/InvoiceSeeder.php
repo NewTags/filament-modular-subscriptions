@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Carbon\Carbon;
 use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
-use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use Illuminate\Database\Seeder;
 
 class InvoiceSeeder extends Seeder
@@ -26,12 +25,10 @@ class InvoiceSeeder extends Seeder
 
                 // Calculate due date based on plan settings
                 if ($plan->fixed_invoice_day) {
-                    // If fixed invoice day is set, use it for the next month
                     $dueDate = $invoiceDate->copy()
                         ->addMonth()
                         ->setDay($plan->fixed_invoice_day);
                 } else {
-                    // Otherwise use the plan's due days setting or default
                     $dueDate = $invoiceDate->copy()
                         ->addDays($plan->due_days ?: config('filament-modular-subscriptions.invoice_due_date_days', 7));
                 }
@@ -40,12 +37,14 @@ class InvoiceSeeder extends Seeder
                     'subscription_id' => $subscription->id,
                     'tenant_id' => $subscription->subscribable_id,
                     'amount' => 0,
+                    'tax' => 0,
                     'status' => $this->getRandomStatus(),
                     'due_date' => $dueDate,
                     'paid_at' => $this->getPaidAtDate($dueDate),
                     'created_at' => $invoiceDate,
                     'updated_at' => $invoiceDate,
                 ]);
+
                 // Add subscription fee as an invoice item
                 if (! $plan->is_pay_as_you_go) {
                     $invoiceItemModel::create([
@@ -72,8 +71,18 @@ class InvoiceSeeder extends Seeder
                     }
                 }
 
+                // Calculate total amount from invoice items
                 $totalAmount = $invoice->items()->sum('total');
-                $invoice->update(['amount' => $totalAmount]);
+
+                // Calculate and update tax
+                $taxPercentage = config('filament-modular-subscriptions.tax_percentage', 15);
+                $tax = $totalAmount * $taxPercentage / 100;
+
+                // Update invoice with final amounts
+                $invoice->update([
+                    'amount' => $totalAmount + $tax,
+                    'tax' => $tax
+                ]);
             }
         }
     }

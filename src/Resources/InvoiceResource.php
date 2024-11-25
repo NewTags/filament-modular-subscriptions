@@ -2,6 +2,7 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
+use ArPHP\I18N\Arabic;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
@@ -19,6 +20,7 @@ use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Support\Facades\View;
 use Mpdf\Mpdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceResource extends Resource
 {
@@ -104,56 +106,31 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.invoice.download_pdf'))
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($record) {
-                        $invoice = $record;
+                        $data = [];
+                        $data['invoice'] = $record;
+                        $data['QrCode'] = '===QRCODEPLACEHOLDER===';
+                        $data['title'] = '===TITLEPLACEHOLDER===';
+                        $data['user'] = $record->customer->user;
 
-                        // Generate QR Code
-                        $qrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
+                        $reportHtml = view('filament-modular-subscriptions::pages.invoice-pdf', $data)->render();
+                        $arabic = new Arabic;
+                        $reportHtml = $arabic->utf8Glyphs($reportHtml, 50, false);
+
+                        $getQrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
                             new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
                             new \Salla\ZATCA\Tags\TaxNumber(config('filament-modular-subscriptions.tax_number')),
-                            new \Salla\ZATCA\Tags\InvoiceDate($invoice->created_at),
-                            new \Salla\ZATCA\Tags\InvoiceTotalAmount($invoice->amount),
-                            new \Salla\ZATCA\Tags\InvoiceTaxAmount($invoice->tax),
+                            new \Salla\ZATCA\Tags\InvoiceDate($record->created_at),
+                            new \Salla\ZATCA\Tags\InvoiceTotalAmount($record->amount),
+                            new \Salla\ZATCA\Tags\InvoiceTaxAmount($record->tax),
                         ])->render();
 
-                        $data = [
-                            'invoice' => $invoice,
-                            'QrCode' => $qrCode,
-                            'company' => [
-                                'name' => config('filament-modular-subscriptions.company_name'),
-                                'tax_number' => config('filament-modular-subscriptions.tax_number'),
-                                'address' => config('filament-modular-subscriptions.company_address'),
-                                'email' => config('filament-modular-subscriptions.company_email'),
-                                'logo' => config('filament-modular-subscriptions.company_logo'),
-                            ],
-                            'tax_percentage' => config('filament-modular-subscriptions.tax_percentage', 15),
-                        ];
+                        $reportHtml = str_replace('===QRCODEPLACEHOLDER===', $getQrCode, $reportHtml);
+                        $reportHtml = str_replace('===COMPANYLOGOPLACEHOLDER===', '<img width="270" src="' . public_path(config('filament-modular-subscriptions.company_logo')) . '"/>', $reportHtml);
+                        $reportHtml = str_replace('===TITLEPLACEHOLDER===', __('filament-modular-subscriptions::fms.invoice.invoice_title', ['number' => $record->id]), $reportHtml);
 
-                        $html = view('filament-modular-subscriptions::pages.invoice-pdf', $data)->render();
+                        $pdf = Pdf::setOption(['defaultFont' => 'DINNextLTArabic-Medium'])->loadHTML($reportHtml);
 
-                        // Configure mPDF with RTL support and custom fonts
-                        $mpdf = new Mpdf([
-                            'mode' => 'utf-8',
-                            'format' => 'A4',
-                            'orientation' => 'P',
-                            'margin_left' => 10,
-                            'margin_right' => 10,
-                            'margin_top' => 10,
-                            'margin_bottom' => 10,
-                            'default_font' => 'cairo',
-                            'tempDir' => storage_path('tmp'),
-                        ]);
-
-                        $mpdf->SetDirectionality('rtl');
-                        $mpdf->autoScriptToLang = true;
-                        $mpdf->autoLangToFont = true;
-
-                        $mpdf->WriteHTML($html);
-
-                        return response()->streamDownload(function () use ($mpdf) {
-                            echo $mpdf->Output('', 'S');
-                        }, "invoice_{$record->id}-{$record->created_at->format('Y-m-d')}.pdf", [
-                            'Content-Type' => 'application/pdf',
-                        ]);
+                        return $pdf->stream('inv_invoice_' . config('filament-modular-subscriptions.company_name') . '_' . $record->id . '_' . $record->created_at->format('Y-m-d') . '.pdf');
                     }),
                 Action::make('pay')
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.actions.pay'))
