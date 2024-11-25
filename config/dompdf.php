@@ -42,7 +42,7 @@ return [
          * Times-Roman, Times-Bold, Times-BoldItalic, Times-Italic,
          * Symbol, ZapfDingbats.
          */
-        'font_dir' => resource_path('fonts/pdf_fonts'), // advised by dompdf (https://github.com/dompdf/dompdf/pull/782)
+        'font_dir' => __DIR__ . '/../resources/fonts', // advised by dompdf (https://github.com/dompdf/dompdf/pull/782)
 
         /*
          * The location of the DOMPDF font cache directory
