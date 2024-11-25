@@ -292,7 +292,8 @@ return [
         'submitted_at' => 'في',
         'approved' => 'تم التأكيد  الدفع بنجاح',
         'subscription_renewed' => 'تم تجديد الاشتراك بنجاح',
-        'partially_paid' => 'ت الدفع جزئيا',
+        'partially_paid' => 'تم الدفع جزئيا',
+        'email' => 'البريد الإلكتروني',
     ],
     'file_entry' => [
         'view_file' => 'عرض الملف',

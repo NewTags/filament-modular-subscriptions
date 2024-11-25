@@ -66,14 +66,11 @@
             <td align="right" valign="top" colspan="2">
                 {{ config('filament-modular-subscriptions.company_name') }}
                 <br>
-                {{ __('filament-modular-subscriptions::fms.invoice.tax_number') }}:
-                {{ config('filament-modular-subscriptions.tax_number') }}
-                <br>
                 {{ __('filament-modular-subscriptions::fms.invoice.billing_to') }}:
                 {{ config('filament-modular-subscriptions.company_address') }}
                 <br>
-                {{ __('filament-modular-subscriptions::fms.payment.email') }}:
-                {{ config('filament-modular-subscriptions.company_email') }}
+                {{ __('filament-modular-subscriptions::fms.invoice.tax_number') }}:
+                {{ config('filament-modular-subscriptions.tax_number') }}
                 <br>
             </td>
             <td align="right">
@@ -106,9 +103,6 @@
                 {{ __('filament-modular-subscriptions::fms.invoice.tax_number') }}:
                 {{ $user['customerInfo']['vat_no'] }}
                 <br>
-
-                {{ __('filament-modular-subscriptions::fms.payment.email') }}:
-                {{ $user['customerInfo']['email'] }}
             </td>
         </tr>
     </table>
