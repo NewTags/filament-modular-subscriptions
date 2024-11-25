@@ -42,13 +42,6 @@
             text-align: center;
         }
 
-        .unpaid-stamp {
-            background-color: #ffebee;
-            color: #333;
-            padding: 5px 15px;
-            border-radius: 4px;
-            display: inline-block;
-        }
 
         .invoice-info {
             display: grid;
@@ -112,41 +105,49 @@
     <div class="invoice-container">
         <div class="header">
             <img src="{{ $company['logo'] }}" alt="{{ $company['name'] }} Logo" class="logo">
-            <h1 class="invoice-title">فاتورة ضريبية</h1>
-            <div class="unpaid-stamp">{{ $invoice->status->getLabel() }}</div>
+            <h1 class="invoice-title">
+                {{ __('filament-modular-subscriptions::fms.invoice.invoice_title', ['subscriber' => $invoice->subscription->subscriber?->name, 'id' => $invoice->id, 'date' => $invoice->created_at->format('Y/m/d')]) }}
+            </h1>
+            <x-filament::badge 
+                :color="$invoice->status->getColor()" 
+                :icon="$invoice->status->getIcon()">
+                {{ $invoice->status->getLabel() }}
+            </x-filament::badge>
         </div>
 
         <div class="invoice-info">
             <div>
-                <strong>E-Invoice #:</strong> {{ $invoice->id }}
-                <strong>التاريخ:</strong> {{ $invoice->created_at->format('Y/m/d') }}
+                <strong>{{ __('filament-modular-subscriptions::invoice.number') }}:</strong> {{ $invoice->id }}
+                <strong>{{ __('filament-modular-subscriptions::invoice.date') }}:</strong>
+                {{ $invoice->created_at->format('Y/m/d') }}
             </div>
         </div>
 
         <div class="details-grid">
             <div>
-                <strong>From:</strong>
+                <strong>{{ __('filament-modular-subscriptions::invoice.billing_to') }}:</strong>
                 <p>{{ $company['name'] }}</p>
                 <p>{{ $company['address'] }}</p>
-                <p>الرقم الضريبي: {{ $company['tax_number'] }}</p>
+                <p>{{ __('filament-modular-subscriptions::invoice.tax_number') }}: {{ $company['tax_number'] }}</p>
             </div>
             <div>
-                <strong>Bill To:</strong>
+                <strong>{{ __('filament-modular-subscriptions::invoice.bill_to') }}:</strong>
                 <p>{{ $invoice->subscription->subscriber?->name }}</p>
                 <p>{{ $invoice->subscription->subscriber?->address }}</p>
-                <p>الرقم الضريبي: {{ $invoice->subscription->subscriber?->tax_number }}</p>
+                <p>{{ __('filament-modular-subscriptions::invoice.tax_number') }}:
+                    {{ $invoice->subscription->subscriber?->tax_number }}</p>
             </div>
         </div>
 
         <table>
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>الصنف | Item</th>
-                    <th>الكمية | Qty</th>
-                    <th>السعر | Price</th>
-                    <th>الضريبة | VAT</th>
-                    <th>الإجمالي | Total</th>
+                    <th>{{ __('filament-modular-subscriptions::invoice.no') }}</th>
+                    <th>{{ __('filament-modular-subscriptions::invoice.item') }}</th>
+                    <th>{{ __('filament-modular-subscriptions::invoice.quantity') }}</th>
+                    <th>{{ __('filament-modular-subscriptions::invoice.unit_price') }}</th>
+                    <th>{{ __('filament-modular-subscriptions::invoice.vat') }}</th>
+                    <th>{{ __('filament-modular-subscriptions::invoice.total') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -165,16 +166,17 @@
 
         <table class="totals">
             <tr>
-                <td>المبلغ الإجمالي بدون الضريبة</td>
+                <td>{{ __('filament-modular-subscriptions::invoice.subtotal') }}</td>
                 <td>{{ number_format($invoice->amount - $invoice->tax, 2) }}
                     {{ $invoice->subscription->plan->currency }}</td>
             </tr>
             <tr>
-                <td>مبلغ الضريبة ({{ $tax_percentage }}%)</td>
+                <td>{{ __('filament-modular-subscriptions::invoice.tax_amount', ['percentage' => $tax_percentage]) }}
+                </td>
                 <td>{{ number_format($invoice->tax, 2) }} {{ $invoice->subscription->plan->currency }}</td>
             </tr>
             <tr>
-                <td><strong>الإجمالي مع الضريبة</strong></td>
+                <td><strong>{{ __('filament-modular-subscriptions::invoice.total_with_tax') }}</strong></td>
                 <td><strong>{{ number_format($invoice->amount, 2) }}
                         {{ $invoice->subscription->plan->currency }}</strong></td>
             </tr>
@@ -182,7 +184,7 @@
 
         <img src="data:image/png;base64,{{ $QrCode }}" alt="QR Code" class="qr-code">
         <div class="tax-number">
-            الرقم الضريبي: VAT ID : {{ $company['tax_number'] }}
+            {{ __('filament-modular-subscriptions::invoice.tax_number') }}: VAT ID : {{ $company['tax_number'] }}
         </div>
     </div>
 </body>

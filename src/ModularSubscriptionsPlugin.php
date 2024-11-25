@@ -13,12 +13,15 @@ use Filament\Notifications\Actions\Action as NotificationAction;
 use Illuminate\Support\Facades\Cache;
 use Filament\Facades\Filament;
 use Filament\View\PanelsRenderHook;
+use Illuminate\Database\Eloquent\Model;
 
 class ModularSubscriptionsPlugin implements Plugin
 {
     protected bool $hasSubscriptionStats = true;
 
     protected bool $onTenantPanel = false;
+
+    protected ?Model $tenant = null;
 
     public static function make(): static
     {
@@ -40,13 +43,12 @@ class ModularSubscriptionsPlugin implements Plugin
             $panel
                 ->pages([
                     TenantSubscription::class,
-                ]);
-
-            // Register the subscription status hook
-            FilamentView::registerRenderHook(
-                PanelsRenderHook::PAGE_START,
-                fn(): string => $this->renderSubscriptionAlerts()
-            );
+                ])->bootUsing(function () {
+                    FilamentView::registerRenderHook(
+                        PanelsRenderHook::PAGE_START,
+                        fn(): string => $this->renderSubscriptionAlerts()
+                    );
+                });
         }
 
         if ($this->hasSubscriptionStats) {
@@ -64,7 +66,9 @@ class ModularSubscriptionsPlugin implements Plugin
     public function onTenantPanel(Closure | bool $condition = true): static
     {
         $this->onTenantPanel = $condition instanceof Closure ? $condition() : $condition;
-
+        if ($this->onTenantPanel) {
+            $this->tenant = filament()->getTenant();
+        }
         return $this;
     }
 
@@ -93,10 +97,10 @@ class ModularSubscriptionsPlugin implements Plugin
         }
 
         // Cache subscription status checks for 5 minutes per tenant
-        $cacheKey = 'subscription_alerts_' . filament()->getTenant()->id;
+        $cacheKey = 'subscription_alerts_' . $this->tenant->id;
         $alerts = Cache::remember($cacheKey, now()->addMinutes(30), function () {
             $alerts = [];
-            $tenant = filament()->getTenant();
+            $tenant = $this->tenant;
             $subscription = $tenant->activeSubscription();
 
             if (!$subscription) {

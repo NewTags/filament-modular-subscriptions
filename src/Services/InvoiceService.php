@@ -19,16 +19,30 @@ class InvoiceService
      */
     public function generateInvoice(Subscription $subscription): ?Invoice
     {
-        // Skip if invoice already exists for current period
         if ($this->hasCurrentPeriodInvoice($subscription)) {
             return null;
         }
 
         $dueDate = $this->calculateDueDate($subscription);
-        
-        DB::transaction(function () use ($subscription, $dueDate) {
+
+        return DB::transaction(function () use ($subscription, $dueDate) {
             $invoice = $this->createInvoice($subscription, $dueDate);
             $this->createInvoiceItems($invoice, $subscription);
+
+            // Calculate total amount from invoice items
+            $totalAmount = $invoice->items()->sum('total');
+
+            // Calculate and update tax
+            $taxPercentage = config('filament-modular-subscriptions.tax_percentage', 15);
+            $tax = $totalAmount * $taxPercentage / 100;
+
+            // Update invoice with final amounts
+            $invoice->update([
+                'amount' => $totalAmount + $tax,
+                'tax' => $tax
+            ]);
+
+            return $invoice;
         });
     }
 
@@ -42,13 +56,11 @@ class InvoiceService
     {
         $plan = $subscription->plan;
         $startDate = $subscription->starts_at;
-        
-        // If plan has specific due days setting
+
         if ($plan->due_days) {
             return now()->addDays($plan->due_days);
         }
-        
-        // Default to subscription start date + invoice period
+
         return $startDate->copy()->addDays($plan->invoice_period);
     }
 
@@ -60,9 +72,10 @@ class InvoiceService
      */
     protected function hasCurrentPeriodInvoice(Subscription $subscription): bool
     {
-        return $subscription->invoices()
-            ->where('created_at', '>=', now()->startOfMonth())
-            ->exists();
+        // return $subscription->invoices()
+        //     ->where('created_at', '>=', now()->startOfMonth())
+        //     ->exists();
+        return false;
     }
 
     /**
@@ -77,7 +90,8 @@ class InvoiceService
         return $this->getInvoiceModel()::create([
             'subscription_id' => $subscription->id,
             'tenant_id' => $subscription->subscribable_id,
-            'amount' => $this->calculateTotalAmount($subscription),
+            'amount' => 0, // Initial amount, will be updated after items
+            'tax' => 0, // Initial tax, will be updated after items
             'status' => InvoiceStatus::UNPAID,
             'due_date' => $dueDate,
         ]);

@@ -105,11 +105,11 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($record) {
                         $invoice = $record;
-                        
+
                         // Generate QR Code
                         $qrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
-                            new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name', 'شركة إيسار لتقنية المعلومات')),
-                            new \Salla\ZATCA\Tags\TaxNumber(config('filament-modular-subscriptions.tax_number', '310970508300003')),
+                            new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
+                            new \Salla\ZATCA\Tags\TaxNumber(config('filament-modular-subscriptions.tax_number')),
                             new \Salla\ZATCA\Tags\InvoiceDate($invoice->created_at),
                             new \Salla\ZATCA\Tags\InvoiceTotalAmount($invoice->amount),
                             new \Salla\ZATCA\Tags\InvoiceTaxAmount($invoice->tax),
