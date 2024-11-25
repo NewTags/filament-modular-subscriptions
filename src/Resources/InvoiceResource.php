@@ -113,17 +113,8 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.invoice.download_pdf'))
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($record) {
-                        $data = [];
-                        $data['invoice'] = $record;
-                        $data['QrCode'] = '===QRCODEPLACEHOLDER===';
-                        $data['title'] = '===TITLEPLACEHOLDER===';
-                        $data['user'] = ResolvesCustomerInfo::take($record->tenant);
-
-                        $reportHtml = view('filament-modular-subscriptions::pages.invoice-pdf', $data)->render();
-                        $arabic = new Arabic;
-                        $reportHtml = $arabic->utf8Glyphs($reportHtml, 50, false);
-
-                        $getQrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
+                        // Generate QR code
+                        $QrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
                             new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
                             new \Salla\ZATCA\Tags\TaxNumber(config('filament-modular-subscriptions.tax_number')),
                             new \Salla\ZATCA\Tags\InvoiceDate($record->created_at),
@@ -131,14 +122,42 @@ class InvoiceResource extends Resource
                             new \Salla\ZATCA\Tags\InvoiceTaxAmount($record->tax),
                         ])->render();
 
-                        $reportHtml = str_replace('===QRCODEPLACEHOLDER===', $getQrCode, $reportHtml);
-                        $reportHtml = str_replace('===COMPANYLOGOPLACEHOLDER===', '<img width="270" src="' . public_path(config('filament-modular-subscriptions.company_logo')) . '"/>', $reportHtml);
-                        $reportHtml = str_replace('===TITLEPLACEHOLDER===', __('filament-modular-subscriptions::fms.invoice.invoice_title', ['number' => $record->id]), $reportHtml);
+                        // Get view data
+                        $data = [
+                            'invoice' => $record,
+                            'QrCode' => $QrCode,
+                            'user' => ResolvesCustomerInfo::take($record->tenant),
+                            'company_logo' => public_path(config('filament-modular-subscriptions.company_logo'))
+                        ];
 
-                        $pdf = Pdf::setOption(['defaultFont' => 'DINNextLTArabic-Medium'])->loadHTML($reportHtml);
+                        // Render view to HTML
+                        $view = view('filament-modular-subscriptions::pages.invoice-pdf', $data);
+                        $html = $view->render();
 
-                        return response()->streamDownload(function () use ($pdf) {
-                            echo $pdf->output();
+                        // Create PDF using mPDF
+                        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+                        $fontDirs = $defaultConfig['fontDir'];
+
+                        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+                        $fontData = $defaultFontConfig['fontdata'];
+
+                        $mpdf = new \Mpdf\Mpdf([
+                            'fontDir' => array_merge($fontDirs, [
+                                config('filament-modular-subscriptions.font_path')
+                            ]),
+                            'fontdata' => array_merge($fontData, [
+                                'DINNextLTArabic' => [
+                                    'R' => 'dinnextltarabic_medium_normal_ab9f5a2326967c69e338559eaff07d99.ttf',
+                                ]
+                            ]),
+                            'default_font' => 'DINNextLTArabic',
+                            'mode' => 'utf-8',
+                            'tempDir' => storage_path('app/pdf-fonts')
+                        ]);
+                        $mpdf->WriteHTML($html);
+
+                        return response()->streamDownload(function () use ($mpdf) {
+                            echo $mpdf->Output('', 'S');
                         }, 'inv_invoice_' . config('filament-modular-subscriptions.company_name') . '_' . $record->id . '_' . $record->created_at->format('Y-m-d') . '.pdf');
                     }),
                 Action::make('pay')

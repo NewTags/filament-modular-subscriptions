@@ -1,181 +1,217 @@
-<html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html dir="rtl">
+<header>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</header>
 
-<head>
-    <style type="text/css">
-        * {
-            direction: rtl;
-            font-size: 12px;
+<body dir="rtl">
+    @php
+        if (function_exists('arabic')) {
+            function arabic($text)
+            {
+                return $text;
+                $arabic = new \ArPHP\I18N\Arabic();
+                return $arabic->utf8Glyphs($text);
+            }
         }
-
-        html {
-            margin: 60px;
+    @endphp
+    <style>
+        body {
+            font-size: 8px;
+            font-family: Cairo;
         }
 
         table {
-            text-align: center;
-            vertical-align: middle;
+            border-collapse: collapse;
         }
 
-        td,
-        th {
-            padding: 5px;
+        tr {
+            border-bottom: 1pt solid black;
         }
 
-        th {
-            background-color: #F3F5F7;
-            color: #061C71;
+        th,
+        td {
+            border-left: 1pt solid black;
         }
 
-        @page {
-            margin: 150px 50px;
-        }
-
-        #header {
-            position: fixed;
-            left: -50px;
-            top: -150px;
-            right: -50px;
-            height: 150px;
-            background-color: #061C71;
-        }
-
-        #head_line {
-            background-color: #061C71;
-            height: 8px;
-            margin-bottom: 10px;
+        table {
+            width: 100%;
+            border: 1px solid #000;
         }
     </style>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>===TITLEPLACEHOLDER===</title>
-</head>
 
-<body style="direction: rtl; text-align: right">
-
-    <div id="head_line"></div>
-
-    <table class="normal-table" align="center" width="100%" style="direction: rtl" border="0">
-        <tr>
-            <td align="left">
-                {{ __('filament-modular-subscriptions::fms.invoice.invoice_title') }}<br>
-                <img width="100" height="100" src="{{ $QrCode }}" alt="QR Code" />
-            </td>
-            <td align="right">{{-- ===LOGOPLACEHOLDER=== --}}</td>
-            <td align="right">===COMPANYLOGOPLACEHOLDER===</td>
-        </tr>
-        <tr>
-            <td align="right" valign="top" colspan="2">
-                {{ config('filament-modular-subscriptions.company_name') }}
-                <br>
-                {{ __('filament-modular-subscriptions::fms.invoice.billing_to') }}:
-                {{ config('filament-modular-subscriptions.company_address') }}
-                <br>
-                {{ __('filament-modular-subscriptions::fms.invoice.tax_number') }}:
-                {{ config('filament-modular-subscriptions.tax_number') }}
-                <br>
-            </td>
-            <td align="right">
-                {{ __('filament-modular-subscriptions::fms.invoice.number') }}:
-                {{ $invoice->id }}
-                <br>
-
-                {{ now()->format('Y/m/d') }}
-                {{ now()->format('h:i') }}
-                {{ __('filament-modular-subscriptions::fms.invoice.time_period.' . now()->format('a')) }}
-                {{ __('filament-modular-subscriptions::fms.invoice.date') }}:
-                <br>
-
-                {{ date('Y/m/d', strtotime($invoice->due_date)) }}
-                {{ __('filament-modular-subscriptions::fms.invoice.due_date') }}:
-                <br>
-
-                {{ $invoice->status->getLabel() }}
-                {{ __('filament-modular-subscriptions::fms.invoice.status') }}:
-                <br><br>
-
-                {{ $user['name'] }}
-                {{ __('filament-modular-subscriptions::fms.invoice.bill_to') }}:
-                <br>
-
-                {{ __('filament-modular-subscriptions::fms.invoice.billing_to') }}:
-                {{ $user['customerInfo']['address'] }}
-                <br>
-
-                {{ __('filament-modular-subscriptions::fms.invoice.tax_number') }}:
-                {{ $user['customerInfo']['vat_no'] }}
-                <br>
-            </td>
-        </tr>
-    </table>
-    <br>
-    <div class="content" style="direction: rtl;">
-        @if ($invoice->items->isNotEmpty())
-            <span>{{ __('filament-modular-subscriptions::fms.invoice.items') }}:</span>
-            <br>
-            <table class="normal-table" align="center" width="100%" style="direction: rtl" border="1"
-                cellpadding="0" cellspacing="0">
-                <tr>
-                    <th width="20%">{{ __('filament-modular-subscriptions::fms.invoice.total') }}</th>
-                    <th width="10%">{{ __('filament-modular-subscriptions::fms.invoice.quantity') }}</th>
-                    <th width="50%">{{ __('filament-modular-subscriptions::fms.invoice.item') }}</th>
-                </tr>
-                @foreach ($invoice->items as $item)
-                    <tr>
-                        <td>
-                            {{ number_format($item->amount, 2, '.', '') }}
-                            {{ __('filament-modular-subscriptions::fms.invoice.currency') }}
-                        </td>
-                        <td>{{ $item->quantity }}</td>
-                        <td>{{ $item->description }}</td>
-                    </tr>
-                @endforeach
-                <tr>
-                    <th>
-                        {{ $invoice->amount }}
-                        {{ __('filament-modular-subscriptions::fms.invoice.currency') }}
-                    </th>
-                    <th colspan="2" class="font-bold">
-                        {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}
-                    </th>
-                </tr>
-            </table>
-        @endif
-        <br>
-        <p style="font-size: 18px;">
-            {{ __('filament-modular-subscriptions::fms.invoice.invoice_details') }}:
-        </p>
-        <table class="normal-table" align="right" width="50%" style="direction: rtl" border="0" cellpadding="0"
-            cellspacing="0">
-            <tr style="border-bottom: solid 1px lightgray; padding-bottom: 5px;">
-                <td width="10%" align="left">
-                    {{ $invoice->amount }}
-                    {{ __('filament-modular-subscriptions::fms.invoice.currency') }}
-                    <br>
+    <table style="border: none; border-collapse:collapse;">
+        <tbody style="border: none;">
+            <tr style="border: none;">
+                <td style="border: none;border-left: none; border-right: none;"></td>
+                <td
+                    style="border: none;border-left: none; border-right: none;text-align: center;font-weight: bolder;font-size: 12pt;">
+                    {{ __('filament-modular-subscriptions::fms.invoice.invoice_title') }}</td>
+                <td
+                    style="border: none;border-left: none; border-right: none;text-align: left;font-weight: bolder;font-size: 12pt;">
+                    <span
+                        style="background-color: {{ $invoice->status == 'paid' ? '#dcfce7' : '#fee2e2' }};color: {{ $invoice->status == 'paid' ? '#166534' : '#991b1b' }};padding: 10px;border-radius: 10px;">
+                        {{ $invoice->status->getLabel() }}
+                    </span>
                 </td>
-                <th width="15%" style="background: unset" align="right">
-                    {{ __('filament-modular-subscriptions::fms.invoice.subtotal') }}
+            </tr>
+        </tbody>
+    </table>
+    <h4> </h4>
+    <table style="border: none; border-collapse:collapse;" cellpadding="6">
+        <thead style="border: none;">
+            <tr style="background-color: #e5e7eb;border: none; border-collapse:collapse;">
+                <th scope="col" style="border: none;border-left: none; border-right: none;">
+                    {{ __('filament-modular-subscriptions::fms.invoice.number') }}</th>
+                <th scope="col" style="border: none;border-left: none; border-right: none;">{{ $invoice->id }}</th>
+                <th scope="col" style="border: none;border-left: none; border-right: none;">E-Invoice #:</th>
+                <th scope="col" style="border: none;border-left: none; border-right: none;">
+                    {{ __('filament-modular-subscriptions::fms.invoice.date') }}:</th>
+                <th scope="col" style="border: none;border-left: none; border-right: none;">
+                    {{ now()->format('Y/m/d') }}</th>
+                <th scope="col" style="border: none;border-left: none; border-right: none;text-align: left;">
+                    E-Invoice Date #:</th>
+            </tr>
+        </thead>
+    </table>
+    <br />
+    <br />
+    <table style="border: none;border-collapse: collapse;" cellpadding="6">
+        <thead style="border: none;">
+            <tr style="background-color: #e5e7eb;border: none;">
+                <th scope="col" style="border: none;border-left: none; border-right: none;">
+                    {{ __('filament-modular-subscriptions::fms.invoice.billing_to') }}:</th>
+                <th scope="col" style="border: none;border-left: none; border-right: none;text-align: left;">From:
+                </th>
+                <th scope="col" style="border: none;border-left: none; border-right: none;">
+                    {{ __('filament-modular-subscriptions::fms.invoice.bill_to') }}:</th>
+                <th scope="col" style="border: none;border-left: none; border-right: none;text-align: left;">Bill To:
                 </th>
             </tr>
-            <tr style="padding-bottom: 5px;">
-                <td width="10%" align="left">
-                    {{ $invoice->tax }}
-                    {{ __('filament-modular-subscriptions::fms.invoice.currency') }}
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="2" style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
+                    <span>{{ config('filament-modular-subscriptions.company_name') }}</span>
+                    <br />
+                    <span>{{ __('filament-modular-subscriptions::fms.invoice.billing_to') }}:
+                        {{ config('filament-modular-subscriptions.company_address') }}</span>
+                    <br />
+                    <span>{{ __('filament-modular-subscriptions::fms.invoice.tax_number') }}:
+                        {{ config('filament-modular-subscriptions.tax_number') }}</span>
+                    <br />
                 </td>
-                <th width="15%" style="background: unset" align="right">
+                <td colspan="2" style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
+                    <span>{{ $user['name'] }}</span>
+                    <br />
+                    <span>{{ __('filament-modular-subscriptions::fms.invoice.billing_to') }}:
+                        {{ $user['customerInfo']['address'] }}</span>
+                    <br />
+                    <span>{{ __('filament-modular-subscriptions::fms.invoice.tax_number') }}:
+                        {{ $user['customerInfo']['vat_no'] }}</span>
+                    <br />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <br />
+    <br />
+    <table style="border: none;border-collapse: collapse;" cellpadding="6">
+        <thead style="border: none;">
+            <tr style="background-color: #e5e7eb;border: none;">
+                <th style="border: none;border-left: none; border-right: none;" width="10%">No.</th>
+                <th style="border: none;border-left: none; border-right: none;" width="50%">
+                    {{ __('filament-modular-subscriptions::fms.invoice.item') }}</th>
+                <th style="border: none;border-left: none; border-right: none;" width="10%">
+                    {{ __('filament-modular-subscriptions::fms.invoice.quantity') }}</th>
+                <th style="border: none;border-left: none; border-right: none;" width="10%">
+                    {{ __('filament-modular-subscriptions::fms.invoice.total') }}</th>
+                <th style="border: none;border-left: none; border-right: none;" width="10%">
                     {{ __('filament-modular-subscriptions::fms.invoice.tax_amount', ['percentage' => config('filament-modular-subscriptions.tax_percentage')]) }}
                 </th>
+                <th style="border: none;border-left: none; border-right: none;" width="10%">
+                    {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}</th>
             </tr>
-            <tr style="border-top: solid 1px #061C71; padding-top: 5px;">
-                <td width="10%" align="left">
-                    {{ $invoice->amount + $invoice->tax }}
-                    {{ __('filament-modular-subscriptions::fms.invoice.currency') }}
+        </thead>
+        <tbody>
+            @foreach ($invoice->items as $item)
+                <tr>
+                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
+                        {{ $loop->iteration }}</td>
+                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="50%">
+                        {{ $item->description }}</td>
+                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
+                        {{ $item->quantity }}</td>
+                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
+                        {{ number_format($item->amount / 1.15, 2, '.', '') }}</td>
+                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
+                        {{ number_format($item->amount - $item->amount / 1.15, 2, '.', '') }}</td>
+                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
+                        {{ $item->amount }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+    <br />
+    <br />
+    <table style="border: none;border-collapse: collapse;" cellpadding="6">
+        <thead style="border: none;">
+            <tr style="background-color: #e5e7eb;border: none;">
+                <th colspan="3" style="border: none;border-left: none; border-right: none;text-align: center;">
+                    {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
+                    {{ __('filament-modular-subscriptions::fms.invoice.subtotal') }}</td>
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">Subtotal</td>
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: ltr;">
+                    {{ $invoice->amount }} {{ __('filament-modular-subscriptions::fms.invoice.currency') }}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
+                    {{ __('filament-modular-subscriptions::fms.invoice.tax_amount', ['percentage' => config('filament-modular-subscriptions.tax_percentage')]) }}
                 </td>
-                <th width="15%" style="background: unset" align="right">
-                    {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}
-                </th>
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">VAT
+                    ({{ config('filament-modular-subscriptions.tax_percentage') }}%)</td>
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: ltr;">
+                    {{ $invoice->tax }} {{ __('filament-modular-subscriptions::fms.invoice.currency') }}</td>
             </tr>
-        </table>
-    </div>
-
+            <tr style="background-color: #e5e7eb;border: none;">
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
+                    {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}</td>
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">Total with VAT</td>
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: rtl;">
+                    {{ number_format($invoice->amount + $invoice->tax, 2, '.', '') }}
+                    {{ __('filament-modular-subscriptions::fms.invoice.currency') }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <br />
+    <br />
+    <table style="border: none;border-collapse: collapse;" width="100%">
+        <tbody>
+            <tr style="border: none;">
+                <td style="vertical-align: middle;text-align: center;border-collapse: collapse;border-left: none;"
+                    width="50%">
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <span>{{ __('filament-modular-subscriptions::fms.invoice.tax_number') }}:
+                        {{ config('filament-modular-subscriptions.tax_number') }}</span>
+                </td>
+                <td style="text-align:left;border-collapse: collapse;border-left: none;" width="50%">
+                    <span>
+                        <img width="100" height="100" src="{{ $QrCode }}" alt="QR Code" />
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </body>
 
 </html>
