@@ -105,18 +105,41 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($record) {
                         $invoice = $record;
-                        $html = view('filament-modular-subscriptions::pages.invoice-pdf', compact('invoice'))->render();
+                        
+                        // Generate QR Code
+                        $qrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
+                            new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name', 'شركة إيسار لتقنية المعلومات')),
+                            new \Salla\ZATCA\Tags\TaxNumber(config('filament-modular-subscriptions.tax_number', '310970508300003')),
+                            new \Salla\ZATCA\Tags\InvoiceDate($invoice->created_at),
+                            new \Salla\ZATCA\Tags\InvoiceTotalAmount($invoice->amount),
+                            new \Salla\ZATCA\Tags\InvoiceTaxAmount($invoice->tax),
+                        ])->render();
 
-                        // Configure mPDF with RTL support
+                        $data = [
+                            'invoice' => $invoice,
+                            'QrCode' => $qrCode,
+                            'company' => [
+                                'name' => config('filament-modular-subscriptions.company_name'),
+                                'tax_number' => config('filament-modular-subscriptions.tax_number'),
+                                'address' => config('filament-modular-subscriptions.company_address'),
+                                'email' => config('filament-modular-subscriptions.company_email'),
+                                'logo' => config('filament-modular-subscriptions.company_logo'),
+                            ],
+                            'tax_percentage' => config('filament-modular-subscriptions.tax_percentage', 15),
+                        ];
+
+                        $html = view('filament-modular-subscriptions::pages.invoice-pdf', $data)->render();
+
+                        // Configure mPDF with RTL support and custom fonts
                         $mpdf = new Mpdf([
                             'mode' => 'utf-8',
                             'format' => 'A4',
                             'orientation' => 'P',
-                            'margin_left' => 0,
-                            'margin_right' => 0,
-                            'margin_top' => 0,
-                            'margin_bottom' => 0,
-                            'default_font' => 'dejavusans',
+                            'margin_left' => 10,
+                            'margin_right' => 10,
+                            'margin_top' => 10,
+                            'margin_bottom' => 10,
+                            'default_font' => 'cairo',
                             'tempDir' => storage_path('tmp'),
                         ]);
 
@@ -128,7 +151,7 @@ class InvoiceResource extends Resource
 
                         return response()->streamDownload(function () use ($mpdf) {
                             echo $mpdf->Output('', 'S');
-                        }, "invoice_{$record->id}-{$record->created_at->format('Y-m-d H-i-s')}.pdf", [
+                        }, "invoice_{$record->id}-{$record->created_at->format('Y-m-d')}.pdf", [
                             'Content-Type' => 'application/pdf',
                         ]);
                     }),

@@ -12,6 +12,7 @@ use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action as NotificationAction;
 use Illuminate\Support\Facades\Cache;
 use Filament\Facades\Filament;
+use Filament\View\PanelsRenderHook;
 
 class ModularSubscriptionsPlugin implements Plugin
 {
@@ -43,7 +44,7 @@ class ModularSubscriptionsPlugin implements Plugin
 
             // Register the subscription status hook
             FilamentView::registerRenderHook(
-                'panels::body.start',
+                PanelsRenderHook::PAGE_START,
                 fn(): string => $this->renderSubscriptionAlerts()
             );
         }

@@ -83,4 +83,10 @@ return [
         // Add other payment method configurations here,
     ],
     'font_path' => resource_path('fonts/Cairo'),
+    'company_name' => 'إسم الشركة',
+    'tax_number' => 'XXXXXXXXXXXXXXXXXXX',
+    'company_address' => 'العنوان',
+    'company_email' => 'info@company.com',
+    'company_logo' => '/images/company-logo.png',
+    'tax_percentage' => 15,
 ];
