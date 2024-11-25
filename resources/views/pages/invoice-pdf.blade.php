@@ -66,37 +66,37 @@
             <td align="right" valign="top" colspan="2">
                 {{ config('filament-modular-subscriptions.company_name') }}
                 <br>
-                {{ config('filament-modular-subscriptions.tax_number') }}
                 {{ __('filament-modular-subscriptions::fms.invoice.tax_number') }}:
+                {{ config('filament-modular-subscriptions.tax_number') }}
                 <br>
-                {{ config('filament-modular-subscriptions.company_address') }}
                 {{ __('filament-modular-subscriptions::fms.invoice.billing_to') }}:
+                {{ config('filament-modular-subscriptions.company_address') }}
                 <br>
-                {{ config('filament-modular-subscriptions.company_email') }}
                 {{ __('filament-modular-subscriptions::fms.payment.email') }}:
+                {{ config('filament-modular-subscriptions.company_email') }}
                 <br>
             </td>
             <td align="right">
-                {{ $invoice->id }}
                 {{ __('filament-modular-subscriptions::fms.invoice.number') }}:
+                {{ $invoice->id }}
                 <br>
 
-                {{ __('filament-modular-subscriptions::fms.invoice.date') }}:
                 {{ now()->format('Y/m/d') }}
                 {{ now()->format('h:i') }}
                 {{ __('filament-modular-subscriptions::fms.invoice.time_period.' . now()->format('a')) }}
+                {{ __('filament-modular-subscriptions::fms.invoice.date') }}:
                 <br>
 
-                {{ __('filament-modular-subscriptions::fms.invoice.due_date') }}:
                 {{ date('Y/m/d', strtotime($invoice->due_date)) }}
+                {{ __('filament-modular-subscriptions::fms.invoice.due_date') }}:
                 <br>
 
+                {{ $invoice->status->getLabel() }}
                 {{ __('filament-modular-subscriptions::fms.invoice.status') }}:
-                {{ __('filament-modular-subscriptions::fms.invoice_status.' . $invoice->status->value) }}
                 <br><br>
 
-                {{ __('filament-modular-subscriptions::fms.invoice.bill_to') }}:
                 {{ $user['name'] }}
+                {{ __('filament-modular-subscriptions::fms.invoice.bill_to') }}:
                 <br>
 
                 {{ __('filament-modular-subscriptions::fms.invoice.billing_to') }}:

@@ -275,6 +275,7 @@ return [
         'subtotal' => 'المبلغ الإجمالي بدون الضريبة',
         'tax_amount' => 'مبلغ الضريبة (:percentage%)',
         'total_with_tax' => 'الإجمالي مع الضريبة',
+        'currency' => 'ريال سعودي',
     ],
     'payment' => [
         'select_method' => 'اختر طريقة الدفع',
