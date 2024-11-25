@@ -89,4 +89,11 @@ return [
     'company_email' => 'info@company.com',
     'company_logo' => '/images/company-logo.png',
     'tax_percentage' => 15,
+    'tenant_fields' => [
+        'name' => 'name', // default field or custom accessor
+        'address' => 'address', // could be 'info.address' or 'customerInfo.address'
+        'vat_number' => 'tax_number', // could be 'vat_number' or 'vat_id' or 'info.vat'
+        'email' => 'company_email', // could be 'contact_email' or 'info.email'
+    ],
+    'tenant_data_resolver' => null, // Can be set to a callable
 ];

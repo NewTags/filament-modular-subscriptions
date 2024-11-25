@@ -21,9 +21,12 @@ use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Support\Facades\View;
 use Mpdf\Mpdf;
 use Barryvdh\DomPDF\Facade\Pdf;
+use HoceineEl\FilamentModularSubscriptions\Traits\ResolvesCustomerInfo;
 
 class InvoiceResource extends Resource
 {
+    use ResolvesCustomerInfo;
+
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $tenantOwnershipRelationshipName = 'tenant';
@@ -62,7 +65,12 @@ class InvoiceResource extends Resource
                     $query->where('tenant_id', filament()->getTenant()->id);
                 }
 
-                return $query->with('subscription.subscriber', 'subscription.plan');
+                return $query->with([
+                    'subscription.subscriber',
+                    'subscription.plan',
+                    'items',
+                    'tenant'
+                ]);
             })
             ->columns([
 
@@ -110,7 +118,7 @@ class InvoiceResource extends Resource
                         $data['invoice'] = $record;
                         $data['QrCode'] = '===QRCODEPLACEHOLDER===';
                         $data['title'] = '===TITLEPLACEHOLDER===';
-                        $data['user'] = $record->customer->user;
+                        $data['user'] = $this->resolveCustomerInfo($record->tenant);
 
                         $reportHtml = view('filament-modular-subscriptions::pages.invoice-pdf', $data)->render();
                         $arabic = new Arabic;

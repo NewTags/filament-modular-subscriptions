@@ -96,19 +96,19 @@
                 <br><br>
 
                 {{ __('filament-modular-subscriptions::fms.invoice.bill_to') }}:
-                {{ $user->name }}
+                {{ $user['name'] }}
                 <br>
 
                 {{ __('filament-modular-subscriptions::fms.invoice.billing_to') }}:
-                {{ $user->customerInfo->address }}
+                {{ $user['customerInfo']['address'] }}
                 <br>
 
                 {{ __('filament-modular-subscriptions::fms.invoice.tax_number') }}:
-                {{ $user->customerInfo->vat_no }}
+                {{ $user['customerInfo']['vat_no'] }}
                 <br>
 
                 {{ __('filament-modular-subscriptions::fms.payment.email') }}:
-                {{ $user->customerInfo->email }}
+                {{ $user['customerInfo']['email'] }}
             </td>
         </tr>
     </table>
