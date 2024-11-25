@@ -1,10 +1,10 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Traits;
+namespace HoceineEl\FilamentModularSubscriptions;
 
-trait ResolvesCustomerInfo
+class ResolvesCustomerInfo
 {
-    protected function resolveCustomerInfo($tenant): array
+    public static function take($tenant): array
     {
         // Check if custom resolver is defined
         $resolver = config('filament-modular-subscriptions.tenant_data_resolver');
@@ -22,17 +22,17 @@ trait ResolvesCustomerInfo
 
         // Resolve each field using dot notation
         return [
-            'name' => $this->resolveField($tenant, $fields['name']),
+            'name' => self::resolveField($tenant, $fields['name']),
             'customerInfo' => [
-                'address' => $this->resolveField($tenant, $fields['address']),
-                'vat_no' => $this->resolveField($tenant, $fields['vat_number']),
-                'email' => $this->resolveField($tenant, $fields['email']),
+                'address' => self::resolveField($tenant, $fields['address']),
+                'vat_no' => self::resolveField($tenant, $fields['vat_number']),
+                'email' => self::resolveField($tenant, $fields['email']),
             ],
         ];
     }
 
-    protected function resolveField($model, string $field)
+    protected static function resolveField($model, string $field)
     {
         return data_get($model, $field, '');
     }
-} 
+}

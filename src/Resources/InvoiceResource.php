@@ -21,11 +21,10 @@ use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Support\Facades\View;
 use Mpdf\Mpdf;
 use Barryvdh\DomPDF\Facade\Pdf;
-use HoceineEl\FilamentModularSubscriptions\Traits\ResolvesCustomerInfo;
+use HoceineEl\FilamentModularSubscriptions\ResolvesCustomerInfo;
 
 class InvoiceResource extends Resource
 {
-    use ResolvesCustomerInfo;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
@@ -118,7 +117,7 @@ class InvoiceResource extends Resource
                         $data['invoice'] = $record;
                         $data['QrCode'] = '===QRCODEPLACEHOLDER===';
                         $data['title'] = '===TITLEPLACEHOLDER===';
-                        $data['user'] = $this->resolveCustomerInfo($record->tenant);
+                        $data['user'] = ResolvesCustomerInfo::take($record->tenant);
 
                         $reportHtml = view('filament-modular-subscriptions::pages.invoice-pdf', $data)->render();
                         $arabic = new Arabic;
@@ -138,7 +137,9 @@ class InvoiceResource extends Resource
 
                         $pdf = Pdf::setOption(['defaultFont' => 'DINNextLTArabic-Medium'])->loadHTML($reportHtml);
 
-                        return $pdf->stream('inv_invoice_' . config('filament-modular-subscriptions.company_name') . '_' . $record->id . '_' . $record->created_at->format('Y-m-d') . '.pdf');
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf->output();
+                        }, 'inv_invoice_' . config('filament-modular-subscriptions.company_name') . '_' . $record->id . '_' . $record->created_at->format('Y-m-d') . '.pdf');
                     }),
                 Action::make('pay')
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.actions.pay'))

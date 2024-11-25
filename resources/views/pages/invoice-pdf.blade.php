@@ -92,7 +92,7 @@
                 <br>
 
                 {{ __('filament-modular-subscriptions::fms.invoice.status') }}:
-                {{ __('filament-modular-subscriptions::fms.invoice_status.' . $invoice->status) }}
+                {{ __('filament-modular-subscriptions::fms.invoice_status.' . $invoice->status->value) }}
                 <br><br>
 
                 {{ __('filament-modular-subscriptions::fms.invoice.bill_to') }}:
