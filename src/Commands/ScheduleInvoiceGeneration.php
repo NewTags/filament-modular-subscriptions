@@ -18,13 +18,13 @@ class ScheduleInvoiceGeneration extends Command
         $this->info(__('filament-modular-subscriptions::fms.commands.schedule_invoices.starting'));
 
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
-        
+
         // Get active subscriptions that need invoicing
         $activeSubscriptions = $subscriptionModel::query()
             ->where('status', SubscriptionStatus::ACTIVE)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereDoesntHave('invoices')
-                    ->orWhereHas('invoices', function($q) {
+                    ->orWhereHas('invoices', function ($q) {
                         $q->where('created_at', '<=', now()->subDay());
                     });
             })
@@ -35,9 +35,9 @@ class ScheduleInvoiceGeneration extends Command
             try {
                 if ($this->shouldGenerateInvoice($subscription)) {
                     $this->info(__('filament-modular-subscriptions::fms.commands.schedule_invoices.generating', ['id' => $subscription->id]));
-                    
+
                     $invoice = $invoiceService->generateInvoice($subscription);
-                    
+
                     if ($invoice) {
                         $this->info(__('filament-modular-subscriptions::fms.commands.schedule_invoices.success', ['id' => $invoice->id]));
                     }
@@ -74,8 +74,12 @@ class ScheduleInvoiceGeneration extends Command
             if ($today->day == $plan->fixed_invoice_day) {
                 // Ensure we haven't already generated an invoice this month
                 return !$subscription->invoices()
-                    ->whereYear('created_at', $today->year)
-                    ->whereMonth('created_at', $today->month)
+                    ->where(function ($query) {
+                        $query->whereDoesntHave('invoices')
+                            ->orWhereHas('invoices', function ($q) {
+                                $q->where('created_at', '<=', now()->subDay());
+                            });
+                    })
                     ->exists();
             }
             return false;
@@ -89,7 +93,7 @@ class ScheduleInvoiceGeneration extends Command
     protected function calculateNextInvoiceDate($subscription, $lastInvoice): Carbon
     {
         $plan = $subscription->plan;
-        
+
         // Use last invoice date or subscription start date
         $baseDate = $lastInvoice ? $lastInvoice->created_at : $subscription->starts_at;
 

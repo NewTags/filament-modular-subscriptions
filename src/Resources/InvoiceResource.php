@@ -21,6 +21,7 @@ use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Support\Facades\View;
 use Mpdf\Mpdf;
 use Barryvdh\DomPDF\Facade\Pdf;
+use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\ResolvesCustomerInfo;
 
 class InvoiceResource extends Resource
@@ -58,6 +59,7 @@ class InvoiceResource extends Resource
 
     public static function table(Tables\Table $table): Tables\Table
     {
+        $currency = Plan::first()->currency ?? config('filament-modular-subscriptions.main_currency');
         return $table
             ->modifyQueryUsing(function ($query) {
                 if (filament()->getTenant()) {
@@ -76,8 +78,13 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('subscription.subscriber.name')
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subscription_id'))
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('subscription.plan.name')
+                    ->getStateUsing(fn($record) => $record->subscription->plan->trans_name)
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.plan'))
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn($record) => $record->subscription->plan->currency)
+                    ->money($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.amount'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
@@ -129,11 +136,9 @@ class InvoiceResource extends Resource
                             'user' => ResolvesCustomerInfo::take($record->tenant),
                             'company_logo' => public_path(config('filament-modular-subscriptions.company_logo'))
                         ];
-
                         // Render view to HTML
                         $view = view('filament-modular-subscriptions::pages.invoice-pdf', $data);
                         $html = $view->render();
-
                         // Create PDF using mPDF
                         $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
                         $fontDirs = $defaultConfig['fontDir'];
@@ -146,11 +151,11 @@ class InvoiceResource extends Resource
                                 config('filament-modular-subscriptions.font_path')
                             ]),
                             'fontdata' => array_merge($fontData, [
-                                'DINNextLTArabic' => [
-                                    'R' => 'dinnextltarabic_medium_normal_ab9f5a2326967c69e338559eaff07d99.ttf',
+                                'Cairo' => [
+                                    'R' => 'Cairo-Bold.ttf',
                                 ]
                             ]),
-                            'default_font' => 'DINNextLTArabic',
+                            'default_font' => 'Cairo',
                             'mode' => 'utf-8',
                             'tempDir' => storage_path('app/pdf-fonts')
                         ]);
