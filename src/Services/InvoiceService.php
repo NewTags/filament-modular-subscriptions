@@ -4,6 +4,7 @@ namespace HoceineEl\FilamentModularSubscriptions\Services;
 
 use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
+use HoceineEl\FilamentModularSubscriptions\Events\InvoiceGenerated;
 use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Support\Carbon;
@@ -42,6 +43,9 @@ class InvoiceService
                 'tax' => $tax
             ]);
 
+            // Fire event if needed
+            event(new InvoiceGenerated($invoice));
+
             return $invoice;
         });
     }
@@ -72,10 +76,33 @@ class InvoiceService
      */
     protected function hasCurrentPeriodInvoice(Subscription $subscription): bool
     {
-        // return $subscription->invoices()
-        //     ->where('created_at', '>=', now()->startOfMonth())
-        //     ->exists();
-        return false;
+        $plan = $subscription->plan;
+        $today = now();
+
+        // If plan has fixed invoice day
+        if ($plan->fixed_invoice_day) {
+            return $subscription->invoices()
+                ->whereYear('created_at', $today->year)
+                ->whereMonth('created_at', $today->month)
+                ->exists();
+        }
+
+        // Calculate the start of the current period
+        $lastInvoice = $subscription->invoices()->latest()->first();
+        if (!$lastInvoice) {
+            return false;
+        }
+
+        $periodStart = $lastInvoice->created_at;
+        $nextInvoiceDate = match ($plan->invoice_interval) {
+            'day' => $periodStart->addDays($plan->invoice_period),
+            'week' => $periodStart->addWeeks($plan->invoice_period),
+            'month' => $periodStart->addMonths($plan->invoice_period),
+            'year' => $periodStart->addYears($plan->invoice_period),
+            default => $periodStart->addMonths(1),
+        };
+
+        return $today->lt($nextInvoiceDate);
     }
 
     /**

@@ -10,6 +10,7 @@ use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use HoceineEl\FilamentModularSubscriptions\Commands\MakeModuleCommand;
 use HoceineEl\FilamentModularSubscriptions\Commands\ProcessSubscriptionInvoices;
+use HoceineEl\FilamentModularSubscriptions\Commands\ScheduleInvoiceGeneration;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -39,6 +40,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
                     $this->commands([
                         MakeModuleCommand::class,
                         ProcessSubscriptionInvoices::class,
+                        ScheduleInvoiceGeneration::class,
                     ]);
                 }
             });
