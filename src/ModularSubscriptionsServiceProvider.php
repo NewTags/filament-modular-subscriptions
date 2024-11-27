@@ -148,7 +148,5 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
                 __DIR__ . '/../database/seeders' => database_path('seeders'),
             ], 'filament-modular-subscriptions-seeders');
         }
-
-        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
     }
 }
