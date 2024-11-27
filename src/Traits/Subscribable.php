@@ -31,6 +31,14 @@ use Illuminate\Support\Facades\DB;
 trait Subscribable
 {
     /**
+     * Cache key prefix for active subscription
+     */
+    private const ACTIVE_SUBSCRIPTION_CACHE_KEY = 'active_subscription_';
+    private const CACHE_TTL = 1800; // 30 minutes in seconds
+    private const DAYS_LEFT_CACHE_TTL = 86400; // 24 hours in seconds
+    private const MODULE_ACCESS_CACHE_TTL = 1800; // 30 minutes in seconds
+
+    /**
      * Get all subscriptions associated with the model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
@@ -38,8 +46,7 @@ trait Subscribable
     public function subscription(): MorphOne
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
-
-        return $this->morphOne($subscriptionModel, 'subscribable');
+        return $this->morphOne($subscriptionModel, 'subscribable')->latest('starts_at');
     }
 
     /**
@@ -56,23 +63,40 @@ trait Subscribable
     }
 
     /**
-     * Get the currently active subscription for the model.
+     * Get the currently active subscription for the model with eager loaded relationships.
      *
      * @return \HoceineEl\FilamentModularSubscriptions\Models\Subscription|null
      */
     public function activeSubscription(): ?Subscription
     {
-        return $this->subscription()
-            ->whereDate('starts_at', '<=', now())
-            ->where(function ($query) {
-                $this->load('plan');
-                $query->whereNull('ends_at')
-                    ->orWhereDate('ends_at', '>', now())
-                    ->orWhereDate('ends_at', '>=', now()->subDays($this->plan->period_grace));
-            })
-            ->where('status', SubscriptionStatus::ACTIVE)
-            ->latest('starts_at')
-            ->first();
+        $cacheKey = self::ACTIVE_SUBSCRIPTION_CACHE_KEY . $this->id;
+
+        return Cache::remember(
+            $cacheKey,
+            self::CACHE_TTL,
+            function () {
+                return $this->subscription()
+                    ->with(['plan', 'moduleUsages.module']) // Eager load relationships
+                    ->whereDate('starts_at', '<=', now())
+                    ->where(function ($query) {
+                        $query->whereNull('ends_at')
+                            ->orWhereDate('ends_at', '>', now())
+                            ->orWhereDate('ends_at', '>=', now()->subDays(
+                                $this->plan?->period_grace ?? 0
+                            ));
+                    })
+                    ->where('status', SubscriptionStatus::ACTIVE)
+                    ->first();
+            }
+        );
+    }
+
+    /**
+     * Invalidate active subscription cache
+     */
+    private function invalidateSubscriptionCache(): void
+    {
+        Cache::forget(self::ACTIVE_SUBSCRIPTION_CACHE_KEY . $this->id);
     }
 
     /**
@@ -92,16 +116,23 @@ trait Subscribable
      */
     public function daysLeft(): ?int
     {
-        $activeSubscription = $this->activeSubscription();
-        if (! $activeSubscription) {
-            return null;
-        }
+        $cacheKey = 'subscription_days_left_' . $this->id;
 
-        $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
+        return Cache::remember(
+            $cacheKey,
+            self::DAYS_LEFT_CACHE_TTL,
+            function () {
+                $activeSubscription = $this->activeSubscription();
+                if (!$activeSubscription) {
+                    return null;
+                }
 
-        return $gracePeriodEndDate
-            ? number_format(now()->diffInDays($gracePeriodEndDate, false), 1)
-            : null;
+                $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
+                return $gracePeriodEndDate
+                    ? number_format(now()->diffInDays($gracePeriodEndDate, false), 1)
+                    : null;
+            }
+        );
     }
 
     /**
@@ -129,14 +160,17 @@ trait Subscribable
     public function cancel(): bool
     {
         $activeSubscription = $this->activeSubscription();
-        if (! $activeSubscription) {
+        if (!$activeSubscription) {
             return false;
         }
 
-        $activeSubscription->update([
-            'status' => SubscriptionStatus::CANCELLED,
-            'ends_at' => now(),
-        ]);
+        DB::transaction(function () use ($activeSubscription) {
+            $activeSubscription->update([
+                'status' => SubscriptionStatus::CANCELLED,
+                'ends_at' => now(),
+            ]);
+            $this->invalidateSubscriptionCache();
+        });
 
         return true;
     }
@@ -168,6 +202,8 @@ trait Subscribable
                 'ends_at' => $this->calculateEndDate($plan, $days),
                 'starts_at' => now(),
             ]);
+
+            $this->invalidateSubscriptionCache();
         });
 
         return true;
@@ -250,25 +286,32 @@ trait Subscribable
      */
     public function canUseModule(string $moduleClass): bool
     {
-        $activeSubscription = $this->activeSubscription();
-        if (!$activeSubscription) {
-            return false;
-        }
+        $cacheKey = $this->getCacheKey($moduleClass);
 
-        $moduleModel = config('filament-modular-subscriptions.models.module');
-        /** @var \HoceineEl\FilamentModularSubscriptions\Models\Module $module */
-        $module = $moduleModel::where('class', $moduleClass)->first();
+        return Cache::remember(
+            $cacheKey,
+            self::MODULE_ACCESS_CACHE_TTL,
+            function () use ($moduleClass) {
+                $activeSubscription = $this->activeSubscription();
+                if (!$activeSubscription) {
+                    return false;
+                }
 
-        if (!$module) {
-            return false;
-        }
+                $moduleModel = config('filament-modular-subscriptions.models.module');
+                /** @var \HoceineEl\FilamentModularSubscriptions\Models\Module $module */
+                $module = $moduleModel::where('class', $moduleClass)
+                    ->with(['planModules' => function ($query) use ($activeSubscription) {
+                        $query->where('plan_id', $activeSubscription->plan_id);
+                    }])
+                    ->first();
 
-        $canUse = $module->canUse($activeSubscription);
-        if (!$canUse) {
-            Cache::forget('subscription_alerts_' . filament()->getTenant()->id);
-        }
+                if (!$module) {
+                    return false;
+                }
 
-        return $canUse;
+                return $module->canUse($activeSubscription);
+            }
+        );
     }
 
     protected function getNextSuitablePlan(): ?Plan
@@ -348,7 +391,7 @@ trait Subscribable
     public function recordUsage(string $moduleClass, int $quantity = 1, bool $incremental = true): void
     {
         $activeSubscription = $this->activeSubscription();
-        if (! $activeSubscription) {
+        if (!$activeSubscription) {
             throw new \RuntimeException('No active subscription found');
         }
 
@@ -394,8 +437,8 @@ trait Subscribable
         $pricing = $this->calculateModulePricing($activeSubscription, $module, $moduleUsage->usage);
         $moduleUsage->update(['pricing' => $pricing]);
 
-
         Cache::forget($this->getCacheKey($moduleClass));
+        Cache::forget('subscription_alerts_' . $this->id);
     }
 
     /**
@@ -671,5 +714,8 @@ trait Subscribable
         if ($moduleUsage) {
             $moduleUsage->decrement('usage', $quantity);
         }
+
+        Cache::forget($this->getCacheKey($moduleClass));
+        Cache::forget('subscription_alerts_' . $this->id);
     }
 }

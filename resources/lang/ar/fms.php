@@ -323,5 +323,7 @@ return [
         'view_invoice' => 'عرض الفاتورة',
         'module_limit_warning' => 'تحذير: أنت تقترب من حد استخدام الوحدة',
         'subscription_ending_soon' => 'اشتراكك سينتهي قريباً',
+        'you_have_reached_the_limit_of_this_module' => 'لقد وصلت إلى حد استخدام الوحدة',
     ],
+    'pay_as_you_go' => 'الدفع حسب الاستخدام',
 ];

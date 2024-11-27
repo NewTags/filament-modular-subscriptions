@@ -75,6 +75,9 @@ class PlanResource extends Resource
                                 Forms\Components\Toggle::make('is_active')
                                     ->default(true)
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.is_active')),
+                                Forms\Components\Toggle::make('is_pay_as_you_go')
+                                    ->default(false)
+                                    ->label(__('filament-modular-subscriptions::fms.pay_as_you_go')),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.tabs.pricing'))
                             ->columns()
@@ -83,15 +86,18 @@ class PlanResource extends Resource
                                 Forms\Components\TextInput::make('price')
                                     ->numeric()
                                     ->required()
+                                    ->hidden(fn (Forms\Get $get) => $get('is_pay_as_you_go'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.price')),
                                 Forms\Components\Select::make('currency')
                                     ->options(config('filament-modular-subscriptions.currencies'))
                                     ->default(config('filament-modular-subscriptions.main_currency'))
                                     ->required()
+                                    ->hidden(fn (Forms\Get $get) => $get('is_pay_as_you_go'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.currency')),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.tabs.billing'))
                             ->columns()
+                            ->hidden(fn (Forms\Get $get) => $get('is_pay_as_you_go'))
                             ->schema([
                                 Forms\Components\TextInput::make('trial_period')
                                     ->numeric()
@@ -121,6 +127,7 @@ class PlanResource extends Resource
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.fields.modules'))
                             ->icon('heroicon-o-puzzle-piece')
+                            ->hidden(fn (Forms\Get $get) => $get('is_pay_as_you_go'))
                             ->schema([
                                 Repeater::make('planModules')
                                     ->label('')
@@ -137,7 +144,6 @@ class PlanResource extends Resource
                                                 return $modules;
                                             })
                                             ->required()
-
                                             ->searchable(),
                                         TextInput::make('limit')
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.module_limit'))
@@ -149,16 +155,7 @@ class PlanResource extends Resource
                                             ->numeric()
                                             ->suffix(config('filament-modular-subscriptions.main_currency'))
                                             ->nullable(),
-
-                                        // Forms\Components\KeyValue::make('settings')
-                                        //     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.module_settings'))
-                                        //     ->keyLabel(__('filament-modular-subscriptions::fms.resources.plan.fields.setting_key'))
-                                        //     ->valueLabel(__('filament-modular-subscriptions::fms.resources.plan.fields.setting_value'))
-                                        //     ->keyPlaceholder(__('filament-modular-subscriptions::fms.resources.plan.placeholders.setting_key'))
-                                        //     ->valuePlaceholder(__('filament-modular-subscriptions::fms.resources.plan.placeholders.setting_value'))
-                                        //     ->nullable(),
                                     ])
-
                                     ->itemLabel(fn(array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
                                     ->collapsible()
                                     ->addActionLabel(__('filament-modular-subscriptions::fms.resources.plan.actions.add_module')),
