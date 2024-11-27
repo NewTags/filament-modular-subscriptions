@@ -39,7 +39,6 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
                 if ($this->app->runningInConsole()) {
                     $this->commands([
                         MakeModuleCommand::class,
-                        ProcessSubscriptionInvoices::class,
                         ScheduleInvoiceGeneration::class,
                     ]);
                 }
@@ -138,6 +137,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             '6_create_invoices_table',
             '7_create_invoice_items_table',
             '8_create_payments_table',
+            'create_subscription_logs_table',
         ];
     }
 

@@ -154,6 +154,7 @@ return [
         'unpaid' => 'غير مدفوع',
         'rejected' => 'مرفوض',
         'partially_paid' => 'مدفوع جزئيا',
+        'pending_payment' => 'قيد انتظار الدفع',
     ],
     'tenant_subscription' => [
         'your_subscription' => 'اشتراكك',
@@ -220,7 +221,7 @@ return [
         'billed_monthly' => 'يتم الفوترة شهرياً بناءً على الاستخدام الفعلي',
         'no_minimum_commitment' => 'لا يوجد حد أدنى للالتزام',
         'usage_tracked_realtime' => 'يتم تتبع الاستخدام في الوقت الفعلي',
-        'start_using_pay_as_you_go' => 'ابدأ باستخدام الدفع حسب الاستخدام',
+        'start_using_pay_as_you_go' => 'ابدأ باستخدام الدفع ��سب الاستخدام',
     ],
     'intervals' => [
         'day' => 'يوم',
@@ -326,4 +327,14 @@ return [
         'you_have_reached_the_limit_of_this_module' => 'لقد وصلت إلى حد استخدام الوحدة',
     ],
     'pay_as_you_go' => 'الدفع حسب الاستخدام',
+    'logs' => [
+        'invoice_generated' => 'تم إنشاء فاتورة جديدة #:invoice_id بقيمة :amount',
+        'invoice_generation_failed' => 'فشل في إنشاء الفاتورة: :error',
+        'status_changed' => 'تم تغيير حالة الاشتراك من :old_status إلى :new_status',
+        'subscription_renewed' => 'تم تجديد الاشتراك',
+        'subscription_cancelled' => 'تم إلغاء الاشتراك',
+        'subscription_expired' => 'انتهى الاشتراك',
+        'trial_started' => 'بدأت فترة التجربة',
+        'trial_ended' => 'انتهت فترة التجربة',
+    ],
 ];

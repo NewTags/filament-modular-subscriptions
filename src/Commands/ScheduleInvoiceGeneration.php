@@ -4,6 +4,7 @@ namespace HoceineEl\FilamentModularSubscriptions\Commands;
 
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
+use HoceineEl\FilamentModularSubscriptions\Services\SubscriptionLogService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -13,13 +14,13 @@ class ScheduleInvoiceGeneration extends Command
     protected $signature = 'subscriptions:schedule-invoices';
     protected $description = 'Generate invoices for subscriptions based on their billing cycles';
 
-    public function handle(InvoiceService $invoiceService)
+    public function handle(InvoiceService $invoiceService, SubscriptionLogService $logService)
     {
         $this->info(__('filament-modular-subscriptions::fms.commands.schedule_invoices.starting'));
 
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
 
-        // Get active subscriptions that need invoicing
+        // Get active subscriptions that need invoicing with eager loading
         $activeSubscriptions = $subscriptionModel::query()
             ->where('status', SubscriptionStatus::ACTIVE)
             ->where(function ($query) {
@@ -28,8 +29,15 @@ class ScheduleInvoiceGeneration extends Command
                         $q->where('created_at', '<=', now()->subDay());
                     });
             })
-            ->with(['plan', 'invoices'])
-            ->get();
+            ->with([
+                'plan:id,fixed_invoice_day,invoice_interval,invoice_period',
+                'invoices:id,subscription_id,created_at'
+            ])
+            ->get([
+                'id',
+                'plan_id',
+                'starts_at'
+            ]);
 
         foreach ($activeSubscriptions as $subscription) {
             try {
@@ -40,9 +48,44 @@ class ScheduleInvoiceGeneration extends Command
 
                     if ($invoice) {
                         $this->info(__('filament-modular-subscriptions::fms.commands.schedule_invoices.success', ['id' => $invoice->id]));
+
+                        $oldStatus = $subscription->status;
+                        $subscription->update([
+                            'status' => SubscriptionStatus::PENDING_PAYMENT
+                        ]);
+                        defer(function () use ($subscription, $logService, $oldStatus, $invoice) {
+                            $logService->log(
+                                $subscription,
+                                'invoice_generated',
+                                __('filament-modular-subscriptions::fms.logs.invoice_generated', [
+                                    'invoice_id' => $invoice->id,
+                                    'amount' => $invoice->total
+                                ]),
+                                $oldStatus->value,
+                                SubscriptionStatus::PENDING_PAYMENT->value,
+                                [
+                                    'invoice_id' => $invoice->id,
+                                    'total' => $invoice->total,
+                                    'items_count' => $invoice->items->count(),
+                                ]
+                            );
+                        });
                     }
                 }
             } catch (\Exception $e) {
+                defer(function () use ($e, $subscription, $logService) {
+                    $logService->log(
+                        $subscription,
+                        'invoice_generation_failed',
+                        __('filament-modular-subscriptions::fms.logs.invoice_generation_failed', [
+                            'error' => $e->getMessage()
+                        ]),
+                        null,
+                        null,
+                        ['error' => $e->getMessage()]
+                    );
+                });
+
                 $this->error(__('filament-modular-subscriptions::fms.commands.schedule_invoices.error', [
                     'id' => $subscription->id,
                     'message' => $e->getMessage()
@@ -60,7 +103,7 @@ class ScheduleInvoiceGeneration extends Command
     protected function shouldGenerateInvoice($subscription): bool
     {
         $plan = $subscription->plan;
-        $lastInvoice = $subscription->invoices()->latest()->first();
+        $lastInvoice = $subscription->invoices->sortByDesc('created_at')->first();
         $today = now();
 
         // If no previous invoice exists, generate one
@@ -72,15 +115,10 @@ class ScheduleInvoiceGeneration extends Command
         if ($plan->fixed_invoice_day) {
             // Check if today is the fixed invoice day
             if ($today->day == $plan->fixed_invoice_day) {
-                // Ensure we haven't already generated an invoice this month
-                return !$subscription->invoices()
-                    ->where(function ($query) {
-                        $query->whereDoesntHave('invoices')
-                            ->orWhereHas('invoices', function ($q) {
-                                $q->where('created_at', '<=', now()->subDay());
-                            });
-                    })
-                    ->exists();
+                // Use the already loaded invoices collection
+                return !$subscription->invoices
+                    ->where('created_at', '>', now()->startOfDay())
+                    ->count();
             }
             return false;
         }

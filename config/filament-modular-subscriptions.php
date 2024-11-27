@@ -13,6 +13,7 @@ return [
         'invoice' => HoceineEl\FilamentModularSubscriptions\Models\Invoice::class,
         'invoice_item' => HoceineEl\FilamentModularSubscriptions\Models\InvoiceItem::class,
         'payment' => HoceineEl\FilamentModularSubscriptions\Models\Payment::class,
+        'subscription_log' => HoceineEl\FilamentModularSubscriptions\Models\SubscriptionLog::class,
     ],
     // Tenant model and attribute to be used for the subscription relationship
     // 'tenant_model' => App\Models\User::class,
@@ -34,7 +35,7 @@ return [
         'invoice' => 'fms_invoices',
         'invoice_item' => 'fms_invoice_items',
         'payment' => 'fms_payments',
-
+        'subscription_log' => 'fms_subscription_logs',
     ],
     'currencies' => [
         'USD',

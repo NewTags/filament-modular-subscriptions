@@ -91,14 +91,14 @@ class Subscription extends Model
     /**
      * Get the number of days left in the current subscription period including grace period.
      *
-     * @return int|null
+     * @return float|null
      */
-    public function daysLeft(): ?int
+    public function daysLeft(): ?float 
     {
         $gracePeriodEndDate = $this->getGracePeriodEndDate($this);
 
         return $gracePeriodEndDate
-            ? number_format(now()->diffInDays($gracePeriodEndDate, false), 1)
+            ? round(now()->diffInDays($gracePeriodEndDate, false), 1)
             : null;
     }
 
