@@ -96,7 +96,20 @@ trait Subscribable
      */
     private function invalidateSubscriptionCache(): void
     {
+        // Clear active subscription cache
         Cache::forget(self::ACTIVE_SUBSCRIPTION_CACHE_KEY . $this->id);
+
+        // Clear days left cache
+        Cache::forget('subscription_days_left_' . $this->id);
+
+        // Clear subscription alerts cache
+        Cache::forget('subscription_alerts_' . $this->id);
+
+        // Clear module access caches
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+        foreach ($moduleModel::all() as $module) {
+            Cache::forget($this->getCacheKey($module->class));
+        }
     }
 
     /**
@@ -204,6 +217,7 @@ trait Subscribable
             $activeSubscription->update([
                 'ends_at' => $this->calculateEndDate($plan, $days),
                 'starts_at' => now(),
+                'status' => SubscriptionStatus::ACTIVE,
             ]);
 
             $this->invalidateSubscriptionCache();
@@ -236,6 +250,8 @@ trait Subscribable
                 'starts_at' => now(),
                 'ends_at' => $this->calculateEndDate($newPlan),
             ]);
+
+            $this->invalidateSubscriptionCache();
         });
 
         return true;
@@ -445,8 +461,7 @@ trait Subscribable
             'pricing' => $pricing
         ]);
 
-        // Clear cache in a single operation
-        Cache::tags([$this->id])->flush();
+        $this->invalidateSubscriptionCache();
     }
 
     /**
@@ -502,6 +517,8 @@ trait Subscribable
 
         $subscription->save();
 
+        $this->invalidateSubscriptionCache();
+
         return $subscription;
     }
 
@@ -539,6 +556,8 @@ trait Subscribable
                 ]
             );
         }
+
+        $this->invalidateSubscriptionCache();
 
         return $usage;
     }
@@ -620,6 +639,7 @@ trait Subscribable
             $subscription = $this->activeSubscription();
             $subscription->trial_ends_at = $subscription->trial_ends_at->addDays($days);
             $subscription->save();
+            $this->invalidateSubscriptionCache();
         } elseif ($this->onGenericTrial()) {
             $this->trial_ends_at = $this->trial_ends_at->addDays($days);
             $this->save();
@@ -637,6 +657,7 @@ trait Subscribable
             $subscription = $this->activeSubscription();
             $subscription->trial_ends_at = now();
             $subscription->save();
+            $this->invalidateSubscriptionCache();
         } elseif ($this->onGenericTrial()) {
             $this->trial_ends_at = now();
             $this->save();
@@ -707,7 +728,6 @@ trait Subscribable
             $moduleUsage->decrement('usage', $quantity);
         }
 
-        Cache::forget($this->getCacheKey($moduleClass));
-        Cache::forget('subscription_alerts_' . $this->id);
+        $this->invalidateSubscriptionCache();
     }
 }

@@ -37,7 +37,7 @@ class Invoice extends Model
     {
         $totalPayments = $this->payments()->where('status', PaymentStatus::PAID)->sum('amount');
         return new Attribute(
-            get: fn() => ($this->amount + $this->tax) - $totalPayments,
+            get: fn() => number_format(($this->amount + $this->tax) - $totalPayments, 2),
         );
     }
 
