@@ -2,15 +2,19 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Colors\Color;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use HoceineEl\FilamentModularSubscriptions\ModularSubscription;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class ModuleUsageResource extends Resource
 {
@@ -84,6 +88,47 @@ class ModuleUsageResource extends Resource
                 SelectFilter::make('module_id')
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.module_id'))
                     ->relationship('module', 'name'),
+                SelectFilter::make('subscription')
+                    ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.subscriber'))
+                    ->relationship('subscription.subscribable', 'name'),
+                Filter::make('usage')
+                    ->form([
+                        TextInput::make('usage_from')
+                            ->numeric()
+                            ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.usage_from')),
+                        TextInput::make('usage_to')
+                            ->numeric()
+                            ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.usage_to')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['usage_from'],
+                                fn (Builder $query, $usage): Builder => $query->where('usage', '>=', $usage),
+                            )
+                            ->when(
+                                $data['usage_to'],
+                                fn (Builder $query, $usage): Builder => $query->where('usage', '<=', $usage),
+                            );
+                    }),
+                Filter::make('calculated_at')
+                    ->form([
+                        DatePicker::make('calculated_from')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_from')),
+                        DatePicker::make('calculated_until')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_until')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['calculated_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('calculated_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['calculated_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('calculated_at', '<=', $date),
+                            );
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()

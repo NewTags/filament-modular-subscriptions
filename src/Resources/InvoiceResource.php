@@ -21,8 +21,10 @@ use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Support\Facades\View;
 use Mpdf\Mpdf;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Forms\Components\DatePicker;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\ResolvesCustomerInfo;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class InvoiceResource extends Resource
 {
@@ -112,6 +114,44 @@ class InvoiceResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->options(InvoiceStatus::class)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.status')),
+                Tables\Filters\Filter::make('amount')
+                    ->form([
+                        TextInput::make('amount_from')
+                            ->numeric()
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount_from')),
+                        TextInput::make('amount_to')
+                            ->numeric()
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount_to')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['amount_from'],
+                                fn (Builder $query, $amount): Builder => $query->where('amount', '>=', $amount),
+                            )
+                            ->when(
+                                $data['amount_to'],
+                                fn (Builder $query, $amount): Builder => $query->where('amount', '<=', $amount),
+                            );
+                    }),
+                Tables\Filters\Filter::make('date')
+                    ->form([
+                        DatePicker::make('created_from')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_from')),
+                        DatePicker::make('created_until')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_until')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    }),
             ], FiltersLayout::AboveContent)
             ->modelLabel(__('filament-modular-subscriptions::fms.resources.invoice.singular_name'))
             ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.invoice.name'))
@@ -133,7 +173,7 @@ class InvoiceResource extends Resource
                         $taxPercentage = config('filament-modular-subscriptions.tax_percentage', 15);
                         $totalBeforeTax = $record->amount;
                         $taxAmount = $record->tax;
-                        
+
                         // Generate QR code with correct amounts
                         $QrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
                             new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
@@ -196,9 +236,9 @@ class InvoiceResource extends Resource
                                 ->title(__('filament-modular-subscriptions::fms.invoice.pdf_generation_error'))
                                 ->danger()
                                 ->send();
-                                
+
                             report($e);
-                            
+
                             return null;
                         }
                     }),

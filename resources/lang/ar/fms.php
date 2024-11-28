@@ -82,6 +82,8 @@ return [
                 'pricing' => 'التسعير',
                 'calculated_at' => 'تاريخ الحساب',
                 'subscriber' => 'المشترك',
+                'usage_from' => 'الاستخدام من',
+                'usage_to' => 'الاستخدام إلى',
             ],
             'actions' => [
                 'calculate' => 'حساب',
@@ -127,6 +129,10 @@ return [
                 'subscribable_name' => 'اسم المشترك',
                 'subscriber' => 'المشترك',
                 'receipt_file' => 'إيصال الدفع',
+                'created_from' => 'تاريخ الإنشاء من',
+                'created_until' => 'تاريخ الإنشاء إلى',
+                'amount_from' => 'المبلغ من',
+                'amount_to' => 'المبلغ إلى',
             ],
             'actions' => [
                 'approve' => 'تأكيد',

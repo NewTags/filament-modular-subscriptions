@@ -198,6 +198,13 @@ class PlanResource extends Resource
                         false => __('filament-modular-subscriptions::fms.inactive'),
                     ])
                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.is_active')),
+                Tables\Filters\SelectFilter::make('is_pay_as_you_go')
+                    ->options([
+                        true => __('filament-modular-subscriptions::fms.pay_as_you_go'),
+                        false => __('filament-modular-subscriptions::fms.subscription'),
+                    ])
+                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.is_pay_as_you_go')),
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

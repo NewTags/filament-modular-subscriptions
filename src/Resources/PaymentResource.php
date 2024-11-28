@@ -2,6 +2,7 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
@@ -12,8 +13,10 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use HoceineEl\FilamentModularSubscriptions\Components\FileEntry;
 use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use HoceineEl\FilamentModularSubscriptions\Enums\PaymentMethod;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\DB;
@@ -80,7 +83,52 @@ class PaymentResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.reviewed_by')),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->default(PaymentStatus::PENDING)
+                    ->options(PaymentStatus::class)
+                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.status')),
+                Tables\Filters\SelectFilter::make('payment_method')
+                    ->default(PaymentMethod::BANK_TRANSFER)
+                    ->options(PaymentMethod::class)
+                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.payment_method')),
+                Tables\Filters\Filter::make('created_at')
+                    ->form([
+                        DatePicker::make('created_from')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_from')),
+                        DatePicker::make('created_until')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_until')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    }),
+                Tables\Filters\Filter::make('amount')
+                    ->form([
+                        TextInput::make('amount_from')
+                            ->numeric()
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount_from')),
+                        TextInput::make('amount_to')
+                            ->numeric()
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount_to')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['amount_from'],
+                                fn (Builder $query, $amount): Builder => $query->where('amount', '>=', $amount),
+                            )
+                            ->when(
+                                $data['amount_to'],
+                                fn (Builder $query, $amount): Builder => $query->where('amount', '<=', $amount),
+                            );
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

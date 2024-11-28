@@ -12,6 +12,7 @@ use Filament\Tables\Table;
 use HoceineEl\FilamentModularSubscriptions\ModularSubscription;
 use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource;
 use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
+use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Contracts\Support\Htmlable;
 
 class TenantSubscription extends Page implements HasTable
@@ -67,17 +68,41 @@ class TenantSubscription extends Page implements HasTable
 
                 return $plan->is_pay_as_you_go ? 'success' : 'primary';
             })
-
+            ->modalHeading(function ($arguments) {
+                $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
+                return __('filament-modular-subscriptions::fms.tenant_subscription.confirm_switch_plan', ['plan' => $plan->trans_name]);
+            })
+            ->modalDescription(function ($arguments) {
+                $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
+                return __('filament-modular-subscriptions::fms.tenant_subscription.switch_plan_description', [
+                    'price' => $plan->price,
+                    'currency' => $plan->currency,
+                    'interval' => __('filament-modular-subscriptions::fms.intervals.' . $plan->invoice_interval->value)
+                ]);
+            })
             ->action(function (array $arguments) {
                 $planId = $arguments['plan_id'];
                 $tenant = filament()->getTenant();
+                $newPlan = config('filament-modular-subscriptions.models.plan')::findOrFail($planId);
 
-                $tenant->switchPlan($planId);
+                if ($tenant->switchPlan($planId)) {
+                    if (!$newPlan->is_pay_as_you_go) {
+                        $invoiceService = app(InvoiceService::class);
+                        $invoiceService->generateInvoice($tenant->subscription);
+                    }
 
-                Notification::make()
-                    ->title(__('filament-modular-subscriptions::fms.tenant_subscription.plan_switched_successfully'))
-                    ->success()
-                    ->send();
+                    Notification::make()
+                        ->title(__('filament-modular-subscriptions::fms.tenant_subscription.plan_switched_successfully'))
+                        ->success()
+                        ->send();
+                } else {
+                    Notification::make()
+                        ->title(__('filament-modular-subscriptions::fms.tenant_subscription.switch_plan_failed'))
+                        ->danger()
+                        ->send();
+                }
+
+                $this->redirect(TenantSubscription::getUrl());
             });
     }
 
