@@ -73,21 +73,37 @@
                                 {{ $item->quantity }}
                             </td>
                             <td class="px-6 py-4 text-right">
-                                {{ number_format($item->unit_price, 2) }}
+                                {{ number_format($item->unit_price, 2) }} {{ $invoice->subscription->plan->currency }}
                             </td>
                             <td class="px-6 py-4 text-right font-medium">
-                                {{ number_format($item->total, 2) }}
+                                {{ number_format($item->total, 2) }} {{ $invoice->subscription->plan->currency }}
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
                 <tfoot>
-                    <tr class="font-semibold text-gray-900 bg-gray-50 border-t-2 border-gray-200 text-center">
-                        <td class="px-6 py-4 " colspan="3">
-                            {{ __('filament-modular-subscriptions::fms.invoice.total') }}
+                    <tr class="font-semibold text-gray-900 bg-gray-50 border-t-2 border-gray-200">
+                        <td class="px-6 py-4" colspan="3" style="text-align: right;">
+                            {{ __('filament-modular-subscriptions::fms.invoice.subtotal') }}
                         </td>
-                        <td class="px-6 py-4  text-lg">
-                            {{ number_format($invoice->amount, 2) }}
+                        <td class="px-6 py-4 text-right">
+                            {{ number_format($invoice->amount, 2) }} {{ $invoice->subscription->plan->currency }}
+                        </td>
+                    </tr>
+                    <tr class="font-semibold text-gray-900 bg-gray-50">
+                        <td class="px-6 py-4" colspan="3" style="text-align: right;">
+                            {{ __('filament-modular-subscriptions::fms.invoice.tax_amount', ['percentage' => config('filament-modular-subscriptions.tax_percentage')]) }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            {{ number_format($invoice->tax, 2) }} {{ $invoice->subscription->plan->currency }}
+                        </td>
+                    </tr>
+                    <tr class="font-semibold text-gray-900 bg-gray-50 border-t-2 border-gray-200">
+                        <td class="px-6 py-4" colspan="3" style="text-align: right;">
+                            {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}
+                        </td>
+                        <td class="px-6 py-4 text-right text-lg">
+                            {{ number_format($invoice->amount + $invoice->tax, 2) }} {{ $invoice->subscription->plan->currency }}
                         </td>
                     </tr>
                 </tfoot>

@@ -118,12 +118,13 @@ class InvoiceResource extends Resource
             ->actions([
                 ViewAction::make()
                     ->slideOver()
+                    ->modalWidth('4xl')
                     ->modalHeading(fn($record) => __('filament-modular-subscriptions::fms.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
-                        $invoice = $record;
-
+                        $invoice = $record->load(['items', 'subscription.plan']); // Eager load relationships
                         return View::make('filament-modular-subscriptions::pages.invoice-details', compact('invoice'));
-                    })->modalFooterActions([]),
+                    })
+                    ->modalFooterActions([]),
                 Action::make('download')
                     ->label(__('filament-modular-subscriptions::fms.invoice.download_pdf'))
                     ->icon('heroicon-o-arrow-down-tray')

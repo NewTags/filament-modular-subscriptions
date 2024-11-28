@@ -83,6 +83,10 @@ class TenantSubscription extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-        return (new InvoiceResource)->table($table)->query(config('filament-modular-subscriptions.models.invoice')::query()->where('tenant_id', filament()->getTenant()->id));
+        return (new InvoiceResource)->table($table)->query(
+            config('filament-modular-subscriptions.models.invoice')::query()
+                ->where('tenant_id', filament()->getTenant()->id)
+                ->with(['items', 'subscription.plan'])
+        );
     }
 }
