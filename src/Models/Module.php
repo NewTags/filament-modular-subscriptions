@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Module extends Model
 {
-    protected $fillable = ['name', 'class', 'is_active'];
+    protected $fillable = ['name', 'class', 'is_active', 'is_persistent'];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_persistent' => 'boolean',
     ];
 
     public function getTable()
@@ -49,6 +50,7 @@ class Module extends Model
             [
                 'class' => $moduleClass,
                 'is_active' => true,
+                'is_persistent' => true,
             ]
         );
     }

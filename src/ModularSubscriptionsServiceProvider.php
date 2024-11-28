@@ -10,6 +10,7 @@ use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use HoceineEl\FilamentModularSubscriptions\Commands\MakeModuleCommand;
 use HoceineEl\FilamentModularSubscriptions\Commands\ProcessSubscriptionInvoices;
+use HoceineEl\FilamentModularSubscriptions\Commands\ScheduleInvoiceGeneration;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -38,7 +39,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
                 if ($this->app->runningInConsole()) {
                     $this->commands([
                         MakeModuleCommand::class,
-                        ProcessSubscriptionInvoices::class,
+                        ScheduleInvoiceGeneration::class,
                     ]);
                 }
             });
@@ -133,10 +134,10 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             '3_create_modules_table',
             '4_create_module_usages_table',
             '5_create_plan_modules_table',
-            '6_add_is_pay_as_you_go_to_plans_table',
-            '7_create_invoices_table',
-            '8_create_invoice_items_table',
-            '9_create_payments_table',
+            '6_create_invoices_table',
+            '7_create_invoice_items_table',
+            '8_create_payments_table',
+            'create_subscription_logs_table',
         ];
     }
 
@@ -147,7 +148,5 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
                 __DIR__ . '/../database/seeders' => database_path('seeders'),
             ], 'filament-modular-subscriptions-seeders');
         }
-
-        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
     }
 }

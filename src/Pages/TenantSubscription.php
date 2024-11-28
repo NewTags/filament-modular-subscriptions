@@ -17,6 +17,7 @@ use Illuminate\Contracts\Support\Htmlable;
 class TenantSubscription extends Page implements HasTable
 {
     use InteractsWithTable;
+    protected static ?int $navigationSort = 500;
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
@@ -39,12 +40,9 @@ class TenantSubscription extends Page implements HasTable
 
     public function getViewData(): array
     {
-        $tenant = Filament::getTenant();
-        $activeSubscription = $tenant->activeSubscription();
+        $tenant = filament()->getTenant();
+        $activeSubscription = $tenant->subscription;
         $planModel = config('filament-modular-subscriptions.models.plan');
-
-        $invoiceService = app(InvoiceService::class);
-        $invoiceService->generateInvoice($tenant->activeSubscription());
 
         return [
             'tenant' => $tenant,
@@ -72,7 +70,7 @@ class TenantSubscription extends Page implements HasTable
 
             ->action(function (array $arguments) {
                 $planId = $arguments['plan_id'];
-                $tenant = Filament::getTenant();
+                $tenant = filament()->getTenant();
 
                 $tenant->switchPlan($planId);
 
@@ -85,6 +83,10 @@ class TenantSubscription extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-        return (new InvoiceResource)->table($table)->query(config('filament-modular-subscriptions.models.invoice')::query()->where('tenant_id', Filament::getTenant()->id));
+        return (new InvoiceResource)->table($table)->query(
+            config('filament-modular-subscriptions.models.invoice')::query()
+                ->where('tenant_id', filament()->getTenant()->id)
+                ->with(['items', 'subscription.plan'])
+        );
     }
 }

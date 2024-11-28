@@ -3,6 +3,7 @@
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
 use Filament\Forms;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -75,6 +76,9 @@ class PlanResource extends Resource
                                 Forms\Components\Toggle::make('is_active')
                                     ->default(true)
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.is_active')),
+                                Forms\Components\Toggle::make('is_pay_as_you_go')
+                                    ->default(false)
+                                    ->label(__('filament-modular-subscriptions::fms.pay_as_you_go')),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.tabs.pricing'))
                             ->columns()
@@ -83,6 +87,7 @@ class PlanResource extends Resource
                                 Forms\Components\TextInput::make('price')
                                     ->numeric()
                                     ->required()
+                                    ->hidden(fn(Forms\Get $get) => $get('is_pay_as_you_go'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.price')),
                                 Forms\Components\Select::make('currency')
                                     ->options(config('filament-modular-subscriptions.currencies'))
@@ -93,31 +98,38 @@ class PlanResource extends Resource
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.tabs.billing'))
                             ->columns()
                             ->schema([
-                                Forms\Components\TextInput::make('trial_period')
+                                Forms\Components\TextInput::make('fixed_invoice_day')
                                     ->numeric()
-                                    ->default(0)
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.trial_period')),
-                                Forms\Components\Select::make('trial_interval')
-                                    ->options(Interval::class)
-                                    ->default(Interval::DAY)
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.trial_interval')),
-                                Forms\Components\TextInput::make('invoice_period')
-                                    ->numeric()
-                                    ->required()
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.invoice_period')),
-                                Forms\Components\Select::make('invoice_interval')
-                                    ->options(Interval::class)
-                                    ->default(Interval::MONTH)
-                                    ->required()
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.invoice_interval')),
-                                Forms\Components\TextInput::make('grace_period')
-                                    ->numeric()
-                                    ->default(0)
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_period')),
-                                Forms\Components\Select::make('grace_interval')
-                                    ->options(Interval::class)
-                                    ->default(Interval::DAY)
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_interval')),
+                                    ->default(1)
+                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.fixed_invoice_day')),
+                                Fieldset::make()
+                                    ->schema([
+                                        Forms\Components\TextInput::make('trial_period')
+                                            ->numeric()
+                                            ->default(0)
+                                            ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.trial_period')),
+                                        Forms\Components\Select::make('trial_interval')
+                                            ->options(Interval::class)
+                                            ->default(Interval::DAY)
+                                            ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.trial_interval')),
+                                        Forms\Components\TextInput::make('invoice_period')
+                                            ->numeric()
+                                            ->required()
+                                            ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.invoice_period')),
+                                        Forms\Components\Select::make('invoice_interval')
+                                            ->options(Interval::class)
+                                            ->default(Interval::MONTH)
+                                            ->required()
+                                            ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.invoice_interval')),
+                                        Forms\Components\TextInput::make('grace_period')
+                                            ->numeric()
+                                            ->default(0)
+                                            ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_period')),
+                                        Forms\Components\Select::make('grace_interval')
+                                            ->options(Interval::class)
+                                            ->default(Interval::DAY)
+                                            ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_interval')),
+                                    ])
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.fields.modules'))
                             ->icon('heroicon-o-puzzle-piece')
@@ -137,7 +149,6 @@ class PlanResource extends Resource
                                                 return $modules;
                                             })
                                             ->required()
-
                                             ->searchable(),
                                         TextInput::make('limit')
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.module_limit'))
@@ -147,17 +158,9 @@ class PlanResource extends Resource
                                         Forms\Components\TextInput::make('price')
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.module_price'))
                                             ->numeric()
+                                            ->suffix(config('filament-modular-subscriptions.main_currency'))
                                             ->nullable(),
-
-                                        // Forms\Components\KeyValue::make('settings')
-                                        //     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.module_settings'))
-                                        //     ->keyLabel(__('filament-modular-subscriptions::fms.resources.plan.fields.setting_key'))
-                                        //     ->valueLabel(__('filament-modular-subscriptions::fms.resources.plan.fields.setting_value'))
-                                        //     ->keyPlaceholder(__('filament-modular-subscriptions::fms.resources.plan.placeholders.setting_key'))
-                                        //     ->valuePlaceholder(__('filament-modular-subscriptions::fms.resources.plan.placeholders.setting_value'))
-                                        //     ->nullable(),
                                     ])
-
                                     ->itemLabel(fn(array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
                                     ->collapsible()
                                     ->addActionLabel(__('filament-modular-subscriptions::fms.resources.plan.actions.add_module')),
@@ -174,8 +177,8 @@ class PlanResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->money(config('filament-modular-subscriptions.main_currency'), locale: 'en')
                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.price'))
+                    ->getStateUsing(fn($record) => $record->is_pay_as_you_go ? __('filament-modular-subscriptions::fms.pay_as_you_go') : $record->price . ' ' . config('filament-modular-subscriptions.main_currency'))
                     ->sortable(),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.is_active')),

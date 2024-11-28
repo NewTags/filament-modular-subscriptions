@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('subscription_id')->constrained(config('filament-modular-subscriptions.tables.subscription'))->cascadeOnDelete();
             $table->foreignId('tenant_id')->constrained(config('filament-modular-subscriptions.tenant_table', 'users'))->cascadeOnDelete();
             $table->decimal('amount', 10, 2);
+            $table->decimal('tax', 10, 2);
             $table->string('status');
             $table->date('due_date');
             $table->timestamp('paid_at')->nullable();

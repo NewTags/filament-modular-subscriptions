@@ -2,6 +2,7 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Models;
 
+use Carbon\Carbon;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -86,5 +87,36 @@ class Subscription extends Model
     public function renew(?int $days = null): bool
     {
         return $this->subscriber->renew($days);
+    }
+    /**
+     * Get the number of days left in the current subscription period including grace period.
+     *
+     * @return float|null
+     */
+    public function daysLeft(): ?float 
+    {
+        $gracePeriodEndDate = $this->getGracePeriodEndDate($this);
+
+        return $gracePeriodEndDate
+            ? round(now()->diffInDays($gracePeriodEndDate, false), 1)
+            : null;
+    }
+
+    /**
+     * Calculate the end date including grace period.
+     *
+     * @param \HoceineEl\FilamentModularSubscriptions\Models\Subscription $subscription
+     * @return \Carbon\Carbon|null
+     */
+    private function getGracePeriodEndDate(Subscription $subscription = null): ?Carbon
+    {
+        $subscription = $subscription ?? $this;
+        if (! $subscription->ends_at) {
+            return null;
+        }
+
+        $gracePeriodDays = $subscription->plan->period_grace;
+
+        return $subscription->ends_at->copy()->addDays($gracePeriodDays);
     }
 }

@@ -26,10 +26,13 @@
     ],
     "require": {
         "php": "^8.2",
-        "laravel/framework": "^10.0 || ^11.0",
+        "barryvdh/laravel-dompdf": "^3.0",
         "filament/filament": "^3.0",
+        "khaled.alshamaa/ar-php": "^6.3",
+        "laravel/framework": "^10.0 || ^11.0",
         "mpdf/mpdf": "^8.2",
         "outerweb/filament-translatable-fields": "^2.0",
+        "salla/zatca": "^3.0",
         "spatie/laravel-package-tools": "^1.15.0"
     },
     "require-dev": {

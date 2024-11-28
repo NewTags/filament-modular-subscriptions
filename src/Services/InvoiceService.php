@@ -4,8 +4,11 @@ namespace HoceineEl\FilamentModularSubscriptions\Services;
 
 use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
+use HoceineEl\FilamentModularSubscriptions\Events\InvoiceGenerated;
 use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceService
 {
@@ -17,62 +20,113 @@ class InvoiceService
      */
     public function generateInvoice(Subscription $subscription): ?Invoice
     {
-        if ($subscription->subscriber->shouldGenerateInvoice()) {
-            $invoice = $this->getInvoiceModel()::query()
-                ->where('subscription_id', $subscription->id)
-                ->whereIn('status', [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID])
-                ->first();
-
-            if ($invoice) {
-                return $this->updateInvoice($invoice, $subscription);
-            }
-
-            return $this->createNewInvoice($subscription);
+        if ($this->hasCurrentPeriodInvoice($subscription)) {
+            return null;
         }
 
-        return null;
+        return $this->generate($subscription);
+    }
+
+    public function generate(Subscription $subscription): Invoice
+    {
+        $dueDate = $this->calculateDueDate($subscription);
+
+        return DB::transaction(function () use ($subscription, $dueDate) {
+            $invoice = $this->createInvoice($subscription, $dueDate);
+            $this->createInvoiceItems($invoice, $subscription);
+
+            // Calculate total amount from invoice items
+            $totalAmount = $invoice->items()->sum('total');
+
+            // Calculate and update tax
+            $taxPercentage = config('filament-modular-subscriptions.tax_percentage', 15);
+            $tax = $totalAmount * $taxPercentage / 100;
+
+            // Update invoice with final amounts
+            $invoice->update([
+                'amount' => $totalAmount + $tax,
+                'tax' => $tax
+            ]);
+
+            // Fire event if needed
+            event(new InvoiceGenerated($invoice));
+
+            return $invoice;
+        });
     }
 
     /**
-     * Update an existing invoice.
+     * Calculate the due date for the invoice.
      *
-     * @param Invoice $invoice
      * @param Subscription $subscription
-     * @return Invoice
+     * @return Carbon
      */
-    private function updateInvoice(Invoice $invoice, Subscription $subscription): Invoice
+    protected function calculateDueDate(Subscription $subscription): Carbon
     {
-        $invoice->update([
-            'amount' => $this->calculateTotalAmount($subscription),
-            'due_date' => now()->addDays($this->getInvoiceDueDays()),
-        ]);
+        $plan = $subscription->plan;
+        $startDate = $subscription->starts_at;
 
-        $invoice->items()->delete();
+        if ($plan->due_days) {
+            return now()->addDays($plan->due_days);
+        }
 
-        $this->createInvoiceItems($invoice, $subscription);
+        return $startDate->copy()->addDays($plan->invoice_period);
+    }
 
-        return $invoice->fresh();
+    /**
+     * Check if an invoice already exists for the current period.
+     *
+     * @param Subscription $subscription
+     * @return bool
+     */
+    protected function hasCurrentPeriodInvoice(Subscription $subscription): bool
+    {
+        $plan = $subscription->plan;
+        $today = now();
+
+        // If plan has fixed invoice day
+        if ($plan->fixed_invoice_day) {
+            return $subscription->invoices()
+                ->whereYear('created_at', $today->year)
+                ->whereMonth('created_at', $today->month)
+                ->exists();
+        }
+
+        // Calculate the start of the current period
+        $lastInvoice = $subscription->invoices()->latest()->first();
+        if (!$lastInvoice) {
+            return false;
+        }
+
+        $periodStart = $lastInvoice->created_at;
+        $nextInvoiceDate = match ($plan->invoice_interval) {
+            'day' => $periodStart->addDays($plan->invoice_period),
+            'week' => $periodStart->addWeeks($plan->invoice_period),
+            'month' => $periodStart->addMonths($plan->invoice_period),
+            'year' => $periodStart->addYears($plan->invoice_period),
+            default => $periodStart->addMonths(1),
+        };
+
+        return $today->lt($nextInvoiceDate);
     }
 
     /**
      * Create a new invoice.
      *
      * @param Subscription $subscription
+     * @param Carbon $dueDate
      * @return Invoice
      */
-    private function createNewInvoice(Subscription $subscription): Invoice
+    private function createInvoice(Subscription $subscription, Carbon $dueDate): Invoice
     {
-        $invoice = $this->getInvoiceModel()::create([
+        return $this->getInvoiceModel()::create([
             'subscription_id' => $subscription->id,
             'tenant_id' => $subscription->subscribable_id,
-            'amount' => $this->calculateTotalAmount($subscription),
+            'amount' => 0, // Initial amount, will be updated after items
+            'tax' => 0, // Initial tax, will be updated after items
             'status' => InvoiceStatus::UNPAID,
-            'due_date' => now()->addDays($this->getInvoiceDueDays()),
+            'due_date' => $dueDate,
         ]);
-
-        $this->createInvoiceItems($invoice, $subscription);
-
-        return $invoice;
     }
 
     /**
@@ -133,7 +187,7 @@ class InvoiceService
      */
     private function isPayAsYouGo(Subscription $subscription): bool
     {
-        return $subscription->plan->is_pay_as_you_go;
+        return $subscription->plan->isPayAsYouGo();
     }
 
     /**
@@ -154,15 +208,5 @@ class InvoiceService
     private function getInvoiceItemModel(): string
     {
         return config('filament-modular-subscriptions.models.invoice_item');
-    }
-
-    /**
-     * Get the invoice due date in days from configuration.
-     *
-     * @return int
-     */
-    private function getInvoiceDueDays(): int
-    {
-        return config('filament-modular-subscriptions.invoice_due_date_days');
     }
 }

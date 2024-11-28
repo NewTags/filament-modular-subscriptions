@@ -30,6 +30,8 @@ class Plan extends Model
         'grace_interval',
         'sort_order',
         'is_pay_as_you_go',
+        'due_days',
+        'fixed_invoice_day',
     ];
 
     protected $casts = [
@@ -45,6 +47,8 @@ class Plan extends Model
         'invoice_interval' => Interval::class,
         'grace_interval' => Interval::class,
         'is_pay_as_you_go' => 'boolean',
+        'due_days' => 'integer',
+        'fixed_invoice_day' => 'integer',
     ];
 
     public function getTable()

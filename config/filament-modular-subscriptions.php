@@ -13,6 +13,7 @@ return [
         'invoice' => HoceineEl\FilamentModularSubscriptions\Models\Invoice::class,
         'invoice_item' => HoceineEl\FilamentModularSubscriptions\Models\InvoiceItem::class,
         'payment' => HoceineEl\FilamentModularSubscriptions\Models\Payment::class,
+        'subscription_log' => HoceineEl\FilamentModularSubscriptions\Models\SubscriptionLog::class,
     ],
     // Tenant model and attribute to be used for the subscription relationship
     // 'tenant_model' => App\Models\User::class,
@@ -34,9 +35,8 @@ return [
         'invoice' => 'fms_invoices',
         'invoice_item' => 'fms_invoice_items',
         'payment' => 'fms_payments',
-
+        'subscription_log' => 'fms_subscription_logs',
     ],
-    'invoice_due_date_days' => 7,
     'currencies' => [
         'USD',
         'SAR',
@@ -84,4 +84,18 @@ return [
         // Add other payment method configurations here,
     ],
     'font_path' => resource_path('fonts/Cairo'),
+    'company_name' => 'إسم الشركة',
+    'tax_number' => 'XXXXXXXXXXXXXXXXXXX',
+    'company_address' => 'العنوان',
+    'company_email' => 'info@company.com',
+    'company_logo' => '/images/company-logo.png',
+    'tax_percentage' => 15,
+    'tenant_fields' => [
+        'name' => 'name', // default field or custom accessor
+        'address' => 'address', // could be 'info.address' or 'customerInfo.address'
+        'vat_number' => 'tax_number', // could be 'vat_number' or 'vat_id' or 'info.vat'
+        'email' => 'company_email', // could be 'contact_email' or 'info.email'
+    ],
+    'tenant_data_resolver' => null, // Can be set to a callable
+    'invoice_generation_grace_period' => 0,
 ];

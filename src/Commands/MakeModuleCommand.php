@@ -8,9 +8,9 @@ use Illuminate\Support\Str;
 
 class MakeModuleCommand extends Command
 {
-    protected $signature = 'make:module {name : The name of the module}';
+    protected $signature = 'make-fms:module {name : The name of the module}';
 
-    protected $description = 'Create a new module for Filament Modular Subscriptions';
+    protected $description = 'Create a new FilamentModularSubscriptions module';
 
     protected $files;
 
