@@ -4,6 +4,7 @@ namespace HoceineEl\FilamentModularSubscriptions\Models;
 
 use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -67,6 +68,13 @@ class Invoice extends Model
     public function paid(): bool
     {
         return $this->status === PaymentStatus::PAID;
+    }
+
+    public function total(): Attribute
+    {
+        return new Attribute(
+            get: fn() => $this->amount + $this->tax,
+        );
     }
 
     public function getTitleAttribute()

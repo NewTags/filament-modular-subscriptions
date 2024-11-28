@@ -24,6 +24,11 @@ class InvoiceService
             return null;
         }
 
+        return $this->generate($subscription);
+    }
+
+    public function generate(Subscription $subscription): Invoice
+    {
         $dueDate = $this->calculateDueDate($subscription);
 
         return DB::transaction(function () use ($subscription, $dueDate) {
@@ -182,7 +187,7 @@ class InvoiceService
      */
     private function isPayAsYouGo(Subscription $subscription): bool
     {
-        return $subscription->plan->is_pay_as_you_go;
+        return $subscription->plan->isPayAsYouGo();
     }
 
     /**

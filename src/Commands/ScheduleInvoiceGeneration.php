@@ -2,6 +2,7 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Commands;
 
+use Cache;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
 use HoceineEl\FilamentModularSubscriptions\Services\SubscriptionLogService;
@@ -23,23 +24,24 @@ class ScheduleInvoiceGeneration extends Command
         $subscriptionModel::query()
             ->where('status', SubscriptionStatus::ACTIVE)
             ->with([
-                'plan:id,fixed_invoice_day,invoice_interval,invoice_period',
-                'invoices:id,subscription_id,created_at'
+                'plan:id,fixed_invoice_day,invoice_interval,invoice_period,is_pay_as_you_go',
+                'invoices:id,subscription_id,created_at',
+                'subscribable:id,name'
             ])
             ->select([
                 'id',
                 'plan_id',
                 'starts_at',
-                'ends_at'
+                'ends_at',
+                'subscribable_id',
+                'subscribable_type'
             ])
             ->chunk(100, function ($activeSubscriptions) use ($invoiceService, $logService) {
                 foreach ($activeSubscriptions as $subscription) {
                     try {
                         if ($this->shouldGenerateInvoice($subscription)) {
                             $this->info(__('filament-modular-subscriptions::fms.commands.schedule_invoices.generating', ['id' => $subscription->id]));
-
-                            $invoice = $invoiceService->generateInvoice($subscription);
-
+                            $invoice = $invoiceService->generate($subscription);
                             if ($invoice) {
                                 $this->info(__('filament-modular-subscriptions::fms.commands.schedule_invoices.success', ['id' => $invoice->id]));
 
@@ -120,17 +122,15 @@ class ScheduleInvoiceGeneration extends Command
         }
 
         // For interval-based billing
-        $nextInvoiceDate = $this->calculateNextInvoiceDate($subscription, $lastInvoice);
-
+        $nextInvoiceDate = $subscription->ends_at ?? $subscription->starts_at;
         return $today->copy()->subDays($plan->grace_period)->startOfDay()->gte($nextInvoiceDate);
     }
 
     protected function calculateNextInvoiceDate($subscription, $lastInvoice): Carbon
     {
         $plan = $subscription->plan;
-
         // Always use last invoice date as base if available
-        $baseDate = $lastInvoice?->created_at ?? $subscription->starts_at;
+        $baseDate =  $subscription->starts_at;
 
         if (!$baseDate) {
             throw new \InvalidArgumentException('Invalid base date for invoice calculation');

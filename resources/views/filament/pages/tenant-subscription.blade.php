@@ -32,7 +32,7 @@
                         </h3>
                         <div class="mt-2">
                             <x-filament::badge size="xl" :color="$activeSubscription->status->getColor()" class="text-lg">
-                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.statuses.' . $activeSubscription->status->value) }}
+                                {{ $activeSubscription->status->getLabel() }}
                             </x-filament::badge>
                         </div>
                     </div>

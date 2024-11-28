@@ -143,11 +143,11 @@
                     <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
                         {{ $item->quantity }}</td>
                     <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
-                        {{ number_format($item->amount / 1.15, 2, '.', '') }}</td>
+                        {{ number_format($item->total / 1.15, 2, '.', '') }}</td>
                     <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
-                        {{ number_format($item->amount - $item->amount / 1.15, 2, '.', '') }}</td>
+                        {{ number_format($item->total - $item->total / 1.15, 2, '.', '') }}</td>
                     <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
-                        {{ $item->amount }}</td>
+                        {{ $item->total }}</td>
                 </tr>
             @endforeach
         </tbody>

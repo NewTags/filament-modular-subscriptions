@@ -41,11 +41,8 @@ class TenantSubscription extends Page implements HasTable
     public function getViewData(): array
     {
         $tenant = filament()->getTenant();
-        $activeSubscription = $tenant->activeSubscription();
+        $activeSubscription = $tenant->subscription;
         $planModel = config('filament-modular-subscriptions.models.plan');
-
-        $invoiceService = app(InvoiceService::class);
-        $invoiceService->generateInvoice($tenant->activeSubscription());
 
         return [
             'tenant' => $tenant,

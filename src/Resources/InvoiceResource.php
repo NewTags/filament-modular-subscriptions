@@ -87,6 +87,14 @@ class InvoiceResource extends Resource
                     ->money($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.amount'))
                     ->sortable(),
+                Tables\Columns\TextColumn::make('tax')
+                    ->money($currency)
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.tax'))
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('total')
+                    ->money($currency)
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.total'))
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.status'))
@@ -120,26 +128,32 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.invoice.download_pdf'))
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($record) {
-                        // Generate QR code
+                        // Calculate tax amounts correctly
+                        $taxPercentage = config('filament-modular-subscriptions.tax_percentage', 15);
+                        $totalBeforeTax = $record->amount;
+                        $taxAmount = $record->tax;
+                        
+                        // Generate QR code with correct amounts
                         $QrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
                             new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
                             new \Salla\ZATCA\Tags\TaxNumber(config('filament-modular-subscriptions.tax_number')),
                             new \Salla\ZATCA\Tags\InvoiceDate($record->created_at),
-                            new \Salla\ZATCA\Tags\InvoiceTotalAmount($record->amount),
-                            new \Salla\ZATCA\Tags\InvoiceTaxAmount($record->tax),
+                            new \Salla\ZATCA\Tags\InvoiceTotalAmount($totalBeforeTax + $taxAmount), // Total with tax
+                            new \Salla\ZATCA\Tags\InvoiceTaxAmount($taxAmount),
                         ])->render();
 
-                        // Get view data
+                        // Get view data with additional tax information
                         $data = [
                             'invoice' => $record,
                             'QrCode' => $QrCode,
                             'user' => ResolvesCustomerInfo::take($record->tenant),
-                            'company_logo' => public_path(config('filament-modular-subscriptions.company_logo'))
+                            'company_logo' => public_path(config('filament-modular-subscriptions.company_logo')),
+                            'tax_percentage' => $taxPercentage,
+                            'total_before_tax' => $totalBeforeTax,
+                            'tax_amount' => $taxAmount,
                         ];
-                        // Render view to HTML
-                        $view = view('filament-modular-subscriptions::pages.invoice-pdf', $data);
-                        $html = $view->render();
-                        // Create PDF using mPDF
+
+                        // Configure mPDF with better Arabic support
                         $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
                         $fontDirs = $defaultConfig['fontDir'];
 
@@ -153,17 +167,39 @@ class InvoiceResource extends Resource
                             'fontdata' => array_merge($fontData, [
                                 'Cairo' => [
                                     'R' => 'Cairo-Bold.ttf',
+                                    'B' => 'Cairo-Bold.ttf',
                                 ]
                             ]),
                             'default_font' => 'Cairo',
                             'mode' => 'utf-8',
-                            'tempDir' => storage_path('app/pdf-fonts')
+                            'format' => 'A4',
+                            'tempDir' => storage_path('app/pdf-fonts'),
+                            'orientation' => 'P',
+                            'margin_left' => 10,
+                            'margin_right' => 10,
+                            'margin_top' => 10,
+                            'margin_bottom' => 10,
                         ]);
-                        $mpdf->WriteHTML($html);
 
-                        return response()->streamDownload(function () use ($mpdf) {
-                            echo $mpdf->Output('', 'S');
-                        }, 'inv_invoice_' . config('filament-modular-subscriptions.company_name') . '_' . $record->id . '_' . $record->created_at->format('Y-m-d') . '.pdf');
+                        // Add better error handling
+                        try {
+                            $view = view('filament-modular-subscriptions::pages.invoice-pdf', $data);
+                            $html = $view->render();
+                            $mpdf->WriteHTML($html);
+
+                            return response()->streamDownload(function () use ($mpdf) {
+                                echo $mpdf->Output('', 'S');
+                            }, 'invoice_' . $record->id . '_' . $record->created_at->format('Y-m-d') . '.pdf');
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title(__('filament-modular-subscriptions::fms.invoice.pdf_generation_error'))
+                                ->danger()
+                                ->send();
+                                
+                            report($e);
+                            
+                            return null;
+                        }
                     }),
                 Action::make('pay')
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.actions.pay'))
