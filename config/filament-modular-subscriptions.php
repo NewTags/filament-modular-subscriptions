@@ -97,4 +97,5 @@ return [
         'email' => 'company_email', // could be 'contact_email' or 'info.email'
     ],
     'tenant_data_resolver' => null, // Can be set to a callable
+    'invoice_generation_grace_period' => 0,
 ];

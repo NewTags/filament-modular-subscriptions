@@ -27,6 +27,7 @@ return [
                 'setting_value' => 'قيمة الإعداد',
                 'modules_count' => 'عدد الوحدات',
                 'is_pay_as_you_go' => 'الدفع حسب الاستخدام',
+                'fixed_invoice_day' => 'يوم محدد للفوترة',
             ],
             'hints' => [
                 'module_limit' => 'اتركه فارغًا للاستخدام غير المحدود',
@@ -221,7 +222,7 @@ return [
         'billed_monthly' => 'يتم الفوترة شهرياً بناءً على الاستخدام الفعلي',
         'no_minimum_commitment' => 'لا يوجد حد أدنى للالتزام',
         'usage_tracked_realtime' => 'يتم تتبع الاستخدام في الوقت الفعلي',
-        'start_using_pay_as_you_go' => 'ابدأ باستخدام الدفع ��سب الاستخدام',
+        'start_using_pay_as_you_go' => 'ابدأ باستخدام الدفع سب الاستخدام',
     ],
     'intervals' => [
         'day' => 'يوم',
@@ -330,11 +331,67 @@ return [
     'logs' => [
         'invoice_generated' => 'تم إنشاء فاتورة جديدة #:invoice_id بقيمة :amount',
         'invoice_generation_failed' => 'فشل في إنشاء الفاتورة: :error',
+        'invoice_paid' => 'تم دفع الفاتورة #:invoice_id بقيمة :amount',
+        'invoice_partially_paid' => 'تم دفع جزء من الفاتورة #:invoice_id (:paid من :total)',
+        'invoice_payment_failed' => 'فشل في دفع الفاتورة #:invoice_id: :error',
+        'invoice_cancelled' => 'تم إلغاء الفاتورة #:invoice_id',
+
         'status_changed' => 'تم تغيير حالة الاشتراك من :old_status إلى :new_status',
-        'subscription_renewed' => 'تم تجديد الاشتراك',
+        'subscription_renewed' => 'تم تجديد الاشتراك حتى :date',
         'subscription_cancelled' => 'تم إلغاء الاشتراك',
-        'subscription_expired' => 'انتهى الاشتراك',
-        'trial_started' => 'بدأت فترة التجربة',
-        'trial_ended' => 'انتهت فترة التجربة',
+        'subscription_expired' => 'انتهت صلاحية الاشتراك',
+        'subscription_suspended' => 'تم تعليق الاشتراك: :reason',
+        'subscription_reactivated' => 'تم إعادة تفعيل الاشتراك',
+
+        'trial_started' => 'بدأت فترة التجربة المجانية (:days يوم)',
+        'trial_ended' => 'انتهت فترة التجربة المجانية',
+        'trial_extended' => 'تم تمديد فترة التجربة حتى :date',
+
+        'plan_changed' => 'تم تغيير الخطة من :old_plan إلى :new_plan',
+        'plan_upgrade' => 'تمت ترقية الخطة إلى :plan',
+        'plan_downgrade' => 'تم تخفيض الخطة إلى :plan',
+
+        'module_limit_reached' => 'تم الوصول إلى الحد الأقصى لاستخدام وحدة :module',
+        'module_limit_warning' => 'تحذير: اقتراب من الحد الأقصى لاستخدام وحدة :module (:usage من :limit)',
+        'module_access_granted' => 'تم منح الوصول إلى وحدة :module',
+        'module_access_revoked' => 'تم إلغاء الوصول إلى وحدة :module',
+
+        'payment_received' => 'تم استلام دفعة بقيمة :amount',
+        'payment_failed' => 'فشلت عملية الدفع: :error',
+        'payment_refunded' => 'تم إرجاع مبلغ :amount',
+        'payment_pending' => 'دفعة معلقة بقيمة :amount',
+
+        'system_error' => 'خطأ في النظام: :error',
+        'calculation_error' => 'خطأ في حساب الاستخدام: :error',
+        'sync_error' => 'خطأ في مزامنة البيانات: :error',
+
+        'created_by' => 'تم الإنشاء بواسطة :user',
+        'updated_by' => 'تم التحديث بواسطة :user',
+        'deleted_by' => 'تم الحذف بواسطة :user',
+        'restored_by' => 'تمت الاستعادة بواسطة :user',
+
+        'statuses' => [
+            'active' => 'نشط',
+            'inactive' => 'غير نشط',
+            'pending' => 'قيد الانتظار',
+            'suspended' => 'معلق',
+            'cancelled' => 'ملغي',
+            'expired' => 'منتهي الصلاحية',
+            'trial' => 'تجريبي',
+            'past_due' => 'متأخر الدفع',
+            'pending_payment' => 'في انتظار الدفع',
+        ],
+
+        'events' => [
+            'subscription_created' => 'إنشاء اشتراك',
+            'subscription_updated' => 'تحديث اشتراك',
+            'subscription_deleted' => 'حذف اشتراك',
+            'subscription_restored' => 'استعادة اشتراك',
+            'invoice_generated' => 'إنشاء فاتورة',
+            'payment_processed' => 'معالجة دفعة',
+            'status_change' => 'تغيير الحالة',
+            'module_usage' => 'استخدام وحدة',
+            'system_event' => 'حدث نظام',
+        ],
     ],
 ];

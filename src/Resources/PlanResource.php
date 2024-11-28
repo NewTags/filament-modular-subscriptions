@@ -86,19 +86,21 @@ class PlanResource extends Resource
                                 Forms\Components\TextInput::make('price')
                                     ->numeric()
                                     ->required()
-                                    ->hidden(fn (Forms\Get $get) => $get('is_pay_as_you_go'))
+                                    ->hidden(fn(Forms\Get $get) => $get('is_pay_as_you_go'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.price')),
                                 Forms\Components\Select::make('currency')
                                     ->options(config('filament-modular-subscriptions.currencies'))
                                     ->default(config('filament-modular-subscriptions.main_currency'))
                                     ->required()
-                                    ->hidden(fn (Forms\Get $get) => $get('is_pay_as_you_go'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.currency')),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.tabs.billing'))
                             ->columns()
-                            ->hidden(fn (Forms\Get $get) => $get('is_pay_as_you_go'))
                             ->schema([
+                                Forms\Components\TextInput::make('fixed_invoice_day')
+                                ->numeric()
+                                ->default(1)
+                                ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.fixed_invoice_day')),
                                 Forms\Components\TextInput::make('trial_period')
                                     ->numeric()
                                     ->default(0)
@@ -127,7 +129,6 @@ class PlanResource extends Resource
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.fields.modules'))
                             ->icon('heroicon-o-puzzle-piece')
-                            ->hidden(fn (Forms\Get $get) => $get('is_pay_as_you_go'))
                             ->schema([
                                 Repeater::make('planModules')
                                     ->label('')

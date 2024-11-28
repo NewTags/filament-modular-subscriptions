@@ -70,7 +70,6 @@ trait Subscribable
     public function activeSubscription(): ?Subscription
     {
         $cacheKey = self::ACTIVE_SUBSCRIPTION_CACHE_KEY . $this->id;
-
         return Cache::remember(
             $cacheKey,
             self::CACHE_TTL,
@@ -79,6 +78,7 @@ trait Subscribable
                     ->with(['plan', 'moduleUsages.module']) // Eager load relationships
                     ->whereDate('starts_at', '<=', now())
                     ->where(function ($query) {
+                        $this->load('plan');
                         $query->whereNull('ends_at')
                             ->orWhereDate('ends_at', '>', now())
                             ->orWhereDate('ends_at', '>=', now()->subDays(
@@ -151,6 +151,9 @@ trait Subscribable
 
         return $gracePeriodEndDate && $gracePeriodEndDate->isPast();
     }
+
+
+
 
     /**
      * Cancel the current subscription.
@@ -240,7 +243,14 @@ trait Subscribable
 
     public function shouldGenerateInvoice(): bool
     {
-        $subscription = $this->subscription()->with('moduleUsages')->first();
+        $subscription = $this->subscription()
+            ->with([
+                'moduleUsages.module.planModules' => function ($query) {
+                    $query->select('plan_id', 'module_id', 'limit');
+                },
+                'plan:id,is_pay_as_you_go'
+            ])
+            ->first();
 
         if (!$subscription) {
             return false;
@@ -252,19 +262,17 @@ trait Subscribable
             return $expired;
         }
 
-        $moduleUsages = $subscription->moduleUsages;
-        $anyModuleReachLimit = false;
+        foreach ($subscription->moduleUsages as $moduleUsage) {
+            $planModule = $moduleUsage->module->planModules
+                ->where('plan_id', $subscription->plan_id)
+                ->first();
 
-        foreach ($moduleUsages as $moduleUsage) {
-            $limit = $moduleUsage->module->planModules()->where('plan_id', $subscription->plan_id)->first()->limit;
-            if ($limit !== null && $moduleUsage->usage >= $limit) {
-                $anyModuleReachLimit = true;
-                break;
+            if ($planModule && $planModule->limit !== null && $moduleUsage->usage >= $planModule->limit) {
+                return true;
             }
         }
 
-
-        return $expired || $anyModuleReachLimit;
+        return $expired;
     }
 
     /**
@@ -406,39 +414,39 @@ trait Subscribable
 
     public function record(string $moduleClass, int $quantity = 1, bool $incremental = true, Subscription $activeSubscription): void
     {
+        // Load module with a single query including plan modules
         $moduleModel = config('filament-modular-subscriptions.models.module');
-        $module = $moduleModel::where('class', $moduleClass)->first();
+        $module = $moduleModel::with(['planModules' => function ($query) use ($activeSubscription) {
+            $query->where('plan_id', $activeSubscription->plan_id);
+        }])->where('class', $moduleClass)->first();
 
         if (! $module) {
             throw new \InvalidArgumentException("Module {$moduleClass} not found");
         }
 
+        // Load or create module usage with a single query
         $moduleUsage = $activeSubscription->moduleUsages()
             ->where('module_id', $module->id)
-            ->first();
+            ->firstOrCreate(
+                ['module_id' => $module->id],
+                [
+                    'usage' => 0,
+                    'calculated_at' => now(),
+                ]
+            );
 
-        if (! $moduleUsage) {
-            $moduleUsage = $activeSubscription->moduleUsages()->create([
-                'module_id' => $module->id,
-                'usage' => 0,
-                'calculated_at' => now(),
-            ]);
-        }
+        // Update usage in a single query
+        $newUsage = $incremental ? $moduleUsage->usage + $quantity : $quantity;
+        $pricing = $this->calculateModulePricing($activeSubscription, $module, $newUsage);
 
-        if ($incremental) {
-            $moduleUsage->usage += $quantity;
-        } else {
-            $moduleUsage->usage = $quantity;
-        }
+        $moduleUsage->updateQuietly([
+            'usage' => $newUsage,
+            'calculated_at' => now(),
+            'pricing' => $pricing
+        ]);
 
-        $moduleUsage->calculated_at = now();
-        $moduleUsage->save();
-
-        $pricing = $this->calculateModulePricing($activeSubscription, $module, $moduleUsage->usage);
-        $moduleUsage->update(['pricing' => $pricing]);
-
-        Cache::forget($this->getCacheKey($moduleClass));
-        Cache::forget('subscription_alerts_' . $this->id);
+        // Clear cache in a single operation
+        Cache::tags([$this->id])->flush();
     }
 
     /**
@@ -451,28 +459,12 @@ trait Subscribable
      */
     private function calculateModulePricing(Subscription $subscription, $module, int $usage): float
     {
-
-        $plan = $subscription->plan;
-        $planModule = $plan->planModules()->where('module_id', $module->id)->first();
-
-        if (! $planModule) {
+        if (!$subscription->plan->is_pay_as_you_go) {
             return 0;
         }
 
-        if ($plan->is_pay_as_you_go) {
-            return $usage * $planModule->price;
-        }
-
-        return 0;
-        //@todo: add overuse pricing
-        // else {
-        //     $limit = $planModule->limit;
-        //     if ($limit === null || $usage <= $limit) {
-        //         return 0; // Included in the plan
-        //     } else {
-        //         return ($usage - $limit) * $planModule->price; // Charge for overuse
-        //     }
-        // }
+        $planModule = $module->planModules->first();
+        return $planModule ? $usage * $planModule->price : 0;
     }
 
     /**

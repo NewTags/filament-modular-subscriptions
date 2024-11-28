@@ -20,15 +20,8 @@ class ScheduleInvoiceGeneration extends Command
 
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
 
-        // Get active subscriptions that need invoicing with eager loading using chunking
         $subscriptionModel::query()
             ->where('status', SubscriptionStatus::ACTIVE)
-            ->where(function ($query) {
-                $query->whereDoesntHave('invoices')
-                    ->orWhereHas('invoices', function ($q) {
-                        $q->where('created_at', '<=', now()->subDay());
-                    });
-            })
             ->with([
                 'plan:id,fixed_invoice_day,invoice_interval,invoice_period',
                 'invoices:id,subscription_id,created_at'
@@ -113,34 +106,31 @@ class ScheduleInvoiceGeneration extends Command
             return true;
         }
 
-        // If subscription has an end date and we've passed it, don't generate invoice
-        if ($subscription->ends_at && $today->isAfter($subscription->ends_at)) {
-            return false;
-        }
-
         // If plan has fixed invoice day
         if ($plan->fixed_invoice_day) {
             // Check if today is the fixed invoice day
             if ($today->day == $plan->fixed_invoice_day) {
-                // Check if we already generated an invoice today
+                // Check if we already generated an invoice this month
                 return !$subscription->invoices
-                    ->where('created_at', '>', now()->startOfDay())
+                    ->where('created_at', '>=', now()->startOfMonth())
+                    ->where('created_at', '<=', now()->endOfMonth())
                     ->count();
             }
             return false;
         }
 
-        // Calculate next invoice date based on subscription end date if available
+        // For interval-based billing
         $nextInvoiceDate = $this->calculateNextInvoiceDate($subscription, $lastInvoice);
-        return $today->startOfDay()->gte($nextInvoiceDate);
+
+        return $today->copy()->subDays($plan->grace_period)->startOfDay()->gte($nextInvoiceDate);
     }
 
     protected function calculateNextInvoiceDate($subscription, $lastInvoice): Carbon
     {
         $plan = $subscription->plan;
 
-        // Use last invoice date, subscription end date, or subscription start date
-        $baseDate = $lastInvoice?->created_at ?? $subscription->ends_at ?? $subscription->starts_at;
+        // Always use last invoice date as base if available
+        $baseDate = $lastInvoice?->created_at ?? $subscription->starts_at;
 
         if (!$baseDate) {
             throw new \InvalidArgumentException('Invalid base date for invoice calculation');
