@@ -3,6 +3,7 @@
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
 use Filament\Forms;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -98,34 +99,37 @@ class PlanResource extends Resource
                             ->columns()
                             ->schema([
                                 Forms\Components\TextInput::make('fixed_invoice_day')
-                                ->numeric()
-                                ->default(1)
-                                ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.fixed_invoice_day')),
-                                Forms\Components\TextInput::make('trial_period')
                                     ->numeric()
-                                    ->default(0)
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.trial_period')),
-                                Forms\Components\Select::make('trial_interval')
-                                    ->options(Interval::class)
-                                    ->default(Interval::DAY)
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.trial_interval')),
-                                Forms\Components\TextInput::make('invoice_period')
-                                    ->numeric()
-                                    ->required()
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.invoice_period')),
-                                Forms\Components\Select::make('invoice_interval')
-                                    ->options(Interval::class)
-                                    ->default(Interval::MONTH)
-                                    ->required()
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.invoice_interval')),
-                                Forms\Components\TextInput::make('grace_period')
-                                    ->numeric()
-                                    ->default(0)
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_period')),
-                                Forms\Components\Select::make('grace_interval')
-                                    ->options(Interval::class)
-                                    ->default(Interval::DAY)
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_interval')),
+                                    ->default(1)
+                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.fixed_invoice_day')),
+                                Fieldset::make()
+                                    ->schema([
+                                        Forms\Components\TextInput::make('trial_period')
+                                            ->numeric()
+                                            ->default(0)
+                                            ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.trial_period')),
+                                        Forms\Components\Select::make('trial_interval')
+                                            ->options(Interval::class)
+                                            ->default(Interval::DAY)
+                                            ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.trial_interval')),
+                                        Forms\Components\TextInput::make('invoice_period')
+                                            ->numeric()
+                                            ->required()
+                                            ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.invoice_period')),
+                                        Forms\Components\Select::make('invoice_interval')
+                                            ->options(Interval::class)
+                                            ->default(Interval::MONTH)
+                                            ->required()
+                                            ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.invoice_interval')),
+                                        Forms\Components\TextInput::make('grace_period')
+                                            ->numeric()
+                                            ->default(0)
+                                            ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_period')),
+                                        Forms\Components\Select::make('grace_interval')
+                                            ->options(Interval::class)
+                                            ->default(Interval::DAY)
+                                            ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_interval')),
+                                    ])
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.fields.modules'))
                             ->icon('heroicon-o-puzzle-piece')
