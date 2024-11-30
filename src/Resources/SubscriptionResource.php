@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Filters\Filter;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
+use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource\Pages;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -53,13 +54,21 @@ class SubscriptionResource extends Resource
                         }
 
                         return $tenantAttribute;
+                    }, modifyQueryUsing: function (Builder $query) {
+                        return $query->whereNotIn(
+                            'id',
+                            Subscription::query()
+                                ->where('status', SubscriptionStatus::ACTIVE)
+                                ->pluck('subscribable_id')
+                        );
                     })
+                    ->searchable()
+                    ->preload()
                     ->required()
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.subscribable_id')),
-                Hidden::make('subscribable_type')
-                    ->default(config('filament-modular-subscriptions.tenant_model')),
+
                 Forms\Components\Select::make('plan_id')
-                    ->options(fn () => Plan::all()->mapWithKeys(function ($plan) {
+                    ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
                         return [$plan->id => $plan->trans_name . ' - ' . $plan->price . ' ' . $plan->currency];
                     }))
                     ->live(debounce: 500)
@@ -75,7 +84,7 @@ class SubscriptionResource extends Resource
                     })
                     ->required()
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.plan_id')),
-                Fieldset::make(__('Details'))
+                Fieldset::make(__('filament-modular-subscriptions::fms.details'))
                     ->columns()
                     ->schema([
                         Forms\Components\DateTimePicker::make('starts_at')
@@ -119,7 +128,7 @@ class SubscriptionResource extends Resource
                     ->options(SubscriptionStatus::class)
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.status')),
                 Tables\Filters\SelectFilter::make('plan_id')
-                    ->options(fn () => Plan::all()->pluck('name', 'id'))
+                    ->options(fn() => Plan::all()->pluck('name', 'id'))
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.plan_id')),
                 Filter::make('dates')
                     ->form([
@@ -141,11 +150,20 @@ class SubscriptionResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->after(function ($record) {
+                        $record->subscribable->invalidateSubscriptionCache();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->after(function () {
+                            $subscriptions = config('filament-modular-subscriptions.models.subscription');
+                            foreach ($subscriptions::all() as $subscription) {
+                                $subscription->subscribable->invalidateSubscriptionCache();
+                            }
+                        }),
                 ]),
             ]);
     }

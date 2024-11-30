@@ -49,8 +49,8 @@ return [
             ],
         ],
         'subscription' => [
-            'name' => 'الاشتراك',
-            'singular_name' => 'الاشتراك',
+            'name' => 'الاشتراكات',
+            'singular_name' => 'اشتراك',
             'fields' => [
                 'plan_id' => 'الخطة',
                 'subscribable_type' => 'نوع المشترك',
@@ -137,6 +137,8 @@ return [
             'actions' => [
                 'approve' => 'تأكيد',
                 'reject' => 'رفض',
+                'cancel' => 'إلغاء',
+                'undo' => 'تراجع',
             ],
             'sections' => [
                 'payment_details' => 'تفاصيل الدفع',
@@ -231,6 +233,17 @@ return [
         'no_minimum_commitment' => 'لا يوجد حد أدنى للالتزام',
         'usage_tracked_realtime' => 'يتم تتبع الاستخدام في الوقت الفعلي',
         'start_using_pay_as_you_go' => 'ابدأ باستخدام الدفع سب الاستخدام',
+        'welcome_title' => 'مرحباً! اختر خطتك المثالية',
+        'welcome_message' => 'ابدأ باختيار خطة الاشتراك التي تناسب احتياجاتك. جميع الخطط تأتي مع فترة تجريبية خالية من المخاطر.',
+        'benefit_1_title' => 'خطط مرنة',
+        'benefit_1_description' => 'اختر من بين خطط متنوعة مصممة لتناسب احتياجات عملك والنمو معك.',
+        'benefit_2_title' => 'آمن وموثوق',
+        'benefit_2_description' => 'حماية وموثوقية على مستوى المؤسسات مدمجة في كل خطة اشتراك.',
+        'benefit_3_title' => 'وصول كامل للميزات',
+        'benefit_3_description' => 'احصل على وصول إلى جميع الميزات التي تحتاجها لإدارة عملك بكفاءة.',
+        'benefit_4_title' => 'تجربة خالية من المخاطر',
+        'benefit_4_description' => 'ابدأ بفترة تجريبية للتأكد من أن الخطة تلبي متطلباتك.',
+        'explore_plans_button' => 'استكشف الخطط المتاحة',
     ],
     'intervals' => [
         'day' => 'يوم',
@@ -305,6 +318,8 @@ return [
         'subscription_renewed' => 'تم تجديد الاشتراك بنجاح',
         'partially_paid' => 'تم الدفع جزئيا',
         'email' => 'البريد الإلكتروني',
+        'undo' => 'تراجع',
+        'undone' => 'تم التراجع بنجاح',
     ],
     'file_entry' => [
         'view_file' => 'عرض الملف',
@@ -375,7 +390,7 @@ return [
 
         'created_by' => 'تم الإنشاء بواسطة :user',
         'updated_by' => 'تم التحديث بواسطة :user',
-        'deleted_by' => 'تم الحذف بواسطة :user',
+        'deleted_by' => 'تم الحذف بو��سطة :user',
         'restored_by' => 'تمت الاستعادة بواسطة :user',
 
         'statuses' => [
@@ -402,4 +417,5 @@ return [
             'system_event' => 'حدث نظام',
         ],
     ],
+    'details' => 'التفاصيل',
 ];

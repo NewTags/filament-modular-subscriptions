@@ -172,7 +172,8 @@
                                         <!-- Pay As You Go Pricing -->
                                         <div class="space-y-2">
                                             <div class="flex items-baseline">
-                                                <span class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                                                <span
+                                                    class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">
                                                     {{ $plan->price }}
                                                 </span>
                                                 <span class="ml-1 text-2xl font-medium text-gray-500">
@@ -189,7 +190,8 @@
                                     @else
                                         <!-- Subscription Pricing -->
                                         <div class="flex items-baseline">
-                                            <span class="text-4xl font-extrabold text-primary-600 dark:text-primary-400">
+                                            <span
+                                                class="text-4xl font-extrabold text-primary-600 dark:text-primary-400">
                                                 {{ $plan->price }}
                                             </span>
                                             <span class="ml-1 text-2xl font-medium text-gray-500">
@@ -219,10 +221,12 @@
                                                 <span class="ml-3 text-gray-700 dark:text-gray-300">
                                                     <span class="font-medium">{{ $module->getLabel() }}:</span>
                                                     @if ($module->pivot->limit !== null)
-                                                        {{ $module->pivot->limit }} {{ __('filament-modular-subscriptions::fms.tenant_subscription.units') }}
+                                                        {{ $module->pivot->limit }}
+                                                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.units') }}
                                                         @if ($plan->is_pay_as_you_go)
                                                             <span class="text-sm text-gray-500">
-                                                                ({{ $plan->price }} {{ $plan->currency }}/{{ __('filament-modular-subscriptions::fms.tenant_subscription.unit') }})
+                                                                ({{ $plan->price }}
+                                                                {{ $plan->currency }}/{{ __('filament-modular-subscriptions::fms.tenant_subscription.unit') }})
                                                             </span>
                                                         @endif
                                                     @else

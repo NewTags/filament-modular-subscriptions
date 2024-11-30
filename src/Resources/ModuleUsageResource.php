@@ -66,7 +66,7 @@ class ModuleUsageResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.subscriber'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('subscription.plan.name')
-                    ->getStateUsing(fn ($record) => $record->subscription->plan->trans_name)
+                    ->getStateUsing(fn($record) => $record->subscription->plan->trans_name)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.plan'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('module.name')
@@ -90,7 +90,7 @@ class ModuleUsageResource extends Resource
                     ->relationship('module', 'name'),
                 SelectFilter::make('subscription')
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.subscriber'))
-                    ->relationship('subscription.subscribable', 'name'),
+                    ->relationship('subscription.subscriber', 'name'),
                 Filter::make('usage')
                     ->form([
                         TextInput::make('usage_from')
@@ -104,11 +104,11 @@ class ModuleUsageResource extends Resource
                         return $query
                             ->when(
                                 $data['usage_from'],
-                                fn (Builder $query, $usage): Builder => $query->where('usage', '>=', $usage),
+                                fn(Builder $query, $usage): Builder => $query->where('usage', '>=', $usage),
                             )
                             ->when(
                                 $data['usage_to'],
-                                fn (Builder $query, $usage): Builder => $query->where('usage', '<=', $usage),
+                                fn(Builder $query, $usage): Builder => $query->where('usage', '<=', $usage),
                             );
                     }),
                 Filter::make('calculated_at')
@@ -122,11 +122,11 @@ class ModuleUsageResource extends Resource
                         return $query
                             ->when(
                                 $data['calculated_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('calculated_at', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('calculated_at', '>=', $date),
                             )
                             ->when(
                                 $data['calculated_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('calculated_at', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('calculated_at', '<=', $date),
                             );
                     }),
             ])
