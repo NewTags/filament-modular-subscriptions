@@ -267,6 +267,10 @@ return [
         'please_pay_invoice' => 'يرجى دفع الفاتورة',
         'confirm_switch_plan' => 'تأكيد تغيير الخطة',
         'switch_plan_description' => 'سيؤدي تغيير الخطة إلى إنشاء فاتورة جديدة. هل تريد المتابعة؟',
+        'subscribe_to_plan' => 'اشترك في هذه الخطة',
+        'confirm_subscription' => 'تأكيد الاشتراك في :plan',
+        'subscription_created' => 'تم إنشاء الاشتراك بنجاح',
+        'subscription_created_pending' => 'تم إنشاء الاشتراك. يرجى دفع الفاتورة للتفعيل.',
     ],
     'intervals' => [
         'day' => 'يوم',

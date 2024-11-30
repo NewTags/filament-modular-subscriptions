@@ -149,6 +149,10 @@ return [
         'billed_monthly' => 'Billed monthly based on actual usage',
         'no_minimum_commitment' => 'No minimum commitment required',
         'usage_tracked_realtime' => 'Usage tracked in real-time',
+        'subscribe_to_plan' => 'Subscribe to this plan',
+        'confirm_subscription' => 'Confirm Subscription to :plan',
+        'subscription_created' => 'Subscription created successfully',
+        'subscription_created_pending' => 'Subscription created. Please pay the invoice to activate.',
     ],
     'intervals' => [
         'day' => 'Day',
