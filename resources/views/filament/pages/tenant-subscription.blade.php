@@ -240,7 +240,11 @@
                                 <!-- Features List -->
                                 <div class="mt-6">
                                     <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">
-                                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.included_features') }}
+                                        @if ($plan->is_pay_as_you_go)
+                                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.usage_information') }}
+                                        @else
+                                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.included_features') }}
+                                        @endif
                                     </h4>
                                     <ul class="space-y-3">
                                         @foreach ($plan->modules as $module)
@@ -248,23 +252,44 @@
                                                 <x-filament::icon icon="heroicon-o-check-circle"
                                                     class="w-5 h-5 {{ $plan->is_pay_as_you_go ? 'text-emerald-500' : 'text-success-500' }} flex-shrink-0 mt-1" />
                                                 <span class="ml-3 text-gray-700 dark:text-gray-300">
-                                                    <span class="font-medium">{{ $module->getLabel() }}:</span>
-                                                    @if ($module->pivot->limit !== null)
-                                                        {{ $module->pivot->limit }}
-                                                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.units') }}
-                                                        @if ($plan->is_pay_as_you_go)
-                                                            <span class="text-sm text-gray-500">
-                                                                ({{ $plan->price }}
-                                                                {{ $plan->currency }}/{{ __('filament-modular-subscriptions::fms.tenant_subscription.unit') }})
+                                                    <span class="font-medium">{{ $module->getLabel() }}</span>
+                                                    @if ($plan->is_pay_as_you_go)
+                                                        <div class="text-sm text-gray-500">
+                                                            {{ number_format($module->pivot->price, 2) }} {{ $plan->currency }}/{{ __('filament-modular-subscriptions::fms.tenant_subscription.unit') }}
+                                                        </div>
+                                                    @else
+                                                        @if ($module->pivot->limit !== null)
+                                                            <span class="ml-1">
+                                                                ({{ $module->pivot->limit }}
+                                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.units') }})
+                                                            </span>
+                                                        @else
+                                                            <span class="ml-1">
+                                                                ({{ __('filament-modular-subscriptions::fms.tenant_subscription.unlimited') }})
                                                             </span>
                                                         @endif
-                                                    @else
-                                                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.unlimited') }}
                                                     @endif
                                                 </span>
                                             </li>
                                         @endforeach
                                     </ul>
+
+                                    @if ($plan->is_pay_as_you_go)
+                                        <div class="mt-4 space-y-2 text-sm text-gray-500">
+                                            <div class="flex items-center gap-2">
+                                                <x-filament::icon icon="heroicon-o-calculator" class="w-4 h-4" />
+                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.billed_monthly') }}
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <x-filament::icon icon="heroicon-o-shield-check" class="w-4 h-4" />
+                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.no_minimum_commitment') }}
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <x-filament::icon icon="heroicon-o-chart-bar" class="w-4 h-4" />
+                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.usage_tracked_realtime') }}
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 

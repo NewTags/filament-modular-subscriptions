@@ -143,6 +143,12 @@ return [
             'canceled' => 'Canceled',
             'expired' => 'Expired',
         ],
+        'unit' => 'unit',
+        'units' => 'units',
+        'usage_information' => 'Usage Pricing',
+        'billed_monthly' => 'Billed monthly based on actual usage',
+        'no_minimum_commitment' => 'No minimum commitment required',
+        'usage_tracked_realtime' => 'Usage tracked in real-time',
     ],
     'intervals' => [
         'day' => 'Day',
