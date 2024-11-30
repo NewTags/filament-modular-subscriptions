@@ -10,7 +10,9 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource;
 use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
+use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\DB;
 
 class TenantSubscription extends Page implements HasTable
 {
@@ -56,29 +58,13 @@ class TenantSubscription extends Page implements HasTable
             ->requiresConfirmation()
             ->label(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
-
                 return $plan->is_pay_as_you_go
                     ? __('filament-modular-subscriptions::fms.tenant_subscription.start_using_pay_as_you_go')
                     : __('filament-modular-subscriptions::fms.tenant_subscription.switch_to_plan');
             })
-            ->color(function ($arguments) {
-                $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
-
-                return $plan->is_pay_as_you_go ? 'success' : 'primary';
-            })
             ->modalHeading(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
-
                 return __('filament-modular-subscriptions::fms.tenant_subscription.confirm_switch_plan', ['plan' => $plan->trans_name]);
-            })
-            ->modalDescription(function ($arguments) {
-                $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
-
-                return __('filament-modular-subscriptions::fms.tenant_subscription.switch_plan_description', [
-                    'price' => $plan->price,
-                    'currency' => $plan->currency,
-                    'interval' => __('filament-modular-subscriptions::fms.intervals.' . $plan->invoice_interval->value),
-                ]);
             })
             ->action(function (array $arguments) {
                 $planId = $arguments['plan_id'];
@@ -87,34 +73,43 @@ class TenantSubscription extends Page implements HasTable
                 $oldSubscription = $tenant->subscription;
                 $invoiceService = app(InvoiceService::class);
 
-                // If switching from pay-as-you-go plan, generate final usage invoice
-                if ($oldSubscription && $oldSubscription->plan->is_pay_as_you_go) {
-                    Notification::make()
-                        ->title(__('filament-modular-subscriptions::fms.tenant_subscription.generate_final_invoice'))
-                        ->info()
-                        ->send();
-
-                    // Generate final invoice for usage
-                    $invoiceService->generatePayAsYouGoInvoice($oldSubscription);
-                }
-
-                // Switch the plan
-                if ($tenant->switchPlan($planId)) {
-                    // Generate initial invoice for new subscription if not pay-as-you-go
-                    if (! $newPlan->is_pay_as_you_go) {
-                        $invoiceService->generateSwitchPlanInvoice($tenant, $newPlan);
+                DB::transaction(function () use ($tenant, $oldSubscription, $newPlan, $invoiceService) {
+                    // Handle existing subscription if any
+                    if ($oldSubscription) {
+                        // Generate final invoice for pay-as-you-go plan
+                        if ($oldSubscription->plan->is_pay_as_you_go) {
+                            $finalInvoice = $invoiceService->generatePayAsYouGoInvoice($oldSubscription);
+                            $oldSubscription->update(['status' => SubscriptionStatus::ON_HOLD]);
+                            
+                            Notification::make()
+                                ->title(__('filament-modular-subscriptions::fms.tenant_subscription.final_invoice_generated'))
+                                ->info()
+                                ->send();
+                        }
                     }
 
-                    Notification::make()
-                        ->title(__('filament-modular-subscriptions::fms.tenant_subscription.plan_switched_successfully'))
-                        ->success()
-                        ->send();
-                } else {
-                    Notification::make()
-                        ->title(__('filament-modular-subscriptions::fms.tenant_subscription.switch_plan_failed'))
-                        ->danger()
-                        ->send();
-                }
+                    // Create new subscription
+                    if ($newPlan->is_pay_as_you_go) {
+                        // Activate pay-as-you-go subscription immediately
+                        $tenant->switchPlan($newPlan->id);
+                        
+                        Notification::make()
+                            ->title(__('filament-modular-subscriptions::fms.tenant_subscription.pay_as_you_go_activated'))
+                            ->success()
+                            ->send();
+                    } else {
+                        // Generate initial invoice for limited plan
+                        $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $newPlan);
+                        
+                        // Create subscription in ON_HOLD status
+                        $tenant->switchPlan($newPlan->id, SubscriptionStatus::ON_HOLD);
+                        
+                        Notification::make()
+                            ->title(__('filament-modular-subscriptions::fms.tenant_subscription.please_pay_invoice'))
+                            ->warning()
+                            ->send();
+                    }
+                });
 
                 $this->redirect(TenantSubscription::getUrl());
             });

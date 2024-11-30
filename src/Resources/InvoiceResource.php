@@ -79,10 +79,6 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subscription_id'))
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('subscription.plan.name')
-                    ->getStateUsing(fn ($record) => $record->subscription->plan->trans_name)
-                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.plan'))
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->money($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.amount'))
@@ -125,11 +121,11 @@ class InvoiceResource extends Resource
                         return $query
                             ->when(
                                 $data['amount_from'],
-                                fn (Builder $query, $amount): Builder => $query->where('amount', '>=', $amount),
+                                fn(Builder $query, $amount): Builder => $query->where('amount', '>=', $amount),
                             )
                             ->when(
                                 $data['amount_to'],
-                                fn (Builder $query, $amount): Builder => $query->where('amount', '<=', $amount),
+                                fn(Builder $query, $amount): Builder => $query->where('amount', '<=', $amount),
                             );
                     }),
                 Tables\Filters\Filter::make('date')
@@ -143,11 +139,11 @@ class InvoiceResource extends Resource
                         return $query
                             ->when(
                                 $data['created_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
                             )
                             ->when(
                                 $data['created_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                             );
                     }),
             ], FiltersLayout::AboveContent)
@@ -157,7 +153,7 @@ class InvoiceResource extends Resource
                 ViewAction::make()
                     ->slideOver()
                     ->modalWidth('4xl')
-                    ->modalHeading(fn ($record) => __('filament-modular-subscriptions::fms.invoice.details_title', ['number' => $record->id]))
+                    ->modalHeading(fn($record) => __('filament-modular-subscriptions::fms.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
                         $invoice = $record->load(['items', 'subscription.plan']); // Eager load relationships
 
@@ -247,15 +243,15 @@ class InvoiceResource extends Resource
                     ->modalWidth('5xl')
                     ->icon('heroicon-o-credit-card')
                     ->color('success')
-                    ->visible(fn ($record) => filament()->getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
+                    ->visible(fn($record) => filament()->getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
                     ->form([
                         TextInput::make('amount')
-                            ->default(fn ($record) => $record->remaining_amount)
+                            ->default(fn($record) => $record->remaining_amount)
                             ->numeric()
                             ->required()
-                            ->suffix(fn ($record) => $record->subscription->plan->currency)
+                            ->suffix(fn($record) => $record->subscription->plan->currency)
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
-                            ->maxValue(fn ($record) => $record->remaining_amount)
+                            ->maxValue(fn($record) => $record->remaining_amount)
                             ->minValue(1),
                         FileUpload::make('receipt_file')
                             ->required()
@@ -290,7 +286,7 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-eye')
                     ->slideOver()
                     ->modalWidth('5xl')
-                    ->visible(fn ($record) => $record->payments()->exists())
+                    ->visible(fn($record) => $record->payments()->exists())
                     ->infolist(function ($record) {
                         $payments = $record->payments;
                         $schema = [];
@@ -300,19 +296,19 @@ class InvoiceResource extends Resource
                                 ->schema([
                                     TextEntry::make('amount')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
-                                        ->money(fn ($record) => $record->subscription->plan->currency)
-                                        ->getStateUsing(fn ($record) => $record->amount),
+                                        ->money(fn($record) => $record->subscription->plan->currency)
+                                        ->getStateUsing(fn($record) => $record->amount),
                                     TextEntry::make('payment_method')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.payment_method'))
                                         ->badge()
-                                        ->getStateUsing(fn ($record) => $record->payment_method),
+                                        ->getStateUsing(fn($record) => $record->payment_method),
                                     TextEntry::make('status')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.status'))
                                         ->badge()
-                                        ->getStateUsing(fn ($record) => $record->status),
+                                        ->getStateUsing(fn($record) => $record->status),
                                     TextEntry::make('created_at')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_at'))
-                                        ->getStateUsing(fn ($record) => $record->created_at->translatedFormat('M d, Y')),
+                                        ->getStateUsing(fn($record) => $record->created_at->translatedFormat('M d, Y')),
                                 ]);
                         }
 
