@@ -46,6 +46,16 @@ class PaymentResource extends Resource
         return __('filament-modular-subscriptions::fms.resources.payment.name');
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        return self::getModel()::where('status', PaymentStatus::PENDING)->count();
+    }
+
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'warning';
+    }
+
     public static function table(Table $table): Table
     {
         return $table

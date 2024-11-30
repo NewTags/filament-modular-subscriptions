@@ -55,6 +55,15 @@ class InvoiceResource extends Resource
 
         return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
     }
+    public static function getNavigationBadge(): ?string
+    {
+        return self::getModel()::where('status', InvoiceStatus::UNPAID)->orWhere('status', InvoiceStatus::PARTIALLY_PAID)->count();
+    }
+
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'warning';
+    }
 
     public static function table(Tables\Table $table): Tables\Table
     {
