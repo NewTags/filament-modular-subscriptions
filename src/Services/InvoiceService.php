@@ -165,7 +165,6 @@ class InvoiceService
     public function generatePayAsYouGoInvoice(Subscription $subscription): void
     {
         $moduleUsages = $subscription->moduleUsages()
-            ->whereNull('invoiced_at')
             ->get();
 
         if ($moduleUsages->isEmpty()) {
@@ -187,14 +186,11 @@ class InvoiceService
             $totalUsage = $usages->sum('usage');
 
             $invoice->items()->create([
-                'module_id' => $moduleId,
-                'description' => $module->getLabel() . ' Usage',
+                'description' => $module->getLabel(),
                 'quantity' => $totalUsage,
                 'unit_price' => $subscription->plan->price,
                 'total' => $totalUsage * $subscription->plan->price,
             ]);
-
-            $usages->each->update(['invoiced_at' => now()]);
         }
     }
 

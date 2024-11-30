@@ -82,14 +82,8 @@ class PaymentResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.reviewed_by')),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
-                    ->options(PaymentStatus::class)
-                    ->default(PaymentStatus::PENDING->value)
-                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.status')),
-                Tables\Filters\SelectFilter::make('payment_method')
-                    ->options(PaymentMethod::class)
-                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.payment_method')),
                 Tables\Filters\Filter::make('created_at')
+                    ->columns(2)
                     ->form([
                         DatePicker::make('created_from')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_from')),
@@ -127,7 +121,8 @@ class PaymentResource extends Resource
                                 fn(Builder $query, $amount): Builder => $query->where('amount', '<=', $amount),
                             );
                     }),
-            ], FiltersLayout::AboveContent)
+
+            ])
             ->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\ViewAction::make(),
