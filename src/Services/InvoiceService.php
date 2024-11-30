@@ -3,7 +3,6 @@
 namespace HoceineEl\FilamentModularSubscriptions\Services;
 
 use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
-use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Events\InvoiceGenerated;
 use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
@@ -14,9 +13,6 @@ class InvoiceService
 {
     /**
      * Generate or update an invoice for the given subscription.
-     *
-     * @param Subscription $subscription
-     * @return Invoice
      */
     public function generateInvoice(Subscription $subscription): ?Invoice
     {
@@ -45,7 +41,7 @@ class InvoiceService
             // Update invoice with final amounts
             $invoice->update([
                 'amount' => $totalAmount + $tax,
-                'tax' => $tax
+                'tax' => $tax,
             ]);
 
             // Fire event if needed
@@ -57,9 +53,6 @@ class InvoiceService
 
     /**
      * Calculate the due date for the invoice.
-     *
-     * @param Subscription $subscription
-     * @return Carbon
      */
     protected function calculateDueDate(Subscription $subscription): Carbon
     {
@@ -75,9 +68,6 @@ class InvoiceService
 
     /**
      * Check if an invoice already exists for the current period.
-     *
-     * @param Subscription $subscription
-     * @return bool
      */
     protected function hasCurrentPeriodInvoice(Subscription $subscription): bool
     {
@@ -94,7 +84,7 @@ class InvoiceService
 
         // Calculate the start of the current period
         $lastInvoice = $subscription->invoices()->latest()->first();
-        if (!$lastInvoice) {
+        if (! $lastInvoice) {
             return false;
         }
 
@@ -112,10 +102,6 @@ class InvoiceService
 
     /**
      * Create a new invoice.
-     *
-     * @param Subscription $subscription
-     * @param Carbon $dueDate
-     * @return Invoice
      */
     private function createInvoice(Subscription $subscription, Carbon $dueDate): Invoice
     {
@@ -131,9 +117,6 @@ class InvoiceService
 
     /**
      * Calculate the total amount for the subscription.
-     *
-     * @param Subscription $subscription
-     * @return float
      */
     private function calculateTotalAmount(Subscription $subscription): float
     {
@@ -144,10 +127,6 @@ class InvoiceService
 
     /**
      * Create invoice items based on the subscription's usage or fixed price.
-     *
-     * @param Invoice $invoice
-     * @param Subscription $subscription
-     * @return void
      */
     private function createInvoiceItems(Invoice $invoice, Subscription $subscription): void
     {
@@ -181,9 +160,6 @@ class InvoiceService
 
     /**
      * Check if the subscription plan is pay-as-you-go.
-     *
-     * @param Subscription $subscription
-     * @return bool
      */
     private function isPayAsYouGo(Subscription $subscription): bool
     {
@@ -192,8 +168,6 @@ class InvoiceService
 
     /**
      * Get the invoice model from configuration.
-     *
-     * @return string
      */
     private function getInvoiceModel(): string
     {
@@ -202,11 +176,52 @@ class InvoiceService
 
     /**
      * Get the invoice item model from configuration.
-     *
-     * @return string
      */
     private function getInvoiceItemModel(): string
     {
         return config('filament-modular-subscriptions.models.invoice_item');
+    }
+
+    public function generatePayAsYouGoInvoice(Subscription $subscription): void
+    {
+        // Get all module usages since last invoice
+        $moduleUsages = $subscription->moduleUsages()
+            ->whereNull('invoiced_at')
+            ->get();
+
+        if ($moduleUsages->isEmpty()) {
+            return;
+        }
+
+        // Create invoice
+        $invoice = config('filament-modular-subscriptions.models.invoice')::create([
+            'tenant_id' => $subscription->tenant_id,
+            'subscription_id' => $subscription->id,
+            'status' => InvoiceStatus::UNPAID,
+            'due_date' => now()->addDays(7), // Or your preferred payment terms
+            'issued_at' => now(),
+        ]);
+
+        // Create invoice items for each module usage
+        foreach ($moduleUsages->groupBy('module_id') as $moduleId => $usages) {
+            $module = config('filament-modular-subscriptions.models.module')::find($moduleId);
+            $totalUsage = $usages->sum('usage');
+
+            $invoice->items()->create([
+                'module_id' => $moduleId,
+                'description' => $module->getLabel() . ' Usage',
+                'quantity' => $totalUsage,
+                'unit_price' => $subscription->plan->price,
+                'total' => $totalUsage * $subscription->plan->price,
+            ]);
+
+            // Mark usages as invoiced
+            $usages->each->update(['invoiced_at' => now()]);
+        }
+
+        // Update invoice total
+        $invoice->update([
+            'total' => $invoice->items->sum('total'),
+        ]);
     }
 }

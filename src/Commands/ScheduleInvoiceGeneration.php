@@ -2,7 +2,6 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Commands;
 
-use Cache;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
 use HoceineEl\FilamentModularSubscriptions\Services\SubscriptionLogService;
@@ -13,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 class ScheduleInvoiceGeneration extends Command
 {
     protected $signature = 'subscriptions:schedule-invoices';
+
     protected $description = 'Generate invoices for subscriptions based on their billing cycles';
 
     public function handle(InvoiceService $invoiceService, SubscriptionLogService $logService)
@@ -26,7 +26,7 @@ class ScheduleInvoiceGeneration extends Command
             ->with([
                 'plan:id,fixed_invoice_day,invoice_interval,invoice_period,is_pay_as_you_go',
                 'invoices:id,subscription_id,created_at',
-                'subscribable:id,name'
+                'subscribable:id,name',
             ])
             ->select([
                 'id',
@@ -34,7 +34,7 @@ class ScheduleInvoiceGeneration extends Command
                 'starts_at',
                 'ends_at',
                 'subscribable_id',
-                'subscribable_type'
+                'subscribable_type',
             ])
             ->chunk(100, function ($activeSubscriptions) use ($invoiceService, $logService) {
                 foreach ($activeSubscriptions as $subscription) {
@@ -47,7 +47,7 @@ class ScheduleInvoiceGeneration extends Command
 
                                 $oldStatus = $subscription->status;
                                 $subscription->update([
-                                    'status' => SubscriptionStatus::PENDING_PAYMENT
+                                    'status' => SubscriptionStatus::PENDING_PAYMENT,
                                 ]);
                                 defer(function () use ($subscription, $logService, $oldStatus, $invoice) {
                                     $logService->log(
@@ -55,7 +55,7 @@ class ScheduleInvoiceGeneration extends Command
                                         'invoice_generated',
                                         __('filament-modular-subscriptions::fms.logs.invoice_generated', [
                                             'invoice_id' => $invoice->id,
-                                            'amount' => $invoice->total
+                                            'amount' => $invoice->total,
                                         ]),
                                         $oldStatus->value,
                                         SubscriptionStatus::PENDING_PAYMENT->value,
@@ -74,7 +74,7 @@ class ScheduleInvoiceGeneration extends Command
                                 $subscription,
                                 'invoice_generation_failed',
                                 __('filament-modular-subscriptions::fms.logs.invoice_generation_failed', [
-                                    'error' => $e->getMessage()
+                                    'error' => $e->getMessage(),
                                 ]),
                                 null,
                                 null,
@@ -84,11 +84,11 @@ class ScheduleInvoiceGeneration extends Command
 
                         $this->error(__('filament-modular-subscriptions::fms.commands.schedule_invoices.error', [
                             'id' => $subscription->id,
-                            'message' => $e->getMessage()
+                            'message' => $e->getMessage(),
                         ]));
                         Log::error("Invoice generation error for subscription {$subscription->id}", [
                             'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString()
+                            'trace' => $e->getTraceAsString(),
                         ]);
                     }
                 }
@@ -104,7 +104,7 @@ class ScheduleInvoiceGeneration extends Command
         $today = now();
 
         // If no previous invoice exists, generate one
-        if (!$lastInvoice) {
+        if (! $lastInvoice) {
             return true;
         }
 
@@ -113,16 +113,18 @@ class ScheduleInvoiceGeneration extends Command
             // Check if today is the fixed invoice day
             if ($today->day == $plan->fixed_invoice_day) {
                 // Check if we already generated an invoice this month
-                return !$subscription->invoices
+                return ! $subscription->invoices
                     ->where('created_at', '>=', now()->startOfMonth())
                     ->where('created_at', '<=', now()->endOfMonth())
                     ->count();
             }
+
             return false;
         }
 
         // For interval-based billing
         $nextInvoiceDate = $subscription->ends_at ?? $subscription->starts_at;
+
         return $today->copy()->subDays($plan->grace_period)->startOfDay()->gte($nextInvoiceDate);
     }
 
@@ -130,9 +132,9 @@ class ScheduleInvoiceGeneration extends Command
     {
         $plan = $subscription->plan;
         // Always use last invoice date as base if available
-        $baseDate =  $subscription->starts_at;
+        $baseDate = $subscription->starts_at;
 
-        if (!$baseDate) {
+        if (! $baseDate) {
             throw new \InvalidArgumentException('Invalid base date for invoice calculation');
         }
 

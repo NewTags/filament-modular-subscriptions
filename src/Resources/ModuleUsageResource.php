@@ -66,7 +66,7 @@ class ModuleUsageResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.subscriber'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('subscription.plan.name')
-                    ->getStateUsing(fn($record) => $record->subscription->plan->trans_name)
+                    ->getStateUsing(fn ($record) => $record->subscription->plan->trans_name)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.plan'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('module.name')

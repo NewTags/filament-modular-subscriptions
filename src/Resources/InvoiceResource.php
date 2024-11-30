@@ -3,7 +3,7 @@
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
 use ArPHP\I18N\Arabic;
-use Filament\Facades\Filament;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\Fieldset;
@@ -17,18 +17,15 @@ use Filament\Tables\Enums\FiltersLayout;
 use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentMethod;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
-use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
-use Illuminate\Support\Facades\View;
-use Mpdf\Mpdf;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Forms\Components\DatePicker;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\ResolvesCustomerInfo;
+use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\View;
+use Mpdf\Mpdf;
 
 class InvoiceResource extends Resource
 {
-
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $tenantOwnershipRelationshipName = 'tenant';
@@ -62,6 +59,7 @@ class InvoiceResource extends Resource
     public static function table(Tables\Table $table): Tables\Table
     {
         $currency = Plan::first()->currency ?? config('filament-modular-subscriptions.main_currency');
+
         return $table
             ->modifyQueryUsing(function ($query) {
                 if (filament()->getTenant()) {
@@ -72,7 +70,7 @@ class InvoiceResource extends Resource
                     'subscription.subscriber',
                     'subscription.plan',
                     'items',
-                    'tenant'
+                    'tenant',
                 ]);
             })
             ->columns([
@@ -82,7 +80,7 @@ class InvoiceResource extends Resource
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('subscription.plan.name')
-                    ->getStateUsing(fn($record) => $record->subscription->plan->trans_name)
+                    ->getStateUsing(fn ($record) => $record->subscription->plan->trans_name)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.plan'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
@@ -159,9 +157,10 @@ class InvoiceResource extends Resource
                 ViewAction::make()
                     ->slideOver()
                     ->modalWidth('4xl')
-                    ->modalHeading(fn($record) => __('filament-modular-subscriptions::fms.invoice.details_title', ['number' => $record->id]))
+                    ->modalHeading(fn ($record) => __('filament-modular-subscriptions::fms.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
                         $invoice = $record->load(['items', 'subscription.plan']); // Eager load relationships
+
                         return View::make('filament-modular-subscriptions::pages.invoice-details', compact('invoice'));
                     })
                     ->modalFooterActions([]),
@@ -195,21 +194,21 @@ class InvoiceResource extends Resource
                         ];
 
                         // Configure mPDF with better Arabic support
-                        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+                        $defaultConfig = (new \Mpdf\Config\ConfigVariables)->getDefaults();
                         $fontDirs = $defaultConfig['fontDir'];
 
-                        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+                        $defaultFontConfig = (new \Mpdf\Config\FontVariables)->getDefaults();
                         $fontData = $defaultFontConfig['fontdata'];
 
                         $mpdf = new \Mpdf\Mpdf([
                             'fontDir' => array_merge($fontDirs, [
-                                config('filament-modular-subscriptions.font_path')
+                                config('filament-modular-subscriptions.font_path'),
                             ]),
                             'fontdata' => array_merge($fontData, [
                                 'Cairo' => [
                                     'R' => 'Cairo-Bold.ttf',
                                     'B' => 'Cairo-Bold.ttf',
-                                ]
+                                ],
                             ]),
                             'default_font' => 'Cairo',
                             'mode' => 'utf-8',
@@ -248,15 +247,15 @@ class InvoiceResource extends Resource
                     ->modalWidth('5xl')
                     ->icon('heroicon-o-credit-card')
                     ->color('success')
-                    ->visible(fn($record) => filament()->getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
+                    ->visible(fn ($record) => filament()->getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
                     ->form([
                         TextInput::make('amount')
-                            ->default(fn($record) => $record->remaining_amount)
+                            ->default(fn ($record) => $record->remaining_amount)
                             ->numeric()
                             ->required()
-                            ->suffix(fn($record) => $record->subscription->plan->currency)
+                            ->suffix(fn ($record) => $record->subscription->plan->currency)
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
-                            ->maxValue(fn($record) => $record->remaining_amount)
+                            ->maxValue(fn ($record) => $record->remaining_amount)
                             ->minValue(1),
                         FileUpload::make('receipt_file')
                             ->required()
@@ -265,7 +264,7 @@ class InvoiceResource extends Resource
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.receipt_file'))
                             ->helperText(__('filament-modular-subscriptions::fms.resources.payment.receipt_help_text')),
                         TextInput::make('notes')
-                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.notes'))
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.notes')),
                     ])
                     ->action(function (array $data, $record) {
                         $record->payments()->create([
@@ -291,7 +290,7 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-eye')
                     ->slideOver()
                     ->modalWidth('5xl')
-                    ->visible(fn($record) => $record->payments()->exists())
+                    ->visible(fn ($record) => $record->payments()->exists())
                     ->infolist(function ($record) {
                         $payments = $record->payments;
                         $schema = [];
@@ -301,19 +300,19 @@ class InvoiceResource extends Resource
                                 ->schema([
                                     TextEntry::make('amount')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
-                                        ->money(fn($record) => $record->subscription->plan->currency)
-                                        ->getStateUsing(fn($record) => $record->amount),
+                                        ->money(fn ($record) => $record->subscription->plan->currency)
+                                        ->getStateUsing(fn ($record) => $record->amount),
                                     TextEntry::make('payment_method')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.payment_method'))
                                         ->badge()
-                                        ->getStateUsing(fn($record) => $record->payment_method),
+                                        ->getStateUsing(fn ($record) => $record->payment_method),
                                     TextEntry::make('status')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.status'))
                                         ->badge()
-                                        ->getStateUsing(fn($record) => $record->status),
+                                        ->getStateUsing(fn ($record) => $record->status),
                                     TextEntry::make('created_at')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_at'))
-                                        ->getStateUsing(fn($record) => $record->created_at->translatedFormat('M d, Y')),
+                                        ->getStateUsing(fn ($record) => $record->created_at->translatedFormat('M d, Y')),
                                 ]);
                         }
 

@@ -17,10 +17,8 @@ use HoceineEl\FilamentModularSubscriptions\Enums\PaymentMethod;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PaymentResource extends Resource
 {
@@ -46,7 +44,6 @@ class PaymentResource extends Resource
         return __('filament-modular-subscriptions::fms.resources.payment.name');
     }
 
-
     public static function table(Table $table): Table
     {
         return $table
@@ -55,7 +52,7 @@ class PaymentResource extends Resource
                     ->sortable()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.subscriber')),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn($record) => $record->invoice->subscription->plan->currency, locale: 'en')
+                    ->money(fn ($record) => $record->invoice->subscription->plan->currency, locale: 'en')
                     ->sortable()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount')),
                 Tables\Columns\TextColumn::make('payment_method')
@@ -136,10 +133,10 @@ class PaymentResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.actions.approve'))
                     ->color('success')
                     ->icon('heroicon-o-check-circle')
-                    ->visible(fn($record) => $record->status === PaymentStatus::PENDING)
+                    ->visible(fn ($record) => $record->status === PaymentStatus::PENDING)
                     ->form([
                         TextInput::make('admin_notes')
-                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.admin_notes'))
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.admin_notes')),
                     ])
                     ->action(function ($record, array $data) {
                         DB::transaction(function () use ($record, $data) {
@@ -184,12 +181,12 @@ class PaymentResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.actions.reject'))
                     ->color('danger')
                     ->icon('heroicon-o-x-circle')
-                    ->visible(fn($record) => $record->status === PaymentStatus::PENDING)
+                    ->visible(fn ($record) => $record->status === PaymentStatus::PENDING)
                     ->requiresConfirmation()
                     ->form([
                         TextInput::make('admin_notes')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.admin_notes'))
-                            ->required()
+                            ->required(),
                     ])
                     ->action(function ($record, array $data) {
                         $record->update([
@@ -203,6 +200,43 @@ class PaymentResource extends Resource
                             ->title(__('filament-modular-subscriptions::fms.payment.rejected'))
                             ->danger()
                             ->send();
+                    }),
+                Action::make('undo')
+                    ->label(__('filament-modular-subscriptions::fms.resources.payment.actions.undo'))
+                    ->color('warning')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->visible(fn ($record) => in_array($record->status, [PaymentStatus::PAID, PaymentStatus::CANCELLED]))
+                    ->requiresConfirmation()
+                    ->action(function ($record) {
+                        DB::transaction(function () use ($record) {
+                            if ($record->status === PaymentStatus::PAID) {
+                                $invoice = $record->invoice;
+                                $totalPaid = $invoice->payments()->where('status', PaymentStatus::PAID)->where('id', '!=', $record->id)->sum('amount');
+
+                                if ($totalPaid >= $invoice->amount) {
+                                    $invoice->update(['status' => InvoiceStatus::PAID]);
+                                } elseif ($totalPaid > 0) {
+                                    $invoice->update(['status' => InvoiceStatus::PARTIALLY_PAID]);
+                                } else {
+                                    $invoice->update([
+                                        'status' => InvoiceStatus::UNPAID,
+                                        'paid_at' => null,
+                                    ]);
+                                }
+                            }
+
+                            $record->update([
+                                'status' => PaymentStatus::PENDING,
+                                'admin_notes' => null,
+                                'reviewed_at' => null,
+                                'reviewed_by' => null,
+                            ]);
+
+                            Notification::make()
+                                ->title(__('filament-modular-subscriptions::fms.payment.undone'))
+                                ->success()
+                                ->send();
+                        });
                     }),
             ])
             ->bulkActions([
@@ -221,7 +255,7 @@ class PaymentResource extends Resource
                         Infolists\Components\TextEntry::make('invoice.subscription.subscriber.name')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.subscriber')),
                         Infolists\Components\TextEntry::make('amount')
-                            ->money(fn($record) => $record->invoice->subscription->plan->currency, locale: 'en')
+                            ->money(fn ($record) => $record->invoice->subscription->plan->currency, locale: 'en')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount')),
                         Infolists\Components\TextEntry::make('payment_method')
                             ->badge()
@@ -237,8 +271,8 @@ class PaymentResource extends Resource
                     ])->columns(),
                 FileEntry::make('receipt_file')
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.receipt_file'))
-                    ->getStateUsing(fn($record) => $record->receipt_file ? Storage::url($record->receipt_file) : null)
-                    ->visible(fn($record) => $record->receipt_file)
+                    ->getStateUsing(fn ($record) => $record->receipt_file ? Storage::url($record->receipt_file) : null)
+                    ->visible(fn ($record) => $record->receipt_file),
             ]);
     }
 

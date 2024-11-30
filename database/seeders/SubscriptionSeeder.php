@@ -13,6 +13,7 @@ class SubscriptionSeeder extends Seeder
 
         if (! $tenantModel) {
             $this->command->warn('Tenant model not set in config. Skipping subscription seeding.');
+
             return;
         }
 
@@ -32,7 +33,7 @@ class SubscriptionSeeder extends Seeder
             );
 
             // Calculate trial end date if trial period exists
-            $trialEndDate = $plan->trial_period > 0 
+            $trialEndDate = $plan->trial_period > 0
                 ? $startDate->copy()->add(
                     $plan->trial_interval->value,
                     $plan->trial_period

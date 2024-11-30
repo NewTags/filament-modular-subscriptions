@@ -51,7 +51,7 @@ class ModuleResource extends Resource
                 Forms\Components\Select::make('class')
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->options(fn() => self::getModuleOptions())
+                    ->options(fn () => self::getModuleOptions())
                     ->label(__('filament-modular-subscriptions::fms.resources.module.fields.class'))
                     ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, ?string $state) {
                         if ($state && ! $get('name')) {
@@ -76,7 +76,7 @@ class ModuleResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.module.fields.name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('class')
-                    ->formatStateUsing(fn($state) => self::getModuleOptions()->get($state, $state))
+                    ->formatStateUsing(fn ($state) => self::getModuleOptions()->get($state, $state))
                     ->label(__('filament-modular-subscriptions::fms.resources.module.fields.class')),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->label(__('filament-modular-subscriptions::fms.resources.module.fields.is_active')),
@@ -122,8 +122,8 @@ class ModuleResource extends Resource
     {
         if (self::$moduleOptions === null) {
             self::$moduleOptions = collect(config('filament-modular-subscriptions.modules'))
-                ->filter(fn($module) => is_subclass_of($module, BaseModule::class))
-                ->mapWithKeys(fn($module) => [$module => (new $module)->getName()]);
+                ->filter(fn ($module) => is_subclass_of($module, BaseModule::class))
+                ->mapWithKeys(fn ($module) => [$module => (new $module)->getName()]);
         }
 
         return self::$moduleOptions;

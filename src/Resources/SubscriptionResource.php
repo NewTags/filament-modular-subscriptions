@@ -59,7 +59,7 @@ class SubscriptionResource extends Resource
                 Hidden::make('subscribable_type')
                     ->default(config('filament-modular-subscriptions.tenant_model')),
                 Forms\Components\Select::make('plan_id')
-                    ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
+                    ->options(fn () => Plan::all()->mapWithKeys(function ($plan) {
                         return [$plan->id => $plan->trans_name . ' - ' . $plan->price . ' ' . $plan->currency];
                     }))
                     ->live(debounce: 500)
@@ -119,7 +119,7 @@ class SubscriptionResource extends Resource
                     ->options(SubscriptionStatus::class)
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.status')),
                 Tables\Filters\SelectFilter::make('plan_id')
-                    ->options(fn() => Plan::all()->pluck('name', 'id'))
+                    ->options(fn () => Plan::all()->pluck('name', 'id'))
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.plan_id')),
                 Filter::make('dates')
                     ->form([

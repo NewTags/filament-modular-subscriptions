@@ -9,7 +9,6 @@ use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use HoceineEl\FilamentModularSubscriptions\Commands\MakeModuleCommand;
-use HoceineEl\FilamentModularSubscriptions\Commands\ProcessSubscriptionInvoices;
 use HoceineEl\FilamentModularSubscriptions\Commands\ScheduleInvoiceGeneration;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
