@@ -95,8 +95,16 @@ class TenantSubscription extends Page implements HasTable
                         // Create or update subscription with active status
                         if ($oldSubscription) {
                             $tenant->switchPlan($newPlan->id);
+                            $tenant->notifySubscriptionChange('switched', [
+                                'plan' => $newPlan->trans_name,
+                                'type' => 'pay_as_you_go'
+                            ]);
                         } else {
                             $this->createSubscription($tenant, $newPlan, SubscriptionStatus::ACTIVE);
+                            $tenant->notifySubscriptionChange('started', [
+                                'plan' => $newPlan->trans_name,
+                                'type' => 'pay_as_you_go'
+                            ]);
                         }
 
                         Notification::make()
@@ -110,6 +118,10 @@ class TenantSubscription extends Page implements HasTable
                         // Update existing subscription if any
                         if ($oldSubscription) {
                             $tenant->switchPlan($newPlan->id, SubscriptionStatus::ON_HOLD);
+                            $tenant->notifySubscriptionChange('switched', [
+                                'plan' => $newPlan->trans_name,
+                                'status' => 'on_hold'
+                            ]);
                         }
 
                         Notification::make()

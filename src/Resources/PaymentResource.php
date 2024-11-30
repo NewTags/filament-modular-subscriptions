@@ -145,11 +145,11 @@ class PaymentResource extends Resource
                         TextInput::make('admin_notes')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.admin_notes')),
                     ])
-                    ->action(function ($record, array $data) {
-                        DB::transaction(function () use ($record, $data) {
+                    ->action(function ($record) {
+                        DB::transaction(function () use ($record) {
                             $record->update([
                                 'status' => PaymentStatus::PAID,
-                                'admin_notes' => $data['admin_notes'],
+                                'admin_notes' => null,
                                 'reviewed_at' => now(),
                                 'reviewed_by' => auth()->id(),
                             ]);
@@ -164,11 +164,11 @@ class PaymentResource extends Resource
                                 ]);
 
                                 $invoice->subscription->renew();
-
-                                Notification::make()
-                                    ->title(__('filament-modular-subscriptions::fms.payment.subscription_renewed'))
-                                    ->success()
-                                    ->send();
+                                
+                                $invoice->subscription->subscribable->notifySubscriptionChange('renewed', [
+                                    'invoice_id' => $invoice->id,
+                                    'amount' => $invoice->amount
+                                ]);
                             } elseif ($totalPaid > 0) {
                                 $invoice->update(['status' => InvoiceStatus::PARTIALLY_PAID]);
 
@@ -203,6 +203,12 @@ class PaymentResource extends Resource
                             'reviewed_by' => auth()->id(),
                         ]);
 
+                        $record->invoice->subscription->subscribable->notifySubscriptionChange('payment_rejected', [
+                            'invoice_id' => $record->invoice->id,
+                            'amount' => $record->amount,
+                            'reason' => $data['admin_notes']
+                        ]);
+                        
                         Notification::make()
                             ->title(__('filament-modular-subscriptions::fms.payment.rejected'))
                             ->danger()

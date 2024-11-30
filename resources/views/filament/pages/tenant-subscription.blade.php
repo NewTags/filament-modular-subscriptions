@@ -197,18 +197,6 @@
                                     @if ($plan->is_pay_as_you_go)
                                         <!-- Pay As You Go Pricing -->
                                         <div class="space-y-2">
-                                            <div class="flex items-baseline">
-                                                <span
-                                                    class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">
-                                                    {{ $plan->price }}
-                                                </span>
-                                                <span class="ml-1 text-2xl font-medium text-gray-500">
-                                                    {{ $plan->currency }}
-                                                </span>
-                                                <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ __('filament-modular-subscriptions::fms.tenant_subscription.per_unit') }}
-                                                </span>
-                                            </div>
                                             <p class="text-sm text-emerald-600 dark:text-emerald-400">
                                                 {{ __('filament-modular-subscriptions::fms.tenant_subscription.only_pay_for_what_you_use') }}
                                             </p>

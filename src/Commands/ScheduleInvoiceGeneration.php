@@ -49,6 +49,14 @@ class ScheduleInvoiceGeneration extends Command
                                 $subscription->update([
                                     'status' => SubscriptionStatus::PENDING_PAYMENT,
                                 ]);
+
+                                $subscription->subscribable->notifySubscriptionChange('invoice_generated', [
+                                    'invoice_id' => $invoice->id,
+                                    'amount' => $invoice->total,
+                                    'due_date' => $invoice->due_date->format('Y-m-d'),
+                                    'currency' => $subscription->plan->currency
+                                ]);
+
                                 defer(function () use ($subscription, $logService, $oldStatus, $invoice) {
                                     $logService->log(
                                         $subscription,
@@ -65,6 +73,34 @@ class ScheduleInvoiceGeneration extends Command
                                             'items_count' => $invoice->items->count(),
                                         ]
                                     );
+
+                                    if ($invoice->due_date->isPast()) {
+                                        $daysOverdue = now()->diffInDays($invoice->due_date);
+                                        $subscription->subscribable->notifySubscriptionChange('invoice_overdue', [
+                                            'invoice_id' => $invoice->id,
+                                            'days' => $daysOverdue,
+                                            'amount' => $invoice->total,
+                                            'currency' => $subscription->plan->currency
+                                        ]);
+                                    }
+
+                                    if ($subscription->ends_at && $subscription->ends_at->diffInDays(now()) <= 7) {
+                                        $subscription->subscribable->notifySubscriptionChange('subscription_near_expiry', [
+                                            'days' => $subscription->ends_at->diffInDays(now()),
+                                            'expiry_date' => $subscription->ends_at->format('Y-m-d'),
+                                            'plan' => $subscription->plan->trans_name
+                                        ]);
+                                    }
+
+                                    if ($subscription->ends_at && 
+                                        $subscription->ends_at->isPast() && 
+                                        $subscription->ends_at->copy()->addDays($subscription->plan->grace_period)->isFuture()) {
+                                        $daysLeft = now()->diffInDays($subscription->ends_at->copy()->addDays($subscription->plan->grace_period));
+                                        $subscription->subscribable->notifySubscriptionChange('subscription_grace_period', [
+                                            'days' => $daysLeft,
+                                            'grace_end_date' => $subscription->ends_at->copy()->addDays($subscription->plan->grace_period)->format('Y-m-d')
+                                        ]);
+                                    }
                                 });
                             }
                         }
@@ -80,6 +116,11 @@ class ScheduleInvoiceGeneration extends Command
                                 null,
                                 ['error' => $e->getMessage()]
                             );
+
+                            $subscription->subscribable->notifySubscriptionChange('invoice_generation_failed', [
+                                'error' => $e->getMessage(),
+                                'subscription_id' => $subscription->id
+                            ]);
                         });
 
                         $this->error(__('filament-modular-subscriptions::fms.commands.schedule_invoices.error', [

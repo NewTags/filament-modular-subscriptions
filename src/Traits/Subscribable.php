@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Notifications\Notification;
 
 /**
  * Trait Subscribable
@@ -667,5 +669,53 @@ trait Subscribable
         }
 
         $this->invalidateSubscriptionCache();
+    }
+
+    /**
+     * Get users who should be notified about subscription changes.
+     * This method should be implemented by the tenant model.
+     */
+    public function getShouldNotifyUsersQuery(): Builder
+    {
+        if (method_exists($this, 'admins')) {
+            return $this->admins()->whereHas('roles', function ($query) {
+                $query->whereIn('name', [
+                    'admin',
+                    'owner',
+                    'billing_manager'
+                ]);
+            });
+        }
+
+        throw new \Exception('The tenant model must implement getShouldNotifyUsersQuery() or have a admins() relationship');
+    }
+
+    /**
+     * Notify users about subscription changes
+     */
+    public function notifySubscriptionChange(string $action, array $additionalData = []): void
+    {
+        if (version_compare(app()->version(), '11.23', '>=')) {
+            defer(function () use ($action, $additionalData) {
+                $this->notifyAdmins($action, $additionalData);
+            });
+        } else {
+            $this->notifyAdmins($action, $additionalData);
+        }
+    }
+
+    public function notifyAdmins(string $action, array $additionalData = []): void
+    {
+        $users = $this->getShouldNotifyUsersQuery()->get();
+
+        foreach ($users as $user) {
+            Notification::make()
+                ->title(__('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.title'))
+                ->body(__('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.body', [
+                    'tenant' => $this->name
+                ]))
+                ->data($additionalData)
+                ->sendToDatabase($user);
+        }
     }
 }

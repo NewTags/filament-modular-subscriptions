@@ -306,7 +306,7 @@ class InvoiceResource extends Resource
                                 ->schema([
                                     TextEntry::make('amount')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
-                                        ->money(fn($record) => $record->subscription->plan->currency)
+                                        ->money(fn($record) => $record->subscription->plan->currency, locale: 'en')
                                         ->getStateUsing(fn($record) => $record->amount),
                                     TextEntry::make('payment_method')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.payment_method'))
