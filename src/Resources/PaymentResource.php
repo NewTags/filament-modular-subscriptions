@@ -10,11 +10,13 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use HoceineEl\FilamentModularSubscriptions\Components\FileEntry;
 use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentMethod;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
+use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -86,7 +88,6 @@ class PaymentResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.status')),
                 Tables\Filters\SelectFilter::make('payment_method')
                     ->options(PaymentMethod::class)
-                    ->default(PaymentMethod::BANK_TRANSFER->value)
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.payment_method')),
                 Tables\Filters\Filter::make('created_at')
                     ->form([
@@ -126,7 +127,8 @@ class PaymentResource extends Resource
                                 fn(Builder $query, $amount): Builder => $query->where('amount', '<=', $amount),
                             );
                     }),
-            ])
+            ], FiltersLayout::AboveContent)
+            ->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Action::make('approve')
@@ -211,7 +213,20 @@ class PaymentResource extends Resource
                         DB::transaction(function () use ($record) {
                             if ($record->status === PaymentStatus::PAID) {
                                 $invoice = $record->invoice;
-                                $totalPaid = $invoice->payments()->where('status', PaymentStatus::PAID)->where('id', '!=', $record->id)->sum('amount');
+                                $subscription = $invoice->subscription;
+
+                                // Revert subscription renewal if this was the payment that triggered it
+                                if ($invoice->paid_at && $invoice->paid_at->eq($record->reviewed_at)) {
+                                    $subscription->update([
+                                        'status' => SubscriptionStatus::ON_HOLD,
+                                        'ends_at' => $subscription->starts_at->addDays($subscription->plan->period),
+                                    ]);
+                                }
+
+                                $totalPaid = $invoice->payments()
+                                    ->where('status', PaymentStatus::PAID)
+                                    ->where('id', '!=', $record->id)
+                                    ->sum('amount');
 
                                 if ($totalPaid >= $invoice->amount) {
                                     $invoice->update(['status' => InvoiceStatus::PAID]);
@@ -236,6 +251,8 @@ class PaymentResource extends Resource
                                 ->title(__('filament-modular-subscriptions::fms.payment.undone'))
                                 ->success()
                                 ->send();
+
+                            defer(fn() => $invoice->tenant->invalidateSubscriptionCache());
                         });
                     }),
             ])
