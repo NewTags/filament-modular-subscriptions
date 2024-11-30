@@ -156,7 +156,7 @@ return [
         'month' => 'شهر',
         'year' => 'سنة',
     ],
-    'status' => [
+    'statuses' => [
         'active' => 'نشط',
         'cancelled' => 'لغي',
         'expired' => 'منتهي',
@@ -171,7 +171,7 @@ return [
         'your_subscription' => 'اشتراكك',
         'current_subscription' => 'الاشتراك الحالي',
         'plan' => 'الخطة',
-        'status' => 'الحالة',
+        'statuses' => 'الحالة',
         'started_on' => 'تاريخ البدء',
         'unlimited' => 'غير محدود',
         'ends_on' => 'تاريخ الانتهاء',
@@ -208,6 +208,10 @@ return [
             'pending' => 'قيد الانتظار',
             'trialing' => 'في فترة التجربة',
             'rejected' => 'مرفوض',
+            'inactive' => 'غير نشط',
+            'on_hold' => 'معلق',
+            'pending_payment' => 'قيد انتظار الدفع',
+
         ],
         'started_on' => 'تاريخ البدء',
         'ends_on' => 'تاريخ الانتهاء',
@@ -445,4 +449,15 @@ return [
         ],
     ],
     'details' => 'التفاصيل',
+    'statuses' => [
+        'active' => 'نشط',
+        'cancelled' => 'لغي',
+        'expired' => 'منتهي',
+        'pending' => 'قيد الانتظار',
+        'paid' => 'مدفوع',
+        'unpaid' => 'غير مدفوع',
+        'rejected' => 'مرفوض',
+        'partially_paid' => 'مدفوع جزئيا',
+        'pending_payment' => 'قيد انتظار الدفع',
+    ],
 ];

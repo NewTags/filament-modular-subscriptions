@@ -147,6 +147,7 @@ class InvoiceResource extends Resource
                             );
                     }),
             ], FiltersLayout::AboveContent)
+            ->filtersFormColumns(3)
             ->modelLabel(__('filament-modular-subscriptions::fms.resources.invoice.singular_name'))
             ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.invoice.name'))
             ->actions([

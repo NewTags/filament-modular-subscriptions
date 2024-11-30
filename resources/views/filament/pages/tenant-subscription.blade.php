@@ -143,14 +143,11 @@
                 <p class="text-gray-500 dark:text-gray-400">
                     {{ __('filament-modular-subscriptions::fms.tenant_subscription.please_pay_invoice_to_activate') }}
                 </p>
-                
+
                 <!-- Add link to pending invoice -->
-                @if($pendingInvoice = $activeSubscription->pendingInvoice)
+                @if ($pendingInvoice = $activeSubscription->pendingInvoice)
                     <div class="mt-4">
-                        <x-filament::button
-                            :href="route('filament.resources.invoices.view', $pendingInvoice)"
-                            color="primary"
-                        >
+                        <x-filament::button :href="route('filament.resources.invoices.view', $pendingInvoice)" color="primary">
                             {{ __('filament-modular-subscriptions::fms.tenant_subscription.view_invoice') }}
                         </x-filament::button>
                     </div>
@@ -255,7 +252,8 @@
                                                     <span class="font-medium">{{ $module->getLabel() }}</span>
                                                     @if ($plan->is_pay_as_you_go)
                                                         <div class="text-sm text-gray-500">
-                                                            {{ number_format($module->pivot->price, 2) }} {{ $plan->currency }}/{{ __('filament-modular-subscriptions::fms.tenant_subscription.unit') }}
+                                                            {{ number_format($module->pivot->price, 2) }}
+                                                            {{ $plan->currency }}/{{ __('filament-modular-subscriptions::fms.tenant_subscription.unit') }}
                                                         </div>
                                                     @else
                                                         @if ($module->pivot->limit !== null)
@@ -276,10 +274,6 @@
 
                                     @if ($plan->is_pay_as_you_go)
                                         <div class="mt-4 space-y-2 text-sm text-gray-500">
-                                            <div class="flex items-center gap-2">
-                                                <x-filament::icon icon="heroicon-o-calculator" class="w-4 h-4" />
-                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.billed_monthly') }}
-                                            </div>
                                             <div class="flex items-center gap-2">
                                                 <x-filament::icon icon="heroicon-o-shield-check" class="w-4 h-4" />
                                                 {{ __('filament-modular-subscriptions::fms.tenant_subscription.no_minimum_commitment') }}

@@ -384,7 +384,7 @@ trait Subscribable
     {
         $activeSubscription = $this->activeSubscription();
         if (! $activeSubscription) {
-            throw new \RuntimeException('No active subscription found');
+            return;
         }
 
         if (version_compare(app()->version(), '11.23', '>=')) {

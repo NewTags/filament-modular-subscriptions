@@ -54,13 +54,22 @@ class SubscriptionResource extends Resource
                         }
 
                         return $tenantAttribute;
-                    }, modifyQueryUsing: function (Builder $query) {
-                        return $query->whereNotIn(
-                            'id',
-                            Subscription::query()
-                                ->where('status', SubscriptionStatus::ACTIVE)
-                                ->pluck('subscribable_id')
-                        );
+                    }, modifyQueryUsing: function (Builder $query, $record) {
+                        // Get subscribers with active subscriptions except current record
+                        $subscribersWithActiveSubscriptions = Subscription::query()
+                            ->where('status', SubscriptionStatus::ACTIVE)
+                            ->when($record, function ($query) use ($record) {
+                                $query->where('subscribable_id', '!=', $record->subscribable_id);
+                            })
+                            ->pluck('subscribable_id');
+
+                        // Return current subscriber and those without active subscriptions
+                        return $query->where(function ($query) use ($record, $subscribersWithActiveSubscriptions) {
+                            $query->whereNotIn('id', $subscribersWithActiveSubscriptions)
+                                ->when($record, function ($query) use ($record) {
+                                    $query->orWhere('id', $record->subscribable_id);
+                                });
+                        });
                     })
                     ->searchable()
                     ->preload()

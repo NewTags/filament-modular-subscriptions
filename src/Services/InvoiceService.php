@@ -106,7 +106,6 @@ class InvoiceService
             'tax' => 0,
             'status' => InvoiceStatus::UNPAID,
             'due_date' => $dueDate,
-            'issued_at' => now(),
         ]);
     }
 
@@ -175,7 +174,7 @@ class InvoiceService
 
         DB::transaction(function () use ($subscription, $moduleUsages) {
             $invoice = $this->createInvoice($subscription, now()->addDays(7));
-            
+
             $this->processModuleUsages($invoice, $moduleUsages, $subscription);
             $this->updateInvoiceTotals($invoice);
         });
@@ -210,10 +209,10 @@ class InvoiceService
             }
 
             $invoice = $this->createInvoice(
-                $subscription, 
+                $subscription,
                 now()->addDays(config('filament-modular-subscriptions.payment_due_days', 7))
             );
-            
+
             $this->createFixedPriceItem($invoice, $subscription);
             $this->updateInvoiceTotals($invoice);
 
@@ -224,7 +223,7 @@ class InvoiceService
     protected function createInitialSubscription($tenant, $plan): Subscription
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
-        
+
         return $subscriptionModel::create([
             'plan_id' => $plan->id,
             'subscribable_id' => $tenant->id,
