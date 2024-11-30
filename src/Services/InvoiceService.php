@@ -3,6 +3,7 @@
 namespace HoceineEl\FilamentModularSubscriptions\Services;
 
 use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Events\InvoiceGenerated;
 use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
@@ -201,12 +202,48 @@ class InvoiceService
     public function generateInitialPlanInvoice($tenant, $plan): Invoice
     {
         return DB::transaction(function () use ($tenant, $plan) {
-            $invoice = $this->createInvoice($tenant->subscription, now()->addDays(config('filament-modular-subscriptions.payment_due_days', 7)));
+            // Create subscription if it doesn't exist
+            if (!$tenant->subscription) {
+                $subscription = $this->createInitialSubscription($tenant, $plan);
+            } else {
+                $subscription = $tenant->subscription;
+            }
+
+            $invoice = $this->createInvoice(
+                $subscription, 
+                now()->addDays(config('filament-modular-subscriptions.payment_due_days', 7))
+            );
             
-            $this->createFixedPriceItem($invoice, $tenant->subscription);
+            $this->createFixedPriceItem($invoice, $subscription);
             $this->updateInvoiceTotals($invoice);
 
             return $invoice;
         });
+    }
+
+    protected function createInitialSubscription($tenant, $plan): Subscription
+    {
+        $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
+        
+        return $subscriptionModel::create([
+            'plan_id' => $plan->id,
+            'subscribable_id' => $tenant->id,
+            'subscribable_type' => get_class($tenant),
+            'starts_at' => now(),
+            'ends_at' => $this->calculateSubscriptionEndDate($plan),
+            'trial_ends_at' => $plan->trial_period ? now()->addDays($plan->trial_period) : null,
+            'status' => SubscriptionStatus::ON_HOLD,
+        ]);
+    }
+
+    protected function calculateSubscriptionEndDate($plan): Carbon
+    {
+        return match ($plan->invoice_interval) {
+            'day' => now()->addDays($plan->invoice_period),
+            'week' => now()->addWeeks($plan->invoice_period),
+            'month' => now()->addMonths($plan->invoice_period),
+            'year' => now()->addYears($plan->invoice_period),
+            default => now()->addMonth(),
+        };
     }
 }

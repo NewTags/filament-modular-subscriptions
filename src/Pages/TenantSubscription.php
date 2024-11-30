@@ -104,15 +104,13 @@ class TenantSubscription extends Page implements HasTable
                             ->success()
                             ->send();
                     } else {
-                        // Create or update subscription with on-hold status
+                        // Generate initial invoice first (this will create the subscription if needed)
+                        $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $newPlan);
+
+                        // Update existing subscription if any
                         if ($oldSubscription) {
                             $tenant->switchPlan($newPlan->id, SubscriptionStatus::ON_HOLD);
-                        } else {
-                            $subscription = $this->createSubscription($tenant, $newPlan, SubscriptionStatus::ON_HOLD);
                         }
-
-                        // Generate initial invoice
-                        $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $newPlan);
 
                         Notification::make()
                             ->title(__('filament-modular-subscriptions::fms.tenant_subscription.please_pay_invoice'))
