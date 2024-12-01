@@ -13,7 +13,10 @@ class EditSubscription extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->after(function ($record) {
+                    $record->subscribable->invalidateSubscriptionCache();
+                }),
         ];
     }
 }

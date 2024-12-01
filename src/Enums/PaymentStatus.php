@@ -18,12 +18,12 @@ enum PaymentStatus: string implements HasColor, HasIcon, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::PAID => __('filament-modular-subscriptions::fms.status.paid'),
-            self::UNPAID => __('filament-modular-subscriptions::fms.status.unpaid'),
-            self::PARTIALLY_PAID => __('filament-modular-subscriptions::fms.status.partially_paid'),
-            self::PENDING => __('filament-modular-subscriptions::fms.status.pending'),
-            self::CANCELLED => __('filament-modular-subscriptions::fms.status.cancelled'),
-            self::REJECTED => __('filament-modular-subscriptions::fms.status.rejected'),
+            self::PAID => __('filament-modular-subscriptions::fms.statuses.paid'),
+            self::UNPAID => __('filament-modular-subscriptions::fms.statuses.unpaid'),
+            self::PARTIALLY_PAID => __('filament-modular-subscriptions::fms.statuses.partially_paid'),
+            self::PENDING => __('filament-modular-subscriptions::fms.statuses.pending'),
+            self::CANCELLED => __('filament-modular-subscriptions::fms.statuses.cancelled'),
+            self::REJECTED => __('filament-modular-subscriptions::fms.statuses.rejected'),
         };
     }
 

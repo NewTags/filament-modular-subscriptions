@@ -17,4 +17,4 @@ class SubscriptionAlerts extends Component
     {
         return view('filament-modular-subscriptions::components.subscription-alerts');
     }
-} 
+}

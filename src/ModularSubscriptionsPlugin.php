@@ -5,22 +5,26 @@ namespace HoceineEl\FilamentModularSubscriptions;
 use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
-use HoceineEl\FilamentModularSubscriptions\Pages\TenantSubscription;
-use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
+use HoceineEl\FilamentModularSubscriptions\Pages\TenantSubscription;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
+use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
 class ModularSubscriptionsPlugin implements Plugin
 {
     private const ALERTS_CACHE_KEY = 'subscription_alerts_';
+
     private const ALERTS_CACHE_TTL = 30; // minutes
 
     protected bool $hasSubscriptionStats = true;
+
     protected bool $onTenantPanel = false;
+
     protected ?Model $tenant = null;
+
     protected array $cachedAlerts = [];
 
     public static function make(): static
@@ -35,7 +39,7 @@ class ModularSubscriptionsPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        if (!$this->onTenantPanel) {
+        if (! $this->onTenantPanel) {
             $panel
                 ->plugin(FilamentTranslatableFieldsPlugin::make())
                 ->resources(config('filament-modular-subscriptions.resources'));
@@ -45,7 +49,7 @@ class ModularSubscriptionsPlugin implements Plugin
                 ->bootUsing(function () {
                     FilamentView::registerRenderHook(
                         PanelsRenderHook::PAGE_START,
-                        fn(): string => $this->renderSubscriptionAlerts()
+                        fn (): string => $this->renderSubscriptionAlerts()
                     );
                 });
         }
@@ -59,15 +63,17 @@ class ModularSubscriptionsPlugin implements Plugin
 
     public function boot(Panel $panel): void {}
 
-    public function onTenantPanel(Closure|bool $condition = true): static
+    public function onTenantPanel(Closure | bool $condition = true): static
     {
         $this->onTenantPanel = $condition instanceof Closure ? $condition() : $condition;
+
         return $this;
     }
 
     public function subscriptionStats(bool $condition = true): static
     {
         $this->hasSubscriptionStats = $condition;
+
         return $this;
     }
 
@@ -83,12 +89,12 @@ class ModularSubscriptionsPlugin implements Plugin
 
     protected function renderSubscriptionAlerts(): string
     {
-        if (!$this->onTenantPanel) {
+        if (! $this->onTenantPanel) {
             return '';
         }
 
         $tenant = filament()->getTenant();
-        if (!$tenant) {
+        if (! $tenant) {
             return '';
         }
 
@@ -113,7 +119,7 @@ class ModularSubscriptionsPlugin implements Plugin
         $alerts = [];
         $subscription = $tenant->activeSubscription();
 
-        if (!$subscription) {
+        if (! $subscription) {
             return [$this->createNoSubscriptionAlert()];
         }
 
@@ -152,7 +158,7 @@ class ModularSubscriptionsPlugin implements Plugin
             $planModule = $module->planModules->first();
             $limit = $planModule?->limit;
 
-            if (!$tenant->canUseModule($module->class)) {
+            if (! $tenant->canUseModule($module->class)) {
                 $alerts[] = $this->createModuleLimitAlert($module, $moduleUsage, $limit);
             }
         }

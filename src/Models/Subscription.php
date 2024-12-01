@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
 
 class Subscription extends Model
 {
@@ -88,12 +87,11 @@ class Subscription extends Model
     {
         return $this->subscriber->renew($days);
     }
+
     /**
      * Get the number of days left in the current subscription period including grace period.
-     *
-     * @return float|null
      */
-    public function daysLeft(): ?float 
+    public function daysLeft(): ?float
     {
         $gracePeriodEndDate = $this->getGracePeriodEndDate($this);
 
@@ -104,11 +102,8 @@ class Subscription extends Model
 
     /**
      * Calculate the end date including grace period.
-     *
-     * @param \HoceineEl\FilamentModularSubscriptions\Models\Subscription $subscription
-     * @return \Carbon\Carbon|null
      */
-    private function getGracePeriodEndDate(Subscription $subscription = null): ?Carbon
+    private function getGracePeriodEndDate(?Subscription $subscription = null): ?Carbon
     {
         $subscription = $subscription ?? $this;
         if (! $subscription->ends_at) {

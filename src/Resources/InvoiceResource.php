@@ -3,8 +3,10 @@
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
 use ArPHP\I18N\Arabic;
-use Filament\Facades\Filament;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
@@ -17,16 +19,17 @@ use Filament\Tables\Enums\FiltersLayout;
 use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentMethod;
 use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
-use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
-use Illuminate\Support\Facades\View;
-use Mpdf\Mpdf;
-use Barryvdh\DomPDF\Facade\Pdf;
 use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\ResolvesCustomerInfo;
+use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\View;
+use Mpdf\Mpdf;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\ToggleButtons;
 
 class InvoiceResource extends Resource
 {
-
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $tenantOwnershipRelationshipName = 'tenant';
@@ -56,10 +59,20 @@ class InvoiceResource extends Resource
 
         return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
     }
+    public static function getNavigationBadge(): ?string
+    {
+        return self::getModel()::where('status', InvoiceStatus::UNPAID)->orWhere('status', InvoiceStatus::PARTIALLY_PAID)->count();
+    }
+
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'warning';
+    }
 
     public static function table(Tables\Table $table): Tables\Table
     {
         $currency = Plan::first()->currency ?? config('filament-modular-subscriptions.main_currency');
+
         return $table
             ->modifyQueryUsing(function ($query) {
                 if (filament()->getTenant()) {
@@ -70,7 +83,7 @@ class InvoiceResource extends Resource
                     'subscription.subscriber',
                     'subscription.plan',
                     'items',
-                    'tenant'
+                    'tenant',
                 ]);
             })
             ->columns([
@@ -79,10 +92,6 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subscription_id'))
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('subscription.plan.name')
-                    ->getStateUsing(fn($record) => $record->subscription->plan->trans_name)
-                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.plan'))
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->money($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.amount'))
@@ -112,7 +121,46 @@ class InvoiceResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->options(InvoiceStatus::class)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.status')),
+                Tables\Filters\Filter::make('amount')
+                    ->form([
+                        TextInput::make('amount_from')
+                            ->numeric()
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount_from')),
+                        TextInput::make('amount_to')
+                            ->numeric()
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount_to')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['amount_from'],
+                                fn(Builder $query, $amount): Builder => $query->where('amount', '>=', $amount),
+                            )
+                            ->when(
+                                $data['amount_to'],
+                                fn(Builder $query, $amount): Builder => $query->where('amount', '<=', $amount),
+                            );
+                    }),
+                Tables\Filters\Filter::make('date')
+                    ->form([
+                        DatePicker::make('created_from')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_from')),
+                        DatePicker::make('created_until')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_until')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    }),
             ], FiltersLayout::AboveContent)
+            ->filtersFormColumns(3)
             ->modelLabel(__('filament-modular-subscriptions::fms.resources.invoice.singular_name'))
             ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.invoice.name'))
             ->actions([
@@ -122,6 +170,7 @@ class InvoiceResource extends Resource
                     ->modalHeading(fn($record) => __('filament-modular-subscriptions::fms.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
                         $invoice = $record->load(['items', 'subscription.plan']); // Eager load relationships
+
                         return View::make('filament-modular-subscriptions::pages.invoice-details', compact('invoice'));
                     })
                     ->modalFooterActions([]),
@@ -133,7 +182,7 @@ class InvoiceResource extends Resource
                         $taxPercentage = config('filament-modular-subscriptions.tax_percentage', 15);
                         $totalBeforeTax = $record->amount;
                         $taxAmount = $record->tax;
-                        
+
                         // Generate QR code with correct amounts
                         $QrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
                             new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
@@ -155,21 +204,21 @@ class InvoiceResource extends Resource
                         ];
 
                         // Configure mPDF with better Arabic support
-                        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+                        $defaultConfig = (new \Mpdf\Config\ConfigVariables)->getDefaults();
                         $fontDirs = $defaultConfig['fontDir'];
 
-                        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+                        $defaultFontConfig = (new \Mpdf\Config\FontVariables)->getDefaults();
                         $fontData = $defaultFontConfig['fontdata'];
 
                         $mpdf = new \Mpdf\Mpdf([
                             'fontDir' => array_merge($fontDirs, [
-                                config('filament-modular-subscriptions.font_path')
+                                config('filament-modular-subscriptions.font_path'),
                             ]),
                             'fontdata' => array_merge($fontData, [
                                 'Cairo' => [
                                     'R' => 'Cairo-Bold.ttf',
                                     'B' => 'Cairo-Bold.ttf',
-                                ]
+                                ],
                             ]),
                             'default_font' => 'Cairo',
                             'mode' => 'utf-8',
@@ -196,9 +245,9 @@ class InvoiceResource extends Resource
                                 ->title(__('filament-modular-subscriptions::fms.invoice.pdf_generation_error'))
                                 ->danger()
                                 ->send();
-                                
+
                             report($e);
-                            
+
                             return null;
                         }
                     }),
@@ -209,25 +258,70 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-credit-card')
                     ->color('success')
                     ->visible(fn($record) => filament()->getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
-                    ->form([
-                        TextInput::make('amount')
-                            ->default(fn($record) => $record->remaining_amount)
-                            ->numeric()
-                            ->required()
-                            ->suffix(fn($record) => $record->subscription->plan->currency)
-                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
-                            ->maxValue(fn($record) => $record->remaining_amount)
-                            ->minValue(1),
-                        FileUpload::make('receipt_file')
-                            ->required()
-                            ->maxSize(5120) // 5MB
-                            ->directory('payment-receipts')
-                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.receipt_file'))
-                            ->helperText(__('filament-modular-subscriptions::fms.resources.payment.receipt_help_text')),
-                        TextInput::make('notes')
-                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.notes'))
+                    ->steps([
+                        Step::make('payment_method')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_method'))
+                            ->description(__('filament-modular-subscriptions::fms.resources.payment.choose_method'))
+                            ->schema([
+                                ToggleButtons::make('payment_method')
+                                    ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_method'))
+                                    ->required()
+                                    ->inline()
+                                    ->options([
+                                        'online' => __('filament-modular-subscriptions::fms.resources.payment.methods.online'),
+                                        'local' => __('filament-modular-subscriptions::fms.resources.payment.methods.local'),
+                                    ])
+                                    ->default('local')
+                                    ->icons([
+                                        'local' => 'heroicon-o-banknotes',
+                                        'online' => 'heroicon-o-credit-card',
+                                    ])
+                                    ->colors([
+                                        'local' => 'warning',
+                                        'online' => 'success',
+                                    ])
+                            ]),
+
+                        Step::make('payment_details')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_details'))
+                            ->description(__('filament-modular-subscriptions::fms.resources.payment.enter_details'))
+                            ->schema(function ($get) {
+                                if ($get('payment_method') === 'online') {
+                                    return [
+                                        Placeholder::make('online_payment')
+                                            ->content(__('filament-modular-subscriptions::fms.resources.payment.online_coming_soon'))
+                                    ];
+                                }
+
+                                return [
+                                    TextInput::make('amount')
+                                        ->default(fn($record) => $record->remaining_amount)
+                                        ->numeric()
+                                        ->required()
+                                        ->suffix(fn($record) => $record->subscription->plan->currency)
+                                        ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
+                                        ->maxValue(fn($record) => $record->remaining_amount)
+                                        ->minValue(1),
+                                    FileUpload::make('receipt_file')
+                                        ->required()
+                                        ->maxSize(5120)
+                                        ->directory('payment-receipts')
+                                        ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.receipt_file'))
+                                        ->helperText(__('filament-modular-subscriptions::fms.resources.payment.receipt_help_text')),
+                                    TextInput::make('notes')
+                                        ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.notes')),
+                                ];
+                            })
                     ])
                     ->action(function (array $data, $record) {
+                        if ($data['payment_method'] === 'online') {
+                            Notification::make()
+                                ->warning()
+                                ->title(__('filament-modular-subscriptions::fms.resources.payment.online_not_available'))
+                                ->send();
+                            return;
+                        }
+
                         $record->payments()->create([
                             'amount' => $data['amount'],
                             'receipt_file' => $data['receipt_file'],
@@ -239,6 +333,15 @@ class InvoiceResource extends Resource
                                 'submitted_by' => auth()->id(),
                                 'submitted_at' => now(),
                             ],
+                        ]);
+
+                        // Notify super admins about new pending payment
+                        $record->subscription->subscribable->notifySuperAdmins('payment_pending', [
+                            'amount' => $data['amount'],
+                            'currency' => $record->subscription->plan->currency,
+                            'invoice_id' => $record->id,
+                            'tenant' => $record->subscription->subscribable->name,
+                            'date' => now()->format('Y-m-d H:i:s')
                         ]);
 
                         Notification::make()
@@ -261,7 +364,7 @@ class InvoiceResource extends Resource
                                 ->schema([
                                     TextEntry::make('amount')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
-                                        ->money(fn($record) => $record->subscription->plan->currency)
+                                        ->money(fn($record) => $record->subscription->plan->currency, locale: 'en')
                                         ->getStateUsing(fn($record) => $record->amount),
                                     TextEntry::make('payment_method')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.payment_method'))

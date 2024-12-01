@@ -24,4 +24,4 @@ return new class extends Migration
     {
         Schema::dropIfExists(config('filament-modular-subscriptions.tables.subscription_log'));
     }
-}; 
+};

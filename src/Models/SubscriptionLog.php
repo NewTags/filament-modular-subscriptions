@@ -29,4 +29,4 @@ class SubscriptionLog extends Model
     {
         return $this->belongsTo(config('filament-modular-subscriptions.models.subscription'));
     }
-} 
+}

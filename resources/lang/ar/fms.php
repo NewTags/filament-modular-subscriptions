@@ -49,8 +49,8 @@ return [
             ],
         ],
         'subscription' => [
-            'name' => 'الاشتراك',
-            'singular_name' => 'الاشتراك',
+            'name' => 'الاشتراكات',
+            'singular_name' => 'اشتراك',
             'fields' => [
                 'plan_id' => 'الخطة',
                 'subscribable_type' => 'نوع المشترك',
@@ -82,6 +82,8 @@ return [
                 'pricing' => 'التسعير',
                 'calculated_at' => 'تاريخ الحساب',
                 'subscriber' => 'المشترك',
+                'usage_from' => 'الاستخدام من',
+                'usage_to' => 'الاستخدام إلى',
             ],
             'actions' => [
                 'calculate' => 'حساب',
@@ -127,16 +129,33 @@ return [
                 'subscribable_name' => 'اسم المشترك',
                 'subscriber' => 'المشترك',
                 'receipt_file' => 'إيصال الدفع',
+                'created_from' => 'تاريخ الإنشاء من',
+                'created_until' => 'تاريخ الإنشاء إلى',
+                'amount_from' => 'المبلغ من',
+                'amount_to' => 'المبلغ إلى',
+                'payment_method' => 'طريقة الدفع',
+                'payment_details' => 'تفاصيل الدفع',
             ],
             'actions' => [
                 'approve' => 'تأكيد',
                 'reject' => 'رفض',
+                'cancel' => 'إلغاء',
+                'undo' => 'تراجع',
             ],
             'sections' => [
                 'payment_details' => 'تفاصيل الدفع',
             ],
-            'receipt_help_text' => 'يرجى رفع ملف لإيصال الدفع الخاص بك لتأكيد الدفع.',
-
+            'receipt_help_text' => 'يرجى رفع صورة إيصال التحويل البنكي',
+            'choose_method' => 'اختر طريقة الدفع',
+            'enter_details' => 'أدخل تفاصيل الدفع',
+            'methods' => [
+                'online' => 'الدفع الإلكتروني',
+                'local' => 'تحويل بنكي',
+            ],
+            'online_coming_soon' => 'الدفع الإلكتروني سيكون متاحاً قريباً!',
+            'online_not_available' => 'الدفع الإلكتروني غير متاح حالياً',
+            'payment_method' => 'طريقة الدفع',
+            'payment_details' => 'تفاصيل الدفع',
         ],
     ],
     'menu_group' => [
@@ -148,7 +167,7 @@ return [
         'month' => 'شهر',
         'year' => 'سنة',
     ],
-    'status' => [
+    'statuses' => [
         'active' => 'نشط',
         'cancelled' => 'لغي',
         'expired' => 'منتهي',
@@ -163,7 +182,7 @@ return [
         'your_subscription' => 'اشتراكك',
         'current_subscription' => 'الاشتراك الحالي',
         'plan' => 'الخطة',
-        'status' => 'الحالة',
+        'statuses' => 'الحالة',
         'started_on' => 'تاريخ البدء',
         'unlimited' => 'غير محدود',
         'ends_on' => 'تاريخ الانتهاء',
@@ -192,15 +211,7 @@ return [
         'current_subscription' => 'الاشتراك الحالي',
         'plan' => 'الخطة',
         'status' => 'الحالة',
-        'statuses' => [
-            'active' => 'نشط',
-            'canceled' => 'ملغى',
-            'expired' => 'منتهي الصلاحية',
-            'past_due' => 'متأخر الدفع',
-            'pending' => 'قيد الانتظار',
-            'trialing' => 'في فترة التجربة',
-            'rejected' => 'مرفوض',
-        ],
+  
         'started_on' => 'تاريخ البدء',
         'ends_on' => 'تاريخ الانتهاء',
         'subscription_details' => 'تفاصيل الاشتراك',
@@ -224,7 +235,45 @@ return [
         'billed_monthly' => 'يتم الفوترة شهرياً بناءً على الاستخدام الفعلي',
         'no_minimum_commitment' => 'لا يوجد حد أدنى للالتزام',
         'usage_tracked_realtime' => 'يتم تتبع الاستخدام في الوقت الفعلي',
-        'start_using_pay_as_you_go' => 'ابدأ باستخدام الدفع سب الاستخدام',
+        'start_using_pay_as_you_go' => 'ابدأ باستخدام الدفع سسب الاستخدام',
+        'welcome_title' => 'مرحباً! اختر خطتك المثالية',
+        'welcome_message' => 'ابدأ باختيار خطة الاشتراك التي تناسب احتياجاتك. جميع الخطط تأتي مع فترة تجريبية خالية من المخاطر.',
+        'benefit_1_title' => 'خطط مرنة',
+        'benefit_1_description' => 'اختر من بين خطط متنوعة مصممة لتناسب احتياجات عملك والنمو معك.',
+        'benefit_2_title' => 'آمن وموثوق',
+        'benefit_2_description' => 'حماية وموثوقية على مستوى المؤسسات مدمجة في كل خطة اشتراك.',
+        'benefit_3_title' => 'وصول كامل للميزات',
+        'benefit_3_description' => 'احصل على وصول إلى جميع الميزات التي تحتاجها لإدارة عملك بكفاءة.',
+        'benefit_4_title' => 'تجربة خالية من المخاطر',
+        'benefit_4_description' => 'ابدأ بفترة تجريبية للتأكد من أن الخطة تلبي متطلباتك.',
+        'explore_plans_button' => 'استكشف الخطط المتاحة',
+        'units' => 'وحدة',
+        'confirm_switch_plan' => 'تأكيد تغيير الخطة',
+        'switch_plan_description' => 'تأكيد تغيير الخطة سيؤدي إلى إلغاء الاشتراك الحالي وإنشاء اشتراك جديد بالخطة الجديدة. هل أنت متأكد من رغبتك في التبديل؟',
+        'unit' => 'وحدة',
+        'units' => 'وحدات',
+        'usage_information' => 'تسعير الاستخدام',
+        'billed_monthly' => 'تتم الفوترة شهرياً حسب الاستخدام الفعلي',
+        'no_minimum_commitment' => 'لا يوجد حد أدنى للالتزام',
+        'usage_tracked_realtime' => 'يتم تتبع الاستخدام في الوقت الفعلي',
+        'pay_as_you_go' => 'الدفع حسب الاستخدام',
+        'subscription' => 'اشتراك',
+        'per_unit' => 'لكل وحدة',
+        'only_pay_for_what_you_use' => 'ادفع فقط مقابل ما تستخدمه',
+        'included_features' => 'الميزات المضمنة',
+        'start_using_pay_as_you_go' => 'ابدأ باستخدام الدفع حسب الاستخدام',
+        'subscription_on_hold' => 'الاشتراك معلق',
+        'please_pay_invoice_to_activate' => 'يرجى دفع الفاتورة لتفعيل الاشتراك',
+        'view_invoice' => 'عرض الفاتورة',
+        'final_invoice_generated' => 'تم إنشاء الفاتورة النهائية',
+        'pay_as_you_go_activated' => 'تم تفعيل خطة الدفع حسب الاستخدام',
+        'please_pay_invoice' => 'يرجى دفع الفاتورة',
+        'confirm_switch_plan' => 'تأكيد تغيير الخطة',
+        'switch_plan_description' => 'سيؤدي تغيير اخطة إلى إنشاء فاتورة جديدة. هل تريد المتابعة؟',
+        'subscribe_to_plan' => 'اشترك في هذه الخطة',
+        'confirm_subscription' => 'تأكيد الاشتراك في :plan',
+        'subscription_created' => 'تم إنشاء الاشتراك بنجاح',
+        'subscription_created_pending' => 'تم إنشاء الاشتراك. يرجى دفع الفاتورة للتفعيل.',
     ],
     'intervals' => [
         'day' => 'يوم',
@@ -274,7 +323,7 @@ return [
         'no' => 'رقم',
         'item' => 'الصنف | Item',
         'quantity' => 'الكمية | Qty',
-        'unit_price' => 'السعر | Price',
+        'unit_price' => 'السع | Price',
         'vat' => 'الضريبة | VAT',
         'total' => 'الإجمالي | Total',
         'subtotal' => 'المبلغ الإجمالي بدون الضريبة',
@@ -299,6 +348,19 @@ return [
         'subscription_renewed' => 'تم تجديد الاشتراك بنجاح',
         'partially_paid' => 'تم الدفع جزئيا',
         'email' => 'البريد الإلكتروني',
+        'undo' => 'تراجع',
+        'undone' => 'تم التراجع بنجاح',
+        'payment_method' => 'طريقة الدفع',
+        'payment_details' => 'تفاصيل الدفع',
+        'choose_method' => 'اختر طريقة الدفع',
+        'enter_details' => 'أدخل تفاصيل الدفع',
+        'methods' => [
+            'online' => 'الدفع الإلكتروني',
+            'local' => 'تحويل بنكي',
+        ],
+        'online_coming_soon' => 'الدفع الإلكتروني سيكون متاحاً قريباً!',
+        'online_not_available' => 'الدفع الإلكتروني غير متاح حالياً',
+        'receipt_help_text' => 'يرجى رفع صورة إيصال التحويل البنكي',
     ],
     'file_entry' => [
         'view_file' => 'عرض الملف',
@@ -395,5 +457,225 @@ return [
             'module_usage' => 'استخدام وحدة',
             'system_event' => 'حدث نظام',
         ],
+    ],
+    'details' => 'التفاصيل',
+    'statuses' => [
+        'active' => 'نشط',
+        'cancelled' => 'لغي',
+        'expired' => 'منتهي',
+        'pending' => 'قيد الانتظار',
+        'paid' => 'مدفوع',
+        'unpaid' => 'غير مدفوع',
+        'rejected' => 'مرفوض',
+        'partially_paid' => 'مدفوع جزئيا',
+        'pending_payment' => 'قيد انتظار الدفع',
+        'on_hold' => 'معلق',
+        
+    ],
+    'notifications' => [
+        'subscription' => [
+            'renewed' => [
+                'title' => 'تم تجديد الاشتراك',
+                'body' => 'تم تجديد اشتراك :tenant'
+            ],
+            'switched' => [
+                'title' => 'تم تغيير خطة الاشتراك',
+                'body' => 'تم تغيير خطة اشتراك :tenant'
+            ],
+            'started' => [
+                'title' => 'تم بدء اشتراك جديد',
+                'body' => 'تم بدء اشتراك جديد لـ :tenant'
+            ],
+            'payment_rejected' => [
+                'title' => 'تم رفض الدفع',
+                'body' => 'تم رفض عملية دفع لاشتراك :tenant'
+            ],
+            'expired' => [
+                'title' => 'انتهى الاشتراك',
+                'body' => 'انتهت صلاحية اشتراك :tenant'
+            ],
+            'trial_ending' => [
+                'title' => 'الفترة التجريبية تنتهي قريباً',
+                'body' => 'ستنتهي الفترة التجريبية لـ :tenant خلال :days أيام'
+            ],
+            'payment_received' => [
+                'title' => 'تم استلام الدفع',
+                'body' => 'تم استلام دفعة بقيمة :amount لاشتراك :tenant'
+            ],
+            'payment_overdue' => [
+                'title' => 'دفعة متأخرة',
+                'body' => 'الدفع متأخر لاشتراك :tenant'
+            ],
+            'suspended' => [
+                'title' => 'تم تعليق الاشتراك',
+                'body' => 'تم تعليق اشتراك :tenant'
+            ],
+            'reactivated' => [
+                'title' => 'تم إعادة تفعيل الاشتراك',
+                'body' => 'تم إعادة تفعيل اشتراك :tenant'
+            ],
+            'cancelled' => [
+                'title' => 'تم إلغاء الاشتراك',
+                'body' => 'تم إلغاء اشتراك :tenant'
+            ],
+            'invoice_generated' => [
+                'title' => 'تم إنشاء فاتورة جديدة',
+                'body' => 'تم إنشاء فاتورة جديدة رقم #:invoice_id بقيمة :amount لـ :tenant'
+            ],
+            'invoice_generation_failed' => [
+                'title' => 'فشل إنشاء الفاتورة',
+                'body' => 'فشل في إنشاء فاتورة لـ :tenant: :error'
+            ],
+            'payment_pending' => [
+                'title' => 'دفعة في انتظار المراجعة',
+                'body' => 'هناك دفعة جديدة بقيمة :amount في انتظار المراجعة لـ :tenant'
+            ],
+            'payment_approved' => [
+                'title' => 'تم اعتماد الدفعة',
+                'body' => 'تم اعتماد دفعة بقيمة :amount لـ :tenant'
+            ],
+            'payment_partially_approved' => [
+                'title' => 'تم اعتماد دفعة جزئية',
+                'body' => 'تم اعتماد دفعة جزئية بقيمة :amount من أصل :total لـ :tenant'
+            ],
+            'payment_cancelled' => [
+                'title' => 'تم إلغاء الدفعة',
+                'body' => 'تم إلغاء دفعة بقيمة :amount لـ :tenant'
+            ],
+            'payment_undone' => [
+                'title' => 'تم التراجع عن الدفعة',
+                'body' => 'تم التراجع عن دفعة بقيمة :amount لـ :tenant'
+            ],
+            'subscription_status_changed' => [
+                'title' => 'تغيير حالة الاشتراك',
+                'body' => 'تم تغيير حالة اشتراك :tenant من :old_status إلى :new_status'
+            ],
+            'subscription_near_expiry' => [
+                'title' => 'اشتراك قارب على الانتهاء',
+                'body' => 'اشتراك :tenant سينتهي خلال :days أيام'
+            ],
+            'subscription_grace_period' => [
+                'title' => 'اشتراك في فترة السماح',
+                'body' => 'اشتراك :tenant في فترة السماح. سيتم تعليق الاشتراك بعد :days أيام'
+            ],
+            'usage_limit_warning' => [
+                'title' => 'تحذير حد الاستخدام',
+                'body' => ':tenant اقترب من حد استخدام :module (:current من :limit)'
+            ],
+            'usage_limit_exceeded' => [
+                'title' => 'تجاوز حد الاستخدام',
+                'body' => ':tenant تجاوز حد استخدام :module (:current من :limit)'
+            ],
+            'invoice_overdue' => [
+                'title' => 'فاتورة متأخرة',
+                'body' => 'الفاتورة رقم #:invoice_id لـ :tenant متأخرة السداد منذ :days أيام'
+            ],
+            'payment_pending' => [
+                'title' => 'دفعة قيد المراجعة',
+                'body' => 'دفعة جديدة بقيمة :amount :currency قيد المراجعة'
+            ],
+            'payment_partially_approved' => [
+                'title' => 'تمت الموافقة على دفعة جزئية',
+                'body' => 'تمت الموافقة على دفعة جزئية بقيمة :amount :currency من أصل :total :currency'
+            ],
+            'invoice_generated' => [
+                'title' => 'تم إنشاء فاتورة جديدة',
+                'body' => 'تم إنشاء فاتورة جديدة رقم #:invoice_id بقيمة :amount :currency، تاريخ الاستحقاق :due_date'
+            ],
+            'invoice_generation_failed' => [
+                'title' => 'فشل إنشاء الفاتورة',
+                'body' => 'فشل في إنشاء الفاتورة: :error'
+            ],
+            'invoice_overdue' => [
+                'title' => 'فاتورة متأخرة',
+                'body' => 'الفاتورة رقم #:invoice_id متأخرة منذ :days يوم. المبلغ: :amount :currency'
+            ],
+            'usage_limit_warning' => [
+                'title' => 'تحذير حد الاستخدام',
+                'body' => 'أنت تقترب من حد الاستخدام لـ :module (:current من :limit)'
+            ],
+            'usage_limit_exceeded' => [
+                'title' => 'تم تجاوز حد الاستخدام',
+                'body' => 'لقد تجاوزت حد الاستخدام لـ :module (:current من :limit)'
+            ],
+            'subscription_status_changed' => [
+                'title' => 'تم تغيير حالة الاشتراك',
+                'body' => 'تم تغيير حالة اشتراكك من :old_status إلى :new_status'
+            ],
+            'subscription_near_expiry' => [
+                'title' => 'الاشتراك قريب من الانتهاء',
+                'body' => 'سينتهي اشتراكك خلال :days يوم في :expiry_date'
+            ],
+            'subscription_grace_period' => [
+                'title' => 'الاشتراك في فترة السماح',
+                'body' => 'اشتراكك في فترة السماح وسيتم تعليقه في :grace_end_date (متبقي :days يوم)'
+            ],
+        ],
+        'admin_message' => [
+            'invoice_generated' => [
+                'title' => 'تم إنشاء فاتورة جديدة',
+                'body' => 'تم إنشاء فاتورة جديدة رقم #:invoice_id لـ :tenant بقيمة :amount :currency'
+            ],
+            'invoice_generation_failed' => [
+                'title' => 'فشل إنشاء الفاتورة',
+                'body' => 'فشل في إنشاء فاتورة لـ :tenant. الخطأ: :error'
+            ],
+            'invoice_overdue' => [
+                'title' => 'فاتورة متأخرة',
+                'body' => 'الفاتورة رقم #:invoice_id لـ :tenant متأخرة السداد منذ :days يوم. المبلغ: :amount :currency'
+            ],
+            'subscription_near_expiry' => [
+                'title' => 'اشتراك قارب على الانتهاء',
+                'body' => 'اشتراك :tenant (:plan) سينتهي خلال :days يوم في :expiry_date'
+            ],
+            'subscription_grace_period' => [
+                'title' => 'اشتراك ف�� فترة السماح',
+                'body' => 'اشتراك :tenant في فترة السماح. سيتم تعليقه في :grace_end_date (متبقي :days يوم)'
+            ],
+            'expired' => [
+                'title' => 'انتهى الاشتراك',
+                'body' => 'انتهى اشتراك :tenant في :date'
+            ],
+            'suspended' => [
+                'title' => 'تم تعليق الاشتراك',
+                'body' => 'تم تعليق اشتراك :tenant في :date'
+            ],
+            'cancelled' => [
+                'title' => 'تم إلغاء الاشتراك',
+                'body' => 'تم إلغاء اشتراك :tenant في :date'
+            ],
+            'payment_received' => [
+                'title' => 'تم استلام الدفع',
+                'body' => 'تم استلام دفعة بقيمة :amount :currency من :tenant في :date'
+            ],
+            'payment_rejected' => [
+                'title' => 'تم رفض الدفع',
+                'body' => 'تم رفض دفعة بقيمة :amount :currency من :tenant في :date'
+            ],
+            'payment_overdue' => [
+                'title' => 'دفعة متأخرة',
+                'body' => 'دفعة بقيمة :amount :currency من :tenant متأخرة منذ :days يوم'
+            ],
+            'payment_pending' => [
+                'title' => 'دفعة جديدة قيد المراجعة',
+                'body' => 'دفعة جديدة بقيمة :amount :currency قيد المراجعة من :tenant للفاتورة رقم #:invoice_id'
+            ],
+            'payment_partially_approved' => [
+                'title' => 'تمت الموافقة على دفعة جزئية',
+                'body' => 'تمت الموافقة على دفعة جزئية بقيمة :amount :currency من أصل :total :currency لـ :tenant'
+            ],
+            'usage_limit_warning' => [
+                'title' => 'تحذير حد الاستخدام',
+                'body' => ':tenant يقترب من حد الاستخدام لـ :module (:current من :limit)'
+            ],
+            'usage_limit_exceeded' => [
+                'title' => 'تم تجاوز حد الاستخدام',
+                'body' => ':tenant تجاوز حد الاستخدام لـ :module (:current من :limit)'
+            ],
+            'subscription_status_changed' => [
+                'title' => 'تم تغيير حالة الاشتراك',
+                'body' => 'تم تغيير حالة اشتراك :tenant من :old_status إلى :new_status'
+            ],
+        ]
     ],
 ];

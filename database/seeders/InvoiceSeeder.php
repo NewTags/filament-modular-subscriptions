@@ -81,7 +81,7 @@ class InvoiceSeeder extends Seeder
                 // Update invoice with final amounts
                 $invoice->update([
                     'amount' => $totalAmount + $tax,
-                    'tax' => $tax
+                    'tax' => $tax,
                 ]);
             }
         }
@@ -90,6 +90,7 @@ class InvoiceSeeder extends Seeder
     private function getRandomStatus(): InvoiceStatus
     {
         $statuses = InvoiceStatus::cases();
+
         return $statuses[array_rand($statuses)];
     }
 

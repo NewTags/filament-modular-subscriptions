@@ -129,7 +129,33 @@
             </x-filament::section>
         @endif
 
-        {{-- <!-- Available Plans Section -->
+        @if ($activeSubscription && $activeSubscription->status === 'on_hold')
+            <x-filament::section class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6">
+                <x-slot name="heading">
+                    <div class="flex items-center space-x-2 gap-2">
+                        <x-filament::icon icon="heroicon-o-exclamation-triangle" class="w-6 h-6 text-warning-500" />
+                        <span class="text-xl font-bold">
+                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.subscription_on_hold') }}
+                        </span>
+                    </div>
+                </x-slot>
+
+                <p class="text-gray-500 dark:text-gray-400">
+                    {{ __('filament-modular-subscriptions::fms.tenant_subscription.please_pay_invoice_to_activate') }}
+                </p>
+
+                <!-- Add link to pending invoice -->
+                @if ($pendingInvoice = $activeSubscription->pendingInvoice)
+                    <div class="mt-4">
+                        <x-filament::button :href="route('filament.resources.invoices.view', $pendingInvoice)" color="primary">
+                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.view_invoice') }}
+                        </x-filament::button>
+                    </div>
+                @endif
+            </x-filament::section>
+        @endif
+
+        <!-- Available Plans Section -->
         <x-filament::section class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl">
             <x-slot name="heading">
                 <div class="flex items-center space-x-2 gap-2">
@@ -147,16 +173,21 @@
                             class="absolute -inset-2 bg-gradient-to-r {{ $plan->is_pay_as_you_go ? 'from-emerald-600 to-teal-600' : 'from-primary-600 to-secondary-600' }} rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-200 ">
                         </div>
                         <div
-                            class=" relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg transform transition duration-200 group-hover:scale-[1.001] {{ $activeSubscription && $activeSubscription->plan_id === $plan->id ? 'ring-2 ring-primary-500' : '' }} flex flex-col h-full">
+                            class="relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg transform transition duration-200 group-hover:scale-[1.001] {{ $activeSubscription && $activeSubscription->plan_id === $plan->id ? 'ring-2 ring-primary-500' : '' }} flex flex-col h-full">
                             <!-- Plan Badge -->
-                            <div class="">
+                            <div class="p-4">
                                 <x-filament::badge :color="$plan->is_pay_as_you_go ? 'success' : 'primary'" class="text-xs font-medium">
                                     {{ $plan->is_pay_as_you_go ? __('filament-modular-subscriptions::fms.tenant_subscription.pay_as_you_go') : __('filament-modular-subscriptions::fms.tenant_subscription.subscription') }}
                                 </x-filament::badge>
+                                @if ($activeSubscription && $activeSubscription->plan_id === $plan->id)
+                                    <x-filament::badge color="info" class="text-xs font-medium ml-2">
+                                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.current_plan') }}
+                                    </x-filament::badge>
+                                @endif
                             </div>
 
-                            <!-- Plan Header -->
-                            <div class="px-6 py-8 flex-grow">
+                            <!-- Plan Content -->
+                            <div class="px-6 py-4 flex-grow">
                                 <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                     {{ $plan->trans_name }}
                                 </h3>
@@ -166,18 +197,6 @@
                                     @if ($plan->is_pay_as_you_go)
                                         <!-- Pay As You Go Pricing -->
                                         <div class="space-y-2">
-                                            <div class="flex items-baseline">
-                                                <span
-                                                    class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">
-                                                    {{ $plan->price }}
-                                                </span>
-                                                <span class="ml-1 text-2xl font-medium text-gray-500">
-                                                    {{ $plan->currency }}
-                                                </span>
-                                                <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ __('filament-modular-subscriptions::fms.tenant_subscription.per_unit') }}
-                                                </span>
-                                            </div>
                                             <p class="text-sm text-emerald-600 dark:text-emerald-400">
                                                 {{ __('filament-modular-subscriptions::fms.tenant_subscription.only_pay_for_what_you_use') }}
                                             </p>
@@ -202,45 +221,63 @@
                                 <p class="mt-4 text-gray-500 dark:text-gray-400">
                                     {{ $plan->trans_description }}
                                 </p>
-                            </div>
 
-                            <!-- Features List -->
-                            <div class="px-6 pb-6 flex-grow">
-                                <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mb-4">
-                                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
-                                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.included_features') }}
+                                <!-- Features List -->
+                                <div class="mt-6">
+                                    <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">
+                                        @if ($plan->is_pay_as_you_go)
+                                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.usage_information') }}
+                                        @else
+                                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.included_features') }}
+                                        @endif
                                     </h4>
-                                    <ul class="space-y-4">
+                                    <ul class="space-y-3">
                                         @foreach ($plan->modules as $module)
-                                            <li class="flex items-center">
+                                            <li class="flex items-start">
                                                 <x-filament::icon icon="heroicon-o-check-circle"
-                                                    class="w-5 h-5 {{ $plan->is_pay_as_you_go ? 'text-emerald-500' : 'text-success-500' }} flex-shrink-0" />
+                                                    class="w-5 h-5 {{ $plan->is_pay_as_you_go ? 'text-emerald-500' : 'text-success-500' }} flex-shrink-0 mt-1" />
                                                 <span class="ml-3 text-gray-700 dark:text-gray-300">
-                                                    {{ $module->getLabel() }}:
-                                                    <span class="font-semibold">
+                                                    <span class="font-medium">{{ $module->getLabel() }}</span>
+                                                    @if ($plan->is_pay_as_you_go)
+                                                        <div class="text-sm text-gray-500">
+                                                            {{ number_format($module->pivot->price, 2) }}
+                                                            {{ $plan->currency }}/{{ __('filament-modular-subscriptions::fms.tenant_subscription.unit') }}
+                                                        </div>
+                                                    @else
                                                         @if ($module->pivot->limit !== null)
-                                                            {{ $module->pivot->limit }}
-                                                            @if ($plan->is_pay_as_you_go)
-                                                                <span class="text-sm text-gray-500">
-                                                                    ({{ $plan->price }} {{ $plan->currency }}/unit
-                                                                    after)
-                                                                </span>
-                                                            @endif
+                                                            <span class="ml-1">
+                                                                ({{ $module->pivot->limit }}
+                                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.units') }})
+                                                            </span>
                                                         @else
-                                                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.unlimited') }}
+                                                            <span class="ml-1">
+                                                                ({{ __('filament-modular-subscriptions::fms.tenant_subscription.unlimited') }})
+                                                            </span>
                                                         @endif
-                                                    </span>
+                                                    @endif
                                                 </span>
                                             </li>
                                         @endforeach
                                     </ul>
+
+                                    @if ($plan->is_pay_as_you_go)
+                                        <div class="mt-4 space-y-2 text-sm text-gray-500">
+                                            <div class="flex items-center gap-2">
+                                                <x-filament::icon icon="heroicon-o-shield-check" class="w-4 h-4" />
+                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.no_minimum_commitment') }}
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <x-filament::icon icon="heroicon-o-chart-bar" class="w-4 h-4" />
+                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.usage_tracked_realtime') }}
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 
-
                             <!-- Action Button -->
-                            <div class="px-6 pb-8 mx-auto">
-                                @if ($activeSubscription && $activeSubscription->plan_id !== $plan->id)
+                            <div class="px-6 pb-6 mt-6">
+                                @if (!$activeSubscription || $activeSubscription->plan_id !== $plan->id)
                                     {{ ($this->switchPlanAction)(['plan_id' => $plan->id]) }}
                                 @endif
                             </div>
@@ -248,7 +285,7 @@
                     </div>
                 @endforeach
             </div>
-        </x-filament::section> --}}
+        </x-filament::section>
     </div>
 
 
