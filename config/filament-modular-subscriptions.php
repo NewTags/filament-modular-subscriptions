@@ -18,6 +18,8 @@ return [
     // Tenant model and attribute to be used for the subscription relationship
     // 'tenant_model' => App\Models\User::class,
     // 'tenant_attribute' => 'name',
+    // user model
+    // 'user_model' => App\Models\User::class,
     'resources' => [
         'plan' => HoceineEl\FilamentModularSubscriptions\Resources\PlanResource::class,
         'subscription' => HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource::class,

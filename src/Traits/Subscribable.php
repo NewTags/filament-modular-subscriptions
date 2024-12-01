@@ -675,18 +675,11 @@ trait Subscribable
      * Get users who should be notified about subscription changes.
      * This method should be implemented by the tenant model.
      */
-    public function getShouldNotifyUsersQuery(): Builder
+    public function getShouldNotifyUsersQuery()
     {
         if (method_exists($this, 'admins')) {
-            return $this->admins()->whereHas('roles', function ($query) {
-                $query->whereIn('name', [
-                    'admin',
-                    'owner',
-                    'billing_manager'
-                ]);
-            });
+            return $this->admins();
         }
-
         throw new \Exception('The tenant model must implement getShouldNotifyUsersQuery() or have a admins() relationship');
     }
 
@@ -697,25 +690,33 @@ trait Subscribable
     {
         if (version_compare(app()->version(), '11.23', '>=')) {
             defer(function () use ($action, $additionalData) {
-                $this->notifyAdmins($action, $additionalData);
+                $this->notifyAdminsUsing($action, $additionalData);
             });
         } else {
-            $this->notifyAdmins($action, $additionalData);
+            $this->notifyAdminsUsing($action, $additionalData);
         }
     }
 
-    public function notifyAdmins(string $action, array $additionalData = []): void
+    public function notifyAdminsUsing(string $action, array $additionalData = []): void
     {
         $users = $this->getShouldNotifyUsersQuery()->get();
 
-        foreach ($users as $user) {
-            Notification::make()
-                ->title(__('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.title'))
-                ->body(__('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.body', [
-                    'tenant' => $this->name
-                ]))
-                ->data($additionalData)
-                ->sendToDatabase($user);
-        }
+        Notification::make()
+            ->title(__('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.title'))
+            ->body(__('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.body', [
+                'tenant' => $this->name
+            ]))
+            ->sendToDatabase($users);
+    }
+
+    public function getSuperAdminsQuery(): Builder
+    {
+        return config('filament-modular-subscriptions.user_model')::query()->role('super_admin');
+    }
+
+    public function notifySuperAdmins(string $action, array $additionalData = []): void
+    {
+        $users = $this->getSuperAdminsQuery()->get();
+        Notification::make()->sendToDatabase($users);
     }
 }
