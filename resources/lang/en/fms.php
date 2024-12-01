@@ -242,6 +242,52 @@ return [
                 'title' => 'Invoice Overdue',
                 'body' => 'Invoice #:invoice_id for :tenant is overdue by :days days'
             ]
+        ],
+        'admin_message' => [
+            'invoice_generated' => [
+                'title' => 'New Invoice Generated',
+                'body' => 'New invoice #:invoice_id generated for :tenant for :amount :currency'
+            ],
+            'invoice_generation_failed' => [
+                'title' => 'Invoice Generation Failed',
+                'body' => 'Failed to generate invoice for :tenant. Error: :error'
+            ],
+            'invoice_overdue' => [
+                'title' => 'Invoice Overdue',
+                'body' => 'Invoice #:invoice_id for :tenant is overdue by :days days. Amount: :amount :currency'
+            ],
+            'subscription_near_expiry' => [
+                'title' => 'Subscription Near Expiry',
+                'body' => ':tenant\'s subscription (:plan) will expire in :days days on :expiry_date'
+            ],
+            'subscription_grace_period' => [
+                'title' => 'Subscription in Grace Period',
+                'body' => ':tenant\'s subscription is in grace period. Will be suspended on :grace_end_date (:days days remaining)'
+            ],
+            'expired' => [
+                'title' => 'Subscription Expired',
+                'body' => ':tenant\'s subscription has expired on :date'
+            ],
+            'suspended' => [
+                'title' => 'Subscription Suspended',
+                'body' => ':tenant\'s subscription has been suspended on :date'
+            ],
+            'cancelled' => [
+                'title' => 'Subscription Cancelled',
+                'body' => ':tenant\'s subscription has been cancelled on :date'
+            ],
+            'payment_received' => [
+                'title' => 'Payment Received',
+                'body' => 'Payment of :amount :currency received from :tenant on :date'
+            ],
+            'payment_rejected' => [
+                'title' => 'Payment Rejected',
+                'body' => 'Payment of :amount :currency from :tenant was rejected on :date'
+            ],
+            'payment_overdue' => [
+                'title' => 'Payment Overdue',
+                'body' => 'Payment of :amount :currency from :tenant is overdue by :days days'
+            ],
         ]
     ]
 ];

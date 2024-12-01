@@ -286,6 +286,13 @@ class InvoiceResource extends Resource
                             ],
                         ]);
 
+                        // Notify super admins about new pending payment
+                        $record->subscription->subscribable->notifySuperAdmins('payment_pending', [
+                            'amount' => $data['amount'],
+                            'currency' => $record->subscription->plan->currency,
+                            'invoice_id' => $record->id
+                        ]);
+
                         Notification::make()
                             ->title(__('filament-modular-subscriptions::fms.invoice.payment_pending'))
                             ->success()

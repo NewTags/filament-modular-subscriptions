@@ -675,7 +675,7 @@ trait Subscribable
      * Get users who should be notified about subscription changes.
      * This method should be implemented by the tenant model.
      */
-    public function getShouldNotifyUsersQuery()
+    public function getTenantAdminsUsing()
     {
         if (method_exists($this, 'admins')) {
             return $this->admins();
@@ -699,7 +699,7 @@ trait Subscribable
 
     public function notifyAdminsUsing(string $action, array $additionalData = []): void
     {
-        $users = $this->getShouldNotifyUsersQuery()->get();
+        $users = $this->getTenantAdminsUsing()->get();
 
         Notification::make()
             ->title(__('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.title'))
@@ -716,7 +716,66 @@ trait Subscribable
 
     public function notifySuperAdmins(string $action, array $additionalData = []): void
     {
+        // Only notify super admins for critical events
+        $criticalEvents = [
+            'expired',                  
+            'suspended',            
+            'cancelled',            
+            // Payment Related
+            'payment_received',     
+            'payment_rejected',     
+            'payment_overdue',      
+            
+            // Invoice Related
+            'invoice_generated',    
+            'invoice_overdue',      
+            
+            // Critical Warnings
+            'subscription_near_expiry',  
+            'usage_limit_exceeded',     
+        ];
+
+        if (!in_array($action, $criticalEvents)) {
+            return;
+        }
+
         $users = $this->getSuperAdminsQuery()->get();
-        Notification::make()->sendToDatabase($users);
+        
+        $data = array_merge([
+            'tenant' => $this->name,
+            'date' => now()->format('Y-m-d H:i:s'),
+        ], $additionalData);
+
+        Notification::make()
+            ->title(__('filament-modular-subscriptions::fms.notifications.admin_message.' . $action . '.title'))
+            ->body(__('filament-modular-subscriptions::fms.notifications.admin_message.' . $action . '.body', $data))
+            ->icon($this->getNotificationIcon($action))
+            ->color($this->getNotificationColor($action))
+            ->sendToDatabase($users);
+    }
+
+    protected function getNotificationIcon(string $action): string
+    {
+        return match ($action) {
+            'expired', 'suspended', 'cancelled' => 'heroicon-o-exclamation-triangle',
+            'payment_received' => 'heroicon-o-currency-dollar',
+            'payment_rejected', 'payment_overdue' => 'heroicon-o-x-circle',
+            'invoice_generated' => 'heroicon-o-document-text',
+            'invoice_overdue' => 'heroicon-o-clock',
+            'subscription_near_expiry' => 'heroicon-o-clock',
+            'usage_limit_exceeded' => 'heroicon-o-exclamation-circle',
+            default => 'heroicon-o-bell',
+        };
+    }
+
+    protected function getNotificationColor(string $action): string
+    {
+        return match ($action) {
+            'expired', 'suspended', 'cancelled', 'payment_rejected' => 'danger',
+            'payment_received', 'invoice_generated' => 'success',
+            'payment_overdue', 'invoice_overdue', 'subscription_near_expiry' => 'warning',
+            'usage_limit_exceeded' => 'danger',
+            default => 'primary',
+        };
     }
 }

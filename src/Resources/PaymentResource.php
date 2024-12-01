@@ -165,17 +165,19 @@ class PaymentResource extends Resource
 
                                 $invoice->subscription->renew();
                                 
-                                $invoice->subscription->subscribable->notifySubscriptionChange('renewed', [
-                                    'invoice_id' => $invoice->id,
-                                    'amount' => $invoice->amount
+                                $invoice->subscription->subscribable->notifySubscriptionChange('payment_received', [
+                                    'amount' => $record->amount,
+                                    'currency' => $invoice->subscription->plan->currency,
+                                    'invoice_id' => $invoice->id
                                 ]);
                             } elseif ($totalPaid > 0) {
                                 $invoice->update(['status' => InvoiceStatus::PARTIALLY_PAID]);
 
-                                Notification::make()
-                                    ->title(__('filament-modular-subscriptions::fms.payment.partially_paid'))
-                                    ->success()
-                                    ->send();
+                                $invoice->subscription->subscribable->notifySubscriptionChange('payment_partially_approved', [
+                                    'amount' => $record->amount,
+                                    'total' => $invoice->amount,
+                                    'currency' => $invoice->subscription->plan->currency
+                                ]);
                             }
                         });
 
@@ -204,11 +206,11 @@ class PaymentResource extends Resource
                         ]);
 
                         $record->invoice->subscription->subscribable->notifySubscriptionChange('payment_rejected', [
-                            'invoice_id' => $record->invoice->id,
                             'amount' => $record->amount,
+                            'currency' => $record->invoice->subscription->plan->currency,
                             'reason' => $data['admin_notes']
                         ]);
-                        
+
                         Notification::make()
                             ->title(__('filament-modular-subscriptions::fms.payment.rejected'))
                             ->danger()

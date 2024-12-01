@@ -312,7 +312,7 @@ return [
         'no' => 'رقم',
         'item' => 'الصنف | Item',
         'quantity' => 'الكمية | Qty',
-        'unit_price' => 'السعر | Price',
+        'unit_price' => 'السع�� | Price',
         'vat' => 'الضريبة | VAT',
         'total' => 'الإجمالي | Total',
         'subtotal' => 'المبلغ الإجمالي بدون الضريبة',
@@ -547,6 +547,52 @@ return [
             'invoice_overdue' => [
                 'title' => 'فاتورة متأخرة',
                 'body' => 'الفاتورة رقم #:invoice_id لـ :tenant متأخرة السداد منذ :days أيام'
+            ]
+        ],
+        'admin_message' => [
+            'invoice_generated' => [
+                'title' => 'تم إنشاء فاتورة جديدة',
+                'body' => 'تم إنشاء فاتورة جديدة رقم #:invoice_id لـ :tenant بقيمة :amount :currency'
+            ],
+            'invoice_generation_failed' => [
+                'title' => 'فشل إنشاء الفاتورة',
+                'body' => 'فشل في إنشاء فاتورة لـ :tenant. الخطأ: :error'
+            ],
+            'invoice_overdue' => [
+                'title' => 'فاتورة متأخرة',
+                'body' => 'الفاتورة رقم #:invoice_id لـ :tenant متأخرة السداد منذ :days يوم. المبلغ: :amount :currency'
+            ],
+            'subscription_near_expiry' => [
+                'title' => 'اشتراك قارب على الانتهاء',
+                'body' => 'اشتراك :tenant (:plan) سينتهي خلال :days يوم في :expiry_date'
+            ],
+            'subscription_grace_period' => [
+                'title' => 'اشتراك في فترة السماح',
+                'body' => 'اشتراك :tenant في فترة السماح. سيتم تعليقه في :grace_end_date (متبقي :days يوم)'
+            ],
+            'expired' => [
+                'title' => 'انتهى الاشتراك',
+                'body' => 'انتهى اشتراك :tenant في :date'
+            ],
+            'suspended' => [
+                'title' => 'تم تعليق الاشتراك',
+                'body' => 'تم تعليق اشتراك :tenant في :date'
+            ],
+            'cancelled' => [
+                'title' => 'تم إلغاء الاشتراك',
+                'body' => 'تم إلغاء اشتراك :tenant في :date'
+            ],
+            'payment_received' => [
+                'title' => 'تم استلام الدفع',
+                'body' => 'تم استلام دفعة بقيمة :amount :currency من :tenant في :date'
+            ],
+            'payment_rejected' => [
+                'title' => 'تم رفض الدفع',
+                'body' => 'تم رفض دفعة بقيمة :amount :currency من :tenant في :date'
+            ],
+            'payment_overdue' => [
+                'title' => 'دفعة متأخرة',
+                'body' => 'دفعة بقيمة :amount :currency من :tenant متأخرة منذ :days يوم'
             ]
         ]
     ],
