@@ -47,6 +47,13 @@ class InvoiceService
 
             event(new InvoiceGenerated($invoice));
 
+            $subscription->subscribable->notifySubscriptionChange('invoice_generated', [
+                'invoice_id' => $invoice->id,
+                'amount' => $invoice->total,
+                'currency' => $subscription->plan->currency,
+                'due_date' => $dueDate->format('Y-m-d')
+            ]);
+
             return $invoice;
         });
     }
@@ -139,6 +146,7 @@ class InvoiceService
         $invoice->items()->create([
             'description' => __('filament-modular-subscriptions::fms.invoice.subscription_fee', [
                 'plan' => $subscription->plan->trans_name,
+                'currency' => $subscription->plan->currency
             ]),
             'quantity' => 1,
             'unit_price' => $subscription->plan->price,

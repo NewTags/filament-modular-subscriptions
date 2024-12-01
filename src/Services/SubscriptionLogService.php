@@ -3,6 +3,7 @@
 namespace HoceineEl\FilamentModularSubscriptions\Services;
 
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Support\Facades\Log;
 
 class SubscriptionLogService
@@ -22,8 +23,8 @@ class SubscriptionLogService
                 'subscription_id' => $subscription->id,
                 'event' => $event,
                 'description' => $description,
-                'old_status' => $oldStatus,
-                'new_status' => $newStatus,
+                'old_status' => $oldStatus instanceof SubscriptionStatus ? $oldStatus->getLabel() : $oldStatus,
+                'new_status' => $newStatus instanceof SubscriptionStatus ? $newStatus->getLabel() : $newStatus,
                 'metadata' => $metadata,
             ]);
         } catch (\Exception $e) {

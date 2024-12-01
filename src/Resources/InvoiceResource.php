@@ -290,7 +290,9 @@ class InvoiceResource extends Resource
                         $record->subscription->subscribable->notifySuperAdmins('payment_pending', [
                             'amount' => $data['amount'],
                             'currency' => $record->subscription->plan->currency,
-                            'invoice_id' => $record->id
+                            'invoice_id' => $record->id,
+                            'tenant' => $record->subscription->subscribable->name,
+                            'date' => now()->format('Y-m-d H:i:s')
                         ]);
 
                         Notification::make()

@@ -312,7 +312,7 @@ return [
         'no' => 'رقم',
         'item' => 'الصنف | Item',
         'quantity' => 'الكمية | Qty',
-        'unit_price' => 'السع�� | Price',
+        'unit_price' => 'السع | Price',
         'vat' => 'الضريبة | VAT',
         'total' => 'الإجمالي | Total',
         'subtotal' => 'المبلغ الإجمالي بدون الضريبة',
@@ -547,7 +547,47 @@ return [
             'invoice_overdue' => [
                 'title' => 'فاتورة متأخرة',
                 'body' => 'الفاتورة رقم #:invoice_id لـ :tenant متأخرة السداد منذ :days أيام'
-            ]
+            ],
+            'payment_pending' => [
+                'title' => 'دفعة قيد المراجعة',
+                'body' => 'دفعة جديدة بقيمة :amount :currency قيد المراجعة'
+            ],
+            'payment_partially_approved' => [
+                'title' => 'تمت الموافقة على دفعة جزئية',
+                'body' => 'تمت الموافقة على دفعة جزئية بقيمة :amount :currency من أصل :total :currency'
+            ],
+            'invoice_generated' => [
+                'title' => 'تم إنشاء فاتورة جديدة',
+                'body' => 'تم إنشاء فاتورة جديدة رقم #:invoice_id بقيمة :amount :currency، تاريخ الاستحقاق :due_date'
+            ],
+            'invoice_generation_failed' => [
+                'title' => 'فشل إنشاء الفاتورة',
+                'body' => 'فشل في إنشاء الفاتورة: :error'
+            ],
+            'invoice_overdue' => [
+                'title' => 'فاتورة متأخرة',
+                'body' => 'الفاتورة رقم #:invoice_id متأخرة منذ :days يوم. المبلغ: :amount :currency'
+            ],
+            'usage_limit_warning' => [
+                'title' => 'تحذير حد الاستخدام',
+                'body' => 'أنت تقترب من حد الاستخدام لـ :module (:current من :limit)'
+            ],
+            'usage_limit_exceeded' => [
+                'title' => 'تم تجاوز حد الاستخدام',
+                'body' => 'لقد تجاوزت حد الاستخدام لـ :module (:current من :limit)'
+            ],
+            'subscription_status_changed' => [
+                'title' => 'تم تغيير حالة الاشتراك',
+                'body' => 'تم تغيير حالة اشتراكك من :old_status إلى :new_status'
+            ],
+            'subscription_near_expiry' => [
+                'title' => 'الاشتراك قريب من الانتهاء',
+                'body' => 'سينتهي اشتراكك خلال :days يوم في :expiry_date'
+            ],
+            'subscription_grace_period' => [
+                'title' => 'الاشتراك في فترة السماح',
+                'body' => 'اشتراكك في فترة السماح وسيتم تعليقه في :grace_end_date (متبقي :days يوم)'
+            ],
         ],
         'admin_message' => [
             'invoice_generated' => [
@@ -593,7 +633,27 @@ return [
             'payment_overdue' => [
                 'title' => 'دفعة متأخرة',
                 'body' => 'دفعة بقيمة :amount :currency من :tenant متأخرة منذ :days يوم'
-            ]
+            ],
+            'payment_pending' => [
+                'title' => 'دفعة جديدة قيد المراجعة',
+                'body' => 'دفعة جديدة بقيمة :amount :currency قيد المراجعة من :tenant للفاتورة رقم #:invoice_id'
+            ],
+            'payment_partially_approved' => [
+                'title' => 'تمت الموافقة على دفعة جزئية',
+                'body' => 'تمت الموافقة على دفعة جزئية بقيمة :amount :currency من أصل :total :currency لـ :tenant'
+            ],
+            'usage_limit_warning' => [
+                'title' => 'تحذير حد الاستخدام',
+                'body' => ':tenant يقترب من حد الاستخدام لـ :module (:current من :limit)'
+            ],
+            'usage_limit_exceeded' => [
+                'title' => 'تم تجاوز حد الاستخدام',
+                'body' => ':tenant تجاوز حد الاستخدام لـ :module (:current من :limit)'
+            ],
+            'subscription_status_changed' => [
+                'title' => 'تم تغيير حالة الاشتراك',
+                'body' => 'تم تغيير حالة اشتراك :tenant من :old_status إلى :new_status'
+            ],
         ]
     ],
 ];

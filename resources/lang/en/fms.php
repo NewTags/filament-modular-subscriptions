@@ -192,15 +192,39 @@ return [
             // ... existing subscription notifications ...
             'invoice_generated' => [
                 'title' => 'New Invoice Generated',
-                'body' => 'New invoice #:invoice_id generated for :tenant for :amount'
+                'body' => 'New invoice #:invoice_id has been generated for :amount :currency, due on :due_date'
             ],
             'invoice_generation_failed' => [
                 'title' => 'Invoice Generation Failed',
-                'body' => 'Failed to generate invoice for :tenant: :error'
+                'body' => 'Failed to generate invoice: :error'
+            ],
+            'invoice_overdue' => [
+                'title' => 'Invoice Overdue',
+                'body' => 'Invoice #:invoice_id is overdue by :days days. Amount: :amount :currency'
+            ],
+            'usage_limit_warning' => [
+                'title' => 'Usage Limit Warning',
+                'body' => 'You are approaching the usage limit for :module (:current of :limit)'
+            ],
+            'usage_limit_exceeded' => [
+                'title' => 'Usage Limit Exceeded',
+                'body' => 'You have exceeded the usage limit for :module (:current of :limit)'
+            ],
+            'subscription_status_changed' => [
+                'title' => 'Subscription Status Changed',
+                'body' => 'Your subscription status has changed from :old_status to :new_status'
+            ],
+            'subscription_near_expiry' => [
+                'title' => 'Subscription Near Expiry',
+                'body' => 'Your subscription will expire in :days days on :expiry_date'
+            ],
+            'subscription_grace_period' => [
+                'title' => 'Subscription in Grace Period',
+                'body' => 'Your subscription is in grace period and will be suspended on :grace_end_date (:days days remaining)'
             ],
             'payment_pending' => [
                 'title' => 'Payment Pending Review',
-                'body' => 'New payment of :amount is pending review for :tenant'
+                'body' => 'New payment of :amount :currency is pending review'
             ],
             'payment_approved' => [
                 'title' => 'Payment Approved',
@@ -218,30 +242,6 @@ return [
                 'title' => 'Payment Undone',
                 'body' => 'Payment of :amount has been undone for :tenant'
             ],
-            'subscription_status_changed' => [
-                'title' => 'Subscription Status Changed',
-                'body' => ':tenant\'s subscription status changed from :old_status to :new_status'
-            ],
-            'subscription_near_expiry' => [
-                'title' => 'Subscription Near Expiry',
-                'body' => ':tenant\'s subscription will expire in :days days'
-            ],
-            'subscription_grace_period' => [
-                'title' => 'Subscription in Grace Period',
-                'body' => ':tenant\'s subscription is in grace period. Will be suspended in :days days'
-            ],
-            'usage_limit_warning' => [
-                'title' => 'Usage Limit Warning',
-                'body' => ':tenant is approaching :module usage limit (:current of :limit)'
-            ],
-            'usage_limit_exceeded' => [
-                'title' => 'Usage Limit Exceeded',
-                'body' => ':tenant has exceeded :module usage limit (:current of :limit)'
-            ],
-            'invoice_overdue' => [
-                'title' => 'Invoice Overdue',
-                'body' => 'Invoice #:invoice_id for :tenant is overdue by :days days'
-            ]
         ],
         'admin_message' => [
             'invoice_generated' => [
@@ -287,6 +287,26 @@ return [
             'payment_overdue' => [
                 'title' => 'Payment Overdue',
                 'body' => 'Payment of :amount :currency from :tenant is overdue by :days days'
+            ],
+            'payment_pending' => [
+                'title' => 'New Payment Pending Review',
+                'body' => 'New payment of :amount :currency is pending review from :tenant for invoice #:invoice_id'
+            ],
+            'payment_partially_approved' => [
+                'title' => 'Partial Payment Approved',
+                'body' => 'Partial payment of :amount :currency out of :total :currency has been approved for :tenant'
+            ],
+            'usage_limit_warning' => [
+                'title' => 'Usage Limit Warning',
+                'body' => ':tenant is approaching the usage limit for :module (:current of :limit)'
+            ],
+            'usage_limit_exceeded' => [
+                'title' => 'Usage Limit Exceeded',
+                'body' => ':tenant has exceeded the usage limit for :module (:current of :limit)'
+            ],
+            'subscription_status_changed' => [
+                'title' => 'Subscription Status Changed',
+                'body' => ':tenant\'s subscription status changed from :old_status to :new_status'
             ],
         ]
     ]

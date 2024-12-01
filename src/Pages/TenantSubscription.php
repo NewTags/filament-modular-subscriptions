@@ -120,7 +120,9 @@ class TenantSubscription extends Page implements HasTable
                             $tenant->switchPlan($newPlan->id, SubscriptionStatus::ON_HOLD);
                             $tenant->notifySubscriptionChange('switched', [
                                 'plan' => $newPlan->trans_name,
-                                'status' => 'on_hold'
+                                'old_status' => $oldSubscription->status->getLabel(),
+                                'new_status' => SubscriptionStatus::ON_HOLD->getLabel(),
+                                'date' => now()->format('Y-m-d H:i:s')
                             ]);
                         }
 
@@ -138,7 +140,7 @@ class TenantSubscription extends Page implements HasTable
     protected function createSubscription($tenant, $plan, SubscriptionStatus $status): Subscription
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
-        
+
         return $subscriptionModel::create([
             'plan_id' => $plan->id,
             'subscribable_id' => $tenant->id,

@@ -168,7 +168,9 @@ class PaymentResource extends Resource
                                 $invoice->subscription->subscribable->notifySubscriptionChange('payment_received', [
                                     'amount' => $record->amount,
                                     'currency' => $invoice->subscription->plan->currency,
-                                    'invoice_id' => $invoice->id
+                                    'invoice_id' => $invoice->id,
+                                    'status' => PaymentStatus::PAID->getLabel(),
+                                    'date' => now()->format('Y-m-d H:i:s')
                                 ]);
                             } elseif ($totalPaid > 0) {
                                 $invoice->update(['status' => InvoiceStatus::PARTIALLY_PAID]);
@@ -176,7 +178,9 @@ class PaymentResource extends Resource
                                 $invoice->subscription->subscribable->notifySubscriptionChange('payment_partially_approved', [
                                     'amount' => $record->amount,
                                     'total' => $invoice->amount,
-                                    'currency' => $invoice->subscription->plan->currency
+                                    'currency' => $invoice->subscription->plan->currency,
+                                    'status' => PaymentStatus::PARTIALLY_PAID->getLabel(),
+                                    'date' => now()->format('Y-m-d H:i:s')
                                 ]);
                             }
                         });
@@ -208,7 +212,9 @@ class PaymentResource extends Resource
                         $record->invoice->subscription->subscribable->notifySubscriptionChange('payment_rejected', [
                             'amount' => $record->amount,
                             'currency' => $record->invoice->subscription->plan->currency,
-                            'reason' => $data['admin_notes']
+                            'reason' => $data['admin_notes'],
+                            'date' => now()->format('Y-m-d H:i:s'),
+                            'invoice_id' => $record->invoice->id
                         ]);
 
                         Notification::make()
