@@ -701,12 +701,12 @@ trait Subscribable
     {
         $users = $this->getTenantAdminsUsing()->get();
 
-        Notification::make()
-            ->title(__('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.title'))
-            ->body(__('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.body', [
+        $this->getNotificationUsing(
+            __('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.title'),
+            __('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.body', [
                 'tenant' => $this->name
-            ]))
-            ->sendToDatabase($users);
+            ])
+        )->sendToDatabase($users);
     }
 
     public function getSuperAdminsQuery(): Builder
@@ -716,42 +716,29 @@ trait Subscribable
 
     public function notifySuperAdmins(string $action, array $additionalData = []): void
     {
-        // Only notify super admins for critical events
-        $criticalEvents = [
-            'expired',                  
-            'suspended',            
-            'cancelled',            
-            // Payment Related
-            'payment_received',     
-            'payment_rejected',     
-            'payment_overdue',      
-            
-            // Invoice Related
-            'invoice_generated',    
-            'invoice_overdue',      
-            
-            // Critical Warnings
-            'subscription_near_expiry',  
-            'usage_limit_exceeded',     
-        ];
-
-        if (!in_array($action, $criticalEvents)) {
-            return;
-        }
-
         $users = $this->getSuperAdminsQuery()->get();
-        
         $data = array_merge([
             'tenant' => $this->name,
             'date' => now()->format('Y-m-d H:i:s'),
         ], $additionalData);
 
-        Notification::make()
-            ->title(__('filament-modular-subscriptions::fms.notifications.admin_message.' . $action . '.title'))
-            ->body(__('filament-modular-subscriptions::fms.notifications.admin_message.' . $action . '.body', $data))
+        $title = __('filament-modular-subscriptions::fms.notifications.admin_message.' . $action . '.title');
+        $body = __('filament-modular-subscriptions::fms.notifications.admin_message.' . $action . '.body', $data);
+
+        $this->getNotificationUsing(
+            $title,
+            $body
+        )
             ->icon($this->getNotificationIcon($action))
-            ->color($this->getNotificationColor($action))
+            ->iconColor($this->getNotificationColor($action))
             ->sendToDatabase($users);
+    }
+
+    public function getNotificationUsing($title, $body)
+    {
+        return Notification::make()
+            ->title($title)
+            ->body($body);
     }
 
     protected function getNotificationIcon(string $action): string
