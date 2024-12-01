@@ -26,6 +26,7 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\View;
 use Mpdf\Mpdf;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\ToggleButtons;
 
 class InvoiceResource extends Resource
 {
@@ -259,9 +260,11 @@ class InvoiceResource extends Resource
                     ->visible(fn($record) => filament()->getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
                     ->steps([
                         Step::make('payment_method')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_method'))
                             ->description(__('filament-modular-subscriptions::fms.resources.payment.choose_method'))
                             ->schema([
-                                Radio::make('payment_method')
+                                ToggleButtons::make('payment_method')
+                                    ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_method'))
                                     ->required()
                                     ->inline()
                                     ->options([
@@ -269,8 +272,9 @@ class InvoiceResource extends Resource
                                         'local' => __('filament-modular-subscriptions::fms.resources.payment.methods.local'),
                                     ])
                             ]),
-                        
+
                         Step::make('payment_details')
+                            ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_details'))
                             ->description(__('filament-modular-subscriptions::fms.resources.payment.enter_details'))
                             ->schema(function ($get) {
                                 if ($get('payment_method') === 'online') {
@@ -279,7 +283,7 @@ class InvoiceResource extends Resource
                                             ->content(__('filament-modular-subscriptions::fms.resources.payment.online_coming_soon'))
                                     ];
                                 }
-                                
+
                                 return [
                                     TextInput::make('amount')
                                         ->default(fn($record) => $record->remaining_amount)
