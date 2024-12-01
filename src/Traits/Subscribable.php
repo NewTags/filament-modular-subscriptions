@@ -705,7 +705,8 @@ trait Subscribable
         $this->getNotificationUsing(
             __('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.title'),
             __('filament-modular-subscriptions::fms.notifications.subscription.' . $action . '.body', [
-                'tenant' => $this->name
+                'tenant' => $this->name,
+                ...$additionalData,
             ])
         )->sendToDatabase($users);
     }

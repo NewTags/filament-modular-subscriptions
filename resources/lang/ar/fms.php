@@ -235,7 +235,7 @@ return [
         'current_subscription' => 'الاشتراك الحالي',
         'plan' => 'الخطة',
         'status' => 'الحالة',
-  
+
         'started_on' => 'تاريخ البدء',
         'ends_on' => 'تاريخ الانتهاء',
         'subscription_details' => 'تفاصيل الاشتراك',
@@ -494,7 +494,7 @@ return [
         'partially_paid' => 'مدفوع جزئيا',
         'pending_payment' => 'قيد انتظار الدفع',
         'on_hold' => 'معلق',
-        
+
     ],
     'notifications' => [
         'subscription' => [
@@ -674,7 +674,7 @@ return [
             ],
             'payment_rejected' => [
                 'title' => 'تم رفض الدفع',
-                'body' => 'تم رفض دفعة بقيمة :amount :currency من :tenant في :date'
+                'body' => 'تم رفض دفعة بقيمة :amount :currency من :tenant في :date بحجة :reason'
             ],
             'payment_overdue' => [
                 'title' => 'دفعة متأخرة',

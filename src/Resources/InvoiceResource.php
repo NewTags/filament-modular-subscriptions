@@ -159,7 +159,7 @@ class InvoiceResource extends Resource
                                 fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                             );
                     }),
-            ], FiltersLayout::AboveContent)
+            ], FiltersLayout::Modal)
             ->filtersFormColumns(3)
             ->modelLabel(__('filament-modular-subscriptions::fms.resources.invoice.singular_name'))
             ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.invoice.name'))
@@ -231,7 +231,6 @@ class InvoiceResource extends Resource
                             'margin_bottom' => 10,
                         ]);
 
-                        // Add better error handling
                         try {
                             $view = view('filament-modular-subscriptions::pages.invoice-pdf', $data);
                             $html = $view->render();
