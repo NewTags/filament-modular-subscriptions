@@ -5,6 +5,8 @@ namespace HoceineEl\FilamentModularSubscriptions\Resources;
 use ArPHP\I18N\Arabic;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
@@ -23,6 +25,7 @@ use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\View;
 use Mpdf\Mpdf;
+use Filament\Forms\Components\Placeholder;
 
 class InvoiceResource extends Resource
 {
@@ -254,25 +257,58 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-credit-card')
                     ->color('success')
                     ->visible(fn($record) => filament()->getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
-                    ->form([
-                        TextInput::make('amount')
-                            ->default(fn($record) => $record->remaining_amount)
-                            ->numeric()
-                            ->required()
-                            ->suffix(fn($record) => $record->subscription->plan->currency)
-                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
-                            ->maxValue(fn($record) => $record->remaining_amount)
-                            ->minValue(1),
-                        FileUpload::make('receipt_file')
-                            ->required()
-                            ->maxSize(5120) // 5MB
-                            ->directory('payment-receipts')
-                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.receipt_file'))
-                            ->helperText(__('filament-modular-subscriptions::fms.resources.payment.receipt_help_text')),
-                        TextInput::make('notes')
-                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.notes')),
+                    ->steps([
+                        Step::make('payment_method')
+                            ->description(__('filament-modular-subscriptions::fms.resources.payment.choose_method'))
+                            ->schema([
+                                Radio::make('payment_method')
+                                    ->required()
+                                    ->inline()
+                                    ->options([
+                                        'online' => __('filament-modular-subscriptions::fms.resources.payment.methods.online'),
+                                        'local' => __('filament-modular-subscriptions::fms.resources.payment.methods.local'),
+                                    ])
+                            ]),
+                        
+                        Step::make('payment_details')
+                            ->description(__('filament-modular-subscriptions::fms.resources.payment.enter_details'))
+                            ->schema(function ($get) {
+                                if ($get('payment_method') === 'online') {
+                                    return [
+                                        Placeholder::make('online_payment')
+                                            ->content(__('filament-modular-subscriptions::fms.resources.payment.online_coming_soon'))
+                                    ];
+                                }
+                                
+                                return [
+                                    TextInput::make('amount')
+                                        ->default(fn($record) => $record->remaining_amount)
+                                        ->numeric()
+                                        ->required()
+                                        ->suffix(fn($record) => $record->subscription->plan->currency)
+                                        ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
+                                        ->maxValue(fn($record) => $record->remaining_amount)
+                                        ->minValue(1),
+                                    FileUpload::make('receipt_file')
+                                        ->required()
+                                        ->maxSize(5120)
+                                        ->directory('payment-receipts')
+                                        ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.receipt_file'))
+                                        ->helperText(__('filament-modular-subscriptions::fms.resources.payment.receipt_help_text')),
+                                    TextInput::make('notes')
+                                        ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.notes')),
+                                ];
+                            })
                     ])
                     ->action(function (array $data, $record) {
+                        if ($data['payment_method'] === 'online') {
+                            Notification::make()
+                                ->warning()
+                                ->title(__('filament-modular-subscriptions::fms.resources.payment.online_not_available'))
+                                ->send();
+                            return;
+                        }
+
                         $record->payments()->create([
                             'amount' => $data['amount'],
                             'receipt_file' => $data['receipt_file'],
