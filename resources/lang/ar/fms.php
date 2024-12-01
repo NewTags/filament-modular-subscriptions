@@ -157,6 +157,30 @@ return [
             'payment_method' => 'طريقة الدفع',
             'payment_details' => 'تفاصيل الدفع',
         ],
+        'subscription_log' => [
+            'label' => 'سجل الاشتراك',
+            'plural_label' => 'سجلات الاشتراكات',
+            'fields' => [
+                'subscription_id' => 'رقم الاشتراك',
+                'event' => 'الحدث',
+                'description' => 'الوصف',
+                'old_status' => 'الحالة السابقة',
+                'new_status' => 'الحالة الجديدة',
+                'metadata' => 'البيانات الإضافية',
+                'created_at' => 'تاريخ الإنشاء',
+            ],
+            'events' => [
+                'subscription_created' => 'إنشاء اشتراك',
+                'subscription_updated' => 'تحديث اشتراك',
+                'subscription_deleted' => 'حذف اشتراك',
+                'subscription_restored' => 'استعادة اشتراك',
+                'invoice_generated' => 'إنشاء فاتورة',
+                'payment_processed' => 'معالجة دفعة',
+                'status_change' => 'تغيير الحالة',
+                'module_usage' => 'استخدام وحدة',
+                'system_event' => 'حدث نظام',
+            ],
+        ],
     ],
     'menu_group' => [
         'subscription_management' => 'إدارة الاشتراكات',
@@ -629,7 +653,7 @@ return [
                 'body' => 'اشتراك :tenant (:plan) سينتهي خلال :days يوم في :expiry_date'
             ],
             'subscription_grace_period' => [
-                'title' => 'اشتراك ف�� فترة السماح',
+                'title' => 'اشتراك ف فترة السماح',
                 'body' => 'اشتراك :tenant في فترة السماح. سيتم تعليقه في :grace_end_date (متبقي :days يوم)'
             ],
             'expired' => [

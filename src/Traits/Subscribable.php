@@ -671,6 +671,7 @@ trait Subscribable
         $this->invalidateSubscriptionCache();
     }
 
+
     /**
      * Get users who should be notified about subscription changes.
      * This method should be implemented by the tenant model.
