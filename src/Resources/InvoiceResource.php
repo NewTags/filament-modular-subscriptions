@@ -271,6 +271,15 @@ class InvoiceResource extends Resource
                                         'online' => __('filament-modular-subscriptions::fms.resources.payment.methods.online'),
                                         'local' => __('filament-modular-subscriptions::fms.resources.payment.methods.local'),
                                     ])
+                                    ->default('local')
+                                    ->icons([
+                                        'local' => 'heroicon-o-banknotes',
+                                        'online' => 'heroicon-o-credit-card',
+                                    ])
+                                    ->colors([
+                                        'local' => 'warning',
+                                        'online' => 'success',
+                                    ])
                             ]),
 
                         Step::make('payment_details')

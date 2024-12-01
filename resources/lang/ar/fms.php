@@ -145,7 +145,7 @@ return [
             'sections' => [
                 'payment_details' => 'تفاصيل الدفع',
             ],
-            'receipt_help_text' => 'يرجى رفع ملف لإيصال الدفع الخاص بك لتأكيد الدفع.',
+            'receipt_help_text' => 'يرجى رفع صورة إيصال التحويل البنكي',
             'choose_method' => 'اختر طريقة الدفع',
             'enter_details' => 'أدخل تفاصيل الدفع',
             'methods' => [
@@ -154,7 +154,8 @@ return [
             ],
             'online_coming_soon' => 'الدفع الإلكتروني سيكون متاحاً قريباً!',
             'online_not_available' => 'الدفع الإلكتروني غير متاح حالياً',
-            'receipt_help_text' => 'يرجى رفع صورة إيصال التحويل البنكي',
+            'payment_method' => 'طريقة الدفع',
+            'payment_details' => 'تفاصيل الدفع',
         ],
     ],
     'menu_group' => [
@@ -268,7 +269,7 @@ return [
         'pay_as_you_go_activated' => 'تم تفعيل خطة الدفع حسب الاستخدام',
         'please_pay_invoice' => 'يرجى دفع الفاتورة',
         'confirm_switch_plan' => 'تأكيد تغيير الخطة',
-        'switch_plan_description' => 'سيؤدي تغيير ا��خطة إلى إنشاء فاتورة جديدة. هل تريد المتابعة؟',
+        'switch_plan_description' => 'سيؤدي تغيير اخطة إلى إنشاء فاتورة جديدة. هل تريد المتابعة؟',
         'subscribe_to_plan' => 'اشترك في هذه الخطة',
         'confirm_subscription' => 'تأكيد الاشتراك في :plan',
         'subscription_created' => 'تم إنشاء الاشتراك بنجاح',
@@ -628,7 +629,7 @@ return [
                 'body' => 'اشتراك :tenant (:plan) سينتهي خلال :days يوم في :expiry_date'
             ],
             'subscription_grace_period' => [
-                'title' => 'اشتراك في فترة السماح',
+                'title' => 'اشتراك ف�� فترة السماح',
                 'body' => 'اشتراك :tenant في فترة السماح. سيتم تعليقه في :grace_end_date (متبقي :days يوم)'
             ],
             'expired' => [
