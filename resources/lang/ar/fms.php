@@ -110,7 +110,7 @@ return [
                 'pay' => 'دفع المستحقات',
             ],
             'invoice_title' => 'فاتورة :subscriber - :id - :date',
-            'payment_pending' => 'تم إرسال الفاتورة بنجاح. في انتظار التأكيد من الجهة المختصة',
+            'payment_pending' => 'تم إرسال الفاتورة بنجاح. في انت��ار التأكيد من الجهة المختصة',
         ],
         'payment' => [
             'name' => 'المدفوعات',
@@ -159,7 +159,7 @@ return [
         ],
         'subscription_log' => [
             'label' => 'سجل الاشتراك',
-            'plural_label' => 'سجلات الاشتراكات',
+            'plural_label' => 'سجل الاشتراكات',
             'fields' => [
                 'subscription_id' => 'رقم الاشتراك',
                 'event' => 'الحدث',
@@ -217,7 +217,7 @@ return [
         'no' => 'لا',
         'trial_ends_at' => 'تاريخ انتهاء التجربة',
         'no_active_subscription' => 'لا يوجد اشتراك نشط',
-        'no_subscription_message' => 'ليس لديك اشتراك نشط حاليًا. يرجى اختيار خطة للاشتراك.',
+        'no_subscription_message' => 'ليس لديك اشتراك نشط حاليًا. يرجى ا��تيار خطة للاشتراك.',
         'available_plans' => 'الخطط المتاحة',
         'per' => 'لكل',
         'switch_plan_button' => 'تغيير الخطة',
@@ -535,7 +535,7 @@ return [
                 'body' => 'تم تعليق اشتراك :tenant'
             ],
             'reactivated' => [
-                'title' => 'تم إعادة تفعيل الاشتراك',
+                'title' => 'تم إعادة تف��يل الاشتراك',
                 'body' => 'تم إعادة تفعيل اشتراك :tenant'
             ],
             'cancelled' => [

@@ -2,7 +2,6 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Resources;
 
-use HoceineEl\FilamentModularSubscriptions\Filament\Resources\SubscriptionLogResource\Pages;
 use HoceineEl\FilamentModularSubscriptions\Models\SubscriptionLog;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -11,6 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
+use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionLogResource\Pages\ListSubscriptionLogs;
 
 class SubscriptionLogResource extends Resource
 {
@@ -20,17 +20,17 @@ class SubscriptionLogResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-modular-subscriptions::subscription.navigation.group');
+        return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
     }
 
     public static function getModelLabel(): string
     {
-        return __('filament-modular-subscriptions::subscription.resources.subscription_log.label');
+        return __('filament-modular-subscriptions::fms.resources.subscription_log.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('filament-modular-subscriptions::subscription.resources.subscription_log.plural_label');
+        return __('filament-modular-subscriptions::fms.resources.subscription_log.plural_label');
     }
 
     public static function table(Table $table): Table
@@ -38,21 +38,21 @@ class SubscriptionLogResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('subscription.id')
-                    ->label(__('filament-modular-subscriptions::subscription.fields.subscription_id'))
+                    ->label(__('filament-modular-subscriptions::fms.fields.subscription_id'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('event')
-                    ->label(__('filament-modular-subscriptions::subscription.fields.event'))
+                    ->label(__('filament-modular-subscriptions::fms.fields.event'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('old_status')
-                    ->label(__('filament-modular-subscriptions::subscription.fields.old_status'))
+                    ->label(__('filament-modular-subscriptions::fms.fields.old_status'))
                     ->sortable(),
                 TextColumn::make('new_status')
-                    ->label(__('filament-modular-subscriptions::subscription.fields.new_status'))
+                    ->label(__('filament-modular-subscriptions::fms.fields.new_status'))
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->label(__('filament-modular-subscriptions::subscription.fields.created_at'))
+                    ->label(__('filament-modular-subscriptions::fms.fields.created_at'))
                     ->dateTime()
                     ->sortable(),
             ])
@@ -74,22 +74,22 @@ class SubscriptionLogResource extends Resource
                 Infolists\Components\Section::make()
                     ->schema([
                         TextEntry::make('subscription.id')
-                            ->label(__('filament-modular-subscriptions::subscription.fields.subscription_id')),
+                            ->label(__('filament-modular-subscriptions::fms.fields.subscription_id')),
                         TextEntry::make('event')
-                            ->label(__('filament-modular-subscriptions::subscription.fields.event')),
+                            ->label(__('filament-modular-subscriptions::fms.fields.event')),
                         TextEntry::make('description')
-                            ->label(__('filament-modular-subscriptions::subscription.fields.description'))
+                            ->label(__('filament-modular-subscriptions::fms.fields.description'))
                             ->columnSpanFull(),
                         TextEntry::make('old_status')
-                            ->label(__('filament-modular-subscriptions::subscription.fields.old_status')),
+                            ->label(__('filament-modular-subscriptions::fms.fields.old_status')),
                         TextEntry::make('new_status')
-                            ->label(__('filament-modular-subscriptions::subscription.fields.new_status')),
+                            ->label(__('filament-modular-subscriptions::fms.fields.new_status')),
                         TextEntry::make('metadata')
-                            ->label(__('filament-modular-subscriptions::subscription.fields.metadata'))
+                            ->label(__('filament-modular-subscriptions::fms.fields.metadata'))
                             ->columnSpanFull()
                             ->formatStateUsing(fn($state) => json_encode($state, JSON_PRETTY_PRINT)),
                         TextEntry::make('created_at')
-                            ->label(__('filament-modular-subscriptions::subscription.fields.created_at'))
+                            ->label(__('filament-modular-subscriptions::fms.fields.created_at'))
                             ->dateTime(),
                     ])
                     ->columns(2)
@@ -99,7 +99,7 @@ class SubscriptionLogResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSubscriptionLogs::route('/'),
+            'index' => ListSubscriptionLogs::route('/'),
         ];
     }
 }

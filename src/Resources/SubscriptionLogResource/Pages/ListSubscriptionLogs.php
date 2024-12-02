@@ -1,11 +1,11 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource\Pages;
+namespace HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionLogResource\Pages;
 
-use HoceineEl\FilamentModularSubscriptions\Filament\Resources\SubscriptionLogResource;
 use Filament\Resources\Pages\ListRecords;
+use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionLogResource;
 
 class ListSubscriptionLogs extends ListRecords
 {
     protected static string $resource = SubscriptionLogResource::class;
-} 
+}
