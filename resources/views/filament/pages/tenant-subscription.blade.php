@@ -4,7 +4,7 @@
     </div>
     <div class="max-w-7xl mx-auto space-y-8 px-4 sm:px-6 lg:px-8">
         @if ($activeSubscription)
-            @include('filament.pages.components.current-subscription-card', ['subscription' => $activeSubscription, 'tenant' => $tenant])
+            @include('filament-modular-subscriptions::filament.pages.components.current-subscription-card', ['subscription' => $activeSubscription, 'tenant' => $tenant])
         @else
             <x-filament::section class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6">
                 <x-slot name="heading">
@@ -22,9 +22,9 @@
             </x-filament::section>
         @endif
 
-        @include('filament.pages.components.subscription-on-hold-warning', ['subscription' => $activeSubscription])
+        @include('filament-modular-subscriptions::filament.pages.components.subscription-on-hold-warning', ['subscription' => $activeSubscription])
 
-        @include('filament.pages.components.available-plans', [
+        @include('filament-modular-subscriptions::filament.pages.components.available-plans', [
             'availablePlans' => $availablePlans,
             'activeSubscription' => $activeSubscription,
             'switchPlanAction' => $switchPlanAction

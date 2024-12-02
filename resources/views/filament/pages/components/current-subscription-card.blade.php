@@ -64,7 +64,10 @@
             {{ __('filament-modular-subscriptions::fms.tenant_subscription.subscription_details') }}
         </h3>
         <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 space-y-4">
-            @include('filament.pages.components.subscription-details', ['subscription' => $subscription, 'tenant' => $tenant])
+            @include('filament-modular-subscriptions::filament.pages.components.subscription-details', [
+                'subscription' => $subscription,
+                'tenant' => $tenant
+            ])
         </div>
     </div>
 </x-filament::section> 
