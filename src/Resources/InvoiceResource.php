@@ -183,6 +183,8 @@ class InvoiceResource extends Resource
                         $totalBeforeTax = $record->amount;
                         $taxAmount = $record->tax;
 
+
+
                         // Generate QR code with correct amounts
                         $QrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
                             new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
@@ -204,38 +206,53 @@ class InvoiceResource extends Resource
                         ];
 
                         // Configure mPDF with better Arabic support
-                        $defaultConfig = (new \Mpdf\Config\ConfigVariables)->getDefaults();
+                        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
                         $fontDirs = $defaultConfig['fontDir'];
 
-                        $defaultFontConfig = (new \Mpdf\Config\FontVariables)->getDefaults();
+                        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
                         $fontData = $defaultFontConfig['fontdata'];
 
                         $mpdf = new \Mpdf\Mpdf([
                             'fontDir' => array_merge($fontDirs, [
                                 config('filament-modular-subscriptions.font_path'),
                             ]),
-                            'fontdata' => array_merge($fontData, [
-                                'Cairo' => [
-                                    'R' => 'Cairo-Bold.ttf',
-                                    'B' => 'Cairo-Bold.ttf',
+                            'fontdata' => $fontData + [
+                                'dinnextltarabic-medium' => [
+                                    'R' => 'dinnextltarabic_medium_normal_ab9f5a2326967c69e338559eaff07d99.ttf',
+                                    'B' => 'DINNextLTArabic-Medium.ttf',
+                                    'I' => 'DINNextLTArabic-Medium.ttf',
+                                    'BI' => 'DINNextLTArabic-Medium.ttf',
+                                    'useOTL' => 0xFF,
+                                    'useKashida' => 75,
+                                    'unAGlyphs' => true,
                                 ],
-                            ]),
-                            'default_font' => 'Cairo',
+                            ],
+                            'default_font' => 'dinnextltarabic-medium',
                             'mode' => 'utf-8',
                             'format' => 'A4',
-                            'tempDir' => storage_path('app/pdf-fonts'),
+                            'tempDir' => storage_path('app/pdf_fonts'),
                             'orientation' => 'P',
                             'margin_left' => 10,
                             'margin_right' => 10,
                             'margin_top' => 10,
                             'margin_bottom' => 10,
+                            'direction' => 'rtl',
+                            'autoScriptToLang' => true,
+                            'autoLangToFont' => true,
+                            'useSubstitutions' => true,
+                            'biDirectional' => true,
+                            'text_input_as_HTML' => true,
                         ]);
+                        $mpdf->SetTitle('Invoice #' . $record->id);
+                        $mpdf->SetAuthor(config('filament-modular-subscriptions.company_name'));
+                        $mpdf->SetCreator(config('filament-modular-subscriptions.company_name'));
+                        $mpdf->SetDirectionality('rtl');
+                        $mpdf->SetFont('dinnextltarabic-medium', '', 14);
+                        $view = view('filament-modular-subscriptions::pages.invoice-pdf', $data);
+                        $html = $view->render();
+                        $mpdf->WriteHTML($html);
 
                         try {
-                            $view = view('filament-modular-subscriptions::pages.invoice-pdf', $data);
-                            $html = $view->render();
-                            $mpdf->WriteHTML($html);
-
                             return response()->streamDownload(function () use ($mpdf) {
                                 echo $mpdf->Output('', 'S');
                             }, 'invoice_' . $record->id . '_' . $record->created_at->format('Y-m-d') . '.pdf');

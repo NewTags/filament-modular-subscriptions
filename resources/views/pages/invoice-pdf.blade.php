@@ -39,18 +39,20 @@
             border: 1px solid #000;
         }
     </style>
-
     <table style="border: none; border-collapse:collapse;">
         <tbody style="border: none;">
             <tr style="border: none;">
-                <td style="border: none;border-left: none; border-right: none;"></td>
+                <td style="border: none;border-left: none; border-right: none; width: 100px;">
+                    <img src="{{ config('filament-modular-subscriptions.company_logo') }}" alt="Company Logo"
+                        style="max-width: 100px; height: auto;">
+                </td>
                 <td
                     style="border: none;border-left: none; border-right: none;text-align: center;font-weight: bolder;font-size: 12pt;">
                     {{ __('filament-modular-subscriptions::fms.invoice.invoice_title') }}</td>
                 <td
-                    style="border: none;border-left: none; border-right: none;text-align: left;font-weight: bolder;font-size: 12pt;">
+                    style="border: none;border-left: none; border-right: none;text-align: left;font-weight: bolder;font-size: 12pt;padding: 10px;">
                     <span
-                        style="background-color: {{ $invoice->status == 'paid' ? '#dcfce7' : '#fee2e2' }};color: {{ $invoice->status == 'paid' ? '#166534' : '#991b1b' }};padding: 10px;border-radius: 10px;">
+                        style="background-color: {{ $invoice->status->value == 'paid' ? '#dcfce7' : '#fee2e2' }};color: {{ $invoice->status->value == 'paid' ? '#166534' : '#991b1b' }};padding: 10px;border-radius: 10px;">
                         {{ $invoice->status->getLabel() }}
                     </span>
                 </td>
