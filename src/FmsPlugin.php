@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
-class ModularSubscriptionsPlugin implements Plugin
+class FmsPlugin implements Plugin
 {
     private const ALERTS_CACHE_KEY = 'subscription_alerts_';
 
@@ -22,6 +22,8 @@ class ModularSubscriptionsPlugin implements Plugin
     protected bool $hasSubscriptionStats = true;
 
     protected bool $onTenantPanel = false;
+
+    protected static ?Closure $getTenantUsing = null;
 
     protected ?Model $tenant = null;
 
@@ -36,6 +38,30 @@ class ModularSubscriptionsPlugin implements Plugin
     {
         return 'filament-modular-subscriptions';
     }
+    public static function get(): Plugin
+    {
+        return filament(app(static::class)->getId());
+    }
+
+
+
+    public static function getTenantUsing(?Closure $callback = null): Closure|static
+    {
+        if ($callback === null) {
+            return static::$getTenantUsing ?? static function () {
+                return self::getTenant();
+            };
+        }
+
+        static::$getTenantUsing = $callback;
+
+        return new static();
+    }
+
+    public static function getTenant(): mixed
+    {
+        return app()->call(static::getTenantUsing());
+    }
 
     public function register(Panel $panel): void
     {
@@ -49,7 +75,7 @@ class ModularSubscriptionsPlugin implements Plugin
                 ->bootUsing(function () {
                     FilamentView::registerRenderHook(
                         PanelsRenderHook::PAGE_START,
-                        fn (): string => $this->renderSubscriptionAlerts()
+                        fn(): string => $this->renderSubscriptionAlerts()
                     );
                 });
         }
@@ -82,10 +108,6 @@ class ModularSubscriptionsPlugin implements Plugin
         return $this->hasSubscriptionStats;
     }
 
-    public static function get(): static
-    {
-        return filament(app(static::class)->getId());
-    }
 
     protected function renderSubscriptionAlerts(): string
     {
@@ -93,7 +115,7 @@ class ModularSubscriptionsPlugin implements Plugin
             return '';
         }
 
-        $tenant = filament()->getTenant();
+        $tenant = self::getTenant();
         if (! $tenant) {
             return '';
         }

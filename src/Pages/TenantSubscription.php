@@ -15,6 +15,7 @@ use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 
 class TenantSubscription extends Page implements HasTable
 {
@@ -44,15 +45,15 @@ class TenantSubscription extends Page implements HasTable
     public static function shouldRegisterNavigation(): bool
     {
         return cache()->remember(
-            'tenant_subscription_nav_' . auth()->id() . '_' . filament()->getTenant()->id,
+            'tenant_subscription_nav_' . auth()->id() . '_' . FmsPlugin::getTenant()->id,
             now()->addMinutes(60),
-            fn() => filament()->getTenant()->admins()->where('users.id', auth()->id())->exists()
+            fn() => FmsPlugin::getTenant()->admins()->where('users.id', auth()->id())->exists()
         );
     }
 
     public function getViewData(): array
     {
-        $tenant = filament()->getTenant();
+        $tenant = FmsPlugin::getTenant();
         $activeSubscription = $tenant->subscription;
         $planModel = config('filament-modular-subscriptions.models.plan');
 
@@ -79,7 +80,7 @@ class TenantSubscription extends Page implements HasTable
             })
             ->action(function (array $arguments) {
                 $planId = $arguments['plan_id'];
-                $tenant = filament()->getTenant();
+                $tenant = FmsPlugin::getTenant();
                 $newPlan = config('filament-modular-subscriptions.models.plan')::findOrFail($planId);
                 $oldSubscription = $tenant->subscription;
                 $invoiceService = app(InvoiceService::class);
@@ -176,7 +177,7 @@ class TenantSubscription extends Page implements HasTable
     {
         return (new InvoiceResource)->table($table)->query(
             config('filament-modular-subscriptions.models.invoice')::query()
-                ->where('tenant_id', filament()->getTenant()->id)
+                ->where('tenant_id', FmsPlugin::getTenant()->id)
                 ->with(['items', 'subscription.plan'])
         );
     }

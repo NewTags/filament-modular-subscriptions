@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\View;
 use Mpdf\Mpdf;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\ToggleButtons;
+use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 
 class InvoiceResource extends Resource
 {
@@ -53,7 +54,7 @@ class InvoiceResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        if (filament()->getTenant()) {
+        if (FmsPlugin::getTenant()) {
             return __('filament-modular-subscriptions::fms.tenant_subscription.subscription_navigation_label');
         }
 
@@ -75,8 +76,9 @@ class InvoiceResource extends Resource
 
         return $table
             ->modifyQueryUsing(function ($query) {
-                if (filament()->getTenant()) {
-                    $query->where('tenant_id', filament()->getTenant()->id);
+                $tenant = FmsPlugin::getTenant();
+                if ($tenant) {
+                    $query->where('tenant_id', $tenant->id);
                 }
 
                 return $query->with([
@@ -273,7 +275,7 @@ class InvoiceResource extends Resource
                     ->modalWidth('5xl')
                     ->icon('heroicon-o-credit-card')
                     ->color('success')
-                    ->visible(fn($record) => filament()->getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
+                    ->visible(fn($record) => FmsPlugin::getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
                     ->steps([
                         Step::make('payment_method')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_method'))
