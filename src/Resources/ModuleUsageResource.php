@@ -15,6 +15,7 @@ use Filament\Tables\Filters\SelectFilter;
 use HoceineEl\FilamentModularSubscriptions\ModularSubscription;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 
 class ModuleUsageResource extends Resource
 {
@@ -37,7 +38,7 @@ class ModuleUsageResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
+        return FmsPlugin::get()->getNavigationGroup();
     }
 
     public static function infolist(Infolist $infolist): Infolist

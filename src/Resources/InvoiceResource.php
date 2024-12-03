@@ -54,11 +54,11 @@ class InvoiceResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        if (FmsPlugin::getTenant()) {
-            return __('filament-modular-subscriptions::fms.tenant_subscription.subscription_navigation_label');
+        if (FmsPlugin::get()->onTenantPanel) {
+            return FmsPlugin::get()->getTenantNavigationGroup();
         }
 
-        return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
+        return FmsPlugin::get()->getNavigationGroup();
     }
     public static function getNavigationBadge(): ?string
     {

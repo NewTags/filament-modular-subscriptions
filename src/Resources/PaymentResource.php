@@ -21,6 +21,7 @@ use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 
 class PaymentResource extends Resource
 {
@@ -33,7 +34,7 @@ class PaymentResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
+        return FmsPlugin::get()->getNavigationGroup();
     }
 
     public static function getModelLabel(): string

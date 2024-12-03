@@ -15,6 +15,7 @@ use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\CreatePl
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\EditPlan;
 use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\ListPlans;
 use Illuminate\Database\Eloquent\Model;
+use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 
 class PlanResource extends Resource
 {
@@ -37,7 +38,7 @@ class PlanResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
+        return FmsPlugin::get()->getNavigationGroup();
     }
 
     public static function canDelete(Model $record): bool
@@ -60,7 +61,7 @@ class PlanResource extends Resource
                                     ->required()
                                     ->translatable(true, config('filament-modular-subscriptions.locales'))
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn (Set $set, $state) => $set('slug', str($state['name'][config('filament-modular-subscriptions.locales')[0] ?? app()->getLocale()])->slug()))
+                                    ->afterStateUpdated(fn(Set $set, $state) => $set('slug', str($state['name'][config('filament-modular-subscriptions.locales')[0] ?? app()->getLocale()])->slug()))
                                     ->columnSpanFull()
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.name')),
                                 Forms\Components\TextInput::make('slug')
@@ -85,7 +86,7 @@ class PlanResource extends Resource
                                 Forms\Components\TextInput::make('price')
                                     ->numeric()
                                     ->required()
-                                    ->hidden(fn (Forms\Get $get) => $get('is_pay_as_you_go'))
+                                    ->hidden(fn(Forms\Get $get) => $get('is_pay_as_you_go'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.price')),
                                 Forms\Components\Select::make('currency')
                                     ->options(config('filament-modular-subscriptions.currencies'))
@@ -159,7 +160,7 @@ class PlanResource extends Resource
                                             ->suffix(config('filament-modular-subscriptions.main_currency'))
                                             ->nullable(),
                                     ])
-                                    ->itemLabel(fn (array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
+                                    ->itemLabel(fn(array $state): ?string => config('filament-modular-subscriptions.models.module')::find($state['module_id'])?->getLabel() ?? null)
                                     ->collapsible()
                                     ->addActionLabel(__('filament-modular-subscriptions::fms.resources.plan.actions.add_module')),
                             ]),
@@ -176,7 +177,7 @@ class PlanResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')
                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.price'))
-                    ->getStateUsing(fn ($record) => $record->is_pay_as_you_go ? __('filament-modular-subscriptions::fms.pay_as_you_go') : $record->price . ' ' . config('filament-modular-subscriptions.main_currency'))
+                    ->getStateUsing(fn($record) => $record->is_pay_as_you_go ? __('filament-modular-subscriptions::fms.pay_as_you_go') : $record->price . ' ' . config('filament-modular-subscriptions.main_currency'))
                     ->sortable(),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.is_active')),

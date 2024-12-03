@@ -34,12 +34,12 @@ class TenantSubscription extends Page implements HasTable
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-modular-subscriptions::fms.tenant_subscription.your_subscription');
+        return FmsPlugin::get()->getSubscriptionNavigationLabel();
     }
 
     public static function getNavigationGroup(): string
     {
-        return __('filament-modular-subscriptions::fms.tenant_subscription.subscription_navigation_label');
+        return FmsPlugin::get()->getTenantNavigationGroup();
     }
 
     public static function shouldRegisterNavigation(): bool

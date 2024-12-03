@@ -11,6 +11,7 @@ use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
 use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionLogResource\Pages\ListSubscriptionLogs;
+use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 
 class SubscriptionLogResource extends Resource
 {
@@ -20,7 +21,7 @@ class SubscriptionLogResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
+        return FmsPlugin::get()->getNavigationGroup();
     }
 
     public static function getModelLabel(): string

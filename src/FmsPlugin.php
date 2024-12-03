@@ -29,6 +29,10 @@ class FmsPlugin implements Plugin
 
     protected array $cachedAlerts = [];
 
+    protected ?string $navigationGroup = null;
+    protected ?string $tenantNavigationGroup = null;
+    protected ?string $subscriptionNavigationLabel = null;
+
     public static function make(): static
     {
         return app(static::class);
@@ -38,29 +42,30 @@ class FmsPlugin implements Plugin
     {
         return 'filament-modular-subscriptions';
     }
+
     public static function get(): Plugin
     {
-        return filament(app(static::class)->getId());
+        return filament('filament-modular-subscriptions');
     }
 
-
-
-    public static function getTenantUsing(?Closure $callback = null): Closure|static
+    public function onTenantPanel(Closure | bool $condition = true): static
     {
-        if ($callback === null) {
-            return static::$getTenantUsing ?? static function () {
-                return self::getTenant();
-            };
-        }
+        $this->onTenantPanel = $condition instanceof Closure ? $condition() : $condition;
+        return $this;
+    }
 
+    public function getTenantUsing(?Closure $callback = null): Closure|static
+    {
         static::$getTenantUsing = $callback;
 
-        return new static();
+        return $this;
     }
 
     public static function getTenant(): mixed
     {
-        return app()->call(static::getTenantUsing());
+        return app()->call(static::$getTenantUsing ?? function () {
+            return filament()->getTenant();
+        });
     }
 
     public function register(Panel $panel): void
@@ -89,12 +94,7 @@ class FmsPlugin implements Plugin
 
     public function boot(Panel $panel): void {}
 
-    public function onTenantPanel(Closure | bool $condition = true): static
-    {
-        $this->onTenantPanel = $condition instanceof Closure ? $condition() : $condition;
 
-        return $this;
-    }
 
     public function subscriptionStats(bool $condition = true): static
     {
@@ -245,5 +245,38 @@ class FmsPlugin implements Plugin
                 'url' => TenantSubscription::getUrl(),
             ],
         ];
+    }
+
+    public function navigationGroup(string | Closure $label): static
+    {
+        $this->navigationGroup = $label instanceof Closure ? $label() : $label;
+        return $this;
+    }
+
+    public function tenantNavigationGroup(string | Closure $label): static
+    {
+        $this->tenantNavigationGroup = $label instanceof Closure ? $label() : $label;
+        return $this;
+    }
+
+    public function subscriptionNavigationLabel(string | Closure $label): static
+    {
+        $this->subscriptionNavigationLabel = $label instanceof Closure ? $label() : $label;
+        return $this;
+    }
+
+    public function getNavigationGroup(): string
+    {
+        return $this->navigationGroup ?? __('filament-modular-subscriptions::fms.menu_group.subscription_management');
+    }
+
+    public function getTenantNavigationGroup(): string
+    {
+        return $this->tenantNavigationGroup ?? __('filament-modular-subscriptions::fms.tenant_subscription.subscription_navigation_label');
+    }
+
+    public function getSubscriptionNavigationLabel(): string
+    {
+        return $this->subscriptionNavigationLabel ?? __('filament-modular-subscriptions::fms.tenant_subscription.your_subscription');
     }
 }

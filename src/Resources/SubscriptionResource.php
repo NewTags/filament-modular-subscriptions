@@ -15,6 +15,7 @@ use HoceineEl\FilamentModularSubscriptions\Models\Plan;
 use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource\Pages;
 use Illuminate\Database\Eloquent\Builder;
+use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 
 class SubscriptionResource extends Resource
 {
@@ -39,7 +40,7 @@ class SubscriptionResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
+        return FmsPlugin::get()->getNavigationGroup();
     }
 
     public static function form(Forms\Form $form): Forms\Form

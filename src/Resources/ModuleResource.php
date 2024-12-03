@@ -9,6 +9,7 @@ use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
 use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource\Pages;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 
 class ModuleResource extends Resource
 {
@@ -33,7 +34,7 @@ class ModuleResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
+        return FmsPlugin::get()->getNavigationGroup();
     }
 
     public static function canDelete(Model $record): bool
