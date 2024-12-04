@@ -202,7 +202,7 @@ class FmsPlugin implements Plugin
     {
         return $this->createAlert(
             'danger',
-            __('filament-modular-subscriptions::fms.status.expired'),
+            __('filament-modular-subscriptions::fms.statuses.expired'),
             __('filament-modular-subscriptions::fms.messages.you_have_to_renew_your_subscription_to_use_this_module'),
             __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
         );

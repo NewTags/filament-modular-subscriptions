@@ -5,6 +5,7 @@ namespace HoceineEl\FilamentModularSubscriptions\Resources;
 use ArPHP\I18N\Arabic;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Components\TextInput;
@@ -28,6 +29,7 @@ use Mpdf\Mpdf;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\ToggleButtons;
 use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
+use Illuminate\Support\HtmlString;
 
 class InvoiceResource extends Resource
 {
@@ -275,28 +277,52 @@ class InvoiceResource extends Resource
                     ->modalWidth('5xl')
                     ->icon('heroicon-o-credit-card')
                     ->color('success')
-                    ->visible(fn($record) => FmsPlugin::getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
+                    ->visible(
+                        function ($record) {
+                            if ($record->payments()->where('status', PaymentStatus::PENDING)->exists()) {
+                                Notification::make()
+                                    ->warning()
+                                    ->title(__('filament-modular-subscriptions::fms.resources.payment.pending_payment_warning'))
+                                    ->send();
+                            }
+
+                            return FmsPlugin::get()->isOnTenantPanel()
+                                && in_array(
+                                    $record->status,
+                                    [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]
+                                );
+                        }
+                    )
                     ->steps([
                         Step::make('payment_method')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_method'))
                             ->description(__('filament-modular-subscriptions::fms.resources.payment.choose_method'))
                             ->schema([
-                                ToggleButtons::make('payment_method')
-                                    ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_method'))
-                                    ->required()
-                                    ->inline()
-                                    ->options([
-                                        'online' => __('filament-modular-subscriptions::fms.resources.payment.methods.online'),
-                                        'local' => __('filament-modular-subscriptions::fms.resources.payment.methods.local'),
-                                    ])
-                                    ->default('local')
-                                    ->icons([
-                                        'local' => 'heroicon-o-banknotes',
-                                        'online' => 'heroicon-o-credit-card',
-                                    ])
-                                    ->colors([
-                                        'local' => 'warning',
-                                        'online' => 'success',
+                                Grid::make()
+                                    ->schema([
+                                        Placeholder::make('pending_payment_warning')
+                                            ->label('')
+                                            ->content(fn() => new HtmlString('<div class="text-warning-500 font-semibold">' . __('filament-modular-subscriptions::fms.resources.payment.pending_payment_warning') . '</div>'))
+                                            ->columnSpan('full')
+                                            ->visible(fn($record) => $record->payments()->where('status', PaymentStatus::PENDING)->exists()),
+
+                                        ToggleButtons::make('payment_method')
+                                            ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_method'))
+                                            ->required()
+                                            ->inline()
+                                            ->options([
+                                                'online' => __('filament-modular-subscriptions::fms.resources.payment.methods.online'),
+                                                'local' => __('filament-modular-subscriptions::fms.resources.payment.methods.local'),
+                                            ])
+                                            ->default('local')
+                                            ->icons([
+                                                'local' => 'heroicon-o-banknotes',
+                                                'online' => 'heroicon-o-credit-card',
+                                            ])
+                                            ->colors([
+                                                'local' => 'warning',
+                                                'online' => 'success',
+                                            ])
                                     ])
                             ]),
 
@@ -338,6 +364,12 @@ class InvoiceResource extends Resource
                                 ->title(__('filament-modular-subscriptions::fms.resources.payment.online_not_available'))
                                 ->send();
                             return;
+                        }
+
+                        if ($record->payments()->where('status', PaymentStatus::PENDING)->exists()) {
+                            if (! $this->confirm(__('filament-modular-subscriptions::fms.resources.payment.confirm_new_payment'))) {
+                                return;
+                            }
                         }
 
                         $record->payments()->create([

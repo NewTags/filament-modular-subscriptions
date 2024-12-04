@@ -231,35 +231,62 @@ class PaymentResource extends Resource
                     ->requiresConfirmation()
                     ->action(function ($record) {
                         DB::transaction(function () use ($record) {
-                            if ($record->status === PaymentStatus::PAID) {
-                                $invoice = $record->invoice;
-                                $subscription = $invoice->subscription;
+                            $invoice = $record->invoice;
+                            $subscription = $invoice->subscription;
+                            $subscribable = $subscription->subscribable;
 
+                            if ($record->status === PaymentStatus::PAID) {
                                 // Revert subscription renewal if this was the payment that triggered it
                                 if ($invoice->paid_at && $invoice->paid_at->eq($record->reviewed_at)) {
+                                    // Calculate the previous end date before renewal
+                                    $previousEndsAt = $subscription->starts_at->addDays($subscription->plan->period);
+
                                     $subscription->update([
                                         'status' => SubscriptionStatus::ON_HOLD,
-                                        'ends_at' => $subscription->starts_at->addDays($subscription->plan->period),
+                                        'ends_at' => $previousEndsAt,
+                                    ]);
+
+                                    // Notify about subscription status change
+                                    $subscribable->notifySubscriptionChange('payment_undone', [
+                                        'amount' => $record->amount,
+                                        'currency' => $subscription->plan->currency,
+                                        'previous_end_date' => $previousEndsAt->format('Y-m-d'),
                                     ]);
                                 }
 
+                                // Recalculate total paid amount excluding this payment
                                 $totalPaid = $invoice->payments()
                                     ->where('status', PaymentStatus::PAID)
                                     ->where('id', '!=', $record->id)
                                     ->sum('amount');
 
+                                // Update invoice status based on remaining paid amount
                                 if ($totalPaid >= $invoice->amount) {
                                     $invoice->update(['status' => InvoiceStatus::PAID]);
                                 } elseif ($totalPaid > 0) {
-                                    $invoice->update(['status' => InvoiceStatus::PARTIALLY_PAID]);
+                                    $invoice->update([
+                                        'status' => InvoiceStatus::PARTIALLY_PAID,
+                                        'paid_at' => null,
+                                    ]);
                                 } else {
                                     $invoice->update([
                                         'status' => InvoiceStatus::UNPAID,
                                         'paid_at' => null,
                                     ]);
                                 }
+
+                                defer(function () use ($subscribable, $record, $subscription) {
+                                    // Notify about payment status change
+                                    $subscribable->notifySubscriptionChange('payment_status_changed', [
+                                        'previous_status' => PaymentStatus::PAID->getLabel(),
+                                        'new_status' => PaymentStatus::PENDING->getLabel(),
+                                        'amount' => $record->amount,
+                                        'currency' => $subscription->plan->currency,
+                                    ]);
+                                });
                             }
 
+                            // Reset payment record to pending state
                             $record->update([
                                 'status' => PaymentStatus::PENDING,
                                 'admin_notes' => null,
@@ -267,12 +294,21 @@ class PaymentResource extends Resource
                                 'reviewed_by' => null,
                             ]);
 
+                            // Invalidate all relevant caches
+                            $subscribable->invalidateSubscriptionCache();
+
+                            // Send notification
                             Notification::make()
                                 ->title(__('filament-modular-subscriptions::fms.payment.undone'))
                                 ->success()
                                 ->send();
 
-                            defer(fn() => $invoice->tenant->invalidateSubscriptionCache());
+                            // Notify super admins
+                            $subscribable->notifySuperAdmins('payment_undone', [
+                                'amount' => $record->amount,
+                                'currency' => $subscription->plan->currency,
+                                'invoice_id' => $invoice->id,
+                            ]);
                         });
                     }),
             ])

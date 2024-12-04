@@ -24,17 +24,9 @@ class ScheduleInvoiceGeneration extends Command
         $subscriptionModel::query()
             ->where('status', SubscriptionStatus::ACTIVE)
             ->with([
-                'plan:id,fixed_invoice_day,invoice_interval,invoice_period,is_pay_as_you_go',
-                'invoices:id,subscription_id,created_at',
-                'subscribable:id,name',
-            ])
-            ->select([
-                'id',
-                'plan_id',
-                'starts_at',
-                'ends_at',
-                'subscribable_id',
-                'subscribable_type',
+                'plan',
+                'invoices',
+                'subscribable',
             ])
             ->chunk(100, function ($activeSubscriptions) use ($invoiceService, $logService) {
                 foreach ($activeSubscriptions as $subscription) {
@@ -101,31 +93,33 @@ class ScheduleInvoiceGeneration extends Command
 
                                     if ($subscription->ends_at && $subscription->ends_at->diffInDays(now()) <= 7) {
                                         $subscription->subscribable->notifySubscriptionChange('subscription_near_expiry', [
-                                            'days' => $subscription->ends_at->diffInDays(now()),
+                                            'days' => number_format($subscription->ends_at->diffInDays(now())),
                                             'expiry_date' => $subscription->ends_at->format('Y-m-d'),
                                             'plan' => $subscription->plan->trans_name
                                         ]);
 
                                         $subscription->subscribable->notifySuperAdmins('subscription_near_expiry', [
                                             'tenant' => $subscription->subscribable->name,
-                                            'days' => $subscription->ends_at->diffInDays(now()),
+                                            'days' => number_format($subscription->ends_at->diffInDays(now())),
                                             'expiry_date' => $subscription->ends_at->format('Y-m-d'),
                                             'plan' => $subscription->plan->trans_name
                                         ]);
                                     }
 
-                                    if ($subscription->ends_at && 
-                                        $subscription->ends_at->isPast() && 
-                                        $subscription->ends_at->copy()->addDays($subscription->plan->grace_period)->isFuture()) {
+                                    if (
+                                        $subscription->ends_at &&
+                                        $subscription->ends_at->isPast() &&
+                                        $subscription->ends_at->copy()->addDays($subscription->plan->grace_period)->isFuture()
+                                    ) {
                                         $daysLeft = now()->diffInDays($subscription->ends_at->copy()->addDays($subscription->plan->grace_period));
                                         $subscription->subscribable->notifySubscriptionChange('subscription_grace_period', [
-                                            'days' => $daysLeft,
+                                            'days' => number_format($daysLeft),
                                             'grace_end_date' => $subscription->ends_at->copy()->addDays($subscription->plan->grace_period)->format('Y-m-d')
                                         ]);
 
                                         $subscription->subscribable->notifySuperAdmins('subscription_grace_period', [
                                             'tenant' => $subscription->subscribable->name,
-                                            'days' => $daysLeft,
+                                            'days' => number_format($daysLeft),
                                             'grace_end_date' => $subscription->ends_at->copy()->addDays($subscription->plan->grace_period)->format('Y-m-d')
                                         ]);
                                     }
