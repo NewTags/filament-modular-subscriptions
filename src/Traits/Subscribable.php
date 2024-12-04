@@ -90,7 +90,7 @@ trait Subscribable
     /**
      * Invalidate active subscription cache
      */
-    private function invalidateSubscriptionCache(): void
+    public function invalidateSubscriptionCache(): void
     {
         // Clear active subscription cache
         Cache::forget(self::ACTIVE_SUBSCRIPTION_CACHE_KEY . $this->id);
