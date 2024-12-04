@@ -141,6 +141,8 @@ class TenantSubscription extends Page implements HasTable
                             ->warning()
                             ->send();
                     }
+
+                    $tenant->invalidateSubscriptionCache();
                 });
 
                 $this->redirect(TenantSubscription::getUrl());
