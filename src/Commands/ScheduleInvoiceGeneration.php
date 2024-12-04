@@ -2,8 +2,10 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Commands;
 
-use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
+use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
+use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
 use HoceineEl\FilamentModularSubscriptions\Services\SubscriptionLogService;
@@ -220,5 +222,15 @@ class ScheduleInvoiceGeneration extends Command
         };
 
         return $nextDate;
+    }
+
+    protected function isInvoiceOverdue(Invoice $invoice): bool
+    {
+        $totalPaid = $invoice->payments()
+            ->where('status', PaymentStatus::PAID)
+            ->sum('amount');
+
+        return $totalPaid < $invoice->amount && 
+            now()->greaterThan($invoice->due_date);
     }
 }

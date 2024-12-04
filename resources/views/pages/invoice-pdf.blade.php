@@ -145,11 +145,9 @@
                     <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
                         {{ $item->quantity }}</td>
                     <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
-                        {{ number_format($item->total / 1.15, 2, '.', '') }}</td>
+                        {{ number_format($item->unit_price, 2, '.', '') }}</td>
                     <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
-                        {{ number_format($item->total - $item->total / 1.15, 2, '.', '') }}</td>
-                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
-                        {{ $item->total }}</td>
+                        {{ number_format($item->total, 2, '.', '') }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -169,7 +167,7 @@
                     {{ __('filament-modular-subscriptions::fms.invoice.subtotal') }}</td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">Subtotal</td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: ltr;">
-                    {{ $invoice->amount }} {{ __('filament-modular-subscriptions::fms.invoice.currency') }}</td>
+                    {{ number_format($invoice->subtotal, 2) }} {{ __('filament-modular-subscriptions::fms.invoice.currency') }}</td>
             </tr>
             <tr>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
@@ -178,14 +176,14 @@
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">VAT
                     ({{ config('filament-modular-subscriptions.tax_percentage') }}%)</td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: ltr;">
-                    {{ $invoice->tax }} {{ __('filament-modular-subscriptions::fms.invoice.currency') }}</td>
+                    {{ number_format($invoice->tax, 2) }} {{ __('filament-modular-subscriptions::fms.invoice.currency') }}</td>
             </tr>
             <tr style="background-color: #e5e7eb;border: none;">
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
                     {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}</td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">Total with VAT</td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: rtl;">
-                    {{ number_format($invoice->amount + $invoice->tax, 2, '.', '') }}
+                    {{ number_format($invoice->amount, 2, '.', '') }}
                     {{ __('filament-modular-subscriptions::fms.invoice.currency') }}</td>
             </tr>
         </tbody>

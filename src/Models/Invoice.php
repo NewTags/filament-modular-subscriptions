@@ -92,4 +92,13 @@ class Invoice extends Model
             'date' => $this->created_at->translatedFormat('Y-m-d'),
         ]);
     }
+
+    public function getRemainingAmountAttribute(): float
+    {
+        $totalPaid = $this->payments()
+            ->where('status', PaymentStatus::PAID)
+            ->sum('amount');
+        
+        return max(0, $this->amount - $totalPaid);
+    }
 }

@@ -172,7 +172,6 @@ class PaymentResource extends Resource
                                 ->where('status', PaymentStatus::PAID)
                                 ->sum('amount');
 
-                            // Compare with total amount (subtotal + tax)
                             if ($totalPaid >= $invoice->amount) {
                                 $invoice->update([
                                     'status' => InvoiceStatus::PAID,
