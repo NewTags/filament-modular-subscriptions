@@ -5,6 +5,7 @@ namespace HoceineEl\FilamentModularSubscriptions\Resources;
 use ArPHP\I18N\Arabic;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Components\TextInput;
@@ -24,9 +25,10 @@ use HoceineEl\FilamentModularSubscriptions\ResolvesCustomerInfo;
 use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\View;
-use Mpdf\Mpdf;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\ToggleButtons;
+use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
+use Illuminate\Support\HtmlString;
 
 class InvoiceResource extends Resource
 {
@@ -34,7 +36,7 @@ class InvoiceResource extends Resource
 
     protected static ?string $tenantOwnershipRelationshipName = 'tenant';
 
-    protected static ?string $slug = 'ms-nvoices';
+    protected static ?string $slug = 'ms-invoices';
 
     public static function getModel(): string
     {
@@ -53,11 +55,11 @@ class InvoiceResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        if (filament()->getTenant()) {
-            return __('filament-modular-subscriptions::fms.tenant_subscription.subscription_navigation_label');
+        if (FmsPlugin::get()->isOnTenantPanel()) {
+            return FmsPlugin::get()->getTenantNavigationGroup();
         }
 
-        return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
+        return FmsPlugin::get()->getNavigationGroup();
     }
     public static function getNavigationBadge(): ?string
     {
@@ -75,8 +77,9 @@ class InvoiceResource extends Resource
 
         return $table
             ->modifyQueryUsing(function ($query) {
-                if (filament()->getTenant()) {
-                    $query->where('tenant_id', filament()->getTenant()->id);
+                $tenant = FmsPlugin::getTenant();
+                if ($tenant) {
+                    $query->where('tenant_id', $tenant->id);
                 }
 
                 return $query->with([
@@ -92,15 +95,15 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subscription_id'))
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('amount')
+                Tables\Columns\TextColumn::make('subtotal')
                     ->money($currency)
-                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.amount'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subtotal'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tax')
                     ->money($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.tax'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('total')
+                Tables\Columns\TextColumn::make('amount')
                     ->money($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.total'))
                     ->sortable(),
@@ -159,7 +162,7 @@ class InvoiceResource extends Resource
                                 fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                             );
                     }),
-            ], FiltersLayout::AboveContent)
+            ], FiltersLayout::Modal)
             ->filtersFormColumns(3)
             ->modelLabel(__('filament-modular-subscriptions::fms.resources.invoice.singular_name'))
             ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.invoice.name'))
@@ -183,13 +186,15 @@ class InvoiceResource extends Resource
                         $totalBeforeTax = $record->amount;
                         $taxAmount = $record->tax;
 
+
+
                         // Generate QR code with correct amounts
                         $QrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
                             new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
                             new \Salla\ZATCA\Tags\TaxNumber(config('filament-modular-subscriptions.tax_number')),
                             new \Salla\ZATCA\Tags\InvoiceDate($record->created_at),
-                            new \Salla\ZATCA\Tags\InvoiceTotalAmount($totalBeforeTax + $taxAmount), // Total with tax
-                            new \Salla\ZATCA\Tags\InvoiceTaxAmount($taxAmount),
+                            new \Salla\ZATCA\Tags\InvoiceTotalAmount($record->amount), // Total with tax
+                            new \Salla\ZATCA\Tags\InvoiceTaxAmount($record->tax),
                         ])->render();
 
                         // Get view data with additional tax information
@@ -204,39 +209,53 @@ class InvoiceResource extends Resource
                         ];
 
                         // Configure mPDF with better Arabic support
-                        $defaultConfig = (new \Mpdf\Config\ConfigVariables)->getDefaults();
+                        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
                         $fontDirs = $defaultConfig['fontDir'];
 
-                        $defaultFontConfig = (new \Mpdf\Config\FontVariables)->getDefaults();
+                        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
                         $fontData = $defaultFontConfig['fontdata'];
 
                         $mpdf = new \Mpdf\Mpdf([
                             'fontDir' => array_merge($fontDirs, [
                                 config('filament-modular-subscriptions.font_path'),
                             ]),
-                            'fontdata' => array_merge($fontData, [
-                                'Cairo' => [
-                                    'R' => 'Cairo-Bold.ttf',
-                                    'B' => 'Cairo-Bold.ttf',
+                            'fontdata' => $fontData + [
+                                'dinnextltarabic-medium' => [
+                                    'R' => 'dinnextltarabic_medium_normal_ab9f5a2326967c69e338559eaff07d99.ttf',
+                                    'B' => 'DINNextLTArabic-Medium.ttf',
+                                    'I' => 'DINNextLTArabic-Medium.ttf',
+                                    'BI' => 'DINNextLTArabic-Medium.ttf',
+                                    'useOTL' => 0xFF,
+                                    'useKashida' => 75,
+                                    'unAGlyphs' => true,
                                 ],
-                            ]),
-                            'default_font' => 'Cairo',
+                            ],
+                            'default_font' => 'dinnextltarabic-medium',
                             'mode' => 'utf-8',
                             'format' => 'A4',
-                            'tempDir' => storage_path('app/pdf-fonts'),
+                            'tempDir' => storage_path('app/pdf_fonts'),
                             'orientation' => 'P',
                             'margin_left' => 10,
                             'margin_right' => 10,
                             'margin_top' => 10,
                             'margin_bottom' => 10,
+                            'direction' => 'rtl',
+                            'autoScriptToLang' => true,
+                            'autoLangToFont' => true,
+                            'useSubstitutions' => true,
+                            'biDirectional' => true,
+                            'text_input_as_HTML' => true,
                         ]);
+                        $mpdf->SetTitle('Invoice #' . $record->id);
+                        $mpdf->SetAuthor(config('filament-modular-subscriptions.company_name'));
+                        $mpdf->SetCreator(config('filament-modular-subscriptions.company_name'));
+                        $mpdf->SetDirectionality('rtl');
+                        $mpdf->SetFont('dinnextltarabic-medium', '', 14);
+                        $view = view('filament-modular-subscriptions::pages.invoice-pdf', $data);
+                        $html = $view->render();
+                        $mpdf->WriteHTML($html);
 
-                        // Add better error handling
                         try {
-                            $view = view('filament-modular-subscriptions::pages.invoice-pdf', $data);
-                            $html = $view->render();
-                            $mpdf->WriteHTML($html);
-
                             return response()->streamDownload(function () use ($mpdf) {
                                 echo $mpdf->Output('', 'S');
                             }, 'invoice_' . $record->id . '_' . $record->created_at->format('Y-m-d') . '.pdf');
@@ -257,28 +276,45 @@ class InvoiceResource extends Resource
                     ->modalWidth('5xl')
                     ->icon('heroicon-o-credit-card')
                     ->color('success')
-                    ->visible(fn($record) => filament()->getTenant() && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]))
+                    ->visible(
+                        function ($record) {
+                            return FmsPlugin::get()->isOnTenantPanel()
+                                && in_array(
+                                    $record->status,
+                                    [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID]
+                                );
+                        }
+                    )
                     ->steps([
                         Step::make('payment_method')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_method'))
                             ->description(__('filament-modular-subscriptions::fms.resources.payment.choose_method'))
                             ->schema([
-                                ToggleButtons::make('payment_method')
-                                    ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_method'))
-                                    ->required()
-                                    ->inline()
-                                    ->options([
-                                        'online' => __('filament-modular-subscriptions::fms.resources.payment.methods.online'),
-                                        'local' => __('filament-modular-subscriptions::fms.resources.payment.methods.local'),
-                                    ])
-                                    ->default('local')
-                                    ->icons([
-                                        'local' => 'heroicon-o-banknotes',
-                                        'online' => 'heroicon-o-credit-card',
-                                    ])
-                                    ->colors([
-                                        'local' => 'warning',
-                                        'online' => 'success',
+                                Grid::make()
+                                    ->schema([
+                                        Placeholder::make('pending_payment_warning')
+                                            ->label('')
+                                            ->content(fn() => new HtmlString('<div class="text-warning-500 font-semibold">' . __('filament-modular-subscriptions::fms.resources.payment.pending_payment_warning') . '</div>'))
+                                            ->columnSpan('full')
+                                            ->visible(fn($record) => $record->payments()->where('status', PaymentStatus::PENDING)->exists()),
+
+                                        ToggleButtons::make('payment_method')
+                                            ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_method'))
+                                            ->required()
+                                            ->inline()
+                                            ->options([
+                                                'online' => __('filament-modular-subscriptions::fms.resources.payment.methods.online'),
+                                                'local' => __('filament-modular-subscriptions::fms.resources.payment.methods.local'),
+                                            ])
+                                            ->default('local')
+                                            ->icons([
+                                                'local' => 'heroicon-o-banknotes',
+                                                'online' => 'heroicon-o-credit-card',
+                                            ])
+                                            ->colors([
+                                                'local' => 'warning',
+                                                'online' => 'success',
+                                            ])
                                     ])
                             ]),
 
@@ -322,6 +358,8 @@ class InvoiceResource extends Resource
                             return;
                         }
 
+
+
                         $record->payments()->create([
                             'amount' => $data['amount'],
                             'receipt_file' => $data['receipt_file'],
@@ -334,13 +372,13 @@ class InvoiceResource extends Resource
                                 'submitted_at' => now(),
                             ],
                         ]);
-
+                        $subscribable = $record->subscription->subscribable;
                         // Notify super admins about new pending payment
-                        $record->subscription->subscribable->notifySuperAdmins('payment_pending', [
+                        $subscribable->notifySuperAdmins('payment_pending', [
                             'amount' => $data['amount'],
                             'currency' => $record->subscription->plan->currency,
                             'invoice_id' => $record->id,
-                            'tenant' => $record->subscription->subscribable->name,
+                            'tenant' => $subscribable->name,
                             'date' => now()->format('Y-m-d H:i:s')
                         ]);
 

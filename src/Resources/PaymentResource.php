@@ -21,6 +21,7 @@ use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 
 class PaymentResource extends Resource
 {
@@ -33,7 +34,7 @@ class PaymentResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-modular-subscriptions::fms.menu_group.subscription_management');
+        return FmsPlugin::get()->getNavigationGroup();
     }
 
     public static function getModelLabel(): string
@@ -90,6 +91,18 @@ class PaymentResource extends Resource
                 Tables\Columns\TextColumn::make('reviewer.name')
                     ->toggledHiddenByDefault()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.reviewed_by')),
+                Tables\Columns\TextColumn::make('invoice.subtotal')
+                    ->money(fn($record) => $record->invoice->subscription->plan->currency)
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subtotal'))
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('invoice.tax')
+                    ->money(fn($record) => $record->invoice->subscription->plan->currency)
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.tax'))
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('invoice.amount')
+                    ->money(fn($record) => $record->invoice->subscription->plan->currency)
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.total'))
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\Filter::make('created_at')
@@ -155,7 +168,10 @@ class PaymentResource extends Resource
                             ]);
 
                             $invoice = $record->invoice;
-                            $totalPaid = $invoice->payments()->where('status', PaymentStatus::PAID)->sum('amount');
+                            $subscription = $invoice->subscription;
+                            $totalPaid = $invoice->payments()
+                                ->where('status', PaymentStatus::PAID)
+                                ->sum('amount');
 
                             if ($totalPaid >= $invoice->amount) {
                                 $invoice->update([
@@ -163,10 +179,49 @@ class PaymentResource extends Resource
                                     'paid_at' => now(),
                                 ]);
 
-                                $invoice->subscription->renew();
+                                // Store the old plan ID before renewal
+                                $oldPlanId = $subscription->plan_id;
+                                
+                                // Renew the subscription
+                                $subscription->renew();
 
+                                // Determine the type of subscription change
+                                if ($subscription->plan_id !== $oldPlanId) {
+                                    // Plan was switched
+                                    $subscription->subscribable->notifySubscriptionChange('subscription_switched', [
+                                        'old_plan' => $oldPlanId,
+                                        'new_plan' => $subscription->plan_id,
+                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                        'currency' => $subscription->plan->currency,
+                                        'amount' => $invoice->amount,
+                                    ]);
+                                } elseif ($subscription->wasRecentlyCreated) {
+                                    // New subscription
+                                    $subscription->subscribable->notifySubscriptionChange('subscription_activated', [
+                                        'plan' => $subscription->plan_id,
+                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                        'currency' => $subscription->plan->currency,
+                                        'amount' => $invoice->amount,
+                                    ]);
+                                } else {
+                                    // Regular renewal
+                                    $subscription->subscribable->notifySubscriptionChange('subscription_renewed', [
+                                        'plan' => $subscription->plan_id,
+                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                        'currency' => $subscription->plan->currency,
+                                        'amount' => $invoice->amount,
+                                    ]);
+                                }
+
+                                // Payment received notification
                                 $invoice->subscription->subscribable->notifySubscriptionChange('payment_received', [
                                     'amount' => $record->amount,
+                                    'subtotal' => $invoice->subtotal,
+                                    'tax' => $invoice->tax,
+                                    'total' => $invoice->amount,
                                     'currency' => $invoice->subscription->plan->currency,
                                     'invoice_id' => $invoice->id,
                                     'status' => PaymentStatus::PAID->getLabel(),
@@ -177,6 +232,9 @@ class PaymentResource extends Resource
 
                                 $invoice->subscription->subscribable->notifySubscriptionChange('payment_partially_approved', [
                                     'amount' => $record->amount,
+                                    'remaining' => $invoice->amount - $totalPaid,
+                                    'subtotal' => $invoice->subtotal,
+                                    'tax' => $invoice->tax,
                                     'total' => $invoice->amount,
                                     'currency' => $invoice->subscription->plan->currency,
                                     'status' => PaymentStatus::PARTIALLY_PAID->getLabel(),
@@ -230,48 +288,52 @@ class PaymentResource extends Resource
                     ->requiresConfirmation()
                     ->action(function ($record) {
                         DB::transaction(function () use ($record) {
+                            $invoice = $record->invoice;
+                            $subscription = $invoice->subscription;
+                            $subscribable = $subscription->subscribable;
+
                             if ($record->status === PaymentStatus::PAID) {
-                                $invoice = $record->invoice;
-                                $subscription = $invoice->subscription;
-
-                                // Revert subscription renewal if this was the payment that triggered it
-                                if ($invoice->paid_at && $invoice->paid_at->eq($record->reviewed_at)) {
-                                    $subscription->update([
-                                        'status' => SubscriptionStatus::ON_HOLD,
-                                        'ends_at' => $subscription->starts_at->addDays($subscription->plan->period),
-                                    ]);
-                                }
-
+                                // Recalculate total paid amount excluding this payment
                                 $totalPaid = $invoice->payments()
                                     ->where('status', PaymentStatus::PAID)
                                     ->where('id', '!=', $record->id)
                                     ->sum('amount');
 
+                                // Update invoice status based on remaining paid amount
                                 if ($totalPaid >= $invoice->amount) {
                                     $invoice->update(['status' => InvoiceStatus::PAID]);
                                 } elseif ($totalPaid > 0) {
-                                    $invoice->update(['status' => InvoiceStatus::PARTIALLY_PAID]);
+                                    $invoice->update([
+                                        'status' => InvoiceStatus::PARTIALLY_PAID,
+                                        'paid_at' => null,
+                                    ]);
                                 } else {
                                     $invoice->update([
                                         'status' => InvoiceStatus::UNPAID,
                                         'paid_at' => null,
                                     ]);
                                 }
+
+                                // Notify about payment status change
+                                $subscribable->notifySubscriptionChange('payment_status_changed', [
+                                    'previous_status' => PaymentStatus::PAID->getLabel(),
+                                    'new_status' => PaymentStatus::PENDING->getLabel(),
+                                    'amount' => $record->amount,
+                                    'remaining' => $invoice->amount - $totalPaid,
+                                    'subtotal' => $invoice->subtotal,
+                                    'tax' => $invoice->tax,
+                                    'total' => $invoice->amount,
+                                    'currency' => $subscription->plan->currency,
+                                ]);
                             }
 
+                            // Reset payment record to pending state
                             $record->update([
                                 'status' => PaymentStatus::PENDING,
                                 'admin_notes' => null,
                                 'reviewed_at' => null,
                                 'reviewed_by' => null,
                             ]);
-
-                            Notification::make()
-                                ->title(__('filament-modular-subscriptions::fms.payment.undone'))
-                                ->success()
-                                ->send();
-
-                            defer(fn() => $invoice->tenant->invalidateSubscriptionCache());
                         });
                     }),
             ])

@@ -27,6 +27,7 @@ return [
         'usage' => HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource::class,
         'payment' => HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource::class,
         'invoice' => HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource::class,
+        'log' => HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionLogResource::class,
     ],
     'tables' => [
         'plan' => 'fms_plans',

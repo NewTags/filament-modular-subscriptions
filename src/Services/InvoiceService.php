@@ -42,17 +42,26 @@ class InvoiceService
         return DB::transaction(function () use ($subscription, $dueDate) {
             $invoice = $this->createInvoice($subscription, $dueDate);
             $this->createInvoiceItems($invoice, $subscription);
-
             $this->updateInvoiceTotals($invoice);
 
             event(new InvoiceGenerated($invoice));
-
-            $subscription->subscribable->notifySubscriptionChange('invoice_generated', [
+            $subscribable = $subscription->subscribable;
+            $subscribable->notifySubscriptionChange('invoice_generated', [
                 'invoice_id' => $invoice->id,
-                'amount' => $invoice->total,
+                'subtotal' => $invoice->subtotal,
+                'tax' => $invoice->tax,
+                'amount' => $invoice->amount,
                 'currency' => $subscription->plan->currency,
                 'due_date' => $dueDate->format('Y-m-d')
             ]);
+
+            $subscribable->notifySuperAdmins('invoice_generated', [
+                'invoice_id' => $invoice->id,
+                'amount' => $invoice->total,
+                'tenant' => $subscription->subscribable->name,
+                'currency' => $subscription->plan->currency
+            ]);
+            $subscribable->invalidateSubscriptionCache();
 
             return $invoice;
         });
@@ -60,14 +69,7 @@ class InvoiceService
 
     protected function calculateDueDate(Subscription $subscription): Carbon
     {
-        $plan = $subscription->plan;
-        $startDate = $subscription->starts_at;
-
-        if ($plan->due_days) {
-            return now()->addDays($plan->due_days);
-        }
-
-        return $startDate->copy()->addDays($plan->invoice_period);
+        return now()->addDays($subscription->plan->due_days);
     }
 
     protected function hasCurrentPeriodInvoice(Subscription $subscription): bool
@@ -75,9 +77,8 @@ class InvoiceService
         $plan = $subscription->plan;
         $today = now();
 
-        if ($plan->fixed_invoice_day) {
+        if ($plan->fixed_invoice_day > 0) {
             return $subscription->invoices()
-                ->whereYear('created_at', $today->year)
                 ->whereMonth('created_at', $today->month)
                 ->exists();
         }
@@ -95,12 +96,12 @@ class InvoiceService
 
     private function calculateNextInvoiceDate(Carbon $periodStart, $plan): Carbon
     {
-        return match ($plan->invoice_interval) {
+        return match ($plan->invoice_interval->value) {
             'day' => $periodStart->addDays($plan->invoice_period),
             'week' => $periodStart->addWeeks($plan->invoice_period),
             'month' => $periodStart->addMonths($plan->invoice_period),
             'year' => $periodStart->addYears($plan->invoice_period),
-            default => $periodStart->addMonths(1),
+            default => $periodStart->addMonth(),
         };
     }
 
@@ -109,8 +110,9 @@ class InvoiceService
         return $this->invoiceModel::create([
             'subscription_id' => $subscription->id,
             'tenant_id' => $subscription->subscribable_id,
-            'amount' => 0,
+            'subtotal' => 0,
             'tax' => 0,
+            'amount' => 0,
             'status' => InvoiceStatus::UNPAID,
             'due_date' => $dueDate,
         ]);
@@ -129,45 +131,52 @@ class InvoiceService
     {
         $subscription->load('moduleUsages');
         foreach ($subscription->moduleUsages as $moduleUsage) {
+            $unitPrice = $subscription->plan->modulePrice($moduleUsage->module);
+            $total = $moduleUsage->usage * $unitPrice;
+
             $invoice->items()->create([
-                'module_id' => $moduleUsage->module_id,
                 'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', [
                     'module' => $moduleUsage->module->getName(),
                 ]),
                 'quantity' => $moduleUsage->usage,
-                'unit_price' => $subscription->plan->modulePrice($moduleUsage->module),
-                'total' => $moduleUsage->pricing,
+                'unit_price' => $unitPrice,
+                'total' => $total,
             ]);
         }
     }
 
     private function createFixedPriceItem(Invoice $invoice, Subscription $subscription): void
     {
+        $price = $subscription->plan->price;
         $invoice->items()->create([
             'description' => __('filament-modular-subscriptions::fms.invoice.subscription_fee', [
                 'plan' => $subscription->plan->trans_name,
                 'currency' => $subscription->plan->currency
             ]),
             'quantity' => 1,
-            'unit_price' => $subscription->plan->price,
-            'total' => $subscription->plan->price,
+            'unit_price' => $price,
+            'total' => $price,
         ]);
     }
 
     private function updateInvoiceTotals(Invoice $invoice): void
     {
-        $totalAmount = $invoice->items()->sum('total');
-        $tax = $totalAmount * $this->taxPercentage / 100;
+        DB::transaction(function () use ($invoice) {
+            $items = $invoice->items;
+            $subtotal = $items->sum('total');
+            $tax = round($subtotal * ($this->taxPercentage / 100), 2);
 
-        $invoice->update([
-            'amount' => $totalAmount + $tax,
-            'tax' => $tax,
-        ]);
+            $invoice->update([
+                'subtotal' => $subtotal,
+                'tax' => $tax,
+                'amount' => $subtotal + $tax,
+            ]);
+        });
     }
 
     private function isPayAsYouGo(Subscription $subscription): bool
     {
-        return $subscription->plan->isPayAsYouGo();
+        return $subscription->plan->is_pay_as_you_go;
     }
 
     public function generatePayAsYouGoInvoice(Subscription $subscription): void
@@ -192,12 +201,14 @@ class InvoiceService
         foreach ($moduleUsages->groupBy('module_id') as $moduleId => $usages) {
             $module = config('filament-modular-subscriptions.models.module')::find($moduleId);
             $totalUsage = $usages->sum('usage');
+            $modulePrice = $subscription->plan->modulePrice($module);
+            $total = $totalUsage * $modulePrice;
 
             $invoice->items()->create([
                 'description' => $module->getLabel(),
                 'quantity' => $totalUsage,
-                'unit_price' => $subscription->plan->price,
-                'total' => $totalUsage * $subscription->plan->price,
+                'unit_price' => $modulePrice,
+                'total' => $total,
             ]);
         }
     }
@@ -241,7 +252,7 @@ class InvoiceService
 
     protected function calculateSubscriptionEndDate($plan): Carbon
     {
-        return match ($plan->invoice_interval) {
+        return match ($plan->invoice_interval->value) {
             'day' => now()->addDays($plan->invoice_period),
             'week' => now()->addWeeks($plan->invoice_period),
             'month' => now()->addMonths($plan->invoice_period),

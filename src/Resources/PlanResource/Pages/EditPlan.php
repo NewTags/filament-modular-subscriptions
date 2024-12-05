@@ -13,7 +13,13 @@ class EditPlan extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->visible(fn($record) => $record->subscriptions()->exists()),
         ];
+    }
+
+    public function afterSave(): void
+    {
+        $this->getRecord()->subscribable->invalidateSubscriptionCache();
     }
 }

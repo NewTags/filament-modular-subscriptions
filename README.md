@@ -134,7 +134,7 @@ class ApiCallsModule extends BaseModule
 
     public function calculateUsage(Subscription $subscription): int
     {
-        return filament()->getTenant()->moduleUsage(get_class($this));
+        return FmsPlugin::getTenant()->moduleUsage(get_class($this));
     }
 
    public function getPricing(Subscription $subscription): float

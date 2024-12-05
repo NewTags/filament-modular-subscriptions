@@ -8,24 +8,31 @@ use Filament\Panel;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use HoceineEl\FilamentModularSubscriptions\Pages\TenantSubscription;
+use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
-class ModularSubscriptionsPlugin implements Plugin
+class FmsPlugin implements Plugin
 {
     private const ALERTS_CACHE_KEY = 'subscription_alerts_';
 
     private const ALERTS_CACHE_TTL = 30; // minutes
 
-    protected bool $hasSubscriptionStats = true;
+    public bool $hasSubscriptionStats = true;
 
-    protected bool $onTenantPanel = false;
+    public bool $onTenantPanel = false;
 
-    protected ?Model $tenant = null;
+    public static ?Closure $getTenantUsing = null;
 
-    protected array $cachedAlerts = [];
+    public ?Model $tenant = null;
+
+    public array $cachedAlerts = [];
+
+    public ?string $navigationGroup = null;
+    public ?string $tenantNavigationGroup = null;
+    public ?string $subscriptionNavigationLabel = null;
 
     public static function make(): static
     {
@@ -35,6 +42,31 @@ class ModularSubscriptionsPlugin implements Plugin
     public function getId(): string
     {
         return 'filament-modular-subscriptions';
+    }
+
+    public static function get(): static
+    {
+        return filament('filament-modular-subscriptions');
+    }
+
+    public function onTenantPanel(Closure | bool $condition = true): static
+    {
+        $this->onTenantPanel = $condition instanceof Closure ? $condition() : $condition;
+        return $this;
+    }
+
+    public function getTenantUsing(?Closure $callback = null): Closure|static
+    {
+        static::$getTenantUsing = $callback;
+
+        return $this;
+    }
+
+    public static function getTenant(): mixed
+    {
+        return app()->call(static::$getTenantUsing ?? function () {
+            return filament()->getTenant();
+        });
     }
 
     public function register(Panel $panel): void
@@ -49,7 +81,7 @@ class ModularSubscriptionsPlugin implements Plugin
                 ->bootUsing(function () {
                     FilamentView::registerRenderHook(
                         PanelsRenderHook::PAGE_START,
-                        fn (): string => $this->renderSubscriptionAlerts()
+                        fn(): string => $this->renderSubscriptionAlerts()
                     );
                 });
         }
@@ -63,12 +95,7 @@ class ModularSubscriptionsPlugin implements Plugin
 
     public function boot(Panel $panel): void {}
 
-    public function onTenantPanel(Closure | bool $condition = true): static
-    {
-        $this->onTenantPanel = $condition instanceof Closure ? $condition() : $condition;
 
-        return $this;
-    }
 
     public function subscriptionStats(bool $condition = true): static
     {
@@ -82,10 +109,6 @@ class ModularSubscriptionsPlugin implements Plugin
         return $this->hasSubscriptionStats;
     }
 
-    public static function get(): static
-    {
-        return filament(app(static::class)->getId());
-    }
 
     protected function renderSubscriptionAlerts(): string
     {
@@ -93,7 +116,7 @@ class ModularSubscriptionsPlugin implements Plugin
             return '';
         }
 
-        $tenant = filament()->getTenant();
+        $tenant = self::getTenant();
         if (! $tenant) {
             return '';
         }
@@ -117,16 +140,26 @@ class ModularSubscriptionsPlugin implements Plugin
     protected function generateAlerts(Model $tenant): array
     {
         $alerts = [];
-        $subscription = $tenant->activeSubscription();
+        $subscription = $tenant->subscription;
 
-        if (! $subscription) {
+        if (! $subscription || $subscription->status === SubscriptionStatus::CANCELLED) {
             return [$this->createNoSubscriptionAlert()];
+        }
+
+
+
+        if ($subscription->status === SubscriptionStatus::ON_HOLD) {
+            return [$this->createOnHoldAlert()];
+        }
+
+        if ($subscription->status === SubscriptionStatus::PENDING_PAYMENT) {
+            return [$this->createPendingPaymentAlert()];
         }
 
         if ($this->isSubscriptionExpired($subscription)) {
             return [$this->createExpiredSubscriptionAlert()];
         }
-
+        
         if ($this->isSubscriptionEndingSoon($subscription)) {
             $alerts[] = $this->createEndingSoonAlert($subscription);
         }
@@ -180,9 +213,29 @@ class ModularSubscriptionsPlugin implements Plugin
     {
         return $this->createAlert(
             'danger',
-            __('filament-modular-subscriptions::fms.status.expired'),
-            __('filament-modular-subscriptions::fms.messages.you_have_to_renew_your_subscription_to_use_this_module'),
+            __('filament-modular-subscriptions::fms.statuses.expired'),
+            __('filament-modular-subscriptions::fms.messages.you_have_to_renew_your_subscription'),
+            __('filament-modular-subscriptions::fms.messages.pay_invoice')
+        );
+    }
+
+    protected function createOnHoldAlert(): array
+    {
+        return $this->createAlert(
+            'warning',
+            __('filament-modular-subscriptions::fms.messages.subscription_on_hold'),
+            __('filament-modular-subscriptions::fms.messages.subscription_on_hold_message'),
             __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
+        );
+    }
+
+    protected function createPendingPaymentAlert(): array
+    {
+        return $this->createAlert(
+            'warning',
+            __('filament-modular-subscriptions::fms.messages.subscription_pending_payment'),
+            __('filament-modular-subscriptions::fms.messages.subscription_pending_payment_message'),
+            __('filament-modular-subscriptions::fms.messages.pay_invoice')
         );
     }
 
@@ -223,5 +276,43 @@ class ModularSubscriptionsPlugin implements Plugin
                 'url' => TenantSubscription::getUrl(),
             ],
         ];
+    }
+
+    public function navigationGroup(string | Closure $label): static
+    {
+        $this->navigationGroup = $label instanceof Closure ? $label() : $label;
+        return $this;
+    }
+
+    public function tenantNavigationGroup(string | Closure $label): static
+    {
+        $this->tenantNavigationGroup = $label instanceof Closure ? $label() : $label;
+        return $this;
+    }
+
+    public function subscriptionNavigationLabel(string | Closure $label): static
+    {
+        $this->subscriptionNavigationLabel = $label instanceof Closure ? $label() : $label;
+        return $this;
+    }
+
+    public function getNavigationGroup(): string
+    {
+        return $this->navigationGroup ?? __('filament-modular-subscriptions::fms.menu_group.subscription_management');
+    }
+
+    public function getTenantNavigationGroup(): string
+    {
+        return $this->tenantNavigationGroup ?? __('filament-modular-subscriptions::fms.tenant_subscription.subscription_navigation_label');
+    }
+
+    public function getSubscriptionNavigationLabel(): string
+    {
+        return $this->subscriptionNavigationLabel ?? __('filament-modular-subscriptions::fms.tenant_subscription.your_subscription');
+    }
+
+    public function isOnTenantPanel(): bool
+    {
+        return $this->onTenantPanel;
     }
 }

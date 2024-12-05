@@ -87,7 +87,7 @@
                             {{ __('filament-modular-subscriptions::fms.invoice.subtotal') }}
                         </td>
                         <td class="px-6 py-4 text-right">
-                            {{ number_format($invoice->amount, 2) }} {{ $invoice->subscription->plan->currency }}
+                            {{ number_format($invoice->subtotal, 2) }} {{ $invoice->subscription->plan->currency }}
                         </td>
                     </tr>
                     <tr class="font-semibold text-gray-900 bg-gray-50">
@@ -103,7 +103,7 @@
                             {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}
                         </td>
                         <td class="px-6 py-4 text-right text-lg">
-                            {{ number_format($invoice->amount + $invoice->tax, 2) }} {{ $invoice->subscription->plan->currency }}
+                            {{ number_format($invoice->amount, 2) }} {{ $invoice->subscription->plan->currency }}
                         </td>
                     </tr>
                 </tfoot>

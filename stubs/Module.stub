@@ -3,6 +3,7 @@
 namespace {{ namespace }};
 
 use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
+use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 use {{ subscription_model }};
 use {{ plan_model }};
 use Filament\Facades\Filament;
@@ -21,7 +22,7 @@ class {{ class }} extends BaseModule
     public function calculateUsage(Subscription $subscription): int
     {
         // Implement your usage calculation logic here
-        return filament()->getTenant()->moduleUsage(get_class($this));
+        return FmsPlugin::getTenant()->moduleUsage(get_class($this));
     }
 
     public function getPricing(Subscription $subscription): float

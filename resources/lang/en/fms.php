@@ -308,6 +308,12 @@ return [
                 'title' => 'Subscription Status Changed',
                 'body' => ':tenant\'s subscription status changed from :old_status to :new_status'
             ],
-        ]
+        ],
+        'messages' => [
+            'subscription_on_hold' => 'Your subscription is currently on hold',
+            'subscription_on_hold_message' => 'Your subscription has been placed on hold. Please contact support for assistance.',
+            'subscription_pending_payment' => 'Subscription pending payment',
+            'subscription_pending_payment_message' => 'Your subscription is awaiting payment confirmation. Please complete the payment to activate your subscription.',
+        ],
     ]
 ];

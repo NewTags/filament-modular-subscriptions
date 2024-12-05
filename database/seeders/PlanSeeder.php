@@ -20,11 +20,11 @@ class PlanSeeder extends Seeder
                 'is_active' => true,
                 'price' => 9.99,
                 'currency' => config('filament-modular-subscriptions.main_currency'),
-                'trial_period' => 14,
+                'trial_period' => 0,
                 'trial_interval' => Interval::DAY,
                 'invoice_period' => 1,
                 'invoice_interval' => Interval::MONTH,
-                'grace_period' => 3,
+                'grace_period' => 0,
                 'grace_interval' => Interval::DAY,
                 'modules' => [
                     ['limit' => 100, 'price' => 0.99],
@@ -43,7 +43,7 @@ class PlanSeeder extends Seeder
                 'trial_interval' => Interval::DAY,
                 'invoice_period' => 1,
                 'invoice_interval' => Interval::MONTH,
-                'grace_period' => 5,
+                'grace_period' => 0,
                 'grace_interval' => Interval::DAY,
                 'modules' => [
                     ['limit' => null, 'price' => 1.99],

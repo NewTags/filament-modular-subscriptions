@@ -34,10 +34,17 @@ class Invoice extends Model
 
     public function remainingAmount(): Attribute
     {
-        $totalPayments = $this->payments()->where('status', PaymentStatus::PAID)->sum('amount');
-
         return new Attribute(
-            get: fn () => number_format(($this->amount + $this->tax) - $totalPayments, 2),
+            get: function () {
+                $totalPayments = $this->payments()
+                    ->where('status', PaymentStatus::PAID)
+                    ->sum('amount');
+
+                $totalAmount = $this->amount;
+                $remaining = $totalAmount - $totalPayments;
+
+                return number_format($remaining, 2);
+            }
         );
     }
 
@@ -73,12 +80,6 @@ class Invoice extends Model
         return $this->status === PaymentStatus::PAID;
     }
 
-    public function total(): Attribute
-    {
-        return new Attribute(
-            get: fn () => $this->amount + $this->tax,
-        );
-    }
 
     public function getTitleAttribute()
     {
