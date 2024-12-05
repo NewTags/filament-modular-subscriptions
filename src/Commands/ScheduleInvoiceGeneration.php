@@ -144,21 +144,17 @@ class ScheduleInvoiceGeneration extends Command
     {
         $plan = $subscription->plan;
         $lastInvoice = $subscription->invoices()
-            ->where(function ($query) {
-                $query->where('status', InvoiceStatus::UNPAID)
-                    ->orWhere('status', InvoiceStatus::PARTIALLY_PAID);
-            })
             ->latest()
             ->first();
         $today = now();
 
-        if (! $lastInvoice) {
+        if (!$lastInvoice ) {
             return true;
         }
 
         if ($plan->fixed_invoice_day) {
             if ($today->day == $plan->fixed_invoice_day) {
-                return ! $subscription->invoices
+                return !$subscription->invoices
                     ->whereBetween('created_at', [
                         now()->startOfMonth(),
                         now()->endOfMonth()
@@ -168,10 +164,20 @@ class ScheduleInvoiceGeneration extends Command
             return false;
         }
 
-        $nextInvoiceDate = $subscription->ends_at ?? $subscription->starts_at;
-        return $today->startOfDay()->gte(
-            $nextInvoiceDate->copy()->addDays($plan->grace_period)
-        );
+        $nextInvoiceDate = $this->calculateNextInvoiceDate($subscription, $lastInvoice);
+        
+        if ($today->startOfDay()->gte($nextInvoiceDate)) {
+            if ($plan->is_pay_as_you_go) {
+                return $subscription->moduleUsages()
+                    ->where('usage', '>', 0)
+                    ->exists();
+            }
+            
+            return true;
+        }
+
+
+        return false;
     }
 
     protected function calculateNextInvoiceDate($subscription, $lastInvoice): Carbon

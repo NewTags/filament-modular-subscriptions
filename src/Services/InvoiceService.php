@@ -69,14 +69,7 @@ class InvoiceService
 
     protected function calculateDueDate(Subscription $subscription): Carbon
     {
-        $plan = $subscription->plan;
-        $startDate = $subscription->starts_at;
-
-        if ($plan->due_days > 0) {
-            return now()->addDays($plan->due_days);
-        }
-
-        return $startDate->copy()->addDays($plan->invoice_period);
+        return now()->addDays($subscription->plan->due_days);
     }
 
     protected function hasCurrentPeriodInvoice(Subscription $subscription): bool
@@ -86,7 +79,6 @@ class InvoiceService
 
         if ($plan->fixed_invoice_day > 0) {
             return $subscription->invoices()
-                ->whereYear('created_at', $today->year)
                 ->whereMonth('created_at', $today->month)
                 ->exists();
         }
