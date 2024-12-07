@@ -146,36 +146,63 @@ class ScheduleInvoiceGeneration extends Command
         $lastInvoice = $subscription->invoices()
             ->latest()
             ->first();
+
+        if ($subscription->invoices()->where(function ($query) {
+            $query->where('status', InvoiceStatus::PARTIALLY_PAID)
+                ->orWhere('status', InvoiceStatus::UNPAID);
+        })->exists()) {
+            return false;
+        }
+
         $today = now();
 
-        if (!$lastInvoice ) {
+        // For pay-as-you-go plans
+        if ($plan->is_pay_as_you_go) {
+
+            if (!$subscription->ends_at) {
+                return false;
+            }
+            // Generate invoice at end of subscription period
+            if ($today->gte($subscription->ends_at)) {
+                return true;
+            }
+
+            // Or on fixed invoice day if set
+            if ($plan->fixed_invoice_day && $today->day == $plan->fixed_invoice_day) {
+                return !$subscription->invoices()
+                    ->whereMonth('created_at', $today->month)
+                    ->exists();
+            }
+
+            return false;
+        }
+
+        // For new subscriptions with no invoices
+        if (!$lastInvoice) {
             return true;
         }
 
+        // For fixed invoice day plans
         if ($plan->fixed_invoice_day) {
             if ($today->day == $plan->fixed_invoice_day) {
-                return !$subscription->invoices
-                    ->whereBetween('created_at', [
-                        now()->startOfMonth(),
-                        now()->endOfMonth()
-                    ])
-                    ->count();
+                if ($subscription->ends_at && $today->gte($subscription->ends_at)) {
+                    return !$subscription->invoices
+                        ->whereBetween('created_at', [
+                            $subscription->ends_at->startOfMonth(),
+                            $subscription->ends_at->endOfMonth()
+                        ])
+                        ->count();
+                }
             }
             return false;
         }
 
+        // For regular interval plans
         $nextInvoiceDate = $this->calculateNextInvoiceDate($subscription, $lastInvoice);
-        
-        if ($today->startOfDay()->gte($nextInvoiceDate)) {
-            if ($plan->is_pay_as_you_go) {
-                return $subscription->moduleUsages()
-                    ->where('usage', '>', 0)
-                    ->exists();
-            }
-            
+
+        if ($today->gte($nextInvoiceDate)) {
             return true;
         }
-
 
         return false;
     }

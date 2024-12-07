@@ -214,8 +214,8 @@ class FmsPlugin implements Plugin
         return $this->createAlert(
             'danger',
             __('filament-modular-subscriptions::fms.statuses.expired'),
-            __('filament-modular-subscriptions::fms.messages.you_have_to_renew_your_subscription'),
-            __('filament-modular-subscriptions::fms.messages.pay_invoice')
+            __('filament-modular-subscriptions::fms.tenant_subscription.you_have_to_renew_your_subscription'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice')
         );
     }
 
@@ -223,8 +223,8 @@ class FmsPlugin implements Plugin
     {
         return $this->createAlert(
             'warning',
-            __('filament-modular-subscriptions::fms.messages.subscription_on_hold'),
-            __('filament-modular-subscriptions::fms.messages.subscription_on_hold_message'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.subscription_on_hold'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.subscription_on_hold_message'),
             __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
         );
     }
@@ -233,9 +233,9 @@ class FmsPlugin implements Plugin
     {
         return $this->createAlert(
             'warning',
-            __('filament-modular-subscriptions::fms.messages.subscription_pending_payment'),
-            __('filament-modular-subscriptions::fms.messages.subscription_pending_payment_message'),
-            __('filament-modular-subscriptions::fms.messages.pay_invoice')
+            __('filament-modular-subscriptions::fms.tenant_subscription.subscription_pending_payment'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.subscription_pending_payment_message'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice')
         );
     }
 
@@ -243,7 +243,7 @@ class FmsPlugin implements Plugin
     {
         return $this->createAlert(
             'warning',
-            __('filament-modular-subscriptions::fms.messages.subscription_ending_soon'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.subscription_ending_soon'),
             __('filament-modular-subscriptions::fms.tenant_subscription.days_left') . ': ' . $subscription->daysLeft(),
             __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
         );
@@ -253,7 +253,7 @@ class FmsPlugin implements Plugin
     {
         return $this->createAlert(
             'danger',
-            __('filament-modular-subscriptions::fms.messages.you_have_reached_the_limit_of_this_module'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.you_have_reached_the_limit_of_this_module'),
             sprintf(
                 '%s: %d/%d (%d%%)',
                 $module->getName(),
@@ -261,7 +261,7 @@ class FmsPlugin implements Plugin
                 $limit,
                 ($moduleUsage->usage / $limit) * 100
             ),
-            __('filament-modular-subscriptions::fms.messages.upgrade_now')
+            __('filament-modular-subscriptions::fms.tenant_subscription.upgrade_now')
         );
     }
 

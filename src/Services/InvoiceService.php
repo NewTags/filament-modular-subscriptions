@@ -159,9 +159,9 @@ class InvoiceService
         ]);
     }
 
-    private function updateInvoiceTotals(Invoice $invoice): void
+    private function updateInvoiceTotals(Invoice $invoice): Invoice
     {
-        DB::transaction(function () use ($invoice) {
+        return DB::transaction(function () use ($invoice) {
             $items = $invoice->items;
             $subtotal = $items->sum('total');
             $tax = round($subtotal * ($this->taxPercentage / 100), 2);
@@ -171,7 +171,10 @@ class InvoiceService
                 'tax' => $tax,
                 'amount' => $subtotal + $tax,
             ]);
+
+            return $invoice;
         });
+
     }
 
     private function isPayAsYouGo(Subscription $subscription): bool
@@ -179,20 +182,22 @@ class InvoiceService
         return $subscription->plan->is_pay_as_you_go;
     }
 
-    public function generatePayAsYouGoInvoice(Subscription $subscription): void
+    public function generatePayAsYouGoInvoice(Subscription $subscription): ?Invoice
     {
         $moduleUsages = $subscription->moduleUsages()
             ->get();
 
         if ($moduleUsages->isEmpty()) {
-            return;
+            return null;
         }
 
-        DB::transaction(function () use ($subscription, $moduleUsages) {
+        return DB::transaction(function () use ($subscription, $moduleUsages) {
             $invoice = $this->createInvoice($subscription, now()->addDays(7));
 
             $this->processModuleUsages($invoice, $moduleUsages, $subscription);
             $this->updateInvoiceTotals($invoice);
+
+            return $invoice;
         });
     }
 

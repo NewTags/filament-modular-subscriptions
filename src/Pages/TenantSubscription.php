@@ -91,12 +91,26 @@ class TenantSubscription extends Page implements HasTable
                         if ($oldSubscription->plan->is_pay_as_you_go) {
                             // Generate final invoice for pay-as-you-go plan
                             $finalInvoice = $invoiceService->generatePayAsYouGoInvoice($oldSubscription);
+                            
                             $oldSubscription->update(['status' => SubscriptionStatus::ON_HOLD]);
 
-                            Notification::make()
-                                ->title(__('filament-modular-subscriptions::fms.tenant_subscription.final_invoice_generated'))
-                                ->info()
-                                ->send();
+                            // Send notifications for final invoice
+                            if ($finalInvoice) {
+                                $tenant->notifySuperAdmins('invoice_generated', [
+                                    'invoice_id' => $finalInvoice->id,
+                                    'amount' => $finalInvoice->amount,
+                                    'currency' => $finalInvoice->currency,
+                                ]);
+
+                                Notification::make()
+                                    ->title(__('filament-modular-subscriptions::fms.tenant_subscription.final_invoice_generated'))
+                                    ->info()
+                                    ->send();
+                            } else {
+                                $tenant->notifySuperAdmins('invoice_generation_failed', [
+                                    'error' => 'Failed to generate final invoice for pay-as-you-go plan',
+                                ]);
+                            }
                         }
                     }
 
@@ -105,18 +119,23 @@ class TenantSubscription extends Page implements HasTable
                         // Create or update subscription with active status
                         if ($oldSubscription) {
                             $tenant->switchPlan($newPlan->id);
+                            
+                            // Send notifications for plan switch
                             $tenant->notifySubscriptionChange('switched', [
                                 'plan' => $newPlan->trans_name,
                                 'type' => 'pay_as_you_go'
                             ]);
                         } else {
                             $this->createSubscription($tenant, $newPlan, SubscriptionStatus::ACTIVE);
+                            
+                            // Send notifications for new subscription
                             $tenant->notifySubscriptionChange('started', [
                                 'plan' => $newPlan->trans_name,
                                 'type' => 'pay_as_you_go'
                             ]);
                         }
 
+                        // Send success notification
                         Notification::make()
                             ->title(__('filament-modular-subscriptions::fms.tenant_subscription.pay_as_you_go_activated'))
                             ->success()
@@ -128,14 +147,22 @@ class TenantSubscription extends Page implements HasTable
                         // Update existing subscription if any
                         if ($oldSubscription) {
                             $tenant->switchPlan($newPlan->id, SubscriptionStatus::ON_HOLD);
+                            
+                            // Send notifications for subscription switch
                             $tenant->notifySubscriptionChange('switched', [
                                 'plan' => $newPlan->trans_name,
                                 'old_status' => $oldSubscription->status->getLabel(),
                                 'new_status' => SubscriptionStatus::ON_HOLD->getLabel(),
                                 'date' => now()->format('Y-m-d H:i:s')
                             ]);
+
+                            $tenant->notifySuperAdmins('subscription_switched', [
+                                'plan' => $newPlan->trans_name,
+                                'end_date' => $oldSubscription->ends_at->format('Y-m-d H:i:s'),
+                            ]);
                         }
 
+                        // Send payment reminder notification
                         Notification::make()
                             ->title(__('filament-modular-subscriptions::fms.tenant_subscription.please_pay_invoice'))
                             ->warning()
