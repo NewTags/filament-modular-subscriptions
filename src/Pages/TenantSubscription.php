@@ -15,6 +15,7 @@ use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Closure;
 use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 
 class TenantSubscription extends Page implements HasTable
@@ -68,38 +69,37 @@ class TenantSubscription extends Page implements HasTable
     {
         return Action::make('switchPlanAction')
             ->requiresConfirmation()
-            ->form([
-                \Filament\Forms\Components\TextInput::make('confirmation')
-                    ->label(function ($arguments) {
-                        $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
-                        return __('filament-modular-subscriptions::fms.tenant_subscription.type_to_confirm', [
-                            'phrase' => __('filament-modular-subscriptions::fms.tenant_subscription.switch_confirmation_phrase', [
-                                'plan' => $plan->trans_name
-                            ])
-                        ]);
-                    })
-                    ->required()
-                    ->rules([
-                        function (string $attribute, $value, \Closure $fail, $arguments) {
-                            // Get the plan_id from the form state
-                            $planId = $arguments['plan_id'];
-                            $plan = config('filament-modular-subscriptions.models.plan')::find($planId);
-                            
-                            if (!$plan) {
-                                $fail(__('filament-modular-subscriptions::fms.tenant_subscription.invalid_plan'));
-                                return;
-                            }
-
-                            $expectedPhrase = __('filament-modular-subscriptions::fms.tenant_subscription.switch_confirmation_phrase', [
-                                'plan' => $plan->trans_name
+            ->form(function ($arguments) {
+                $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
+                return [
+                    \Filament\Forms\Components\TextInput::make('confirmation')
+                        ->label(function () use ($plan) {
+                            return __('filament-modular-subscriptions::fms.tenant_subscription.type_to_confirm', [
+                                'phrase' => __('filament-modular-subscriptions::fms.tenant_subscription.switch_confirmation_phrase', [
+                                    'plan' => $plan->trans_name
+                                ])
                             ]);
-                            
-                            if ($value !== $expectedPhrase) {
-                                $fail(__('filament-modular-subscriptions::fms.tenant_subscription.confirmation_phrase_mismatch'));
+                        })
+                        ->required()
+                        ->rules([
+                            fn(): Closure => function (string $attribute, $value, Closure $fail) use ($plan) {
+
+                                if (!$plan) {
+                                    $fail(__('filament-modular-subscriptions::fms.tenant_subscription.invalid_plan'));
+                                    return;
+                                }
+
+                                $expectedPhrase = __('filament-modular-subscriptions::fms.tenant_subscription.switch_confirmation_phrase', [
+                                    'plan' => $plan->trans_name
+                                ]);
+
+                                if ($value !== $expectedPhrase) {
+                                    $fail(__('filament-modular-subscriptions::fms.tenant_subscription.confirmation_phrase_mismatch'));
+                                }
                             }
-                        }
-                    ])
-            ])
+                        ])
+                ];
+            })
             ->label(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
                 return $plan->is_pay_as_you_go
@@ -246,7 +246,7 @@ class TenantSubscription extends Page implements HasTable
                     ->label(function ($get) {
                         $plan = config('filament-modular-subscriptions.models.plan')::find($get('plan_id'));
                         if (!$plan) return '';
-                        
+
                         return __('filament-modular-subscriptions::fms.tenant_subscription.type_to_confirm', [
                             'phrase' => __('filament-modular-subscriptions::fms.tenant_subscription.new_subscription_confirmation_phrase', [
                                 'plan' => $plan->trans_name
@@ -263,7 +263,7 @@ class TenantSubscription extends Page implements HasTable
                             $expectedPhrase = __('filament-modular-subscriptions::fms.tenant_subscription.new_subscription_confirmation_phrase', [
                                 'plan' => $plan->trans_name
                             ]);
-                            
+
                             if ($value !== $expectedPhrase) {
                                 $fail(__('filament-modular-subscriptions::fms.tenant_subscription.confirmation_phrase_mismatch'));
                             }
@@ -273,13 +273,13 @@ class TenantSubscription extends Page implements HasTable
             ->action(function (array $data) {
                 $plan = config('filament-modular-subscriptions.models.plan')::findOrFail($data['plan_id']);
                 $tenant = FmsPlugin::getTenant();
-                
+
                 DB::transaction(function () use ($tenant, $plan) {
                     $invoiceService = app(InvoiceService::class);
-                    
+
                     if ($plan->is_pay_as_you_go) {
                         $this->createSubscription($tenant, $plan, SubscriptionStatus::ACTIVE);
-                        
+
                         $tenant->notifySubscriptionChange('started', [
                             'plan' => $plan->trans_name,
                             'type' => 'pay_as_you_go'
@@ -291,9 +291,9 @@ class TenantSubscription extends Page implements HasTable
                             ->send();
                     } else {
                         $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $plan);
-                        
+
                         $this->createSubscription($tenant, $plan, SubscriptionStatus::ON_HOLD);
-                        
+
                         $tenant->notifySubscriptionChange('started', [
                             'plan' => $plan->trans_name,
                             'status' => SubscriptionStatus::ON_HOLD->getLabel(),
