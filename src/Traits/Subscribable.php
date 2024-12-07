@@ -701,7 +701,7 @@ trait Subscribable
     public function notifyAdminsUsing(string $action, array $additionalData = []): void
     {
         $users = $this->getTenantAdminsUsing()->get();
-        
+
         // Merge default subscription data with additional data
         $data = array_merge(
             $this->getSubscriptionNotificationData($action),
@@ -770,10 +770,10 @@ trait Subscribable
     {
         return match ($action) {
             'expired', 'suspended', 'cancelled', 'payment_rejected' => 'danger',
-            'payment_received', 'subscription_renewed', 
+            'payment_received', 'subscription_renewed',
             'subscription_activated', 'invoice_generated' => 'success',
             'subscription_switched' => 'info',
-            'payment_overdue', 'invoice_overdue', 
+            'payment_overdue', 'invoice_overdue',
             'subscription_near_expiry' => 'warning',
             'usage_limit_exceeded' => 'danger',
             default => 'primary',
@@ -787,14 +787,14 @@ trait Subscribable
     {
         $subscription = $this->activeSubscription();
         $plan = $subscription?->plan;
-        
+
         return [
             'tenant' => $this->name,
             'plan' => $plan?->name ?? 'N/A',
             'start_date' => $subscription?->starts_at?->format('Y-m-d') ?? now()->format('Y-m-d'),
             'end_date' => $subscription?->ends_at?->format('Y-m-d') ?? 'N/A',
             'currency' => $plan?->currency ?? 'USD',
-            'amount' => $subscription?->totalPricing() ?? 0,
+            'amount' => $this->totalPricing() ?? 0,
             'date' => now()->format('Y-m-d H:i:s'),
         ];
     }
