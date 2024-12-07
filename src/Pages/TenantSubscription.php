@@ -91,7 +91,7 @@ class TenantSubscription extends Page implements HasTable
                         if ($oldSubscription->plan->is_pay_as_you_go) {
                             // Generate final invoice for pay-as-you-go plan
                             $finalInvoice = $invoiceService->generatePayAsYouGoInvoice($oldSubscription);
-                            
+
                             $oldSubscription->update(['status' => SubscriptionStatus::ON_HOLD]);
 
                             // Send notifications for final invoice
@@ -119,7 +119,7 @@ class TenantSubscription extends Page implements HasTable
                         // Create or update subscription with active status
                         if ($oldSubscription) {
                             $tenant->switchPlan($newPlan->id);
-                            
+
                             // Send notifications for plan switch
                             $tenant->notifySubscriptionChange('switched', [
                                 'plan' => $newPlan->trans_name,
@@ -127,7 +127,7 @@ class TenantSubscription extends Page implements HasTable
                             ]);
                         } else {
                             $this->createSubscription($tenant, $newPlan, SubscriptionStatus::ACTIVE);
-                            
+
                             // Send notifications for new subscription
                             $tenant->notifySubscriptionChange('started', [
                                 'plan' => $newPlan->trans_name,
@@ -143,11 +143,16 @@ class TenantSubscription extends Page implements HasTable
                     } else {
                         // Generate initial invoice first (this will create the subscription if needed)
                         $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $newPlan);
+                        $tenant->notifySuperAdmins('invoice_generated', [
+                            'invoice_id' => $initialInvoice->id,
+                            'amount' => $initialInvoice->amount,
+                            'currency' => $initialInvoice->currency,
+                        ]);
 
                         // Update existing subscription if any
                         if ($oldSubscription) {
                             $tenant->switchPlan($newPlan->id, SubscriptionStatus::ON_HOLD);
-                            
+
                             // Send notifications for subscription switch
                             $tenant->notifySubscriptionChange('switched', [
                                 'plan' => $newPlan->trans_name,
