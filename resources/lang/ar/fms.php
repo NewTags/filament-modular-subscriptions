@@ -222,6 +222,8 @@ return [
         'your_subscription' => 'تفاصيل اشتراكك',
         'current_subscription' => 'الاشتراك الحالي',
         'subscription_progress' => 'تقدم الاشتراك',
+        'view_available_plans' => 'عرض الخطط المتاحة',
+        'choose_plan' => 'اختر الخطة',
         'plan' => 'الخطة',
         'statuses' => 'الحالة',
         'started_on' => 'تاريخ البدء',

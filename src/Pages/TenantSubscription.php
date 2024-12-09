@@ -232,46 +232,10 @@ class TenantSubscription extends Page implements HasTable
     public function newSubscriptionAction(): Action
     {
         return Action::make('newSubscription')
+            ->label(__('filament-modular-subscriptions::fms.tenant_subscription.choose_plan'))
             ->requiresConfirmation()
-            ->form([
-                \Filament\Forms\Components\Select::make('plan_id')
-                    ->label(__('filament-modular-subscriptions::fms.tenant_subscription.select_plan'))
-                    ->options(function () {
-                        return config('filament-modular-subscriptions.models.plan')::active()
-                            ->get()
-                            ->pluck('trans_name', 'id');
-                    })
-                    ->required(),
-                \Filament\Forms\Components\TextInput::make('confirmation')
-                    ->label(function ($get) {
-                        $plan = config('filament-modular-subscriptions.models.plan')::find($get('plan_id'));
-                        if (!$plan) return '';
-
-                        return __('filament-modular-subscriptions::fms.tenant_subscription.type_to_confirm', [
-                            'phrase' => __('filament-modular-subscriptions::fms.tenant_subscription.new_subscription_confirmation_phrase', [
-                                'plan' => $plan->trans_name
-                            ])
-                        ]);
-                    })
-                    ->required()
-                    ->rules([
-                        'required',
-                        function ($get, $value, $fail) {
-                            $plan = config('filament-modular-subscriptions.models.plan')::find($get('plan_id'));
-                            if (!$plan) return;
-
-                            $expectedPhrase = __('filament-modular-subscriptions::fms.tenant_subscription.new_subscription_confirmation_phrase', [
-                                'plan' => $plan->trans_name
-                            ]);
-
-                            if ($value !== $expectedPhrase) {
-                                $fail(__('filament-modular-subscriptions::fms.tenant_subscription.confirmation_phrase_mismatch'));
-                            }
-                        }
-                    ])
-            ])
-            ->action(function (array $data) {
-                $plan = config('filament-modular-subscriptions.models.plan')::findOrFail($data['plan_id']);
+            ->action(function ($arguments) {
+                $plan = config('filament-modular-subscriptions.models.plan')::findOrFail($arguments['plan_id']);
                 $tenant = FmsPlugin::getTenant();
 
                 DB::transaction(function () use ($tenant, $plan) {

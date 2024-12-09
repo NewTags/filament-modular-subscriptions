@@ -316,10 +316,13 @@
 
                                         <!-- Action Button -->
                                         <div class="px-4 sm:px-6 pb-6 mt-auto">
-                                            @if (!$activeSubscription || $activeSubscription->plan_id !== $plan->id)
+                                            @if ($activeSubscription->plan_id !== $plan->id)
                                                 {{ ($this->switchPlanAction)(['plan_id' => $plan->id]) }}
+                                            @elseif(!$activeSubscription)
+                                                {{ ($this->newSubscriptionAction)(['plan_id' => $plan->id]) }}
                                             @endif
                                         </div>
+
                                     </div>
                                 </div>
                             @endforeach
