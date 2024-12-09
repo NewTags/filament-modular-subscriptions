@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="md:mx-auto space-y-8 px-4 sm:px-6 lg:px-8">
+    <div class="md:mx-auto space-y-8 px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div x-data="{ tab: 'subscription' }">
             <div class="overflow-x-auto">
                 <x-filament::tabs label="Subscription tabs" class="flex-nowrap">
@@ -47,7 +47,7 @@
                                 <div
                                     class="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
                                     <div class="flex flex-col space-y-4">
-                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                             <div class="flex items-center gap-2">
                                                 <x-filament::icon icon="heroicon-o-clock"
                                                     class="w-5 h-5 text-primary-500 dark:text-primary-400" />
@@ -140,7 +140,7 @@
                                 </div>
                             </div>
 
-                            @if ($activeSubscription->status === 'on_hold')
+                            @if ($activeSubscription->status->value === 'on_hold')
                                 <div
                                     class="mt-6 p-4 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-700/30 rounded-xl">
                                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
