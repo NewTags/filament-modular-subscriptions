@@ -250,7 +250,12 @@ class TenantSubscription extends Page implements HasTable
                         ]);
 
                         Notification::make()
-                            ->title(__('filament-modular-subscriptions::fms.tenant_subscription.pay_as_you_go_activated'))
+                            ->title(__('filament-modular-subscriptions::fms.notifications.subscription.starter.title_payg'))
+                            ->body(__('filament-modular-subscriptions::fms.notifications.subscription.starter.payg_body', [
+                                'tenant' => $tenant->name,
+                                'plan' => $plan->trans_name,
+                                'end_date' => $this->calculateEndDate($plan)->format('Y-m-d H:i:s')
+                            ]))
                             ->success()
                             ->send();
                     } else {
@@ -265,7 +270,12 @@ class TenantSubscription extends Page implements HasTable
                         ]);
 
                         Notification::make()
-                            ->title(__('filament-modular-subscriptions::fms.tenant_subscription.please_pay_invoice'))
+                            ->title(__('filament-modular-subscriptions::fms.notifications.subscription.starter.title'))
+                            ->body(__('filament-modular-subscriptions::fms.notifications.subscription.starter.body', [
+                                'tenant' => $tenant->name,
+                                'plan' => $plan->trans_name,
+                                'end_date' => $this->calculateEndDate($plan)->format('Y-m-d H:i:s')
+                            ]))
                             ->warning()
                             ->send();
                     }

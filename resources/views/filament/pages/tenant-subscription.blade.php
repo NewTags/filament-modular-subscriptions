@@ -73,7 +73,7 @@
                                         <div class="relative">
                                             <div
                                                 class="w-full h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                                                <div class="h-full bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-400 dark:to-primary-500 rounded-full transition-all duration-500 shadow-sm"
+                                                <div class="h-full bg-gradient-to-r from-primary-600 to-primary-300 dark:from-primary-300 dark:to-primary-600 rounded-full transition-all duration-500 shadow-sm"
                                                     style="width: {{ $progress }}%"
                                                     x-tooltip.raw="{{ $daysLeft }} days remaining">
                                                 </div>
@@ -314,15 +314,18 @@
                                             </div>
                                         </div>
 
-                                        <!-- Action Button -->
-                                        <div class="px-4 sm:px-6 pb-6 mt-auto">
-                                            @if ($activeSubscription->plan_id !== $plan->id)
-                                                {{ ($this->switchPlanAction)(['plan_id' => $plan->id]) }}
-                                            @elseif(!$activeSubscription)
+                                        @if ($activeSubscription)
+                                            <!-- Action Button -->
+                                            <div class="px-4 sm:px-6 pb-6 mt-auto">
+                                                @if (!$activeSubscription || $activeSubscription->plan_id !== $plan->id)
+                                                    {{ ($this->switchPlanAction)(['plan_id' => $plan->id]) }}
+                                                @endif
+                                            </div>
+                                        @else
+                                            <div class="px-4 sm:px-6 pb-6 mt-auto mx-auto w-full">
                                                 {{ ($this->newSubscriptionAction)(['plan_id' => $plan->id]) }}
-                                            @endif
-                                        </div>
-
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach

@@ -224,6 +224,7 @@ return [
         'subscription_progress' => 'تقدم الاشتراك',
         'view_available_plans' => 'عرض الخطط المتاحة',
         'choose_plan' => 'اختر الخطة',
+        'trial_period' => 'فترة التجربة',
         'plan' => 'الخطة',
         'statuses' => 'الحالة',
         'started_on' => 'تاريخ البدء',
@@ -545,6 +546,12 @@ return [
     ],
     'notifications' => [
         'subscription' => [
+            'starter' => [
+                'title' => 'من فضلك قم بالدفع لتفعيل اشتراكك',
+                'title_payg' => 'تم تفعيل اشتراكك',
+                'body' => 'تم بدء اشتراكك في :tenant. الخطة: :plan، صالح حتى: :end_date يرجى الدفع لتفعيل الاشتراك',
+                'payg_body' => 'تم تفعيل اشتراكك في :tenant. الخطة: :plan، صالح حتى: :end_date',
+            ],
             'subscription_renewed' => [
                 'title' => 'تم تجديد الاشتراك',
                 'body' => 'تم تجديد اشتراكك في :tenant. الخطة: :plan، صالح حتى: :end_date',
@@ -558,8 +565,8 @@ return [
                 'body' => 'تم تفعيل اشتراكك الجديد في :tenant. الخطة: :plan، صالح حتى: :end_date',
             ],
             'payment_received' => [
-                'title' => 'تم استلام الدفعة',
-                'body' => 'تم استلام دفعة بقيمة :amount :currency للفاتورة رقم #:invoice_id',
+                'title' => 'تم اعتماد واستلام الدفعة',
+                'body' => 'تم اعتماد واستلام دفعة بقيمة :amount :currency للفاتورة رقم #:invoice_id',
             ],
             'payment_partially_approved' => [
                 'title' => 'تم اعتماد دفعة جزئية',
