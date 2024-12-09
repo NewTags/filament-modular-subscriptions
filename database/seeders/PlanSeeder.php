@@ -34,7 +34,7 @@ class PlanSeeder extends Seeder
             ],
             [
                 'name' => ['en' => 'Basic Plan', 'ar' => 'الخطة الأساسية'],
-                'slug' => 'basic-plan',
+                'slug' => 'basic-plan', 
                 'description' => ['en' => 'Basic features for small businesses', 'ar' => 'ميزات أساسية للشركات الصغيرة'],
                 'is_active' => true,
                 'price' => 9.99,
