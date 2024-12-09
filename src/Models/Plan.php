@@ -32,6 +32,7 @@ class Plan extends Model
         'is_pay_as_you_go',
         'due_days',
         'fixed_invoice_day',
+        'is_trial_plan',
     ];
 
     protected $casts = [
@@ -49,6 +50,7 @@ class Plan extends Model
         'is_pay_as_you_go' => 'boolean',
         'due_days' => 'integer',
         'fixed_invoice_day' => 'integer',
+        'is_trial_plan' => 'boolean',
     ];
 
     public function getTable()
@@ -138,5 +140,10 @@ class Plan extends Model
     public function scopePayAsYouGo(Builder $query): Builder
     {
         return $query->where('is_pay_as_you_go', true);
+    }
+
+    public function isTrialPlan(): bool
+    {
+        return $this->is_trial_plan;
     }
 }

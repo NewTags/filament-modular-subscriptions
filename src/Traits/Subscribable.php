@@ -455,29 +455,31 @@ trait Subscribable
      */
     public function subscribe(Plan $plan, ?Carbon $startDate = null, ?Carbon $endDate = null, ?int $trialDays = null): Subscription
     {
-        $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
         $startDate = $startDate ?? now();
 
-        if ($endDate === null) {
-            $days = $plan->period;
-            $endDate = $startDate->copy()->addDays($days);
+        if ($plan->isTrialPlan() && !$this->canUseTrial()) {
+            throw new \Exception(__('filament-modular-subscriptions::fms.errors.trial_already_used'));
         }
 
-        $subscription = new $subscriptionModel([
+        if ($endDate === null) {
+            $endDate = $startDate->copy()->addDays($plan->period);
+        }
+        $status = $plan->is_pay_as_you_go
+            ? SubscriptionStatus::ACTIVE
+            : SubscriptionStatus::ON_HOLD;
+        $subscription = $this->subscription()->create([
             'plan_id' => $plan->id,
-            'subscribable_id' => $this->id,
-            'subscribable_type' => get_class($this),
             'starts_at' => $startDate,
             'ends_at' => $endDate,
-            'status' => SubscriptionStatus::ACTIVE,
+            'status' => $status,
+            'has_used_trial' => $plan->isTrialPlan() || $this->subscription?->has_used_trial,
         ]);
 
         if ($trialDays || $plan->period_trial > 0) {
             $trialDays = $trialDays ?? $plan->period_trial;
             $subscription->trial_ends_at = $startDate->copy()->addDays($trialDays);
+            $subscription->save();
         }
-
-        $subscription->save();
 
         $this->invalidateSubscriptionCache();
 
@@ -797,5 +799,10 @@ trait Subscribable
             'amount' => $this->totalPricing() ?? 0,
             'date' => now()->format('Y-m-d H:i:s'),
         ];
+    }
+
+    public function canUseTrial(): bool
+    {
+        return !$this->subscription?->has_used_trial;
     }
 }

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamp('trial_ends_at')->nullable();
             $table->string('status')->default(SubscriptionStatus::ACTIVE->value);
             $table->json('metadata')->nullable();
+            $table->boolean('has_used_trial')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

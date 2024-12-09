@@ -35,8 +35,13 @@ class InvoiceService
         return $this->generate($subscription);
     }
 
-    public function generate(Subscription $subscription): Invoice
+    public function generate(Subscription $subscription): ?Invoice
     {
+        // Don't generate invoices for trial plans
+        if ($subscription->plan->isTrialPlan()) {
+            return null;
+        }
+
         $dueDate = $this->calculateDueDate($subscription);
 
         return DB::transaction(function () use ($subscription, $dueDate) {
@@ -174,7 +179,6 @@ class InvoiceService
 
             return $invoice;
         });
-
     }
 
     private function isPayAsYouGo(Subscription $subscription): bool
