@@ -44,6 +44,7 @@
 
                             <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
                                 <!-- Subscription Progress -->
+                                @if(!$activeSubscription->onTrial())
                                 <div
                                     class="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
                                     <div class="flex flex-col space-y-4">
@@ -67,7 +68,7 @@
                                                 $activeSubscription->starts_at,
                                             );
                                             $daysLeft = $tenant->daysLeft();
-                                            $progress = (($totalDays - $daysLeft) / $totalDays) * 100;
+                                            $progress = $totalDays > 0 ? (($totalDays - $daysLeft) / $totalDays) * 100 : 0;
                                         @endphp
 
                                         <div class="relative">
@@ -87,6 +88,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                @endif
 
                                 <!-- Trial Status -->
                                 @if ($activeSubscription->onTrial())

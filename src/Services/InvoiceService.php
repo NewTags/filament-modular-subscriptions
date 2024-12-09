@@ -37,8 +37,8 @@ class InvoiceService
 
     public function generate(Subscription $subscription): ?Invoice
     {
-        // Don't generate invoices for trial plans
-        if ($subscription->plan->isTrialPlan()) {
+        // Don't generate invoices for subscriptions on trial
+        if ($subscription->onTrial()) {
             return null;
         }
 
@@ -247,15 +247,17 @@ class InvoiceService
     protected function createInitialSubscription($tenant, $plan): Subscription
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
-
+        $startDate = now();
+        
         return $subscriptionModel::create([
             'plan_id' => $plan->id,
             'subscribable_id' => $tenant->id,
             'subscribable_type' => get_class($tenant),
-            'starts_at' => now(),
+            'starts_at' => $startDate,
             'ends_at' => $this->calculateSubscriptionEndDate($plan),
-            'trial_ends_at' => $plan->trial_period ? now()->addDays($plan->trial_period) : null,
-            'status' => SubscriptionStatus::ON_HOLD,
+            'trial_ends_at' => $this->calculateTrialEndDate($plan, $startDate),
+            'status' => $plan->trial_period ? SubscriptionStatus::ACTIVE : SubscriptionStatus::ON_HOLD,
+            'has_used_trial' => false,
         ]);
     }
 
@@ -267,6 +269,21 @@ class InvoiceService
             'month' => now()->addMonths($plan->invoice_period),
             'year' => now()->addYears($plan->invoice_period),
             default => now()->addMonth(),
+        };
+    }
+
+    protected function calculateTrialEndDate($plan, Carbon $startDate): ?Carbon 
+    {
+        if (!$plan->trial_period || !$plan->trial_interval) {
+            return null;
+        }
+
+        return match ($plan->trial_interval->value) {
+            'day' => $startDate->copy()->addDays($plan->trial_period),
+            'week' => $startDate->copy()->addWeeks($plan->trial_period),
+            'month' => $startDate->copy()->addMonths($plan->trial_period),
+            'year' => $startDate->copy()->addYears($plan->trial_period),
+            default => null,
         };
     }
 }

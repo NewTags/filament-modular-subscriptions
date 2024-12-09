@@ -14,8 +14,26 @@ class PlanSeeder extends Seeder
 
         $plans = [
             [
+                'name' => ['en' => 'Trial Plan', 'ar' => 'خطة تجريبية'],
+                'slug' => 'trial-plan',
+                'description' => ['en' => 'Free trial plan with basic features', 'ar' => 'خطة تجريبية مجانية مع ميزات أساسية'],
+                'is_active' => true,
+                'price' => 0,
+                'currency' => config('filament-modular-subscriptions.main_currency'),
+                'trial_period' => 1,
+                'trial_interval' => Interval::MONTH,
+                'invoice_period' => 0,
+                'invoice_interval' => Interval::MONTH,
+                'grace_period' => 0,
+                'grace_interval' => Interval::DAY,
+                'modules' => [
+                    ['limit' => 10, 'price' => 0],
+                    ['limit' => 5, 'price' => 0], 
+                ],
+            ],
+            [
                 'name' => ['en' => 'Basic Plan', 'ar' => 'الخطة الأساسية'],
-                'slug' => 'basic-plan',
+                'slug' => 'basic-plan', 
                 'description' => ['en' => 'Basic features for small businesses', 'ar' => 'ميزات أساسية للشركات الصغيرة'],
                 'is_active' => true,
                 'price' => 9.99,
@@ -27,8 +45,8 @@ class PlanSeeder extends Seeder
                 'grace_period' => 0,
                 'grace_interval' => Interval::DAY,
                 'modules' => [
-                    ['limit' => 100, 'price' => 0.99],
-                    ['limit' => 50, 'price' => 1.99],
+                    ['limit' => 100, 'price' => 0],
+                    ['limit' => 50, 'price' => 0],
                 ],
             ],
             [
@@ -39,7 +57,7 @@ class PlanSeeder extends Seeder
                 'is_active' => true,
                 'price' => 0,
                 'currency' => config('filament-modular-subscriptions.main_currency'),
-                'trial_period' => 14,
+                'trial_period' => 0,
                 'trial_interval' => Interval::DAY,
                 'invoice_period' => 1,
                 'invoice_interval' => Interval::MONTH,

@@ -78,6 +78,7 @@ class PlanResource extends Resource
                                 Forms\Components\Toggle::make('is_pay_as_you_go')
                                     ->default(false)
                                     ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
+                                    ->live()
                                     ->helperText(__('filament-modular-subscriptions::fms.resources.plan.hints.is_pay_as_you_go'))
                                     ->label(__('filament-modular-subscriptions::fms.pay_as_you_go')),
                                 Forms\Components\Toggle::make('is_trial_plan')
