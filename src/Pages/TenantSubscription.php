@@ -268,7 +268,7 @@ class TenantSubscription extends Page implements HasTable
                                 ->send();
                         }
 
-                        $tenant->notifySubscriptionChange('started', [
+                        $tenant->notifySubscriptionChange('trial', [
                             'plan' => $plan->trans_name,
                             'status' => $subscription->status->getLabel(),
                             'trial' => $subscription->onTrial(),
@@ -376,7 +376,7 @@ class TenantSubscription extends Page implements HasTable
             ->body(__('filament-modular-subscriptions::fms.notifications.subscription.trial.body', [
                 'tenant' => $subscription->subscribable->name,
                 'plan' => $subscription->plan->trans_name,
-                'trial_ends_at' => $subscription->trial_ends_at->format('Y-m-d H:i:s')
+                'end_date' => $subscription->trial_ends_at->format('Y-m-d H:i:s')
             ]))
             ->success()
             ->send();
