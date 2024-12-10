@@ -169,7 +169,7 @@ class TenantSubscription extends Page implements HasTable
                             $tenant->switchPlan($newPlan->id);
 
                             // Send notifications for plan switch
-                            $tenant->notifySubscriptionChange('switched', [
+                            $tenant->notifySubscriptionChange('subscription_switched', [
                                 'plan' => $newPlan->trans_name,
                                 'type' => 'pay_as_you_go'
                             ]);
@@ -202,7 +202,7 @@ class TenantSubscription extends Page implements HasTable
                             $tenant->switchPlan($newPlan->id, SubscriptionStatus::ON_HOLD);
 
                             // Send notifications for subscription switch
-                            $tenant->notifySubscriptionChange('switched', [
+                            $tenant->notifySubscriptionChange('subscription_switched', [
                                 'plan' => $newPlan->trans_name,
                                 'old_status' => $oldSubscription->status->getLabel(),
                                 'new_status' => SubscriptionStatus::ON_HOLD->getLabel(),
