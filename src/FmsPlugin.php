@@ -18,63 +18,22 @@ use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFie
 class FmsPlugin implements Plugin
 {
     private const ALERTS_CACHE_KEY = 'subscription_alerts_';
+
     private const ALERTS_CACHE_TTL = 30; // minutes
-    private const SUBSCRIPTION_ENDING_DAYS_THRESHOLD = 7;
-    private const TRIAL_ENDING_DAYS_THRESHOLD = 5;
 
     public bool $hasSubscriptionStats = true;
+
     public bool $onTenantPanel = false;
+
     public static ?Closure $getTenantUsing = null;
+
     public ?Model $tenant = null;
+
     public array $cachedAlerts = [];
+
     public ?string $navigationGroup = null;
     public ?string $tenantNavigationGroup = null;
     public ?string $subscriptionNavigationLabel = null;
-
-    private array $alertTypes = [
-        'no_subscription' => [
-            'type' => 'warning',
-            'title_key' => 'fms.tenant_subscription.no_active_subscription',
-            'body_key' => 'fms.tenant_subscription.no_subscription_message',
-            'action_key' => 'fms.tenant_subscription.select_plan'
-        ],
-        'expired' => [
-            'type' => 'danger',
-            'title_key' => 'fms.statuses.expired',
-            'body_key' => 'fms.tenant_subscription.you_have_to_renew_your_subscription',
-            'action_key' => 'fms.tenant_subscription.pay_invoice'
-        ],
-        'on_hold' => [
-            'type' => 'warning',
-            'title_key' => 'fms.tenant_subscription.subscription_on_hold',
-            'body_key' => 'fms.tenant_subscription.subscription_on_hold_message',
-            'action_key' => 'fms.tenant_subscription.pay_invoice'
-        ],
-        'pending_payment' => [
-            'type' => 'warning',
-            'title_key' => 'fms.tenant_subscription.subscription_pending_payment',
-            'body_key' => 'fms.tenant_subscription.subscription_pending_payment_message',
-            'action_key' => 'fms.tenant_subscription.pay_invoice'
-        ],
-        'ending_soon' => [
-            'type' => 'warning',
-            'title_key' => 'fms.tenant_subscription.subscription_ending_soon',
-            'body_key' => 'fms.tenant_subscription.days_left',
-            'action_key' => 'fms.tenant_subscription.select_plan'
-        ],
-        'trial_ending_soon' => [
-            'type' => 'warning',
-            'title_key' => 'fms.tenant_subscription.trial_ending_soon',
-            'body_key' => 'fms.tenant_subscription.trial_ending_soon_message',
-            'action_key' => 'fms.tenant_subscription.upgrade_now'
-        ],
-        'trial_expired' => [
-            'type' => 'danger',
-            'title_key' => 'fms.tenant_subscription.trial_expired',
-            'body_key' => 'fms.tenant_subscription.trial_expired_message',
-            'action_key' => 'fms.tenant_subscription.choose_plan'
-        ]
-    ];
 
     public static function make(): static
     {
@@ -100,6 +59,7 @@ class FmsPlugin implements Plugin
     public function getTenantUsing(?Closure $callback = null): Closure|static
     {
         static::$getTenantUsing = $callback;
+
         return $this;
     }
 
@@ -136,9 +96,12 @@ class FmsPlugin implements Plugin
 
     public function boot(Panel $panel): void {}
 
+
+
     public function subscriptionStats(bool $condition = true): static
     {
         $this->hasSubscriptionStats = $condition;
+
         return $this;
     }
 
@@ -147,9 +110,15 @@ class FmsPlugin implements Plugin
         return $this->hasSubscriptionStats;
     }
 
+
     protected function renderSubscriptionAlerts(): string
     {
-        if (! $this->onTenantPanel || ! ($tenant = self::getTenant())) {
+        if (! $this->onTenantPanel) {
+            return '';
+        }
+
+        $tenant = self::getTenant();
+        if (! $tenant) {
             return '';
         }
 
@@ -163,55 +132,42 @@ class FmsPlugin implements Plugin
     protected function getAlertsFromCache(Model $tenant): array
     {
         $cacheKey = self::ALERTS_CACHE_KEY . $tenant->id;
-        return Cache::rememberForever($cacheKey, fn() => $this->generateAlerts($tenant));
+
+        return Cache::remember($cacheKey, now()->addHours(5), function () use ($tenant) {
+            return $this->generateAlerts($tenant);
+        });
     }
 
     protected function generateAlerts(Model $tenant): array
     {
+        $alerts = [];
         $subscription = $tenant->subscription;
 
-        // Check for no subscription or cancelled status
         if (! $subscription || $subscription->status === SubscriptionStatus::CANCELLED) {
-            return [$this->createAlertFromType('no_subscription')];
+            return [$this->createNoSubscriptionAlert()];
         }
 
-        // Check for expired subscription first
+
+
+        if ($subscription->status === SubscriptionStatus::ON_HOLD) {
+            return [$this->createOnHoldAlert()];
+        }
+
+        if ($subscription->status === SubscriptionStatus::PENDING_PAYMENT) {
+            return [$this->createPendingPaymentAlert()];
+        }
+
         if ($this->isSubscriptionExpired($subscription)) {
-            return [$this->createAlertFromType('expired')];
+            return [$this->createExpiredSubscriptionAlert()];
         }
 
-        $alerts = [];
-
-        // Check subscription status alerts
-        $statusAlerts = [
-            SubscriptionStatus::ON_HOLD => 'on_hold',
-            SubscriptionStatus::PENDING_PAYMENT => 'pending_payment',
-        ];
-
-        if (isset($statusAlerts[$subscription->status])) {
-            return [$this->createAlertFromType($statusAlerts[$subscription->status])];
-        }
-
-        // Handle trial plan alerts
-        if ($subscription->plan->isTrialPlan()) {
-            if ($subscription->status === SubscriptionStatus::EXPIRED) {
-                return [$this->createAlertFromType('trial_expired')];
-            }
-
-            if ($subscription->ends_at && $subscription->ends_at->diffInDays(now()) <= self::TRIAL_ENDING_DAYS_THRESHOLD) {
-                $alerts[] = $this->createAlertFromType('trial_ending_soon', [
-                    'days' => $subscription->ends_at->diffInDays(now())
-                ]);
-            }
-        }
-
-        // Check if subscription is ending soon
         if ($this->isSubscriptionEndingSoon($subscription)) {
             $alerts[] = $this->createEndingSoonAlert($subscription);
         }
 
-        // Add any module usage alerts
-        return array_merge($alerts, $this->generateModuleUsageAlerts($subscription, $tenant));
+        $alerts = array_merge($alerts, $this->generateModuleUsageAlerts($subscription, $tenant));
+
+        return $alerts;
     }
 
     protected function isSubscriptionExpired($subscription): bool
@@ -221,7 +177,7 @@ class FmsPlugin implements Plugin
 
     protected function isSubscriptionEndingSoon($subscription): bool
     {
-        return $subscription->ends_at && $subscription->daysLeft() <= self::SUBSCRIPTION_ENDING_DAYS_THRESHOLD;
+        return $subscription->ends_at && $subscription->daysLeft() <= 7;
     }
 
     protected function generateModuleUsageAlerts($subscription, $tenant): array
@@ -233,8 +189,10 @@ class FmsPlugin implements Plugin
 
         foreach ($moduleUsages as $moduleUsage) {
             $module = $moduleUsage->module;
+            $planModule = $module->planModules->first();
+            $limit = $planModule?->limit;
+
             if (! $tenant->canUseModule($module->class)) {
-                $limit = $module->planModules->first()?->limit;
                 $alerts[] = $this->createModuleLimitAlert($module, $moduleUsage, $limit);
             }
         }
@@ -242,14 +200,43 @@ class FmsPlugin implements Plugin
         return $alerts;
     }
 
-    protected function createAlertFromType(string $type, array $params = []): array
+    protected function createNoSubscriptionAlert(): array
     {
-        $alertConfig = $this->alertTypes[$type];
         return $this->createAlert(
-            $alertConfig['type'],
-            __('filament-modular-subscriptions::' . $alertConfig['title_key']),
-            __('filament-modular-subscriptions::' . $alertConfig['body_key'], $params),
-            __('filament-modular-subscriptions::' . $alertConfig['action_key'])
+            'warning',
+            __('filament-modular-subscriptions::fms.tenant_subscription.no_active_subscription'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.no_subscription_message'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
+        );
+    }
+
+    protected function createExpiredSubscriptionAlert(): array
+    {
+        return $this->createAlert(
+            'danger',
+            __('filament-modular-subscriptions::fms.statuses.expired'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.you_have_to_renew_your_subscription'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice')
+        );
+    }
+
+    protected function createOnHoldAlert(): array
+    {
+        return $this->createAlert(
+            'warning',
+            __('filament-modular-subscriptions::fms.tenant_subscription.subscription_on_hold'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.subscription_on_hold_message'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice')
+        );
+    }
+
+    protected function createPendingPaymentAlert(): array
+    {
+        return $this->createAlert(
+            'warning',
+            __('filament-modular-subscriptions::fms.tenant_subscription.subscription_pending_payment'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.subscription_pending_payment_message'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice')
         );
     }
 
