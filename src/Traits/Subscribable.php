@@ -227,7 +227,10 @@ trait Subscribable
         $newPlan = $planModel::findOrFail($newPlanId);
 
         DB::transaction(function () use ($activeSubscription, $newPlan) {
-            $activeSubscription->moduleUsages()->delete();
+
+            if ($activeSubscription->is_pay_as_you_go) {
+                $activeSubscription->moduleUsages()->delete();
+            }
 
             $activeSubscription->update([
                 'plan_id' => $newPlan->id,
