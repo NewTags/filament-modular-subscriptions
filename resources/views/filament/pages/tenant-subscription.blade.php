@@ -44,50 +44,52 @@
 
                             <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
                                 <!-- Subscription Progress -->
-                                @if(!$activeSubscription->onTrial())
-                                <div
-                                    class="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-                                    <div class="flex flex-col space-y-4">
-                                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                            <div class="flex items-center gap-2">
-                                                <x-filament::icon icon="heroicon-o-clock"
-                                                    class="w-5 h-5 text-primary-500 dark:text-primary-400" />
-                                                <span class="text-base font-semibold text-gray-900 dark:text-gray-100">
-                                                    {{ __('filament-modular-subscriptions::fms.tenant_subscription.subscription_progress') }}
-                                                </span>
-                                            </div>
+                                @if (!$activeSubscription->onTrial())
+                                    <div
+                                        class="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
+                                        <div class="flex flex-col space-y-4">
                                             <div
-                                                class="text-xl sm:text-2xl font-bold text-primary-600 dark:text-primary-400">
-                                                {{ $tenant->daysLeft() }}
-                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.days_left') }}
-                                            </div>
-                                        </div>
-
-                                        @php
-                                            $totalDays = $activeSubscription->ends_at->diffInDays(
-                                                $activeSubscription->starts_at,
-                                            );
-                                            $daysLeft = $tenant->daysLeft();
-                                            $progress = $totalDays > 0 ? (($totalDays - $daysLeft) / $totalDays) * 100 : 0;
-                                        @endphp
-
-                                        <div class="relative">
-                                            <div
-                                                class="w-full h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                                                <div class="h-full bg-gradient-to-r from-primary-600 to-primary-300 dark:from-primary-300 dark:to-primary-600 rounded-full transition-all duration-500 shadow-sm"
-                                                    style="width: {{ $progress }}%"
-                                                    x-tooltip.raw="{{ $daysLeft }} days remaining">
+                                                class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                <div class="flex items-center gap-2">
+                                                    <x-filament::icon icon="heroicon-o-clock"
+                                                        class="w-5 h-5 text-primary-500 dark:text-primary-400" />
+                                                    <span
+                                                        class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                                                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.subscription_progress') }}
+                                                    </span>
+                                                </div>
+                                                <div
+                                                    class="text-xl sm:text-2xl font-bold text-primary-600 dark:text-primary-400">
+                                                    {{ $tenant->daysLeft() }}
+                                                    {{ __('filament-modular-subscriptions::fms.tenant_subscription.days_left') }}
                                                 </div>
                                             </div>
 
-                                            <div
-                                                class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                                <span>{{ $activeSubscription->starts_at->translatedFormat('M d, Y') }}</span>
-                                                <span>{{ $activeSubscription->ends_at->translatedFormat('M d, Y') }}</span>
+                                            @php
+                                                $totalDays = $activeSubscription->ends_at->diffInDays(
+                                                    $activeSubscription->starts_at,
+                                                );
+                                                $daysLeft = $tenant->daysLeft();
+                                                $progress = $totalDays > 0 ? (($totalDays - $daysLeft) / $totalDays) * 100 : 0;
+                                            @endphp
+
+                                            <div class="relative">
+                                                <div
+                                                    class="w-full h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                                    <div class="h-full bg-gradient-to-r from-primary-600 to-primary-300 dark:from-primary-300 dark:to-primary-600 rounded-full transition-all duration-500 shadow-sm"
+                                                        style="width: {{ $progress }}%"
+                                                        x-tooltip.raw="{{ $daysLeft }} days remaining">
+                                                    </div>
+                                                </div>
+
+                                                <div
+                                                    class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                                    <span>{{ $activeSubscription->starts_at->translatedFormat('M d, Y') }}</span>
+                                                    <span>{{ $activeSubscription->ends_at->translatedFormat('M d, Y') }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
                                 @endif
 
                                 <!-- Trial Status -->
@@ -141,29 +143,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            @if ($activeSubscription->status->value === 'on_hold')
-                                <div
-                                    class="mt-6 p-4 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-700/30 rounded-xl">
-                                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                                        <x-filament::icon icon="heroicon-o-exclamation-circle"
-                                            class="w-6 h-6 text-danger-500" />
-                                        <div class="flex-grow">
-                                            <h4 class="text-base font-semibold text-danger-700 dark:text-danger-400">
-                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.subscription_on_hold') }}
-                                            </h4>
-                                            <p class="text-sm text-danger-600 dark:text-danger-400 mt-1">
-                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.please_pay_invoice_to_activate') }}
-                                            </p>
-                                        </div>
-                                        @if ($pendingInvoice = $activeSubscription->pendingInvoice)
-                                            <x-filament::button :href="route('filament.resources.invoices.view', $pendingInvoice)" color="danger" class="mt-3 sm:mt-0">
-                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.view_invoice') }}
-                                            </x-filament::button>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endif
                         </x-filament::section>
                     @else
                         <div

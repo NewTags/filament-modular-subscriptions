@@ -169,7 +169,7 @@ class TenantSubscription extends Page implements HasTable
                             $tenant->switchPlan($newPlan->id);
 
                             // Send notifications for plan switch
-                            $tenant->notifySubscriptionChange('switched', [
+                            $tenant->notifySubscriptionChange('subscription_switched', [
                                 'plan' => $newPlan->trans_name,
                                 'type' => 'pay_as_you_go'
                             ]);
@@ -202,7 +202,7 @@ class TenantSubscription extends Page implements HasTable
                             $tenant->switchPlan($newPlan->id, SubscriptionStatus::ON_HOLD);
 
                             // Send notifications for subscription switch
-                            $tenant->notifySubscriptionChange('switched', [
+                            $tenant->notifySubscriptionChange('subscription_switched', [
                                 'plan' => $newPlan->trans_name,
                                 'old_status' => $oldSubscription->status->getLabel(),
                                 'new_status' => SubscriptionStatus::ON_HOLD->getLabel(),
@@ -254,13 +254,18 @@ class TenantSubscription extends Page implements HasTable
                         $this->sendSubscriptionNotification($subscription, true);
                     } else {
                         $subscription = null;
-                        if ($plan->trial_period && $canUseTrial) {
+                        if ($plan->is_trial_plan && $canUseTrial) {
                             $subscription = $this->createSubscription($tenant, $plan, SubscriptionStatus::ACTIVE);
                             $this->sendTrialStartedNotification($subscription);
-                        } else {
+                        } elseif (!$plan->is_trial_plan) {
                             $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $plan);
                             $subscription = $tenant->subscription;
                             $this->sendSubscriptionNotification($subscription, false);
+                        } else {
+                            Notification::make()
+                                ->title(__('filament-modular-subscriptions::fms.notifications.subscription.trial.you_cant_use_trial'))
+                                ->danger()
+                                ->send();
                         }
 
                         $tenant->notifySubscriptionChange('started', [
@@ -341,7 +346,7 @@ class TenantSubscription extends Page implements HasTable
             return;
         }
 
-        $notificationTitle = $isPayAsYouGo 
+        $notificationTitle = $isPayAsYouGo
             ? __('filament-modular-subscriptions::fms.notifications.subscription.starter.title_payg')
             : __('filament-modular-subscriptions::fms.notifications.subscription.starter.title');
 

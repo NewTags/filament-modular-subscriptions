@@ -549,11 +549,17 @@ return [
     ],
     'notifications' => [
         'subscription' => [
-            'starter' => [
+            'started' => [
                 'title' => 'من فضلك قم بالدفع لتفعيل اشتراكك',
                 'title_payg' => 'تم تفعيل اشتراكك',
                 'body' => 'تم بدء اشتراكك في :tenant. الخطة: :plan، صالح حتى: :end_date يرجى الدفع لتفعيل الاشتراك',
                 'payg_body' => 'تم تفعيل اشتراكك في :tenant. الخطة: :plan، صالح حتى: :end_date',
+
+            ],
+            'trial' => [
+                'title' => 'تم بدء فترة التجربة المجانية',
+                'body' => 'تم بدء فترة التجربة المجانية للاشتراك في :tenant. الخطة: :plan، صالح حتى: :end_date',
+                'you_cant_use_trial' => 'لا يمكنك استخدام فترة التجربة المجانية',
             ],
             'subscription_renewed' => [
                 'title' => 'تم تجديد الاشتراك',

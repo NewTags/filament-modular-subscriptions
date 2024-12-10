@@ -26,14 +26,15 @@ class PlanSeeder extends Seeder
                 'invoice_interval' => Interval::MONTH,
                 'grace_period' => 0,
                 'grace_interval' => Interval::DAY,
+                'is_trial_plan' => true,
                 'modules' => [
                     ['limit' => 10, 'price' => 0],
-                    ['limit' => 5, 'price' => 0], 
+                    ['limit' => 5, 'price' => 0],
                 ],
             ],
             [
                 'name' => ['en' => 'Basic Plan', 'ar' => 'الخطة الأساسية'],
-                'slug' => 'basic-plan', 
+                'slug' => 'basic-plan',
                 'description' => ['en' => 'Basic features for small businesses', 'ar' => 'ميزات أساسية للشركات الصغيرة'],
                 'is_active' => true,
                 'price' => 9.99,

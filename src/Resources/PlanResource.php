@@ -115,6 +115,7 @@ class PlanResource extends Resource
                                 Forms\Components\TextInput::make('fixed_invoice_day')
                                     ->numeric()
                                     ->default(1)
+                                    ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.fixed_invoice_day')),
                                 Fieldset::make()
                                     ->schema([
