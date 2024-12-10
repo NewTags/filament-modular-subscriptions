@@ -188,7 +188,7 @@ class TenantSubscription extends Page implements HasTable
                             ->title(__('filament-modular-subscriptions::fms.tenant_subscription.pay_as_you_go_activated'))
                             ->success()
                             ->send();
-                    } else {
+                    } elseif (!$newPlan->is_trial_plan) {
                         // Generate initial invoice first (this will create the subscription if needed)
                         $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $newPlan);
                         $tenant->notifySuperAdmins('invoice_generated', [
@@ -220,6 +220,28 @@ class TenantSubscription extends Page implements HasTable
                             ->title(__('filament-modular-subscriptions::fms.tenant_subscription.please_pay_invoice'))
                             ->warning()
                             ->send();
+                    } elseif ($newPlan->is_trial_plan && !$tenant->canUseTrial()) {
+                        Notification::make()
+                            ->title(__('filament-modular-subscriptions::fms.notifications.subscription.trial.you_cant_use_trial'))
+                            ->danger()
+                            ->send();
+                    } else {
+                        if ($oldSubscription) {
+                            $tenant->switchPlan($newPlan->id, SubscriptionStatus::ACTIVE);
+
+                            // Send notifications for subscription switch
+                            $tenant->notifySubscriptionChange('subscription_switched', [
+                                'plan' => $newPlan->trans_name,
+                                'old_status' => $oldSubscription->status->getLabel(),
+                                'new_status' => SubscriptionStatus::ON_HOLD->getLabel(),
+                                'date' => now()->format('Y-m-d H:i:s')
+                            ]);
+
+                            $tenant->notifySuperAdmins('subscription_switched', [
+                                'plan' => $newPlan->trans_name,
+                                'end_date' => $oldSubscription->ends_at->format('Y-m-d H:i:s'),
+                            ]);
+                        }
                     }
 
                     $tenant->invalidateSubscriptionCache();
