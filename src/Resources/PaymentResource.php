@@ -307,10 +307,18 @@ class PaymentResource extends Resource
                                         'status' => InvoiceStatus::PARTIALLY_PAID,
                                         'paid_at' => null,
                                     ]);
+
+                                    $invoice->subscription->update([
+                                        'status' => SubscriptionStatus::ON_HOLD,
+                                    ]);
                                 } else {
                                     $invoice->update([
                                         'status' => InvoiceStatus::UNPAID,
                                         'paid_at' => null,
+                                    ]);
+
+                                    $invoice->subscription->update([
+                                        'status' => SubscriptionStatus::ON_HOLD,
                                     ]);
                                 }
 

@@ -546,7 +546,7 @@ return [
     ],
     'notifications' => [
         'subscription' => [
-            'starter' => [
+            'started' => [
                 'title' => 'من فضلك قم بالدفع لتفعيل اشتراكك',
                 'title_payg' => 'تم تفعيل اشتراكك',
                 'body' => 'تم بدء اشتراكك في :tenant. الخطة: :plan، صالح حتى: :end_date يرجى الدفع لتفعيل الاشتراك',
