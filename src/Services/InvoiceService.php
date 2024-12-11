@@ -211,7 +211,7 @@ class InvoiceService
     private function processModuleUsages(Invoice $invoice, $moduleUsages, Subscription $subscription): void
     {
         $moduleUsages->load('module');
-        
+
         foreach ($moduleUsages->groupBy('module_id') as $moduleId => $usages) {
             $module = config('filament-modular-subscriptions.models.module')::find($moduleId);
             $totalUsage = $usages->sum('usage');
