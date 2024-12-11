@@ -14,7 +14,7 @@ class EditModule extends EditRecord
     {
         return [
             Actions\DeleteAction::make()
-                ->visible(fn($record) => $record->whereHas('plans', fn($query) => $query->whereHas('subscriptions'))->count() === 0),
+                ->visible(fn($record) => $record->whereHas('plans')->count() === 0),
         ];
     }
 }

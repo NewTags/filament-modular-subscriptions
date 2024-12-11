@@ -206,6 +206,7 @@ trait Subscribable
                 'ends_at' => $this->calculateEndDate($plan, $days),
                 'starts_at' => now(),
                 'status' => SubscriptionStatus::ACTIVE,
+                'trial_ends_at' => null,
             ]);
 
             $this->invalidateSubscriptionCache();
