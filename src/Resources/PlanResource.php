@@ -77,7 +77,22 @@ class PlanResource extends Resource
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.is_active')),
                                 Forms\Components\Toggle::make('is_pay_as_you_go')
                                     ->default(false)
+                                    ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
+                                    ->live()
+                                    ->helperText(__('filament-modular-subscriptions::fms.resources.plan.hints.is_pay_as_you_go'))
                                     ->label(__('filament-modular-subscriptions::fms.pay_as_you_go')),
+                                Forms\Components\Toggle::make('is_trial_plan')
+                                    ->default(false)
+                                    ->live()
+                                    ->helperText(__('filament-modular-subscriptions::fms.resources.plan.hints.is_trial_plan'))
+                                    ->afterStateUpdated(function (Set $set, $state) {
+                                        if ($state) {
+                                            $set('price', 0);
+                                            $set('is_pay_as_you_go', false);
+                                        }
+                                    })
+                                    ->hidden(fn(Forms\Get $get) => $get('is_pay_as_you_go'))
+                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.is_trial_plan')),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.tabs.pricing'))
                             ->columns()
@@ -86,7 +101,7 @@ class PlanResource extends Resource
                                 Forms\Components\TextInput::make('price')
                                     ->numeric()
                                     ->required()
-                                    ->hidden(fn(Forms\Get $get) => $get('is_pay_as_you_go'))
+                                    ->hidden(fn(Forms\Get $get) => $get('is_trial_plan') || $get('is_pay_as_you_go'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.price')),
                                 Forms\Components\Select::make('currency')
                                     ->options(config('filament-modular-subscriptions.currencies'))
@@ -100,25 +115,30 @@ class PlanResource extends Resource
                                 Forms\Components\TextInput::make('fixed_invoice_day')
                                     ->numeric()
                                     ->default(1)
+                                    ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.fixed_invoice_day')),
                                 Fieldset::make()
                                     ->schema([
                                         Forms\Components\TextInput::make('trial_period')
                                             ->numeric()
                                             ->default(0)
+                                            ->hidden(fn(Forms\Get $get) => !$get('is_trial_plan'))
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.trial_period')),
                                         Forms\Components\Select::make('trial_interval')
                                             ->options(Interval::class)
                                             ->default(Interval::DAY)
+                                            ->hidden(fn(Forms\Get $get) => !$get('is_trial_plan'))
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.trial_interval')),
                                         Forms\Components\TextInput::make('invoice_period')
                                             ->numeric()
                                             ->required()
+                                            ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.invoice_period')),
                                         Forms\Components\Select::make('invoice_interval')
                                             ->options(Interval::class)
                                             ->default(Interval::MONTH)
                                             ->required()
+                                            ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.invoice_interval')),
                                         Forms\Components\TextInput::make('grace_period')
                                             ->numeric()
@@ -159,6 +179,8 @@ class PlanResource extends Resource
                                         Forms\Components\TextInput::make('price')
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.module_price'))
                                             ->numeric()
+                                            ->default(0)
+                                            ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
                                             ->suffix(config('filament-modular-subscriptions.main_currency'))
                                             ->nullable(),
                                     ])
@@ -191,6 +213,10 @@ class PlanResource extends Resource
                 Tables\Columns\TextColumn::make('modules_count')
                     ->counts('modules')
                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.modules_count')),
+                Tables\Columns\IconColumn::make('is_trial_plan')
+                    ->boolean()
+                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.is_trial_plan'))
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('is_active')

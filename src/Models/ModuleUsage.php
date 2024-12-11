@@ -30,7 +30,6 @@ class ModuleUsage extends Model
     public function module(): BelongsTo
     {
         $moduleModel = config('filament-modular-subscriptions.models.module');
-
         return $this->belongsTo($moduleModel);
     }
 }

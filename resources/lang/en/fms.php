@@ -24,6 +24,7 @@ return [
                 'setting_key' => 'Setting Key',
                 'setting_value' => 'Setting Value',
                 'modules_count' => 'Modules Count',
+                'is_trial_plan' => 'Trial Plan',
             ],
             'hints' => [
                 'module_limit' => 'Leave empty for unlimited usage',
@@ -153,6 +154,11 @@ return [
         'confirm_subscription' => 'Confirm Subscription to :plan',
         'subscription_created' => 'Subscription created successfully',
         'subscription_created_pending' => 'Subscription created. Please pay the invoice to activate.',
+        'trial_ending_soon' => 'Trial Period Ending Soon',
+        'trial_ending_soon_message' => 'Your trial period will end in :days days. Please choose a plan to continue using our services.',
+        'trial_expired' => 'Trial Period Expired',
+        'trial_expired_message' => 'Your trial period has expired. Please choose a plan to continue using our services.',
+        'upgrade_now' => 'Upgrade Now',
     ],
     'intervals' => [
         'day' => 'Day',
@@ -315,5 +321,11 @@ return [
             'subscription_pending_payment' => 'Subscription pending payment',
             'subscription_pending_payment_message' => 'Your subscription is awaiting payment confirmation. Please complete the payment to activate your subscription.',
         ],
-    ]
+    ],
+    'errors' => [
+        'trial_already_used' => 'You have already used your trial period.',
+    ],
+    'logs' => [
+        'trial_expired' => 'Trial period has expired',
+    ],
 ];

@@ -27,6 +27,7 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\View;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Infolists\Components\Fieldset as ComponentsFieldset;
 use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 use Illuminate\Support\HtmlString;
 
@@ -485,7 +486,7 @@ class InvoiceResource extends Resource
                         $schema = [];
 
                         foreach ($payments as $payment) {
-                            $schema[] = Fieldset::make($payment->created_at->translatedFormat('M d, Y'))
+                            $schema[] = ComponentsFieldset::make($payment->created_at->translatedFormat('M d, Y'))
                                 ->schema([
                                     TextEntry::make('amount')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))

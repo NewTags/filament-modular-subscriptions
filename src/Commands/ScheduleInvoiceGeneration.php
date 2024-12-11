@@ -45,6 +45,14 @@ class ScheduleInvoiceGeneration extends Command
     protected function processSubscription($subscription, InvoiceService $invoiceService, SubscriptionLogService $logService): void
     {
         try {
+            // Handle trial plan expiration
+            if ($subscription->plan->isTrialPlan() && $subscription->ends_at && $subscription->ends_at->isPast()) {
+                $this->handleTrialExpiration($subscription, $logService);
+                return;
+            }
+
+
+
             $this->handlePastDueInvoice($subscription);
             // $this->handleSubscriptionNearExpiry($subscription);
 
@@ -129,6 +137,10 @@ class ScheduleInvoiceGeneration extends Command
     {
         $plan = $subscription->plan;
         $lastInvoice = $subscription->invoices()->latest()->first();
+
+        if ($plan->isTrialPlan()) {
+            return false;
+        }
 
         if ($this->hasUnpaidInvoices($subscription)) {
             return false;
@@ -286,5 +298,28 @@ class ScheduleInvoiceGeneration extends Command
 
             $subscription->subscribable->notifySuperAdmins('subscription_near_expiry', $adminNotificationData);
         }
+    }
+
+    protected function handleTrialExpiration($subscription, $logService): void
+    {
+        $oldStatus = $subscription->status;
+        $subscription->update([
+            'status' => SubscriptionStatus::EXPIRED,
+            'trial_ends_at' => null,
+            'has_used_trial' => true,
+        ]);
+
+        $logService->log(
+            $subscription,
+            'trial_expired',
+            __('filament-modular-subscriptions::fms.logs.trial_expired'),
+            $oldStatus->value,
+            SubscriptionStatus::EXPIRED->value
+        );
+
+        $subscription->subscribable->notifySubscriptionChange('trial_expired', [
+            'plan' => $subscription->plan->trans_name,
+            'expiry_date' => $subscription->ends_at->format('Y-m-d')
+        ]);
     }
 }

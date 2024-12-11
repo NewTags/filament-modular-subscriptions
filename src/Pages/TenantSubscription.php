@@ -16,6 +16,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Closure;
+use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 
 class TenantSubscription extends Page implements HasTable
@@ -130,35 +131,54 @@ class TenantSubscription extends Page implements HasTable
                 $planId = $arguments['plan_id'];
                 $tenant = FmsPlugin::getTenant();
                 $newPlan = config('filament-modular-subscriptions.models.plan')::findOrFail($planId);
+                $oldPlan = $tenant->subscription?->plan;
                 $oldSubscription = $tenant->subscription;
                 $invoiceService = app(InvoiceService::class);
 
-                DB::transaction(function () use ($tenant, $oldSubscription, $newPlan, $invoiceService) {
+                DB::transaction(function () use ($tenant, $oldSubscription, $newPlan, $invoiceService, $oldPlan) {
                     // Handle existing subscription if any
-                    if ($oldSubscription) {
-                        if ($oldSubscription->plan->is_pay_as_you_go) {
-                            // Generate final invoice for pay-as-you-go plan
-                            $finalInvoice = $invoiceService->generatePayAsYouGoInvoice($oldSubscription);
+                    if ($oldSubscription->plan->is_pay_as_you_go) {
+                        // Generate final invoice for pay-as-you-go plan
+                        $finalInvoice = $invoiceService->generatePayAsYouGoInvoice($oldSubscription);
 
-                            $oldSubscription->update(['status' => SubscriptionStatus::ON_HOLD]);
+                        $oldSubscription->update([
+                            'status' => SubscriptionStatus::ON_HOLD
+                        ]);
 
-                            // Send notifications for final invoice
-                            if ($finalInvoice) {
-                                $tenant->notifySuperAdmins('invoice_generated', [
-                                    'invoice_id' => $finalInvoice->id,
-                                    'amount' => $finalInvoice->amount,
-                                    'currency' => $finalInvoice->currency,
-                                ]);
+                        // Send notifications for final invoice
+                        if ($finalInvoice) {
+                            $tenant->notifySuperAdmins('invoice_generated', [
+                                'invoice_id' => $finalInvoice->id,
+                                'amount' => $finalInvoice->amount,
+                                'currency' => $finalInvoice->currency,
+                            ]);
 
-                                Notification::make()
-                                    ->title(__('filament-modular-subscriptions::fms.tenant_subscription.final_invoice_generated'))
-                                    ->info()
-                                    ->send();
-                            } else {
-                                $tenant->notifySuperAdmins('invoice_generation_failed', [
-                                    'error' => 'Failed to generate final invoice for pay-as-you-go plan',
-                                ]);
-                            }
+                            Notification::make()
+                                ->title(__('filament-modular-subscriptions::fms.tenant_subscription.final_invoice_generated'))
+                                ->info()
+                                ->send();
+                        } else {
+                            $tenant->notifySuperAdmins('invoice_generation_failed', [
+                                'error' => 'Failed to generate final invoice for pay-as-you-go plan',
+                            ]);
+                        }
+                    }
+
+                    if (($oldPlan && $oldPlan->id != $newPlan->id) && !$oldPlan->is_pay_as_you_go) {
+                        // Clean up any pending invoices from old subscription
+                        $pendingInvoices = $tenant->invoices()
+                            ->whereIn('status', [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID, InvoiceStatus::REFUNDED])
+                            ->where('subscription_id', $oldSubscription->id)
+                            ->get();
+
+                        foreach ($pendingInvoices as $invoice) {
+                            $invoice
+                                ->update(['status' => InvoiceStatus::CANCELLED]);
+
+                            $tenant->notifySuperAdmins('invoice_cancelled', [
+                                'invoice_id' => $invoice->id,
+                                'reason' => 'Plan switch',
+                            ]);
                         }
                     }
 
@@ -188,18 +208,17 @@ class TenantSubscription extends Page implements HasTable
                             ->title(__('filament-modular-subscriptions::fms.tenant_subscription.pay_as_you_go_activated'))
                             ->success()
                             ->send();
-                    } else {
-                        // Generate initial invoice first (this will create the subscription if needed)
-                        $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $newPlan);
-                        $tenant->notifySuperAdmins('invoice_generated', [
-                            'invoice_id' => $initialInvoice->id,
-                            'amount' => $initialInvoice->amount,
-                            'currency' => $initialInvoice->currency,
-                        ]);
+                    } elseif (!$newPlan->is_trial_plan) {
 
                         // Update existing subscription if any
                         if ($oldSubscription) {
                             $tenant->switchPlan($newPlan->id, SubscriptionStatus::ON_HOLD);
+                            $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $newPlan);
+                            $tenant->notifySuperAdmins('invoice_generated', [
+                                'invoice_id' => $initialInvoice->id,
+                                'amount' => $initialInvoice->amount,
+                                'currency' => $initialInvoice->currency,
+                            ]);
 
                             // Send notifications for subscription switch
                             $tenant->notifySubscriptionChange('subscription_switched', [
@@ -220,6 +239,28 @@ class TenantSubscription extends Page implements HasTable
                             ->title(__('filament-modular-subscriptions::fms.tenant_subscription.please_pay_invoice'))
                             ->warning()
                             ->send();
+                    } elseif ($newPlan->is_trial_plan && !$tenant->canUseTrial()) {
+                        Notification::make()
+                            ->title(__('filament-modular-subscriptions::fms.notifications.subscription.trial.you_cant_use_trial'))
+                            ->danger()
+                            ->send();
+                    } else {
+                        if ($oldSubscription) {
+                            $tenant->switchPlan($newPlan->id, SubscriptionStatus::ACTIVE);
+
+                            // Send notifications for subscription switch
+                            $tenant->notifySubscriptionChange('subscription_switched', [
+                                'plan' => $newPlan->trans_name,
+                                'old_status' => $oldSubscription->status->getLabel(),
+                                'new_status' => SubscriptionStatus::ON_HOLD->getLabel(),
+                                'date' => now()->format('Y-m-d H:i:s')
+                            ]);
+
+                            $tenant->notifySuperAdmins('subscription_switched', [
+                                'plan' => $newPlan->trans_name,
+                                'end_date' => $oldSubscription->ends_at->format('Y-m-d H:i:s'),
+                            ]);
+                        }
                     }
 
                     $tenant->invalidateSubscriptionCache();
@@ -237,47 +278,48 @@ class TenantSubscription extends Page implements HasTable
             ->action(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::findOrFail($arguments['plan_id']);
                 $tenant = FmsPlugin::getTenant();
+                $canUseTrial = $tenant->canUseTrial();
 
-                DB::transaction(function () use ($tenant, $plan) {
+                DB::transaction(function () use ($tenant, $plan, $canUseTrial) {
                     $invoiceService = app(InvoiceService::class);
 
                     if ($plan->is_pay_as_you_go) {
-                        $this->createSubscription($tenant, $plan, SubscriptionStatus::ACTIVE);
+                        $subscription = $this->createSubscription($tenant, $plan, SubscriptionStatus::ACTIVE);
 
                         $tenant->notifySubscriptionChange('started', [
                             'plan' => $plan->trans_name,
-                            'type' => 'pay_as_you_go'
+                            'type' => 'pay_as_you_go',
+                            'trial' => $subscription->onTrial(),
                         ]);
 
-                        Notification::make()
-                            ->title(__('filament-modular-subscriptions::fms.notifications.subscription.started.title_payg'))
-                            ->body(__('filament-modular-subscriptions::fms.notifications.subscription.started.payg_body', [
-                                'tenant' => $tenant->name,
-                                'plan' => $plan->trans_name,
-                                'end_date' => $this->calculateEndDate($plan)->format('Y-m-d H:i:s')
-                            ]))
-                            ->success()
-                            ->send();
+                        $this->sendSubscriptionNotification($subscription, true);
                     } else {
-                        $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $plan);
+                        $subscription = null;
+                        if ($plan->is_trial_plan && $canUseTrial) {
+                            $subscription = $this->createSubscription($tenant, $plan, SubscriptionStatus::ACTIVE);
+                            $this->sendTrialStartedNotification($subscription);
+                        } elseif (!$plan->is_trial_plan) {
+                            $subscription = $this->createSubscription($tenant, $plan, SubscriptionStatus::ON_HOLD);
+                            $tenant->refresh();
+                            $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $plan);
+                            $subscription = $tenant->subscription;
+                            $this->sendSubscriptionNotification($subscription, false);
 
-                        $this->createSubscription($tenant, $plan, SubscriptionStatus::ON_HOLD);
-
-                        $tenant->notifySubscriptionChange('started', [
-                            'plan' => $plan->trans_name,
-                            'status' => SubscriptionStatus::ON_HOLD->getLabel(),
-                            'date' => now()->format('Y-m-d H:i:s')
-                        ]);
-
-                        Notification::make()
-                            ->title(__('filament-modular-subscriptions::fms.notifications.subscription.started.title'))
-                            ->body(__('filament-modular-subscriptions::fms.notifications.subscription.started.body', [
-                                'tenant' => $tenant->name,
-                                'plan' => $plan->trans_name,
-                                'end_date' => $this->calculateEndDate($plan)->format('Y-m-d H:i:s')
-                            ]))
-                            ->warning()
-                            ->send();
+                            Notification::make()
+                                ->title(__('filament-modular-subscriptions::fms.notifications.subscription.started.title'))
+                                ->body(__('filament-modular-subscriptions::fms.notifications.subscription.started.body', [
+                                    'tenant' => $tenant->name,
+                                    'plan' => $plan->trans_name,
+                                    'end_date' => $this->calculateEndDate($plan)->format('Y-m-d H:i:s')
+                                ]))
+                                ->warning()
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->title(__('filament-modular-subscriptions::fms.notifications.subscription.trial.you_cant_use_trial'))
+                                ->danger()
+                                ->send();
+                        }
                     }
 
                     $tenant->invalidateSubscriptionCache();
@@ -290,16 +332,37 @@ class TenantSubscription extends Page implements HasTable
     protected function createSubscription($tenant, $plan, SubscriptionStatus $status): Subscription
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
+        $startDate = now();
+
+        // Check if tenant is eligible for trial
+        $canUseTrial = $tenant->canUseTrial();
+        $initialStatus = ($plan->trial_period && $canUseTrial) ? SubscriptionStatus::ACTIVE : $status;
 
         return $subscriptionModel::create([
             'plan_id' => $plan->id,
             'subscribable_id' => $tenant->id,
             'subscribable_type' => get_class($tenant),
-            'starts_at' => now(),
+            'starts_at' => $startDate,
             'ends_at' => $this->calculateEndDate($plan),
-            'trial_ends_at' => $plan->trial_period ? now()->addDays($plan->trial_period) : null,
-            'status' => $status,
+            'trial_ends_at' => $this->calculateTrialEndDate($plan, $startDate, $canUseTrial),
+            'status' => $initialStatus,
+            'has_used_trial' => $canUseTrial && $plan->is_trial_plan,
         ]);
+    }
+
+    protected function calculateTrialEndDate($plan, Carbon $startDate, bool $canUseTrial): ?Carbon
+    {
+        if (!$canUseTrial || !$plan->trial_period || !$plan->trial_interval) {
+            return null;
+        }
+
+        return match ($plan->trial_interval->value) {
+            'day' => $startDate->copy()->addDays($plan->trial_period),
+            'week' => $startDate->copy()->addWeeks($plan->trial_period),
+            'month' => $startDate->copy()->addMonths($plan->trial_period),
+            'year' => $startDate->copy()->addYears($plan->trial_period),
+            default => null,
+        };
     }
 
     protected function calculateEndDate($plan): Carbon
@@ -320,5 +383,56 @@ class TenantSubscription extends Page implements HasTable
                 ->where('tenant_id', FmsPlugin::getTenant()->id)
                 ->with(['items', 'subscription.plan'])
         );
+    }
+
+    protected function sendSubscriptionNotification(Subscription $subscription, bool $isPayAsYouGo): void
+    {
+        if ($subscription->onTrial()) {
+            $this->sendTrialStartedNotification($subscription);
+            return;
+        }
+
+        $notificationTitle = $isPayAsYouGo
+            ? __('filament-modular-subscriptions::fms.notifications.subscription.started.title_payg')
+            : __('filament-modular-subscriptions::fms.notifications.subscription.started.title');
+
+        $notificationBody = $isPayAsYouGo
+            ? __('filament-modular-subscriptions::fms.notifications.subscription.started.payg_body', [
+                'tenant' => $subscription->subscribable->name,
+                'plan' => $subscription->plan->trans_name,
+                'end_date' => $subscription->ends_at->format('Y-m-d H:i:s')
+            ])
+            : __('filament-modular-subscriptions::fms.notifications.subscription.started.body', [
+                'tenant' => $subscription->subscribable->name,
+                'plan' => $subscription->plan->trans_name,
+                'end_date' => $subscription->ends_at->format('Y-m-d H:i:s')
+            ]);
+
+        Notification::make()
+            ->title($notificationTitle)
+            ->body($notificationBody)
+            ->{$isPayAsYouGo ? 'success' : 'warning'}()
+            ->send();
+    }
+
+    protected function sendTrialStartedNotification(Subscription $subscription): void
+    {
+        Notification::make()
+            ->title(__('filament-modular-subscriptions::fms.notifications.subscription.trial.title'))
+            ->body(__('filament-modular-subscriptions::fms.notifications.subscription.trial.body', [
+                'tenant' => $subscription->subscribable->name,
+                'plan' => $subscription->plan->trans_name,
+                'end_date' => $subscription->trial_ends_at->format('Y-m-d H:i:s')
+            ]))
+            ->success()
+            ->send();
+
+
+        $subscription->subscribable->notifySubscriptionChange('trial', [
+            'plan' => $subscription->plan->trans_name,
+            'status' => $subscription->status->getLabel(),
+            'trial' => $subscription->onTrial(),
+            'date' => now()->format('Y-m-d H:i:s')
+        ]);
     }
 }
