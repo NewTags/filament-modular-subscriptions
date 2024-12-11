@@ -564,7 +564,7 @@ trait Subscribable
         return $this->activeSubscription() && $this->activeSubscription()->onTrial();
     }
 
-    public function invoices()
+    public function invoices(): HasMany
     {
         return $this->subscription?->invoices();
     }
