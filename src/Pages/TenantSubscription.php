@@ -305,15 +305,6 @@ class TenantSubscription extends Page implements HasTable
                             $subscription = $tenant->subscription;
                             $this->sendSubscriptionNotification($subscription, false);
 
-                            Notification::make()
-                                ->title(__('filament-modular-subscriptions::fms.notifications.subscription.started.title'))
-                                ->body(__('filament-modular-subscriptions::fms.notifications.subscription.started.body', [
-                                    'tenant' => $tenant->name,
-                                    'plan' => $plan->trans_name,
-                                    'end_date' => $this->calculateEndDate($plan)->format('Y-m-d H:i:s')
-                                ]))
-                                ->warning()
-                                ->send();
                         } else {
                             Notification::make()
                                 ->title(__('filament-modular-subscriptions::fms.notifications.subscription.trial.you_cant_use_trial'))
