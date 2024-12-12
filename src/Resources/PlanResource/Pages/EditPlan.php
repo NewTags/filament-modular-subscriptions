@@ -21,6 +21,7 @@ class EditPlan extends EditRecord
     public function afterSave(): void
     {
         $this->record->subscriptions->each(function ($subscription) {
+            $subscription->load('subscribable');
             $subscription->subscribable->invalidateSubscriptionCache();
         });
     }

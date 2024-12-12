@@ -22,6 +22,7 @@ class EditSubscription extends EditRecord
 
     public function afterSave(): void
     {
+        $this->record->load('subscribable');
         $this->getRecord()->subscribable->invalidateSubscriptionCache();
     }
 }

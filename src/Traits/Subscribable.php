@@ -230,6 +230,8 @@ trait Subscribable
 
             if ($activeSubscription->is_pay_as_you_go) {
                 $activeSubscription->moduleUsages()->delete();
+            } elseif ($newPlan->is_pay_as_you_go && !$activeSubscription->plan->is_pay_as_you_go) {
+                $activeSubscription->moduleUsages()->delete();
             }
 
             $activeSubscription->update([
