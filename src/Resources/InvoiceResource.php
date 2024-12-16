@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources;
+namespace NewTags\FilamentModularSubscriptions\Resources;
 
 use ArPHP\I18N\Arabic;
 use Filament\Forms\Components\DatePicker;
@@ -17,18 +17,18 @@ use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Enums\FiltersLayout;
-use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
-use HoceineEl\FilamentModularSubscriptions\Enums\PaymentMethod;
-use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
-use HoceineEl\FilamentModularSubscriptions\Models\Plan;
-use HoceineEl\FilamentModularSubscriptions\ResolvesCustomerInfo;
-use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
+use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use NewTags\FilamentModularSubscriptions\Enums\PaymentMethod;
+use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
+use NewTags\FilamentModularSubscriptions\Models\Plan;
+use NewTags\FilamentModularSubscriptions\ResolvesCustomerInfo;
+use NewTags\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\View;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Infolists\Components\Fieldset as ComponentsFieldset;
-use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\FmsPlugin;
 use Illuminate\Support\HtmlString;
 
 class InvoiceResource extends Resource

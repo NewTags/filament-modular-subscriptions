@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources;
+namespace NewTags\FilamentModularSubscriptions\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Components\Fieldset;
@@ -10,12 +10,12 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
-use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\CreatePlan;
-use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\EditPlan;
-use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages\ListPlans;
+use NewTags\FilamentModularSubscriptions\Enums\Interval;
+use NewTags\FilamentModularSubscriptions\Resources\PlanResource\Pages\CreatePlan;
+use NewTags\FilamentModularSubscriptions\Resources\PlanResource\Pages\EditPlan;
+use NewTags\FilamentModularSubscriptions\Resources\PlanResource\Pages\ListPlans;
 use Illuminate\Database\Eloquent\Model;
-use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\FmsPlugin;
 
 class PlanResource extends Resource
 {
@@ -112,8 +112,8 @@ class PlanResource extends Resource
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.tabs.billing'))
                             ->columns()
                             ->schema([
-                                Forms\Components\TextInput::make('fixed_invoice_day')
-                                    ->numeric()
+                                Forms\Components\Select::make('fixed_invoice_day')
+                                    ->options(fn() => collect(range(1, 28))->mapWithKeys(fn($day) => [$day => $day]))
                                     ->default(1)
                                     ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.fixed_invoice_day')),

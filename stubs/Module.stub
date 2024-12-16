@@ -2,8 +2,8 @@
 
 namespace {{ namespace }};
 
-use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
-use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\Modules\BaseModule;
+use NewTags\FilamentModularSubscriptions\FmsPlugin;
 use {{ subscription_model }};
 use {{ plan_model }};
 use Filament\Facades\Filament;

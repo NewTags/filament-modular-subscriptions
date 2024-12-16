@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Carbon\Carbon;
-use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use Illuminate\Database\Seeder;
 
 class InvoiceSeeder extends Seeder

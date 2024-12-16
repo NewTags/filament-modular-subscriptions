@@ -1,10 +1,10 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources\PlanResource\Pages;
+namespace NewTags\FilamentModularSubscriptions\Resources\PlanResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use HoceineEl\FilamentModularSubscriptions\Resources\PlanResource;
+use NewTags\FilamentModularSubscriptions\Resources\PlanResource;
 
 class ListPlans extends ListRecords
 {

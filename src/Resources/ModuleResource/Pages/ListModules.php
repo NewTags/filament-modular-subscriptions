@@ -1,10 +1,10 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource\Pages;
+namespace NewTags\FilamentModularSubscriptions\Resources\ModuleResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource;
+use NewTags\FilamentModularSubscriptions\Resources\ModuleResource;
 
 class ListModules extends ListRecords
 {

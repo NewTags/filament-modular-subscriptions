@@ -1,9 +1,9 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Services;
+namespace NewTags\FilamentModularSubscriptions\Services;
 
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
-use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Support\Facades\Log;
 
 class SubscriptionLogService

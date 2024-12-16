@@ -1,8 +1,8 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources;
+namespace NewTags\FilamentModularSubscriptions\Resources;
 
-use HoceineEl\FilamentModularSubscriptions\Models\SubscriptionLog;
+use NewTags\FilamentModularSubscriptions\Models\SubscriptionLog;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -10,8 +10,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
-use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionLogResource\Pages\ListSubscriptionLogs;
-use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\Resources\SubscriptionLogResource\Pages\ListSubscriptionLogs;
+use NewTags\FilamentModularSubscriptions\FmsPlugin;
 
 class SubscriptionLogResource extends Resource
 {

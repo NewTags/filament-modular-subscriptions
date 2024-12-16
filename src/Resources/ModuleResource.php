@@ -1,15 +1,15 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources;
+namespace NewTags\FilamentModularSubscriptions\Resources;
 
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
-use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource\Pages;
+use NewTags\FilamentModularSubscriptions\Modules\BaseModule;
+use NewTags\FilamentModularSubscriptions\Resources\ModuleResource\Pages;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\FmsPlugin;
 
 class ModuleResource extends Resource
 {

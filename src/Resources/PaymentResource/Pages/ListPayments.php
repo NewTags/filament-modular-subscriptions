@@ -1,9 +1,9 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
+namespace NewTags\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
 
 use Filament\Resources\Pages\ListRecords;
-use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource;
+use NewTags\FilamentModularSubscriptions\Resources\PaymentResource;
 
 class ListPayments extends ListRecords
 {

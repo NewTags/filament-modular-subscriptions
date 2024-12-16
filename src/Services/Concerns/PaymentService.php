@@ -1,10 +1,10 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Services\Concerns;
+namespace NewTags\FilamentModularSubscriptions\Services\Concerns;
 
-use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
-use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
-use HoceineEl\FilamentModularSubscriptions\Models\Payment;
+use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
+use NewTags\FilamentModularSubscriptions\Models\Invoice;
+use NewTags\FilamentModularSubscriptions\Models\Payment;
 
 abstract class PaymentService
 {

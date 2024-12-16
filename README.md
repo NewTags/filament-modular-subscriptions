@@ -75,13 +75,13 @@ return [
         \App\Modules\StorageModule::class,
     ],
     'models' => [
-        'plan' => \HoceineEl\FilamentModularSubscriptions\Models\Plan::class,
-        'subscription' => \HoceineEl\FilamentModularSubscriptions\Models\Subscription::class,
+        'plan' => \NewTags\FilamentModularSubscriptions\Models\Plan::class,
+        'subscription' => \NewTags\FilamentModularSubscriptions\Models\Subscription::class,
         // ... other models
     ],
     'resources' => [
-        'plan' => \HoceineEl\FilamentModularSubscriptions\Resources\PlanResource::class,
-        'subscription' => \HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource::class,
+        'plan' => \NewTags\FilamentModularSubscriptions\Resources\PlanResource::class,
+        'subscription' => \NewTags\FilamentModularSubscriptions\Resources\SubscriptionResource::class,
         // ... other resources
     ],
     'tables' => [
@@ -100,7 +100,7 @@ return [
 ### Registering the Plugin
 
 ```php
-use HoceineEl\FilamentModularSubscriptions\ModularSubscriptionsPlugin;
+use NewTags\FilamentModularSubscriptions\ModularSubscriptionsPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -117,8 +117,8 @@ class AdminPanelProvider extends PanelProvider
 ### Creating a Module
 
 ```php
-use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Modules\BaseModule;
+use NewTags\FilamentModularSubscriptions\Models\Subscription;
 
 class ApiCallsModule extends BaseModule
 {
@@ -163,8 +163,8 @@ Register your module in the config:
 ### Creating a Plan
 
 ```php
-use HoceineEl\FilamentModularSubscriptions\Models\Plan;
-use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
+use NewTags\FilamentModularSubscriptions\Models\Plan;
+use NewTags\FilamentModularSubscriptions\Enums\Interval;
 
 $plan = Plan::create([
     'name' => ['en' => 'Pro Plan', 'ar' => 'الخطة الاحترافية'],
@@ -192,8 +192,8 @@ $plan->modules()->attach($apiCallsModule->id, [
 ### Creating a Subscription
 
 ```php
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
-use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 
 $user = User::find(1);
 $plan = Plan::where('slug', 'pro-plan')->first();
@@ -242,7 +242,7 @@ if ($subscription->hasEnded()) {
 ### Working with Invoices
 
 ```php
-use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
+use NewTags\FilamentModularSubscriptions\Services\InvoiceService;
 
 // Generate an invoice
 $invoiceService = app(InvoiceService::class);

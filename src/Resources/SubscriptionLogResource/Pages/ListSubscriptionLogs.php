@@ -1,9 +1,9 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionLogResource\Pages;
+namespace NewTags\FilamentModularSubscriptions\Resources\SubscriptionLogResource\Pages;
 
 use Filament\Resources\Pages\ListRecords;
-use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionLogResource;
+use NewTags\FilamentModularSubscriptions\Resources\SubscriptionLogResource;
 
 class ListSubscriptionLogs extends ListRecords
 {

@@ -1,14 +1,14 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Commands;
+namespace NewTags\FilamentModularSubscriptions\Commands;
 
-use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
-use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
-use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
-use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
-use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
-use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
-use HoceineEl\FilamentModularSubscriptions\Services\SubscriptionLogService;
+use NewTags\FilamentModularSubscriptions\Models\Invoice;
+use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
+use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use NewTags\FilamentModularSubscriptions\Enums\Interval;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\Services\InvoiceService;
+use NewTags\FilamentModularSubscriptions\Services\SubscriptionLogService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;

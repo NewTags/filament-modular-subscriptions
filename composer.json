@@ -46,12 +46,12 @@
     },
     "autoload": {
         "psr-4": {
-            "HoceineEl\\FilamentModularSubscriptions\\": "src/"
+            "NewTags\\FilamentModularSubscriptions\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "HoceineEl\\FilamentModularSubscriptions\\Tests\\": "tests/"
+            "NewTags\\FilamentModularSubscriptions\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -71,7 +71,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "HoceineEl\\FilamentModularSubscriptions\\ModularSubscriptionsServiceProvider"
+                "NewTags\\FilamentModularSubscriptions\\ModularSubscriptionsServiceProvider"
             ]
         },
         "minimum-stability": "dev",

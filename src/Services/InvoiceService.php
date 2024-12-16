@@ -1,12 +1,12 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Services;
+namespace NewTags\FilamentModularSubscriptions\Services;
 
-use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
-use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
-use HoceineEl\FilamentModularSubscriptions\Events\InvoiceGenerated;
-use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\Events\InvoiceGenerated;
+use NewTags\FilamentModularSubscriptions\Models\Invoice;
+use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 

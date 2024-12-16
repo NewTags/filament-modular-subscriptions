@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Database\Seeder;
 
 class SubscriptionSeeder extends Seeder

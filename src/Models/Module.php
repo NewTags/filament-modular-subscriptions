@@ -1,8 +1,8 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Models;
+namespace NewTags\FilamentModularSubscriptions\Models;
 
-use HoceineEl\FilamentModularSubscriptions\Modules\BaseModule;
+use NewTags\FilamentModularSubscriptions\Modules\BaseModule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;

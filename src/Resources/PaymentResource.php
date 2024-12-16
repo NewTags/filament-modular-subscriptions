@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources;
+namespace NewTags\FilamentModularSubscriptions\Resources;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
@@ -12,16 +12,16 @@ use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
-use HoceineEl\FilamentModularSubscriptions\Components\FileEntry;
-use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
-use HoceineEl\FilamentModularSubscriptions\Enums\PaymentMethod;
-use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
-use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
-use HoceineEl\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
+use NewTags\FilamentModularSubscriptions\Components\FileEntry;
+use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use NewTags\FilamentModularSubscriptions\Enums\PaymentMethod;
+use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\FmsPlugin;
 
 class PaymentResource extends Resource
 {

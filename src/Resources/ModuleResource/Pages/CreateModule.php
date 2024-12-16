@@ -1,9 +1,9 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource\Pages;
+namespace NewTags\FilamentModularSubscriptions\Resources\ModuleResource\Pages;
 
 use Filament\Resources\Pages\CreateRecord;
-use HoceineEl\FilamentModularSubscriptions\Resources\ModuleResource;
+use NewTags\FilamentModularSubscriptions\Resources\ModuleResource;
 
 class CreateModule extends CreateRecord
 {

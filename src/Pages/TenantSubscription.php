@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Pages;
+namespace NewTags\FilamentModularSubscriptions\Pages;
 
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -8,16 +8,16 @@ use Filament\Pages\Page;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource;
-use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
-use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Resources\InvoiceResource;
+use NewTags\FilamentModularSubscriptions\Services\InvoiceService;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Closure;
-use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
-use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use NewTags\FilamentModularSubscriptions\FmsPlugin;
 
 class TenantSubscription extends Page implements HasTable
 {
@@ -304,7 +304,6 @@ class TenantSubscription extends Page implements HasTable
                             $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $plan);
                             $subscription = $tenant->subscription;
                             $this->sendSubscriptionNotification($subscription, false);
-
                         } else {
                             Notification::make()
                                 ->title(__('filament-modular-subscriptions::fms.notifications.subscription.trial.you_cant_use_trial'))

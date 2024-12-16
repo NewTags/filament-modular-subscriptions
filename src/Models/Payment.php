@@ -1,9 +1,9 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Models;
+namespace NewTags\FilamentModularSubscriptions\Models;
 
-use HoceineEl\FilamentModularSubscriptions\Enums\PaymentMethod;
-use HoceineEl\FilamentModularSubscriptions\Enums\PaymentStatus;
+use NewTags\FilamentModularSubscriptions\Enums\PaymentMethod;
+use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

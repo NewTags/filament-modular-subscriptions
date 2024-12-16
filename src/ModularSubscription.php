@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions;
+namespace NewTags\FilamentModularSubscriptions;
 
 use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;

@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\View\Components;
+namespace NewTags\FilamentModularSubscriptions\View\Components;
 
 use Illuminate\View\Component;
 

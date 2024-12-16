@@ -1,19 +1,19 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Traits;
+namespace NewTags\FilamentModularSubscriptions\Traits;
 
 use Carbon\Carbon;
-use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
-use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
-use HoceineEl\FilamentModularSubscriptions\Models\Plan;
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Enums\Interval;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\Models\Plan;
+use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
-use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
+use NewTags\FilamentModularSubscriptions\Models\Invoice;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
@@ -22,8 +22,8 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  *
  * Provides subscription management functionality for models.
  *
- * @property-read \HoceineEl\FilamentModularSubscriptions\Models\Subscription|null $subscription
- * @property-read \HoceineEl\FilamentModularSubscriptions\Models\Plan|null $plan
+ * @property-read \NewTags\FilamentModularSubscriptions\Models\Subscription|null $subscription
+ * @property-read \NewTags\FilamentModularSubscriptions\Models\Plan|null $plan
  * @property \Carbon\Carbon|null $trial_ends_at
  */
 trait Subscribable
@@ -309,7 +309,7 @@ trait Subscribable
                 }
 
                 $moduleModel = config('filament-modular-subscriptions.models.module');
-                /** @var \HoceineEl\FilamentModularSubscriptions\Models\Module $module */
+                /** @var \NewTags\FilamentModularSubscriptions\Models\Module $module */
                 $module = $moduleModel::where('class', $moduleClass)
                     ->with(['planModules' => function ($query) use ($activeSubscription) {
                         $query->where('plan_id', $activeSubscription->plan_id);

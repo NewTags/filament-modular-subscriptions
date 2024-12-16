@@ -1,8 +1,8 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Events;
+namespace NewTags\FilamentModularSubscriptions\Events;
 
-use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
+use NewTags\FilamentModularSubscriptions\Models\Invoice;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -13,7 +13,5 @@ class InvoiceGenerated
     /**
      * Create a new event instance.
      */
-    public function __construct(public Invoice $invoice)
-    {
-    }
-} 
+    public function __construct(public Invoice $invoice) {}
+}

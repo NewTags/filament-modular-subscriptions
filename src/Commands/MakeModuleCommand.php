@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Commands;
+namespace NewTags\FilamentModularSubscriptions\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;

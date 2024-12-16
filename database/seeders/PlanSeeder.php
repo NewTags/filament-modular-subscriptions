@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
+use NewTags\FilamentModularSubscriptions\Enums\Interval;
 use Illuminate\Database\Seeder;
 
 class PlanSeeder extends Seeder

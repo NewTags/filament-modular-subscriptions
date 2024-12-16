@@ -1,12 +1,12 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource\Pages;
+namespace NewTags\FilamentModularSubscriptions\Resources\SubscriptionResource\Pages;
 
 use Filament\Resources\Pages\CreateRecord;
-use HoceineEl\FilamentModularSubscriptions\Resources\SubscriptionResource;
-use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
-use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
-use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\Resources\SubscriptionResource;
+use NewTags\FilamentModularSubscriptions\Services\InvoiceService;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\FmsPlugin;
 use Illuminate\Database\Eloquent\Model;
 
 class CreateSubscription extends CreateRecord

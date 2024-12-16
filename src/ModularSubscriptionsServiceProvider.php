@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions;
+namespace NewTags\FilamentModularSubscriptions;
 
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
@@ -8,8 +8,8 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
-use HoceineEl\FilamentModularSubscriptions\Commands\MakeModuleCommand;
-use HoceineEl\FilamentModularSubscriptions\Commands\ScheduleInvoiceGeneration;
+use NewTags\FilamentModularSubscriptions\Commands\MakeModuleCommand;
+use NewTags\FilamentModularSubscriptions\Commands\ScheduleInvoiceGeneration;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;

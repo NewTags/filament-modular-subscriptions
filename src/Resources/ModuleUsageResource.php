@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources;
+namespace NewTags\FilamentModularSubscriptions\Resources;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
@@ -12,10 +12,10 @@ use Filament\Support\Colors\Color;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
-use HoceineEl\FilamentModularSubscriptions\ModularSubscription;
-use HoceineEl\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages;
+use NewTags\FilamentModularSubscriptions\ModularSubscription;
+use NewTags\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\FmsPlugin;
 
 class ModuleUsageResource extends Resource
 {

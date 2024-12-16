@@ -1,9 +1,9 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
+namespace NewTags\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 
 use Filament\Resources\Pages\ListRecords;
-use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource;
+use NewTags\FilamentModularSubscriptions\Resources\InvoiceResource;
 
 class ListInvoices extends ListRecords
 {

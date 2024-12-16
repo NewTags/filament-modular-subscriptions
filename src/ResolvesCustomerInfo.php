@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions;
+namespace NewTags\FilamentModularSubscriptions;
 
 class ResolvesCustomerInfo
 {

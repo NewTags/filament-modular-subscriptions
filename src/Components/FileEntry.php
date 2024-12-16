@@ -1,6 +1,6 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Components;
+namespace NewTags\FilamentModularSubscriptions\Components;
 
 use Filament\Infolists\Components\Entry;
 

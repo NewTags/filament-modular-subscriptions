@@ -1,8 +1,8 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Models;
+namespace NewTags\FilamentModularSubscriptions\Models;
 
-use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
+use NewTags\FilamentModularSubscriptions\Enums\Interval;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

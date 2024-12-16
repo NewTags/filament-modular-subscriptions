@@ -1,8 +1,8 @@
 <?php
 
-namespace HoceineEl\FilamentModularSubscriptions\Modules;
+namespace NewTags\FilamentModularSubscriptions\Modules;
 
-use HoceineEl\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Models\Subscription;
 
 abstract class BaseModule
 {
