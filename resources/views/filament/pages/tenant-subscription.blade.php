@@ -345,8 +345,9 @@
                 <div x-show="tab === 'invoices'" class="animate-fade-in">
                     {{ $this->getTable() }}
                 </div>
+
                 <div x-show="tab === 'usage'" class="animate-fade-in">
-                    {{ $this->usageTable() }}
+                    @livewire(\NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget::class)
                 </div>
             </div>
         </div>

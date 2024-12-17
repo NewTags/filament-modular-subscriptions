@@ -62,6 +62,9 @@ class ModuleUsageResource extends Resource
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table
+            ->heading(__('filament-modular-subscriptions::fms.resources.module_usage.name'))
+            ->modelLabel(__('filament-modular-subscriptions::fms.resources.module_usage.singular_name'))
+            ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.module_usage.name'))
             ->columns([
                 Tables\Columns\TextColumn::make('subscription.subscribable.name')
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.subscriber'))
