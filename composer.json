@@ -1,8 +1,11 @@
 {
-    "name": "hoceineel/filament-modular-subscriptions",
+    "name": "newtags/filament-modular-subscriptions",
     "description": "A Filament plugin for managing modular subscriptions with pricing and usage calculation.",
     "keywords": [
         "hoceineel",
+        "newtags",
+        "Eisar App",
+        "Hoceine El Idrissi",
         "laravel",
         "filament",
         "filament-modular-subscriptions",
@@ -11,10 +14,10 @@
         "modules",
         "filament-resources"
     ],
-    "homepage": "https://github.com/hoceineel/filament-modular-subscriptions",
+    "homepage": "https://github.com/newtags/filament-modular-subscriptions",
     "support": {
-        "issues": "https://github.com/hoceineel/filament-modular-subscriptions/issues",
-        "source": "https://github.com/hoceineel/filament-modular-subscriptions"
+        "issues": "https://github.com/newtags/filament-modular-subscriptions/issues",
+        "source": "https://github.com/newtags/filament-modular-subscriptions"
     },
     "license": "MIT",
     "authors": [
