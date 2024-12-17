@@ -1,17 +1,31 @@
 <x-filament-panels::page>
     <div class="md:mx-auto space-y-8 px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <div x-data="{ tab: 'subscription' }">
+        <div x-data="{
+            tab: 'subscription',
+            init() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const tabParam = urlParams.get('tab');
+                if (['subscription', 'plans', 'invoices'].includes(tabParam)) {
+                    this.tab = tabParam;
+                }
+            }
+        }">
             <div class="overflow-x-auto">
-                <x-filament::tabs label="Subscription tabs" class="flex-nowrap">
-                    <x-filament::tabs.item icon="heroicon-o-credit-card" @click="tab = 'subscription'" :alpine-active="'tab === \'subscription\''">
+                <x-filament::tabs label="Subscription tabs" class="flex-nowrap" persistent>
+                    <x-filament::tabs.item icon="heroicon-o-credit-card"
+                        @click="tab = 'subscription'; $dispatch('change-tab', 'subscription'); window.history.pushState(null, '', window.location.pathname + '?tab=subscription')"
+                        :alpine-active="'tab === \'subscription\' || !tab'">
                         {{ __('filament-modular-subscriptions::fms.tenant_subscription.current_subscription') }}
                     </x-filament::tabs.item>
 
-                    <x-filament::tabs.item icon="heroicon-o-clipboard-document-list" @click="tab = 'plans'"
+                    <x-filament::tabs.item icon="heroicon-o-clipboard-document-list"
+                        @click="tab = 'plans'; $dispatch('change-tab', 'plans'); window.history.pushState(null, '', window.location.pathname + '?tab=plans')"
                         :alpine-active="'tab === \'plans\''">
                         {{ __('filament-modular-subscriptions::fms.tenant_subscription.available_plans') }}
                     </x-filament::tabs.item>
-                    <x-filament::tabs.item icon="heroicon-o-document-text" @click="tab = 'invoices'"
+
+                    <x-filament::tabs.item icon="heroicon-o-document-text"
+                        @click="tab = 'invoices'; $dispatch('change-tab', 'invoices'); window.history.pushState(null, '', window.location.pathname + '?tab=invoices')"
                         :alpine-active="'tab === \'invoices\''">
                         {{ __('filament-modular-subscriptions::fms.tenant_subscription.invoices') }}
                     </x-filament::tabs.item>
