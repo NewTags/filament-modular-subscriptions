@@ -5,7 +5,7 @@
             init() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const tabParam = urlParams.get('tab');
-                if (['subscription', 'plans', 'invoices'].includes(tabParam)) {
+                if (['subscription', 'plans', 'invoices', 'usage'].includes(tabParam)) {
                     this.tab = tabParam;
                 }
             }
@@ -28,6 +28,11 @@
                         @click="tab = 'invoices'; $dispatch('change-tab', 'invoices'); window.history.pushState(null, '', window.location.pathname + '?tab=invoices')"
                         :alpine-active="'tab === \'invoices\''">
                         {{ __('filament-modular-subscriptions::fms.tenant_subscription.invoices') }}
+                    </x-filament::tabs.item>
+                    <x-filament::tabs.item icon="heroicon-o-document-text"
+                        @click="tab = 'usage'; $dispatch('change-tab', 'usage'); window.history.pushState(null, '', window.location.pathname + '?tab=usage')"
+                        :alpine-active="'tab === \'usage\''">
+                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.usage') }}
                     </x-filament::tabs.item>
                 </x-filament::tabs>
             </div>
@@ -339,6 +344,9 @@
 
                 <div x-show="tab === 'invoices'" class="animate-fade-in">
                     {{ $this->getTable() }}
+                </div>
+                <div x-show="tab === 'usage'" class="animate-fade-in">
+                    {{ $this->usageTable() }}
                 </div>
             </div>
         </div>

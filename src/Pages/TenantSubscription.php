@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Closure;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use NewTags\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\Resources\ModuleUsageResource;
 
 class TenantSubscription extends Page implements HasTable
 {
@@ -372,6 +373,14 @@ class TenantSubscription extends Page implements HasTable
             config('filament-modular-subscriptions.models.invoice')::query()
                 ->where('tenant_id', FmsPlugin::getTenant()->id)
                 ->with(['items', 'subscription.plan'])
+        );
+    }
+    public function usageTable(Table $table): Table
+    {
+        return (new ModuleUsageResource)->table($table)->query(
+            config('filament-modular-subscriptions.models.module_usage')::query()
+                ->where('subscription_id', FmsPlugin::getTenant()->subscription?->id)
+                ->with(['module', 'subscription.plan'])
         );
     }
 
