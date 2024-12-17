@@ -223,6 +223,7 @@ return [
     ],
     'tenant_subscription' => [
         'renew_subscription' => 'تجديد الاشتراك',
+        'invoices' => 'الفواتير',
         'your_subscription' => 'تفاصيل اشتراكك',
         'current_subscription' => 'الاشتراك الحالي',
         'subscription_progress' => 'تقدم الاشتراك',

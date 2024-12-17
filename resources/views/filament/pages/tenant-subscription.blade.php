@@ -11,6 +11,10 @@
                         :alpine-active="'tab === \'plans\''">
                         {{ __('filament-modular-subscriptions::fms.tenant_subscription.available_plans') }}
                     </x-filament::tabs.item>
+                    <x-filament::tabs.item icon="heroicon-o-document-text" @click="tab = 'invoices'"
+                        :alpine-active="'tab === \'invoices\''">
+                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.invoices') }}
+                    </x-filament::tabs.item>
                 </x-filament::tabs>
             </div>
 
@@ -319,7 +323,7 @@
                     </x-filament::section>
                 </div>
 
-                <div class="mt-8">
+                <div x-show="tab === 'invoices'" class="animate-fade-in">
                     {{ $this->getTable() }}
                 </div>
             </div>
