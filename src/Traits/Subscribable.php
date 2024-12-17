@@ -329,12 +329,17 @@ trait Subscribable
     /**
      * Create a new subscription for the model.
      */
-    public function subscribe(Plan $plan, ?Carbon $startDate = null, ?Carbon $endDate = null, ?int $trialDays = null): Subscription
+    public function subscribe(Plan $plan, ?Carbon $startDate = null, ?Carbon $endDate = null, ?int $trialDays = null): ?Subscription
     {
         $startDate = $startDate ?? now();
 
         if ($plan->isTrialPlan() && !$this->canUseTrial()) {
-            throw new \Exception(__('filament-modular-subscriptions::fms.errors.trial_already_used'));
+            Notification::make()
+                ->title(__('filament-modular-subscriptions::fms.errors.trial_already_used'))
+                ->danger()
+                ->send();
+
+            return null;
         }
 
         if ($endDate === null) {
