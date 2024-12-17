@@ -16,8 +16,10 @@
         }
     @endphp
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+
         body {
-            font-size: 8px;
+            font-size: 6px;
             font-family: Cairo;
         }
 
@@ -50,11 +52,17 @@
                     style="border: none;border-left: none; border-right: none;text-align: center;font-weight: bolder;font-size: 12pt;">
                     {{ __('filament-modular-subscriptions::fms.invoice.invoice_title') }}</td>
                 <td
-                    style="border: none;border-left: none; border-right: none;text-align: left;font-weight: bolder;font-size: 12pt;padding: 10px;">
-                    <span
-                        style="background-color: {{ $invoice->status->value == 'paid' ? '#dcfce7' : '#fee2e2' }};color: {{ $invoice->status->value == 'paid' ? '#166534' : '#991b1b' }};padding: 10px;border-radius: 10px;">
-                        {{ $invoice->status->getLabel() }}
-                    </span>
+                    style="border: none;border-left: none; border-right: none;text-align: left;font-weight: bolder;font-size: 12pt;">
+                    @if ($invoice->status->value != 'paid')
+                        <span
+                            style="background-color: #fee2e2;color: #991b1b;text-align: center;padding: 5px 10px;display: inline-block;">
+                            {{ $invoice->status->getLabel() }}
+                        </span>
+                    @else
+                        <span style="background-color: #dcfce7;color: #166534;padding: 5px 10px;display: inline-block;">
+                            {{ $invoice->status->getLabel() }}
+                        </span>
+                    @endif
                 </td>
             </tr>
         </tbody>
@@ -66,12 +74,14 @@
                 <th scope="col" style="border: none;border-left: none; border-right: none;">
                     {{ __('filament-modular-subscriptions::fms.invoice.number') }}</th>
                 <th scope="col" style="border: none;border-left: none; border-right: none;">{{ $invoice->id }}</th>
-                <th scope="col" style="border: none;border-left: none; border-right: none;">E-Invoice #:</th>
+                <th scope="col" style="border: none;border-left: none; border-right: none; direction: ltr;">E-Invoice
+                    #:</th>
                 <th scope="col" style="border: none;border-left: none; border-right: none;">
                     {{ __('filament-modular-subscriptions::fms.invoice.date') }}:</th>
                 <th scope="col" style="border: none;border-left: none; border-right: none;">
                     {{ now()->format('Y/m/d') }}</th>
-                <th scope="col" style="border: none;border-left: none; border-right: none;text-align: left;">
+                <th scope="col"
+                    style="border: none;border-left: none; border-right: none;text-align: left;direction: ltr;">
                     E-Invoice Date #:</th>
             </tr>
         </thead>
@@ -83,11 +93,13 @@
             <tr style="background-color: #e5e7eb;border: none;">
                 <th scope="col" style="border: none;border-left: none; border-right: none;">
                     {{ __('filament-modular-subscriptions::fms.invoice.billing_to') }}:</th>
-                <th scope="col" style="border: none;border-left: none; border-right: none;text-align: left;">From:
+                <th scope="col"
+                    style="border: none;border-left: none; border-right: none;text-align: left;direction: ltr;">From:
                 </th>
                 <th scope="col" style="border: none;border-left: none; border-right: none;">
                     {{ __('filament-modular-subscriptions::fms.invoice.bill_to') }}:</th>
-                <th scope="col" style="border: none;border-left: none; border-right: none;text-align: left;">Bill To:
+                <th scope="col"
+                    style="border: none;border-left: none; border-right: none;text-align: left;direction: ltr;">Bill To:
                 </th>
             </tr>
         </thead>
@@ -120,31 +132,35 @@
     <br />
     <table style="border: none;border-collapse: collapse;" cellpadding="6">
         <thead style="border: none;">
-            <tr style="background-color: #e5e7eb;border: none;">
+            <tr style="background-color: #e5e7eb;border: none; ">
                 <th style="border: none;border-left: none; border-right: none;" width="10%">No.</th>
-                <th style="border: none;border-left: none; border-right: none;" width="40%">
-                    {{ __('filament-modular-subscriptions::fms.invoice.item') }}</th>
-                <th style="border: none;border-left: none; border-right: none;" width="10%">
-                    {{ __('filament-modular-subscriptions::fms.invoice.quantity') }}</th>
-                <th style="border: none;border-left: none; border-right: none;" width="15%">
-                    {{ __('filament-modular-subscriptions::fms.invoice.unit_price') }}</th>
-                <th style="border: none;border-left: none; border-right: none;" width="25%">
-                    {{ __('filament-modular-subscriptions::fms.invoice.total') }}</th>
+                <th style="border: none;border-left: none; border-right: none;" width="50%">الصنف | Item</th>
+                <th style="border: none;border-left: none; border-right: none;" width="10%">الكمية | Qty</th>
+                <th style="border: none;border-left: none; border-right: none;" width="10%">السعر | Price</th>
+                <th style="border: none;border-left: none; border-right: none;" width="10%">الضريبة | VAT</th>
+                <th style="border: none;border-left: none; border-right: none;" width="10%">الإجمالي | Total</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($invoice->items as $item)
+                @php
+                    $itemSubtotal = $item->quantity * $item->unit_price;
+                    $itemTax = $itemSubtotal * 0.15;
+                    $itemTotal = $itemSubtotal + $itemTax;
+                @endphp
                 <tr>
                     <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
                         {{ $loop->iteration }}</td>
-                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="50%">
+                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="20%">
                         {{ $item->description }}</td>
-                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
+                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="15%">
                         {{ $item->quantity }}</td>
-                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
+                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="15%">
                         {{ number_format($item->unit_price, 2, '.', '') }}</td>
-                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="10%">
-                        {{ number_format($item->total, 2, '.', '') }}</td>
+                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="15%">
+                        {{ number_format($itemTax, 2, '.', '') }}</td>
+                    <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;" width="20%">
+                        {{ number_format($itemTotal, 2, '.', '') }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -155,33 +171,44 @@
         <thead style="border: none;">
             <tr style="background-color: #e5e7eb;border: none;">
                 <th colspan="3" style="border: none;border-left: none; border-right: none;text-align: center;">
-                    {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}</th>
+                    {{ __('filament-modular-subscriptions::fms.invoice.total') }}</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
-                    {{ __('filament-modular-subscriptions::fms.invoice.subtotal') }}</td>
-                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">Subtotal</td>
+                    {{ __('filament-modular-subscriptions::fms.invoice.subtotal') }}
+                </td>
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
+                    {{ number_format($invoice->subtotal, 2) }}
+                    {{ __('filament-modular-subscriptions::fms.invoice.currency') }}
+                </td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: ltr;">
-                    {{ number_format($invoice->subtotal, 2) }} {{ __('filament-modular-subscriptions::fms.invoice.currency') }}</td>
+                    Subtotal
+                </td>
             </tr>
             <tr>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
                     {{ __('filament-modular-subscriptions::fms.invoice.tax_amount', ['percentage' => config('filament-modular-subscriptions.tax_percentage')]) }}
                 </td>
-                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">VAT
-                    ({{ config('filament-modular-subscriptions.tax_percentage') }}%)</td>
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
+                    {{ number_format($invoice->tax, 2) }}
+                    {{ __('filament-modular-subscriptions::fms.invoice.currency') }}
+                </td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: ltr;">
-                    {{ number_format($invoice->tax, 2) }} {{ __('filament-modular-subscriptions::fms.invoice.currency') }}</td>
+                    VAT({{ config('filament-modular-subscriptions.tax_percentage') }}%)
+                </td>
             </tr>
             <tr style="background-color: #e5e7eb;border: none;">
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
                     {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}</td>
-                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">Total with VAT</td>
-                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: rtl;">
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
                     {{ number_format($invoice->amount, 2, '.', '') }}
-                    {{ __('filament-modular-subscriptions::fms.invoice.currency') }}</td>
+                    {{ __('filament-modular-subscriptions::fms.invoice.currency') }}
+                </td>
+                <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: ltr;">
+                    Total with VAT
+                </td>
             </tr>
         </tbody>
     </table>
