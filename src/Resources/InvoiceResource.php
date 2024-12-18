@@ -332,30 +332,7 @@ class InvoiceResource extends Resource
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.bank_details'))
                                         ->schema([
                                             Placeholder::make('bank_card')
-                                                ->content(fn($record) => new HtmlString('
-                                                    <div class="w-96 p-8 bg-gradient-to-tr from-gray-900 to-gray-800 rounded-xl relative text-white shadow-2xl">
-                                                        <div class="space-y-4">
-                                                            <div class="">
-                                                                <p class="font-light text-xs">' . __('filament-modular-subscriptions::fms.resources.payment.bank_name') . '</p>
-                                                                <p class="font-medium tracking-widest text-lg">' . config('filament-modular-subscriptions.company_bank_name') . '</p>
-                                                            </div>
-                                                            <div>
-                                                                <p class="font-light text-xs">' . __('filament-modular-subscriptions::fms.resources.payment.account_number') . '</p>
-                                                                <p class="font-medium tracking-more-wider text-lg">' . config('filament-modular-subscriptions.company_bank_account') . '</p>
-                                                            </div>
-                                                            <div class="flex justify-between">
-                                                                <div>
-                                                                    <p class="font-light text-xs">' . __('filament-modular-subscriptions::fms.resources.payment.iban') . '</p>
-                                                                    <p class="font-medium tracking-wider text-sm">' . config('filament-modular-subscriptions.company_bank_iban') . '</p>
-                                                                </div>
-                                                                <div>
-                                                                    <p class="font-light text-xs">' . __('filament-modular-subscriptions::fms.resources.payment.swift') . '</p>
-                                                                    <p class="font-medium tracking-wider text-sm">' . config('filament-modular-subscriptions.company_bank_swift') . '</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                '))
+                                                ->content(fn($record) => view('vendor.filament-modular-subscriptions.components.bank-card'))
                                                 ->columnSpanFull(),
                                         ]),
                                     TextInput::make('amount')
