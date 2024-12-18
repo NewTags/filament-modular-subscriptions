@@ -92,6 +92,10 @@ return [
     'company_address' => 'العنوان',
     'company_email' => 'info@company.com',
     'company_logo' => '/images/company-logo.png',
+    'company_bank_account' => 'XXXXXXXXXXXXXXXXXXX',
+    'company_bank_name' => 'XXXXXXXXXXXXXXXXXXX',
+    'company_bank_iban' => 'XXXXXXXXXXXXXXXXXXX',
+    'company_bank_swift' => 'XXXXXXXXXXXXXXXXXXX',
     'tax_percentage' => 15,
     'tenant_fields' => [
         'name' => 'name', // default field or custom accessor
