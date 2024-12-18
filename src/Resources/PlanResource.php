@@ -103,6 +103,11 @@ class PlanResource extends Resource
                                     ->required()
                                     ->hidden(fn(Forms\Get $get) => $get('is_trial_plan') || $get('is_pay_as_you_go'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.price')),
+                                Forms\Components\TextInput::make('setup_fee')
+                                    ->numeric()
+                                    ->required()
+                                    ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
+                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.setup_fee')),
                                 Forms\Components\Select::make('currency')
                                     ->options(config('filament-modular-subscriptions.currencies'))
                                     ->default(config('filament-modular-subscriptions.main_currency'))

@@ -29,7 +29,7 @@ trait GeneratesInvoices
         if ($this->hasCurrentPeriodInvoice($subscription)) {
             return null;
         }
-
+        
         return $this->generate($subscription);
     }
 
@@ -71,7 +71,7 @@ trait GeneratesInvoices
             'tenant' => $subscription->subscribable->name,
             'currency' => $subscription->plan->currency
         ]);
-        
+
         $subscribable->invalidateSubscriptionCache();
     }
 
@@ -82,13 +82,23 @@ trait GeneratesInvoices
         } else {
             $this->createFixedPriceItem($invoice, $subscription);
         }
+        $plan = $subscription->plan;
+        if ($subscription->invoices()->count() == 1 && $plan->setup_fee > 0) {
+            $invoice->items()->create([
+                'description' => __('filament-modular-subscriptions::fms.invoice.setup_fee'),
+                'total' => $plan->setup_fee,
+                'quantity' => 1,
+                'unit_price' => $plan->setup_fee,
+            ]);
+        }
     }
 
     private function createPayAsYouGoItems(Invoice $invoice, Subscription $subscription): void
     {
         $subscription->load('moduleUsages.module');
+        $plan = $subscription->plan;
         foreach ($subscription->moduleUsages as $moduleUsage) {
-            $unitPrice = $subscription->plan->modulePrice($moduleUsage->module);
+            $unitPrice = $plan->modulePrice($moduleUsage->module);
             $total = $moduleUsage->usage * $unitPrice;
 
             $invoice->items()->create([
@@ -106,11 +116,12 @@ trait GeneratesInvoices
 
     private function createFixedPriceItem(Invoice $invoice, Subscription $subscription, $plan = null): void
     {
-        $price = $plan ? $plan->price : $subscription->plan->price;
+        $plan = $plan ?? $subscription->plan;
+        $price = $plan->price;
         $invoice->items()->create([
             'description' => __('filament-modular-subscriptions::fms.invoice.subscription_fee', [
-                'plan' => $subscription->plan->trans_name,
-                'currency' => $subscription->plan->currency
+                'plan' => $plan->trans_name,
+                'currency' => $plan->currency
             ]),
             'quantity' => 1,
             'unit_price' => $price,
@@ -134,4 +145,4 @@ trait GeneratesInvoices
             return $invoice;
         });
     }
-} 
+}

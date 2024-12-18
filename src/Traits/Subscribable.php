@@ -136,14 +136,12 @@ trait Subscribable
             function () {
                 $activeSubscription = $this->activeSubscription();
                 if (! $activeSubscription) {
-                    return null;
+                    return 0;
                 }
 
-                $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
-
-                return $gracePeriodEndDate
-                    ? number_format(now()->diffInDays($gracePeriodEndDate, false))
-                    : null;
+                return $activeSubscription->ends_at
+                    ? number_format(now()->diffInDays($activeSubscription->ends_at, false))
+                    : 0;
             }
         );
     }
@@ -161,6 +159,25 @@ trait Subscribable
         $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
 
         return $gracePeriodEndDate && $gracePeriodEndDate->isPast();
+    }
+
+    /**
+     * Check if the subscription is in the grace period.
+     */
+    public function isInGracePeriod(): bool
+    {
+        $activeSubscription = $this->activeSubscription();
+        if (! $activeSubscription) {
+            return false;
+        }
+
+        $now = now();
+        $endsAt = $activeSubscription->ends_at;
+        $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
+
+        return $endsAt && $gracePeriodEndDate && 
+            $now->isAfter($endsAt) && 
+            $now->isBefore($gracePeriodEndDate);
     }
 
     /**

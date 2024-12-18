@@ -59,12 +59,23 @@
                             {{ __('filament-modular-subscriptions::fms.invoice.unit_price') }}
                         </th>
                         <th scope="col" class="px-6 py-3 text-right">
+                            {{ __('filament-modular-subscriptions::fms.invoice.vat') }}
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-right">
                             {{ __('filament-modular-subscriptions::fms.invoice.total') }}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($invoice->items as $item)
+                        @php
+                            $itemTax =
+                                ($item->unit_price *
+                                    $item->quantity *
+                                    config('filament-modular-subscriptions.tax_percentage')) /
+                                100;
+                            $itemTotal = $item->unit_price * $item->quantity + $itemTax;
+                        @endphp
                         <tr class="bg-white border-b">
                             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                                 {{ $item->description }}
@@ -75,8 +86,11 @@
                             <td class="px-6 py-4 text-right">
                                 {{ number_format($item->unit_price, 2) }} {{ $invoice->subscription->plan->currency }}
                             </td>
+                            <td class="px-6 py-4 text-right">
+                                {{ number_format($itemTax, 2) }} {{ $invoice->subscription->plan->currency }}
+                            </td>
                             <td class="px-6 py-4 text-right font-medium">
-                                {{ number_format($item->total, 2) }} {{ $invoice->subscription->plan->currency }}
+                                {{ number_format($itemTotal, 2) }} {{ $invoice->subscription->plan->currency }}
                             </td>
                         </tr>
                     @endforeach
