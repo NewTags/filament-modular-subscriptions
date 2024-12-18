@@ -175,8 +175,8 @@ trait Subscribable
         $endsAt = $activeSubscription->ends_at;
         $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
 
-        return $endsAt && $gracePeriodEndDate && 
-            $now->isAfter($endsAt) && 
+        return $endsAt && $gracePeriodEndDate &&
+            $now->isAfter($endsAt) &&
             $now->isBefore($gracePeriodEndDate);
     }
 

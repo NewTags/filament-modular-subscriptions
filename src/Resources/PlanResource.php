@@ -105,7 +105,7 @@ class PlanResource extends Resource
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.price')),
                                 Forms\Components\TextInput::make('setup_fee')
                                     ->numeric()
-                                    ->required()
+                                    ->helperText(__('filament-modular-subscriptions::fms.resources.plan.hints.setup_fee'))
                                     ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.setup_fee')),
                                 Forms\Components\Select::make('currency')
