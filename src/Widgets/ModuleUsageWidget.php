@@ -19,6 +19,7 @@ class ModuleUsageWidget extends BaseWidget
             ->filters([])
             ->actions([])
             ->bulkActions([])
+            ->searchable(false)
             ->query(
                 config('filament-modular-subscriptions.models.usage')::query()
                     ->where('subscription_id', FmsPlugin::getTenant()->subscription?->id)
@@ -26,4 +27,3 @@ class ModuleUsageWidget extends BaseWidget
             );
     }
 }
-

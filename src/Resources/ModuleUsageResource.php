@@ -104,7 +104,7 @@ class ModuleUsageResource extends Resource
                             ->numeric()
                             ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.usage_to')),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
+                    ->query(function (Builder $query, array $data): Builder {        
                         return $query
                             ->when(
                                 $data['usage_from'],
