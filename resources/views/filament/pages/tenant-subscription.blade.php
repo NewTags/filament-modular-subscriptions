@@ -27,7 +27,7 @@
                     <x-filament::tabs.item icon="heroicon-o-document-text"
                         @click="tab = 'invoices'; $dispatch('change-tab', 'invoices'); window.history.pushState(null, '', window.location.pathname + '?tab=invoices')"
                         :alpine-active="'tab === \'invoices\''">
-                        <x-slot name="badge" >
+                        <x-slot name="badge">
                             {{ $tenant->unpaidInvoices()->count() }}
                         </x-slot>
                         {{ __('filament-modular-subscriptions::fms.tenant_subscription.invoices') }}
@@ -192,7 +192,7 @@
                 </div>
 
                 {{-- Available Plans Tab --}}
-                <div x-show="tab === 'plans'" class="animate-fade-in">
+                <div x-show="tab === 'plans'" class="animate-fade-in" x-cloak>
                     <x-filament::section class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl"
                         icon="heroicon-o-currency-dollar">
                         <x-slot name="heading">
@@ -343,16 +343,18 @@
                             @endforeach
                         </div>
                     </x-filament::section>
-                    <x-filament-actions::modals />
                 </div>
 
+                <x-filament-actions::modals />
 
                 <div x-show="tab === 'usage'" class="animate-fade-in">
                     @livewire(\NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget::class)
                 </div>
-                <div x-show="tab === 'invoices'" class="animate-fade-in">
+
+                <div x-show="tab === 'invoices'" class="animate-fade-in" x-cloak>
                     {{ $this->getTable() }}
                 </div>
+
             </div>
         </div>
     </div>
