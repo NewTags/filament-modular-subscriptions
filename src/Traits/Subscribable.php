@@ -16,6 +16,8 @@ use Filament\Notifications\Notification;
 use NewTags\FilamentModularSubscriptions\Models\Invoice;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use NewTags\FilamentModularSubscriptions\Services\InvoiceService;
+use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 
 /**
  * Trait Subscribable
@@ -220,30 +222,91 @@ trait Subscribable
     /**
      * Switch to a different subscription plan.
      *
-     * @param  int  $newPlanId  ID of the new plan
+     * @param int $newPlanId ID of the new plan
+     * @param SubscriptionStatus|null $status Optional status for the new subscription
+     * @return bool
      */
-    public function switchPlan(int $newPlanId): bool
+    public function switchPlan(int $newPlanId, ?SubscriptionStatus $status = null): bool
     {
         $activeSubscription = $this->subscription;
-        if (! $activeSubscription) {
+        if (!$activeSubscription) {
             return false;
         }
 
         $planModel = config('filament-modular-subscriptions.models.plan');
         $newPlan = $planModel::findOrFail($newPlanId);
+        $oldPlan = $activeSubscription->plan;
+        $invoiceService = app(InvoiceService::class);
 
-        DB::transaction(function () use ($activeSubscription, $newPlan) {
+        DB::transaction(function () use ($activeSubscription, $newPlan, $oldPlan, $status, $invoiceService) {
+            // Handle existing subscription if pay-as-you-go
+            if ($activeSubscription->plan->is_pay_as_you_go) {
+                $finalInvoice = $invoiceService->generatePayAsYouGoInvoice($activeSubscription);
 
+                $activeSubscription->update([
+                    'status' => SubscriptionStatus::ON_HOLD
+                ]);
+
+                if ($finalInvoice) {
+                    $this->notifySuperAdmins('invoice_generated', [
+                        'invoice_id' => $finalInvoice->id,
+                        'amount' => $finalInvoice->amount,
+                        'currency' => $finalInvoice->currency,
+                    ]);
+                } else {
+                    $this->notifySuperAdmins('invoice_generation_failed', [
+                        'error' => 'Failed to generate final invoice for pay-as-you-go plan',
+                    ]);
+                }
+            }
+
+            // Clean up pending invoices when switching from non-PAYG plan
+            if (($oldPlan && $oldPlan->id != $newPlan->id) && !$oldPlan->is_pay_as_you_go) {
+                $pendingInvoices = $this->invoices()
+                    ->whereIn('status', [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID, InvoiceStatus::REFUNDED])
+                    ->where('subscription_id', $activeSubscription->id)
+                    ->get();
+
+                foreach ($pendingInvoices as $invoice) {
+                    $invoice->update(['status' => InvoiceStatus::CANCELLED]);
+                    $this->notifySuperAdmins('invoice_cancelled', [
+                        'invoice_id' => $invoice->id,
+                        'reason' => 'Plan switch',
+                    ]);
+                }
+            }
+
+            // Clean up module usages based on plan type
             if ($activeSubscription->is_pay_as_you_go) {
                 $activeSubscription->moduleUsages()->delete();
             } elseif ($newPlan->is_pay_as_you_go && !$activeSubscription->plan->is_pay_as_you_go) {
                 $activeSubscription->moduleUsages()->delete();
             }
 
+            // Update subscription
             $activeSubscription->update([
                 'plan_id' => $newPlan->id,
                 'starts_at' => now(),
                 'ends_at' => $this->calculateEndDate($newPlan),
+                'status' => $status ?? $activeSubscription->status,
+            ]);
+
+            // Generate initial invoice for non-trial plans
+            if (!$newPlan->is_trial_plan && !$newPlan->is_pay_as_you_go) {
+                $initialInvoice = $invoiceService->generateInitialPlanInvoice($this, $newPlan);
+                $this->notifySuperAdmins('invoice_generated', [
+                    'invoice_id' => $initialInvoice->id,
+                    'amount' => $initialInvoice->amount,
+                    'currency' => $initialInvoice->currency,
+                ]);
+            }
+
+            // Send notification for subscription switch
+            $this->notifySubscriptionChange('subscription_switched', [
+                'plan' => $newPlan->trans_name,
+                'old_status' => $oldPlan->getLabel(),
+                'new_status' => ($status ?? $activeSubscription->status)->getLabel(),
+                'date' => now()->format('Y-m-d H:i:s')
             ]);
 
             $this->invalidateSubscriptionCache();
@@ -328,41 +391,83 @@ trait Subscribable
 
     /**
      * Create a new subscription for the model.
+     *
+     * @param Plan $plan The plan to subscribe to
+     * @param Carbon|null $startDate Optional start date
+     * @param Carbon|null $endDate Optional end date
+     * @param int|null $trialDays Optional trial days
+     * @return Subscription|null
      */
     public function subscribe(Plan $plan, ?Carbon $startDate = null, ?Carbon $endDate = null, ?int $trialDays = null): ?Subscription
     {
         $startDate = $startDate ?? now();
 
+        // Check trial eligibility
         if ($plan->isTrialPlan() && !$this->canUseTrial()) {
             Notification::make()
-                ->title(__('filament-modular-subscriptions::fms.errors.trial_already_used'))
+                ->title(__('filament-modular-subscriptions::fms.notifications.subscription.trial.you_cant_use_trial'))
                 ->danger()
                 ->send();
-
             return null;
         }
 
         if ($endDate === null) {
             $endDate = $startDate->copy()->addDays($plan->period);
         }
-        $status = $plan->is_pay_as_you_go
-            ? SubscriptionStatus::ACTIVE
-            : SubscriptionStatus::ON_HOLD;
-        $subscription = $this->subscription()->create([
-            'plan_id' => $plan->id,
-            'starts_at' => $startDate,
-            'ends_at' => $endDate,
-            'status' => $status,
-            'has_used_trial' => $plan->isTrialPlan() || $this->subscription?->has_used_trial,
-        ]);
 
-        if ($trialDays || $plan->period_trial > 0) {
-            $trialDays = $trialDays ?? $plan->period_trial;
-            $subscription->trial_ends_at = $startDate->copy()->addDays($trialDays);
-            $subscription->save();
-        }
+        // Determine initial status
+        $status = match (true) {
+            $plan->is_pay_as_you_go => SubscriptionStatus::ACTIVE,
+            $plan->is_trial_plan => SubscriptionStatus::ACTIVE,
+            default => SubscriptionStatus::ON_HOLD,
+        };
 
-        $this->invalidateSubscriptionCache();
+        DB::transaction(function () use (&$subscription, $plan, $startDate, $endDate, $status, $trialDays) {
+            $subscription = $this->subscription()->create([
+                'plan_id' => $plan->id,
+                'starts_at' => $startDate,
+                'ends_at' => $endDate,
+                'status' => $status,
+                'has_used_trial' => $plan->isTrialPlan() || $this->subscription?->has_used_trial,
+            ]);
+
+            // Handle trial period
+            if ($trialDays || $plan->period_trial > 0) {
+                $trialDays = $trialDays ?? $plan->period_trial;
+                $subscription->trial_ends_at = $startDate->copy()->addDays($trialDays);
+                $subscription->save();
+            }
+
+            // Generate initial invoice for non-trial, non-PAYG plans
+            if (!$plan->is_trial_plan && !$plan->is_pay_as_you_go) {
+                $invoiceService = app(InvoiceService::class);
+                $initialInvoice = $invoiceService->generateInitialPlanInvoice($this, $plan);
+
+                $this->notifySuperAdmins('invoice_generated', [
+                    'invoice_id' => $initialInvoice->id,
+                    'amount' => $initialInvoice->amount,
+                    'currency' => $initialInvoice->currency,
+                ]);
+            }
+
+            // Send appropriate notifications
+            if ($plan->is_pay_as_you_go) {
+                $this->notifySubscriptionChange('started', [
+                    'plan' => $plan->trans_name,
+                    'type' => 'pay_as_you_go',
+                    'trial' => $subscription->onTrial(),
+                ]);
+            } elseif ($plan->is_trial_plan) {
+                $this->notifySubscriptionChange('trial', [
+                    'plan' => $plan->trans_name,
+                    'status' => $status->getLabel(),
+                    'trial' => true,
+                    'date' => now()->format('Y-m-d H:i:s')
+                ]);
+            }
+
+            $this->invalidateSubscriptionCache();
+        });
 
         return $subscription;
     }
