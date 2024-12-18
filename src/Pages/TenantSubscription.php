@@ -16,6 +16,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Closure;
+use Filament\Actions\Concerns\InteractsWithActions;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use NewTags\FilamentModularSubscriptions\FmsPlugin;
 use NewTags\FilamentModularSubscriptions\Resources\ModuleUsageResource;
@@ -23,6 +24,7 @@ use NewTags\FilamentModularSubscriptions\Resources\ModuleUsageResource;
 class TenantSubscription extends Page implements HasTable
 {
     use InteractsWithTable;
+    use InteractsWithActions;
 
     protected static ?int $navigationSort = 500;
 

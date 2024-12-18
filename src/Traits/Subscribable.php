@@ -304,8 +304,6 @@ trait Subscribable
             // Send notification for subscription switch
             $this->notifySubscriptionChange('subscription_switched', [
                 'plan' => $newPlan->trans_name,
-                'old_status' => $oldPlan->getLabel(),
-                'new_status' => ($status ?? $activeSubscription->status)->getLabel(),
                 'date' => now()->format('Y-m-d H:i:s')
             ]);
 
