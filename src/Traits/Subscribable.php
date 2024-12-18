@@ -513,4 +513,9 @@ trait Subscribable
     {
         return $this->subscription?->invoices();
     }
+
+    public function unpaidInvoices(): HasMany
+    {
+        return $this->invoices()->where('status', '!=', InvoiceStatus::PAID);
+    }
 }

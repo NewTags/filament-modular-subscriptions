@@ -27,6 +27,9 @@
                     <x-filament::tabs.item icon="heroicon-o-document-text"
                         @click="tab = 'invoices'; $dispatch('change-tab', 'invoices'); window.history.pushState(null, '', window.location.pathname + '?tab=invoices')"
                         :alpine-active="'tab === \'invoices\''">
+                        <x-slot name="badge" >
+                            {{ $tenant->unpaidInvoices()->count() }}
+                        </x-slot>
                         {{ __('filament-modular-subscriptions::fms.tenant_subscription.invoices') }}
                     </x-filament::tabs.item>
                     <x-filament::tabs.item icon="heroicon-o-document-text"
