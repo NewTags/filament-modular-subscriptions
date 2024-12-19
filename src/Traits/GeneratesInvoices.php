@@ -77,13 +77,13 @@ trait GeneratesInvoices
 
     private function createInvoiceItems(Invoice $invoice, Subscription $subscription, $plan = null): void
     {
-        if ($this->isPayAsYouGo($subscription)) {
+        $plan = $subscription->plan;
+        if ($plan->is_pay_as_you_go) {
             $this->createPayAsYouGoItems($invoice, $subscription);
         } else {
             $this->createFixedPriceItem($invoice, $subscription, $plan);
         }
 
-        $plan = $subscription->plan;
         $nonCancelledInvoicesCount = $subscription->invoices()
             ->where('status', '!=', InvoiceStatus::CANCELLED)
             ->count();

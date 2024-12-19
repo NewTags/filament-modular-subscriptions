@@ -311,39 +311,7 @@ trait Subscribable
         return true;
     }
 
-    public function shouldGenerateInvoice(): bool
-    {
-        $subscription = $this->subscription()
-            ->with([
-                'moduleUsages.module.planModules' => function ($query) {
-                    $query->select('plan_id', 'module_id', 'limit');
-                },
-                'plan:id,is_pay_as_you_go',
-            ])
-            ->first();
-
-        if (! $subscription) {
-            return false;
-        }
-
-        $expired = $subscription->subscriber->isExpired();
-
-        if ($subscription->plan->is_pay_as_you_go) {
-            return $expired;
-        }
-
-        foreach ($subscription->moduleUsages as $moduleUsage) {
-            $planModule = $moduleUsage->module->planModules
-                ->where('plan_id', $subscription->plan_id)
-                ->first();
-
-            if ($planModule && $planModule->limit !== null && $moduleUsage->usage >= $planModule->limit) {
-                return true;
-            }
-        }
-
-        return $expired;
-    }
+ 
 
     /**
      * Calculate the end date for a given plan.

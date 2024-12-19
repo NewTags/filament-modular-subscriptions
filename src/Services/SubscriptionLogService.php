@@ -21,7 +21,7 @@ class SubscriptionLogService
 
             $logModel::create([
                 'subscription_id' => $subscription->id,
-                'event' => $event,
+                'event' => __('filament-modular-subscriptions::fms.logs.events.' . $event),
                 'description' => $description,
                 'old_status' => $oldStatus instanceof SubscriptionStatus ? $oldStatus->getLabel() : $oldStatus,
                 'new_status' => $newStatus instanceof SubscriptionStatus ? $newStatus->getLabel() : $newStatus,
