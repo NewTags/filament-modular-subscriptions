@@ -88,7 +88,7 @@ trait Subscribable
                                 $this->plan?->period_grace ?? 0
                             ));
                     })
-                    ->whereIn('status', [SubscriptionStatus::ACTIVE, SubscriptionStatus::ON_HOLD, SubscriptionStatus::PENDING_PAYMENT])
+                    ->where('status', SubscriptionStatus::ACTIVE)
                     ->first();
             }
         );
@@ -311,7 +311,7 @@ trait Subscribable
         return true;
     }
 
- 
+
 
     /**
      * Calculate the end date for a given plan.

@@ -44,7 +44,7 @@ class PlanSeeder extends Seeder
                 'trial_interval' => Interval::DAY,
                 'invoice_period' => 1,
                 'invoice_interval' => Interval::MONTH,
-                'grace_period' => 0,
+                'grace_period' => 10,
                 'grace_interval' => Interval::DAY,
                 'modules' => [
                     ['limit' => 4, 'price' => 0],
@@ -64,7 +64,7 @@ class PlanSeeder extends Seeder
                 'trial_interval' => Interval::DAY,
                 'invoice_period' => 1,
                 'invoice_interval' => Interval::MONTH,
-                'grace_period' => 0,
+                'grace_period' => 10,
                 'grace_interval' => Interval::DAY,
                 'modules' => [
                     ['limit' => null, 'price' => 1.99],

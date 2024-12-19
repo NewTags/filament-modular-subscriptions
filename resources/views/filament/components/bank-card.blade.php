@@ -52,6 +52,13 @@
         gap: 0.5rem;
     }
 
+    .bank-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
     .bank-card-label {
         color: rgb(209, 213, 219);
         font-size: 0.75rem;
@@ -88,21 +95,20 @@
         </div>
 
         <div class="bank-card-content">
-            <div class="bank-card-field">
-                <p class="bank-card-label">{{ __('filament-modular-subscriptions::fms.resources.payment.company_name') }}
-                </p>
-                <p class="bank-card-value">{{ $companyName }}</p>
+            <div class="bank-card-header">
+                <div class="bank-card-field">
+                    <p class="bank-card-label">{{ __('filament-modular-subscriptions::fms.resources.payment.company_name') }}</p>
+                    <p class="bank-card-value">{{ $companyName }}</p>
+                </div>
+
+                <div class="bank-card-field">
+                    <p class="bank-card-label">{{ __('filament-modular-subscriptions::fms.resources.payment.bank_name') }}</p>
+                    <p class="bank-card-value">{{ $bankName }}</p>
+                </div>
             </div>
 
             <div class="bank-card-field">
-                <p class="bank-card-label">{{ __('filament-modular-subscriptions::fms.resources.payment.bank_name') }}
-                </p>
-                <p class="bank-card-value">{{ $bankName }}</p>
-            </div>
-
-            <div class="bank-card-field">
-                <p class="bank-card-label">
-                    {{ __('filament-modular-subscriptions::fms.resources.payment.account_number') }}</p>
+                <p class="bank-card-label">{{ __('filament-modular-subscriptions::fms.resources.payment.account_number') }}</p>
                 <p class="bank-card-value mono">{{ $accountNumber }}</p>
             </div>
 

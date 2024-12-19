@@ -6,6 +6,8 @@ namespace NewTags\FilamentModularSubscriptions\Traits;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
+use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
 
 trait HasSubscriptionModules
@@ -18,18 +20,25 @@ trait HasSubscriptionModules
     public function canUseModule(string $moduleClass): bool
     {
         $cacheKey = $this->getCacheKey($moduleClass);
-
         return Cache::remember(
             $cacheKey,
             self::MODULE_ACCESS_CACHE_TTL,
             function () use ($moduleClass) {
-                $subscription = $this->activeSubscription();
+                $subscription = $this->currentSubscription();
                 if (! $subscription) {
                     return false;
                 }
 
-                if ($subscription->isExpired()) {
-                    return false;
+                // Check if subscription is on hold or pending payment
+                if ($subscription->status === SubscriptionStatus::ON_HOLD || $subscription->status === SubscriptionStatus::PENDING_PAYMENT) {
+                    if ($subscription->ends_at->isPast()) {
+                        $latestInvoice = $subscription->invoices()->whereIn('status', [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID])->latest()->first();
+                        if ($latestInvoice && $latestInvoice->due_date->isPast()) {
+                            return false;
+                        } elseif ($latestInvoice && $latestInvoice->due_date->isFuture()) {
+                            return true;
+                        }
+                    }
                 }
 
                 $moduleModel = config('filament-modular-subscriptions.models.module');
@@ -39,7 +48,7 @@ trait HasSubscriptionModules
                         $query->where('plan_id', $subscription->plan_id);
                     }])
                     ->first();
-                
+
                 if (! $module) {
                     return false;
                 }
@@ -47,6 +56,24 @@ trait HasSubscriptionModules
                 return $module->canUse($subscription);
             }
         );
+    }
+
+    public function currentSubscription(): ?Subscription
+    {
+
+        return $this->subscription()
+            ->with(['plan', 'moduleUsages.module']) // Eager load relationships
+            ->whereDate('starts_at', '<=', now())
+            ->where(function ($query) {
+                $this->load('plan');
+                $query
+                    ->whereDate('ends_at', '>', now())
+                    ->orWhereDate('ends_at', '>=', now()->subDays(
+                        $this->plan?->period_grace ?? 0
+                    ));
+            })
+            ->whereIn('status', [SubscriptionStatus::ACTIVE, SubscriptionStatus::ON_HOLD, SubscriptionStatus::PENDING_PAYMENT])
+            ->first();
     }
 
     /**
@@ -62,7 +89,7 @@ trait HasSubscriptionModules
      */
     public function moduleUsage(string $moduleClass): ?int
     {
-        $activeSubscription = $this->activeSubscription();
+        $activeSubscription = $this->currentSubscription();
         if (! $activeSubscription) {
             return null;
         }
@@ -89,7 +116,7 @@ trait HasSubscriptionModules
      */
     public function recordUsage(string $moduleClass, int $quantity = 1, bool $incremental = true): void
     {
-        $activeSubscription = $this->activeSubscription();
+        $activeSubscription = $this->currentSubscription();
         if (! $activeSubscription) {
             return;
         }
