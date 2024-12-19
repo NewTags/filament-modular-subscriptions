@@ -82,7 +82,7 @@ trait GeneratesInvoices
         } else {
             $this->createFixedPriceItem($invoice, $subscription, $plan);
         }
-
+        
         $plan = $subscription->plan;
         $nonCancelledInvoicesCount = $subscription->invoices()
             ->where('status', '!=', InvoiceStatus::CANCELLED)

@@ -237,6 +237,7 @@ class InvoiceResource extends Resource
                                 if ($get('payment_method') === 'online') {
                                     return [
                                         Fieldset::make('payment_details')
+                                            ->label('')
                                             ->schema([
                                                 Grid::make(2)
                                                     ->schema([
@@ -271,6 +272,7 @@ class InvoiceResource extends Resource
 
                                                 // Credit Card Details Section
                                                 Fieldset::make('credit_card_details')
+                                                    ->label('')
                                                     ->schema([
                                                         TextInput::make('card_number')
                                                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.card_number'))
@@ -328,14 +330,11 @@ class InvoiceResource extends Resource
 
                                 // Bank transfer form
                                 return [
-                                    Fieldset::make('bank_details')
-                                        ->label(__('filament-modular-subscriptions::fms.resources.payment.bank_details'))
-                                        ->schema([
-                                            Placeholder::make('bank_card')
-                                                ->label('')
-                                                ->content(fn($record) => view('filament-modular-subscriptions::filament.components.bank-card'))
-                                                ->columnSpanFull(),
-                                        ]),
+
+                                    Placeholder::make('bank_card')
+                                        ->label('')
+                                        ->content(fn($record) => view('filament-modular-subscriptions::filament.components.bank-card'))
+                                        ->columnSpanFull(),
                                     TextInput::make('amount')
                                         ->default(fn($record) => $record->remaining_amount)
                                         ->numeric()
