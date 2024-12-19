@@ -203,7 +203,9 @@ class TenantSubscription extends Page implements HasTable
                 if (!$subscription) {
                     return false;
                 }
-
+                if ($subscription->status === SubscriptionStatus::CANCELLED) {
+                    return false;
+                }
                 // Check if there are any unpaid pay-as-you-go invoices
                 if ($subscription->plan->is_pay_as_you_go) {
                     return !$tenant->unpaidInvoices()->exists();

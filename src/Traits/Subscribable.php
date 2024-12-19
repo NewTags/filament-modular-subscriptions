@@ -160,7 +160,7 @@ trait Subscribable
      */
     public function cancel(): bool
     {
-        $activeSubscription = $this->activeSubscription();
+        $activeSubscription = $this->subscription()->first();
         if (!$activeSubscription) {
             return false;
         }
@@ -194,7 +194,7 @@ trait Subscribable
                 'status' => SubscriptionStatus::CANCELLED,
                 'ends_at' => now(),
             ]);
-
+            
             // Clean up module usages
             $activeSubscription->moduleUsages()->delete();
 
