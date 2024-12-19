@@ -3,6 +3,7 @@
     'accountNumber' => config('filament-modular-subscriptions.company_bank_account'),
     'iban' => config('filament-modular-subscriptions.company_bank_iban'),
     'swift' => config('filament-modular-subscriptions.company_bank_swift'),
+    'companyName' => config('filament-modular-subscriptions.company_name'),
 ])
 
 <style>
@@ -78,7 +79,7 @@
 <div class="bank-card">
     <div class="bank-card-inner">
         <div class="bank-card-pattern"></div>
-
+    
         <div class="bank-card-logo">
             <svg fill="currentColor" viewBox="0 0 24 24">
                 <path
@@ -87,6 +88,12 @@
         </div>
 
         <div class="bank-card-content">
+            <div class="bank-card-field">
+                <p class="bank-card-label">{{ __('filament-modular-subscriptions::fms.resources.payment.company_name') }}
+                </p>
+                <p class="bank-card-value">{{ $companyName }}</p>
+            </div>
+
             <div class="bank-card-field">
                 <p class="bank-card-label">{{ __('filament-modular-subscriptions::fms.resources.payment.bank_name') }}
                 </p>
