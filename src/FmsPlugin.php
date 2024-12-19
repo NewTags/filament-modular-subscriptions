@@ -157,7 +157,7 @@ class FmsPlugin implements Plugin
             return [$this->createPendingPaymentAlert()];
         }
 
-        if ($this->isSubscriptionExpired($subscription)) {
+        if ($subscription->isExpired()) {
             return [$this->createExpiredSubscriptionAlert()];
         }
 
@@ -172,7 +172,7 @@ class FmsPlugin implements Plugin
 
     protected function isSubscriptionExpired($subscription): bool
     {
-        return $subscription->status === SubscriptionStatus::EXPIRED;
+        return $subscription->isExpired();
     }
 
     protected function isSubscriptionEndingSoon($subscription): bool

@@ -23,24 +23,28 @@ trait HasSubscriptionModules
             $cacheKey,
             self::MODULE_ACCESS_CACHE_TTL,
             function () use ($moduleClass) {
-                $activeSubscription = $this->activeSubscription();
-                if (! $activeSubscription) {
+                $subscription = $this->activeSubscription();
+                if (! $subscription) {
+                    return false;
+                }
+
+                if ($subscription->isExpired()) {
                     return false;
                 }
 
                 $moduleModel = config('filament-modular-subscriptions.models.module');
                 /** @var \NewTags\FilamentModularSubscriptions\Models\Module $module */
                 $module = $moduleModel::where('class', $moduleClass)
-                    ->with(['planModules' => function ($query) use ($activeSubscription) {
-                        $query->where('plan_id', $activeSubscription->plan_id);
+                    ->with(['planModules' => function ($query) use ($subscription) {
+                        $query->where('plan_id', $subscription->plan_id);
                     }])
                     ->first();
-
+                
                 if (! $module) {
                     return false;
                 }
 
-                return $module->canUse($activeSubscription);
+                return $module->canUse($subscription);
             }
         );
     }

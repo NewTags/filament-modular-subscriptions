@@ -134,14 +134,7 @@ trait Subscribable
             $cacheKey,
             self::DAYS_LEFT_CACHE_TTL,
             function () {
-                $activeSubscription = $this->activeSubscription();
-                if (! $activeSubscription) {
-                    return 0;
-                }
-
-                return $activeSubscription->ends_at
-                    ? number_format(now()->diffInDays($activeSubscription->ends_at, false))
-                    : 0;
+                return $this->subscription->daysLeft();
             }
         );
     }
@@ -151,14 +144,7 @@ trait Subscribable
      */
     public function isExpired(): bool
     {
-        $activeSubscription = $this->activeSubscription();
-        if (! $activeSubscription) {
-            return true;
-        }
-
-        $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
-
-        return $gracePeriodEndDate && $gracePeriodEndDate->isPast();
+        return $this->subscription->isExpired();
     }
 
     /**
@@ -166,18 +152,7 @@ trait Subscribable
      */
     public function isInGracePeriod(): bool
     {
-        $activeSubscription = $this->activeSubscription();
-        if (! $activeSubscription) {
-            return false;
-        }
-
-        $now = now();
-        $endsAt = $activeSubscription->ends_at;
-        $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
-
-        return $endsAt && $gracePeriodEndDate &&
-            $now->isAfter($endsAt) &&
-            $now->isBefore($gracePeriodEndDate);
+        return $this->subscription->isInGracePeriod();
     }
 
     /**
@@ -208,22 +183,28 @@ trait Subscribable
      */
     public function renew(?int $days = null): bool
     {
-        $activeSubscription = $this->subscription;
-        if (! $activeSubscription) {
+        $subscription = $this->subscription;
+        if (! $subscription) {
             return false;
         }
 
-        $plan = $activeSubscription->plan;
+        $plan = $subscription->plan;
 
-        DB::transaction(function () use ($activeSubscription, $days, $plan) {
+        DB::transaction(function () use ($subscription, $days, $plan) {
             // Only delete non-persistent module usages
-            $activeSubscription->moduleUsages()
-                ->whereHas('module', function ($query) {
-                    $query->where('is_persistent', false);
-                })
-                ->delete();
+            // Clean up module usages based on plan type
+            if ($subscription->is_pay_as_you_go) {
+                $subscription->moduleUsages()
+                    ->delete();
+            } else {
+                $subscription->moduleUsages()
+                    ->whereHas('module', function ($query) {
+                        $query->where('is_persistent', false);
+                    })
+                    ->delete();
+            }
 
-            $activeSubscription->update([
+            $subscription->update([
                 'ends_at' => $this->calculateEndDate($plan, $days),
                 'starts_at' => now(),
                 'status' => SubscriptionStatus::ACTIVE,

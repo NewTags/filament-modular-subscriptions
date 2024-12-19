@@ -38,6 +38,14 @@ class {{ class }} extends BaseModule
             return true;
         }
 
-        return $this->calculateUsage($subscription) < $subscription->plan->moduleLimit(get_class($this));
+        $usage = $this->calculateUsage($subscription);
+        $limit = $subscription->plan->moduleLimit(get_class($this));
+
+        // Allow usage if in grace period and under limit
+        if ($subscription->isInGracePeriod() && $usage < $limit) {
+            return true;
+        }
+
+        return $usage < $limit;
     }
 }

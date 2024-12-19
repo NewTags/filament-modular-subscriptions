@@ -89,15 +89,54 @@ class Subscription extends Model
     }
 
     /**
-     * Get the number of days left in the current subscription period including grace period.
+     * Get the number of days left in the current subscription period.
      */
     public function daysLeft(): ?float
+    {
+        if (! $this->ends_at) {
+            return null;
+        }
+
+        return round(now()->diffInDays($this->ends_at, false), 1);
+    }
+
+    /**
+     * Get the number of days left including grace period.
+     */
+    public function daysLeftWithGrace(): ?float
     {
         $gracePeriodEndDate = $this->getGracePeriodEndDate($this);
 
         return $gracePeriodEndDate
             ? round(now()->diffInDays($gracePeriodEndDate, false), 1)
             : null;
+    }
+
+
+    public function isExpired(): bool
+    {
+        if ($this->status === SubscriptionStatus::EXPIRED) {
+            return true;
+        }
+
+        if (!$this->ends_at) {
+            return false;
+        }
+
+        $gracePeriodEndDate = $this->getGracePeriodEndDate();
+        
+        return $gracePeriodEndDate && now()->isAfter($gracePeriodEndDate);
+    }
+
+    public function isInGracePeriod(): bool
+    {
+        $now = now();
+        $endsAt = $this->ends_at;
+        $gracePeriodEndDate = $this->getGracePeriodEndDate();
+
+        return $endsAt && $gracePeriodEndDate &&
+            $now->isAfter($endsAt) &&
+            $now->isBefore($gracePeriodEndDate);
     }
 
     /**
