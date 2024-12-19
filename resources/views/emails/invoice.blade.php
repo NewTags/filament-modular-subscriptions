@@ -1,3 +1,5 @@
+<!-- @todo: make the email better with real data -->
+
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
 

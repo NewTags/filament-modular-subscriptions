@@ -133,7 +133,7 @@ class FmsPlugin implements Plugin
     {
         $cacheKey = self::ALERTS_CACHE_KEY . $tenant->id;
 
-        return Cache::remember($cacheKey, now()->addHours(5), function () use ($tenant) {
+        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($tenant) {
             return $this->generateAlerts($tenant);
         });
     }
@@ -172,12 +172,12 @@ class FmsPlugin implements Plugin
 
     protected function isSubscriptionExpired($subscription): bool
     {
-        return $subscription->status === SubscriptionStatus::EXPIRED || ($subscription->ends_at && $subscription->ends_at->isPast());
+        return $subscription->status === SubscriptionStatus::EXPIRED;
     }
 
     protected function isSubscriptionEndingSoon($subscription): bool
     {
-        return $subscription->ends_at && $subscription->daysLeft() <= 7;
+        return $subscription->ends_at && $subscription->daysLeft() <= 3;
     }
 
     protected function generateModuleUsageAlerts($subscription, $tenant): array

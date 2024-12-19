@@ -11,8 +11,9 @@ use Illuminate\Support\Facades\DB;
 
 trait GeneratesInvoices
 {
-    private function createInvoice(Subscription $subscription, Carbon $dueDate): Invoice
+    private function createInvoice(Subscription $subscription, Carbon $dueDate = null): Invoice
     {
+        $dueDate = $dueDate ?? now()->addDays($subscription->plan->period_grace);
         return $this->invoiceModel::create([
             'subscription_id' => $subscription->id,
             'tenant_id' => $subscription->subscribable_id,
@@ -39,10 +40,9 @@ trait GeneratesInvoices
             return null;
         }
 
-        $dueDate = $this->calculateDueDate($subscription);
 
-        return DB::transaction(function () use ($subscription, $dueDate) {
-            $invoice = $this->createInvoice($subscription, $dueDate);
+        return DB::transaction(function () use ($subscription) {
+            $invoice = $this->createInvoice($subscription);
             $this->createInvoiceItems($invoice, $subscription);
             $this->updateInvoiceTotals($invoice);
 
@@ -82,7 +82,7 @@ trait GeneratesInvoices
         } else {
             $this->createFixedPriceItem($invoice, $subscription, $plan);
         }
-        
+
         $plan = $subscription->plan;
         $nonCancelledInvoicesCount = $subscription->invoices()
             ->where('status', '!=', InvoiceStatus::CANCELLED)

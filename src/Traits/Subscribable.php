@@ -82,13 +82,13 @@ trait Subscribable
                     ->whereDate('starts_at', '<=', now())
                     ->where(function ($query) {
                         $this->load('plan');
-                        $query->whereNull('ends_at')
-                            ->orWhereDate('ends_at', '>', now())
+                        $query
+                            ->whereDate('ends_at', '>', now())
                             ->orWhereDate('ends_at', '>=', now()->subDays(
                                 $this->plan?->period_grace ?? 0
                             ));
                     })
-                    ->where('status', SubscriptionStatus::ACTIVE)
+                    ->whereIn('status', [SubscriptionStatus::ACTIVE, SubscriptionStatus::ON_HOLD, SubscriptionStatus::PENDING_PAYMENT])
                     ->first();
             }
         );

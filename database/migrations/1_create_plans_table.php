@@ -27,7 +27,6 @@ return new class extends Migration
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('is_pay_as_you_go')->default(false);
             $table->unsignedSmallInteger('fixed_invoice_day')->nullable();
-            $table->unsignedSmallInteger('due_days')->default(0);
             $table->boolean('is_trial_plan')->default(false);
             $table->softDeletes();
             $table->timestamps();

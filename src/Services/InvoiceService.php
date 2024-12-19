@@ -32,7 +32,7 @@ class InvoiceService
         }
 
         return DB::transaction(function () use ($subscription, $moduleUsages) {
-            $invoice = $this->createInvoice($subscription, now()->addDays(7));
+            $invoice = $this->createInvoice($subscription);
             $this->processModuleUsages($invoice, $moduleUsages, $subscription);
             $this->updateInvoiceTotals($invoice);
 
@@ -69,8 +69,7 @@ class InvoiceService
             }
             $subscription->refresh();
             $invoice = $this->createInvoice(
-                $subscription,
-                now()->addDays(config('filament-modular-subscriptions.payment_due_days', 7))
+                $subscription
             );
 
             $this->createInvoiceItems($invoice, $subscription, $plan);
