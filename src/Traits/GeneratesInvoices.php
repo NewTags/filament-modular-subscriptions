@@ -29,7 +29,7 @@ trait GeneratesInvoices
         if ($this->hasCurrentPeriodInvoice($subscription)) {
             return null;
         }
-        
+
         return $this->generate($subscription);
     }
 
@@ -82,8 +82,13 @@ trait GeneratesInvoices
         } else {
             $this->createFixedPriceItem($invoice, $subscription, $plan);
         }
+
         $plan = $subscription->plan;
-        if ($subscription->invoices()->count() == 1 && $plan->setup_fee > 0) {
+        $nonCancelledInvoicesCount = $subscription->invoices()
+            ->where('status', '!=', InvoiceStatus::CANCELLED)
+            ->count();
+
+        if ($nonCancelledInvoicesCount === 0 && $plan->setup_fee > 0) {
             $invoice->items()->create([
                 'description' => __('filament-modular-subscriptions::fms.invoice.setup_fee'),
                 'total' => $plan->setup_fee,

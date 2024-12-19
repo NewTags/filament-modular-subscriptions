@@ -332,6 +332,7 @@ class InvoiceResource extends Resource
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.bank_details'))
                                         ->schema([
                                             Placeholder::make('bank_card')
+                                                ->label('')
                                                 ->content(fn($record) => view('filament-modular-subscriptions::filament.components.bank-card'))
                                                 ->columnSpanFull(),
                                         ]),
