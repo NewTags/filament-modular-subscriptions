@@ -173,6 +173,64 @@ class TenantSubscription extends Page implements HasTable
             });
     }
 
+    public function cancelSubscriptionAction(): Action
+    {
+        return Action::make('cancelSubscription')
+            ->color('danger')
+            ->icon('heroicon-o-x-circle')
+            ->label(__('filament-modular-subscriptions::fms.tenant_subscription.cancel_subscription'))
+            ->requiresConfirmation()
+            ->modalHeading(__('filament-modular-subscriptions::fms.tenant_subscription.confirm_cancellation'))
+            ->modalDescription(__('filament-modular-subscriptions::fms.tenant_subscription.cancel_subscription_warning'))
+            ->form([
+                \Filament\Forms\Components\TextInput::make('confirmation')
+                    ->label(__('filament-modular-subscriptions::fms.tenant_subscription.type_to_confirm_cancel'))
+                    ->required()
+                    ->rules([
+                        fn(): Closure => function (string $attribute, $value, Closure $fail) {
+                            $expectedPhrase = __('filament-modular-subscriptions::fms.tenant_subscription.cancel_confirmation_phrase');
+
+                            if ($value !== $expectedPhrase) {
+                                $fail(__('filament-modular-subscriptions::fms.tenant_subscription.confirmation_phrase_mismatch'));
+                            }
+                        }
+                    ])
+            ])
+            ->visible(function () {
+                $tenant = FmsPlugin::getTenant();
+                $subscription = $tenant->subscription;
+
+                if (!$subscription) {
+                    return false;
+                }
+
+                // Check if there are any unpaid pay-as-you-go invoices
+                if ($subscription->plan->is_pay_as_you_go) {
+                    return !$tenant->unpaidInvoices()->exists();
+                }
+
+                return true;
+            })
+            ->action(function () {
+                $tenant = FmsPlugin::getTenant();
+
+                if ($tenant->cancel()) {
+                    Notification::make()
+                        ->title(__('filament-modular-subscriptions::fms.notifications.subscription.cancelled.title'))
+                        ->body(__('filament-modular-subscriptions::fms.notifications.subscription.cancelled.body'))
+                        ->success()
+                        ->send();
+
+                    $tenant->notifySubscriptionChange('cancelled', [
+                        'plan' => $tenant->subscription->plan->trans_name,
+                        'date' => now()->format('Y-m-d H:i:s')
+                    ]);
+
+                    $this->redirect(TenantSubscription::getUrl());
+                }
+            });
+    }
+
     public function newSubscriptionAction(): Action
     {
         return Action::make('newSubscription')

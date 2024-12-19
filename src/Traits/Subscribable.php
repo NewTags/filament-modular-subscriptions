@@ -161,15 +161,43 @@ trait Subscribable
     public function cancel(): bool
     {
         $activeSubscription = $this->activeSubscription();
-        if (! $activeSubscription) {
+        if (!$activeSubscription) {
+            return false;
+        }
+
+        // Check for unpaid pay-as-you-go invoices
+        if ($activeSubscription->plan->is_pay_as_you_go && $this->unpaidInvoices()->exists()) {
+            Notification::make()
+                ->title(__('filament-modular-subscriptions::fms.notifications.subscription.cancelled.failed'))
+                ->body(__('filament-modular-subscriptions::fms.notifications.subscription.cancelled.unpaid_invoices'))
+                ->danger()
+                ->send();
             return false;
         }
 
         DB::transaction(function () use ($activeSubscription) {
+            // Generate final invoice for pay-as-you-go plans
+            if ($activeSubscription->plan->is_pay_as_you_go) {
+                $invoiceService = app(InvoiceService::class);
+                $finalInvoice = $invoiceService->generatePayAsYouGoInvoice($activeSubscription);
+
+                if ($finalInvoice) {
+                    $this->notifySuperAdmins('invoice_generated', [
+                        'invoice_id' => $finalInvoice->id,
+                        'amount' => $finalInvoice->amount,
+                        'currency' => $finalInvoice->currency,
+                    ]);
+                }
+            }
+
             $activeSubscription->update([
                 'status' => SubscriptionStatus::CANCELLED,
                 'ends_at' => now(),
             ]);
+
+            // Clean up module usages
+            $activeSubscription->moduleUsages()->delete();
+
             $this->invalidateSubscriptionCache();
         });
 
