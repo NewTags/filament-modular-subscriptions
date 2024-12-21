@@ -78,6 +78,72 @@ class TenantSubscription extends Page implements HasTable
         ];
     }
 
+    public function newSubscriptionAction(): Action
+    {
+        return Action::make('newSubscription')
+            ->label(function () {
+                $tenant = FmsPlugin::getTenant();
+                if ($tenant->unpaidInvoices()->exists()) {
+                    return __('filament-modular-subscriptions::fms.notifications.subscription.pay_all_invoices_to_activate.title');
+                }
+                return __('filament-modular-subscriptions::fms.tenant_subscription.choose_plan');
+            })
+            ->requiresConfirmation()
+            ->visible(function () {
+                $tenant = FmsPlugin::getTenant();
+
+                // Show subscription option if:
+                // - No subscription exists
+                // - Subscription is cancelled 
+                // - No plan is assigned
+                if (
+                    !$tenant->subscription ||
+                    $tenant->subscription->status === SubscriptionStatus::CANCELLED ||
+                    !$tenant->subscription->plan
+                ) {
+                    return true;
+                }
+
+                return true;
+            })
+            ->action(function ($arguments) {
+                $plan = config('filament-modular-subscriptions.models.plan')::findOrFail($arguments['plan_id']);
+                $tenant = FmsPlugin::getTenant();
+
+                if ($tenant->unpaidInvoices()->exists()) {
+                    Notification::make()
+                        ->title(__('filament-modular-subscriptions::fms.notifications.subscription.pay_all_invoices_to_activate.title'))
+                        ->body(__('filament-modular-subscriptions::fms.notifications.subscription.pay_all_invoices_to_activate.body', [
+                            'total' => $tenant->unpaidInvoices()->sum('amount'),
+                            'currency' => config('filament-modular-subscriptions.main_currency')
+                        ]))
+                        ->warning()
+                        ->send();
+                    return;
+                }
+
+                $subscription = $tenant->subscribe($plan);
+
+                if ($subscription) {
+                    // Show appropriate notification based on plan type
+                    if ($plan->is_pay_as_you_go) {
+                        Notification::make()
+                            ->title(__('filament-modular-subscriptions::fms.tenant_subscription.pay_as_you_go_activated'))
+                            ->success()
+                            ->send();
+                    } elseif (!$plan->is_trial_plan) {
+                        Notification::make()
+                            ->title(__('filament-modular-subscriptions::fms.tenant_subscription.please_pay_invoice'))
+                            ->warning()
+                            ->send();
+                    }
+                }
+
+                $this->redirect(TenantSubscription::getUrl());
+            });
+    }
+
+
     public function switchPlanAction(): Action
     {
         return Action::make('switchPlanAction')
@@ -258,35 +324,7 @@ class TenantSubscription extends Page implements HasTable
             });
     }
 
-    public function newSubscriptionAction(): Action
-    {
-        return Action::make('newSubscription')
-            ->label(__('filament-modular-subscriptions::fms.tenant_subscription.choose_plan'))
-            ->requiresConfirmation()
-            ->action(function ($arguments) {
-                $plan = config('filament-modular-subscriptions.models.plan')::findOrFail($arguments['plan_id']);
-                $tenant = FmsPlugin::getTenant();
 
-                $subscription = $tenant->subscribe($plan);
-
-                if ($subscription) {
-                    // Show appropriate notification based on plan type
-                    if ($plan->is_pay_as_you_go) {
-                        Notification::make()
-                            ->title(__('filament-modular-subscriptions::fms.tenant_subscription.pay_as_you_go_activated'))
-                            ->success()
-                            ->send();
-                    } elseif (!$plan->is_trial_plan) {
-                        Notification::make()
-                            ->title(__('filament-modular-subscriptions::fms.tenant_subscription.please_pay_invoice'))
-                            ->warning()
-                            ->send();
-                    }
-                }
-
-                $this->redirect(TenantSubscription::getUrl());
-            });
-    }
 
     public function table(Table $table): Table
     {

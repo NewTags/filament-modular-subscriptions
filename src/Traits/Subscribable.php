@@ -188,8 +188,17 @@ trait Subscribable
                         'currency' => $finalInvoice->currency,
                     ]);
                 }
+                $activeSubscription->moduleUsages()->delete();
             }
+            // Clean up pending invoices when cancelling a non-PAYG plan
+            if (!$activeSubscription->plan->is_pay_as_you_go) {
+                $pendingInvoices = $this->unpaidInvoices()
+                    ->get();
 
+                foreach ($pendingInvoices as $invoice) {
+                    $invoice->update(['status' => InvoiceStatus::CANCELLED]);
+                }
+            }
             $activeSubscription->update([
                 'status' => SubscriptionStatus::CANCELLED,
                 'ends_at' => now(),
@@ -197,7 +206,6 @@ trait Subscribable
             ]);
 
             // Clean up module usages
-            $activeSubscription->moduleUsages()->delete();
 
             $this->invalidateSubscriptionCache();
         });

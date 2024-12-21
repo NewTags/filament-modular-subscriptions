@@ -369,7 +369,10 @@ return [
         'no_plan' => 'بدون خطة',
         'invalid_subscription' => 'اشتراك غير صالح',
         'invalid_subscription_description' => 'الاشتراك غير صالح أو لم يعد متوفر. يرجى اختيار خطة أخرى.',
-        
+        'pay_all_invoices_to_activate' => [
+            'title' => 'يجب عليك دفع جميع الفواتير المستحقة, لتفعيل الاشتراك',
+            'body' => 'يجب عليك دفع جميع الفواتير المستحقة بقيمة :total :currency لتفعيل الاشتراك',
+        ],
     ],
     'intervals' => [
         'day' => 'يوم',
