@@ -206,7 +206,8 @@ class FmsPlugin implements Plugin
             'warning',
             __('filament-modular-subscriptions::fms.tenant_subscription.no_active_subscription'),
             __('filament-modular-subscriptions::fms.tenant_subscription.no_subscription_message'),
-            __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
+            __('filament-modular-subscriptions::fms.tenant_subscription.select_plan'),
+            'plans'
         );
     }
 
@@ -216,7 +217,8 @@ class FmsPlugin implements Plugin
             'danger',
             __('filament-modular-subscriptions::fms.statuses.expired'),
             __('filament-modular-subscriptions::fms.tenant_subscription.you_have_to_renew_your_subscription'),
-            __('filament-modular-subscriptions::fms.tenant_subscription.renew_subscription')
+            __('filament-modular-subscriptions::fms.tenant_subscription.renew_subscription'),
+            'invoices'
         );
     }
 
@@ -226,7 +228,8 @@ class FmsPlugin implements Plugin
             'warning',
             __('filament-modular-subscriptions::fms.tenant_subscription.subscription_on_hold'),
             __('filament-modular-subscriptions::fms.tenant_subscription.subscription_on_hold_message'),
-            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice')
+            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice'),
+            'invoices'
         );
     }
 
@@ -236,7 +239,8 @@ class FmsPlugin implements Plugin
             'warning',
             __('filament-modular-subscriptions::fms.tenant_subscription.subscription_pending_payment'),
             __('filament-modular-subscriptions::fms.tenant_subscription.subscription_pending_payment_message'),
-            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice')
+            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice'),
+            'invoices'
         );
     }
 
@@ -246,7 +250,8 @@ class FmsPlugin implements Plugin
             'warning',
             __('filament-modular-subscriptions::fms.tenant_subscription.subscription_ending_soon'),
             __('filament-modular-subscriptions::fms.tenant_subscription.days_left') . ': ' . $subscription->daysLeft(),
-            __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
+            __('filament-modular-subscriptions::fms.tenant_subscription.select_plan'),
+            'plans'
         );
     }
 
@@ -262,11 +267,12 @@ class FmsPlugin implements Plugin
                 $limit,
                 ($moduleUsage->usage / $limit) * 100
             ),
-            __('filament-modular-subscriptions::fms.tenant_subscription.upgrade_now')
+            __('filament-modular-subscriptions::fms.tenant_subscription.upgrade_now'),
+            'plans'
         );
     }
 
-    protected function createAlert(string $type, string $title, string $body, string $actionLabel): array
+    protected function createAlert(string $type, string $title, string $body, string $actionLabel, string $param = 'subscription'): array
     {
         return [
             'type' => $type,
@@ -274,7 +280,7 @@ class FmsPlugin implements Plugin
             'body' => $body,
             'action' => [
                 'label' => $actionLabel,
-                'url' => TenantSubscription::getUrl(),
+                'url' => TenantSubscription::getUrl(['tab' => $param]),
             ],
         ];
     }
