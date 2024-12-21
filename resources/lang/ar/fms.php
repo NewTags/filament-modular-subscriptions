@@ -367,6 +367,9 @@ return [
         'cancel_confirmation_phrase' => 'تأكيد إلغاء الاشتراك',
         'cannot_cancel_with_unpaid_invoices' => 'لا يمكن إلغاء الاشتراك حتى يتم دفع جميع الفواتير المستحقة',
         'no_plan' => 'بدون خطة',
+        'invalid_subscription' => 'اشتراك غير صالح',
+        'invalid_subscription_description' => 'الاشتراك غير صالح أو لم يعد متوفر. يرجى اختيار خطة أخرى.',
+        
     ],
     'intervals' => [
         'day' => 'يوم',
