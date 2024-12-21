@@ -72,15 +72,21 @@
                                     </div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">
                                         {{ __('filament-modular-subscriptions::fms.tenant_subscription.plan') }}:
-                                        <span class="font-semibold text-primary-600 dark:text-primary-400">
-                                            {{ $activeSubscription->plan?->trans_name ?? __('filament-modular-subscriptions::fms.tenant_subscription.no_plan') }}
-                                        </span>
+                                        @if($activeSubscription->plan)
+                                            <span class="font-semibold text-primary-600 dark:text-primary-400">
+                                                {{ $activeSubscription->plan->trans_name }}
+                                            </span>
+                                        @else
+                                            <span class="font-semibold text-danger-600 dark:text-danger-400">
+                                                {{ __('filament-modular-subscriptions::fms.tenant_subscription.no_plan') }}
+                                            </span>
+                                        @endif
                                     </div>
                                 </div>
                             </x-slot>
 
                             <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
-                                @if (!$activeSubscription->onTrial())
+                                @if (!$activeSubscription->onTrial() && $activeSubscription->plan)
                                     <div class="col-span-full lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-gray-700">
                                         @php
                                             $daysLeft = $tenant->daysLeft();
@@ -172,6 +178,18 @@
                                                 {{ $activeSubscription->ends_at->translatedFormat('M d, Y') }}
                                             </span>
                                         </div>
+                                        @if(!$activeSubscription->plan)
+                                            <div class="mt-4 p-4 bg-danger-50 dark:bg-danger-900/20 rounded-lg border border-danger-200 dark:border-danger-700/30">
+                                                <div class="flex items-center gap-3">
+                                                    <x-filament::icon icon="heroicon-o-exclamation-triangle" class="w-6 h-6 text-danger-500" />
+                                                    <div>
+                                                        <p class="text-sm text-danger-700 dark:text-danger-400">
+                                                            {{ __('filament-modular-subscriptions::fms.tenant_subscription.invalid_subscription') }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
 
                                     @if ($activeSubscription)
@@ -230,7 +248,7 @@
                                                         class="text-xs font-semibold px-3 py-1">
                                                         {{ $plan->is_pay_as_you_go ? __('filament-modular-subscriptions::fms.tenant_subscription.pay_as_you_go') : __('filament-modular-subscriptions::fms.tenant_subscription.subscription') }}
                                                     </x-filament::badge>
-                                                    @if ($activeSubscription && $activeSubscription->plan_id === $plan->id)
+                                                    @if ($activeSubscription && $activeSubscription->plan && $activeSubscription->plan_id === $plan->id)
                                                         <x-filament::badge color="info"
                                                             class="text-xs font-semibold px-3 py-1">
                                                             {{ __('filament-modular-subscriptions::fms.tenant_subscription.current_plan') }}
