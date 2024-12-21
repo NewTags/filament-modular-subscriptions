@@ -221,6 +221,7 @@ return [
     'tenant_subscription' => [
         'your_subscription' => 'تفاصيل اشتراكك',
         'current_subscription' => 'الاشتراك الحالي',
+        'subscription_progress' => 'تقدم الاشتراك',
         'plan' => 'الخطة',
         'statuses' => 'الحالة',
         'started_on' => 'تاريخ البدء',
