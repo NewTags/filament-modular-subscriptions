@@ -26,7 +26,6 @@ class InvoiceService
     public function generatePayAsYouGoInvoice(Subscription $subscription): ?Invoice
     {
         $moduleUsages = $subscription->moduleUsages()->get();
-
         if ($moduleUsages->isEmpty()) {
             return null;
         }
@@ -67,6 +66,7 @@ class InvoiceService
             } else {
                 $subscription = $tenant->subscription;
             }
+            $subscription->load('plan');
             $subscription->refresh();
             $invoice = $this->createInvoice(
                 $subscription
