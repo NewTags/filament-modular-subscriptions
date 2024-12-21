@@ -352,7 +352,7 @@
                                                 </div>
                                             </div>
 
-                                            @if ($activeSubscription)
+                                            @if ($tenant->subscription && $tenant->subscription->plan)
                                                 <!-- Action Button -->
                                                 <div class="px-4 sm:px-6 pb-6 mt-auto">
                                                     @if (!$activeSubscription || $activeSubscription->plan_id !== $plan->id)
@@ -363,9 +363,7 @@
                                                 </div>
                                             @else
                                                 <div class="px-4 sm:px-6 pb-6 mt-auto mx-auto w-full">
-                                                    @if ($this->newSubscriptionAction->isVisible())
                                                         {{ ($this->newSubscriptionAction)(['plan_id' => $plan->id]) }}
-                                                    @endif
                                                 </div>
                                             @endif
                                         </div>

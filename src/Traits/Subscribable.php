@@ -52,7 +52,9 @@ trait Subscribable
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
 
-        return $this->morphOne($subscriptionModel, 'subscribable')->latest('starts_at');
+        return $this->morphOne($subscriptionModel, 'subscribable')
+            ->with(['plan', 'moduleUsages.module'])
+            ->latest('starts_at');
     }
 
     /**

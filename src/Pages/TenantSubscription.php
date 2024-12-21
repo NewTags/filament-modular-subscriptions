@@ -62,14 +62,6 @@ class TenantSubscription extends Page implements HasTable
         $activeSubscription = $tenant->subscription;
         $planModel = config('filament-modular-subscriptions.models.plan');
 
-        if ($activeSubscription && !$activeSubscription->plan) {
-            Notification::make()
-                ->title(__('filament-modular-subscriptions::fms.notifications.subscription.invalid.title'))
-                ->body(__('filament-modular-subscriptions::fms.notifications.subscription.invalid.no_plan'))
-                ->danger()
-                ->persistent()
-                ->send();
-        }
 
         return [
             'tenant' => $tenant,
@@ -91,6 +83,10 @@ class TenantSubscription extends Page implements HasTable
             ->requiresConfirmation()
             ->visible(function () {
                 $tenant = FmsPlugin::getTenant();
+
+                if ($tenant->unpaidInvoices()->exists()) {
+                    return false;
+                }
 
                 // Show subscription option if:
                 // - No subscription exists

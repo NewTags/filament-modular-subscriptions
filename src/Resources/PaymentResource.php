@@ -168,41 +168,44 @@ class PaymentResource extends Resource
                                     'paid_at' => now(),
                                 ]);
 
-                                // Store the old plan ID before renewal
-                                $oldPlanId = $subscription->plan_id;
+                                // Only handle subscription renewal if there's a plan
+                                if ($subscription->plan_id) {
+                                    // Store the old plan ID before renewal
+                                    $oldPlanId = $subscription->plan_id;
 
-                                // Renew the subscription
-                                $subscription->renew();
+                                    // Renew the subscription
+                                    $subscription->renew();
 
-                                // Determine the type of subscription change
-                                if ($subscription->plan_id !== $oldPlanId) {
-                                    // Plan was switched
-                                    $subscription->subscribable->notifySubscriptionChange('subscription_switched', [
-                                        'old_plan' => $oldPlanId,
-                                        'new_plan' => $subscription->plan_id,
-                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
-                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
-                                        'currency' => config('filament-modular-subscriptions.main_currency'),
-                                        'amount' => $invoice->amount,
-                                    ]);
-                                } elseif ($subscription->wasRecentlyCreated) {
-                                    // New subscription
-                                    $subscription->subscribable->notifySubscriptionChange('subscription_activated', [
-                                        'plan' => $subscription->plan_id,
-                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
-                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
-                                        'currency' => config('filament-modular-subscriptions.main_currency'),
-                                        'amount' => $invoice->amount,
-                                    ]);
-                                } else {
-                                    // Regular renewal
-                                    $subscription->subscribable->notifySubscriptionChange('subscription_renewed', [
-                                        'plan' => $subscription->plan_id,
-                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
-                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
-                                        'currency' => config('filament-modular-subscriptions.main_currency'),
-                                        'amount' => $invoice->amount,
-                                    ]);
+                                    // Determine the type of subscription change
+                                    if ($subscription->plan_id !== $oldPlanId) {
+                                        // Plan was switched
+                                        $subscription->subscribable->notifySubscriptionChange('subscription_switched', [
+                                            'old_plan' => $oldPlanId,
+                                            'new_plan' => $subscription->plan_id,
+                                            'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                            'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                            'currency' => config('filament-modular-subscriptions.main_currency'),
+                                            'amount' => $invoice->amount,
+                                        ]);
+                                    } elseif ($subscription->wasRecentlyCreated) {
+                                        // New subscription
+                                        $subscription->subscribable->notifySubscriptionChange('subscription_activated', [
+                                            'plan' => $subscription->plan_id,
+                                            'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                            'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                            'currency' => config('filament-modular-subscriptions.main_currency'),
+                                            'amount' => $invoice->amount,
+                                        ]);
+                                    } else {
+                                        // Regular renewal
+                                        $subscription->subscribable->notifySubscriptionChange('subscription_renewed', [
+                                            'plan' => $subscription->plan_id,
+                                            'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                            'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                            'currency' => config('filament-modular-subscriptions.main_currency'),
+                                            'amount' => $invoice->amount,
+                                        ]);
+                                    }
                                 }
 
                                 // Payment received notification
