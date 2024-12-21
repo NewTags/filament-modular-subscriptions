@@ -192,7 +192,7 @@
                                         @endif
                                     </div>
 
-                                    @if ($activeSubscription)
+                                    @if ($activeSubscription && $this->cancelSubscriptionAction->isVisible())
                                         <div class="mt-6">
                                             {{ $this->cancelSubscriptionAction }}
                                         </div>
@@ -356,12 +356,16 @@
                                                 <!-- Action Button -->
                                                 <div class="px-4 sm:px-6 pb-6 mt-auto">
                                                     @if (!$activeSubscription || $activeSubscription->plan_id !== $plan->id)
-                                                        {{ ($this->switchPlanAction)(['plan_id' => $plan->id]) }}
+                                                        @if ($this->switchPlanAction->isVisible())
+                                                            {{ ($this->switchPlanAction)(['plan_id' => $plan->id]) }}
+                                                        @endif
                                                     @endif
                                                 </div>
                                             @else
                                                 <div class="px-4 sm:px-6 pb-6 mt-auto mx-auto w-full">
-                                                    {{ ($this->newSubscriptionAction)(['plan_id' => $plan->id]) }}
+                                                    @if ($this->newSubscriptionAction->isVisible())
+                                                        {{ ($this->newSubscriptionAction)(['plan_id' => $plan->id]) }}
+                                                    @endif
                                                 </div>
                                             @endif
                                         </div>
