@@ -321,7 +321,7 @@ class FmsPlugin implements Plugin
     {
         $subscription = $this->tenant?->subscription;
 
-        if ($subscription && $subscription->plan->isTrialPlan()) {
+        if ($subscription && $subscription->plan && $subscription->plan->isTrialPlan()) {
             if ($subscription->ends_at?->diffInDays(now()) <= 5) {
                 $alerts[] = $this->createTrialEndingSoonAlert($subscription);
             }

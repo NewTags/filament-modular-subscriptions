@@ -201,7 +201,7 @@ trait CanGenerateInvoices
             'invoice_id' => $invoice->id,
             'days' => $daysOverdue,
             'amount' => $invoice->total,
-            'currency' => $subscription->plan->currency
+            'currency' =>  config('filament-modular-subscriptions.main_currency')
         ];
 
         $subscription->subscribable->notifySubscriptionChange('invoice_overdue', $notificationData);

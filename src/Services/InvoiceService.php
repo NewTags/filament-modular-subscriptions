@@ -47,7 +47,7 @@ class InvoiceService
         foreach ($moduleUsages->groupBy('module_id') as $moduleId => $usages) {
             $module = config('filament-modular-subscriptions.models.module')::find($moduleId);
             $totalUsage = $usages->sum('usage');
-            $modulePrice = $subscription->plan->modulePrice($module);
+            $modulePrice = $subscription->plan?->modulePrice($module) ?? 0;
             $total = $totalUsage * $modulePrice;
 
             $invoice->items()->create([

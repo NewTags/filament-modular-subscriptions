@@ -92,7 +92,7 @@ class TenantSubscription extends Page implements HasTable
                             }
                             return __('filament-modular-subscriptions::fms.tenant_subscription.type_to_confirm', [
                                 'phrase' => __('filament-modular-subscriptions::fms.tenant_subscription.switch_confirmation_phrase', [
-                                    'plan' => $plan->trans_name
+                                    'plan' => $plan?->trans_name
                                 ])
                             ]);
                         })
@@ -105,7 +105,7 @@ class TenantSubscription extends Page implements HasTable
                                 }
 
                                 $expectedPhrase = __('filament-modular-subscriptions::fms.tenant_subscription.switch_confirmation_phrase', [
-                                    'plan' => $plan->trans_name
+                                    'plan' => $plan?->trans_name
                                 ]);
 
                                 if ($value !== $expectedPhrase) {
@@ -139,7 +139,7 @@ class TenantSubscription extends Page implements HasTable
                 if (!$plan) {
                     return __('filament-modular-subscriptions::fms.tenant_subscription.invalid_plan');
                 }
-                return __('filament-modular-subscriptions::fms.tenant_subscription.confirm_subscription', ['plan' => $plan->trans_name]);
+                return __('filament-modular-subscriptions::fms.tenant_subscription.confirm_subscription', ['plan' => $plan?->trans_name]);
             })
             ->modalDescription(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
@@ -152,13 +152,13 @@ class TenantSubscription extends Page implements HasTable
 
                 if ($currentPlan) {
                     return __('filament-modular-subscriptions::fms.tenant_subscription.switch_plan_warning', [
-                        'current_plan' => $currentPlan->trans_name,
-                        'new_plan' => $plan->trans_name,
+                        'current_plan' => $currentPlan?->trans_name,
+                        'new_plan' => $plan?->trans_name,
                     ]);
                 }
 
                 return __('filament-modular-subscriptions::fms.tenant_subscription.new_subscription_info', [
-                    'plan' => $plan->trans_name,
+                    'plan' => $plan?->trans_name,
                 ]);
             })
             ->action(function (array $arguments) {
@@ -232,7 +232,7 @@ class TenantSubscription extends Page implements HasTable
                     return false;
                 }
                 // Check if there are any unpaid pay-as-you-go invoices
-                if ($subscription->plan->is_pay_as_you_go) {
+                if ($subscription->plan && $subscription->plan->is_pay_as_you_go) {
                     return !$tenant->unpaidInvoices()->exists();
                 }
 
@@ -249,7 +249,7 @@ class TenantSubscription extends Page implements HasTable
                         ->send();
 
                     $tenant->notifySubscriptionChange('cancelled', [
-                        'plan' => $tenant->subscription->plan->trans_name,
+                        'plan' => $tenant->subscription->plan?->trans_name,
                         'date' => now()->format('Y-m-d H:i:s')
                     ]);
 
@@ -311,12 +311,12 @@ class TenantSubscription extends Page implements HasTable
         $notificationBody = $isPayAsYouGo
             ? __('filament-modular-subscriptions::fms.notifications.subscription.started.payg_body', [
                 'tenant' => $subscription->subscribable->name,
-                'plan' => $subscription->plan->trans_name,
+                'plan' => $subscription->plan?->trans_name,
                 'end_date' => $subscription->ends_at->format('Y-m-d H:i:s')
             ])
             : __('filament-modular-subscriptions::fms.notifications.subscription.started.body', [
                 'tenant' => $subscription->subscribable->name,
-                'plan' => $subscription->plan->trans_name,
+                'plan' => $subscription->plan?->trans_name,
                 'end_date' => $subscription->ends_at->format('Y-m-d H:i:s')
             ]);
 
@@ -333,7 +333,7 @@ class TenantSubscription extends Page implements HasTable
             ->title(__('filament-modular-subscriptions::fms.notifications.subscription.trial.title'))
             ->body(__('filament-modular-subscriptions::fms.notifications.subscription.trial.body', [
                 'tenant' => $subscription->subscribable->name,
-                'plan' => $subscription->plan->trans_name,
+                'plan' => $subscription->plan?->trans_name,
                 'end_date' => $subscription->trial_ends_at->format('Y-m-d H:i:s')
             ]))
             ->success()
@@ -341,7 +341,7 @@ class TenantSubscription extends Page implements HasTable
 
 
         $subscription->subscribable->notifySubscriptionChange('trial', [
-            'plan' => $subscription->plan->trans_name,
+            'plan' => $subscription->plan?->trans_name,
             'status' => $subscription->status->getLabel(),
             'trial' => $subscription->onTrial(),
             'date' => now()->format('Y-m-d H:i:s')

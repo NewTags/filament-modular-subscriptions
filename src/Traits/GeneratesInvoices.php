@@ -61,7 +61,7 @@ trait GeneratesInvoices
             'subtotal' => $invoice->subtotal,
             'tax' => $invoice->tax,
             'amount' => $invoice->amount,
-            'currency' => $subscription->plan->currency,
+            'currency' => config('filament-modular-subscriptions.main_currency'),
             'due_date' => $invoice->due_date->format('Y-m-d')
         ]);
 
@@ -69,7 +69,7 @@ trait GeneratesInvoices
             'invoice_id' => $invoice->id,
             'amount' => $invoice->total,
             'tenant' => $subscription->subscribable->name,
-            'currency' => $subscription->plan->currency
+            'currency' =>  config('filament-modular-subscriptions.main_currency')
         ]);
 
         $subscribable->invalidateSubscriptionCache();

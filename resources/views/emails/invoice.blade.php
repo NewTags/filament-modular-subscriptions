@@ -15,7 +15,7 @@
     <h1>{{ __('filament-modular-subscriptions::fms.invoice.email_greeting') }}</h1>
     <p>{{ __('filament-modular-subscriptions::fms.invoice.email_body', ['number' => $invoice->id]) }}
     </p>
-    <p>{{ __('filament-modular-subscriptions::fms.invoice.email_amount', ['amount' => number_format($invoice->amount, 2), 'currency' => $invoice->subscription->plan->currency]) }}
+    <p>{{ __('filament-modular-subscriptions::fms.invoice.email_amount', ['amount' => number_format($invoice->amount, 2), 'currency' =>  config('filament-modular-subscriptions.main_currency')]) }}
     </p>
     <p>{{ __('filament-modular-subscriptions::fms.invoice.email_due_date', ['date' => $invoice->due_date->format('Y-m-d')]) }}
     </p>

@@ -246,7 +246,7 @@ class InvoiceResource extends Resource
                                                             ->disabled()
                                                             ->numeric()
                                                             ->required()
-                                                            ->suffix(fn($record) => $record->subscription->plan->currency)
+                                                            ->suffix(fn($record) => config('filament-modular-subscriptions.main_currency'))
                                                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
                                                             ->extraAttributes(['class' => 'text-lg font-semibold']),
 
@@ -339,7 +339,7 @@ class InvoiceResource extends Resource
                                         ->default(fn($record) => $record->remaining_amount)
                                         ->numeric()
                                         ->required()
-                                        ->suffix(fn($record) => $record->subscription->plan->currency)
+                                        ->suffix(fn($record) =>  config('filament-modular-subscriptions.main_currency'))
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
                                         ->maxValue(fn($record) => $record->remaining_amount)
                                         ->minValue(1),
@@ -381,7 +381,7 @@ class InvoiceResource extends Resource
                         // Notify super admins about new pending payment
                         $subscribable->notifySuperAdmins('payment_pending', [
                             'amount' => $data['amount'],
-                            'currency' => $record->subscription->plan->currency,
+                            'currency' => config('filament-modular-subscriptions.main_currency'),
                             'invoice_id' => $record->id,
                             'tenant' => $subscribable->name,
                             'date' => now()->format('Y-m-d H:i:s')
@@ -407,7 +407,7 @@ class InvoiceResource extends Resource
                                 ->schema([
                                     TextEntry::make('amount')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
-                                        ->money(fn($record) => $record->subscription->plan->currency, locale: 'en')
+                                        ->money(fn($record) =>  config('filament-modular-subscriptions.main_currency'), locale: 'en')
                                         ->getStateUsing(fn($record) => $record->amount),
                                     TextEntry::make('payment_method')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.payment_method'))

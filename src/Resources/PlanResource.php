@@ -112,6 +112,7 @@ class PlanResource extends Resource
                                     ->options(config('filament-modular-subscriptions.currencies'))
                                     ->default(config('filament-modular-subscriptions.main_currency'))
                                     ->required()
+                                    ->hidden()
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.currency')),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.tabs.billing'))

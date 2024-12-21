@@ -15,7 +15,7 @@ trait ShouldHandleExpiredSubscriptions
         $notificationData = [
             'days' => number_format($subscription->ends_at->diffInDays(now())),
             'expiry_date' => $subscription->ends_at->format('Y-m-d'),
-            'plan' => $subscription->plan->trans_name
+            'plan' => $subscription->plan?->trans_name
         ];
 
         $subscription->subscribable->notifySubscriptionChange('subscription_near_expiry', $notificationData);
@@ -39,7 +39,7 @@ trait ShouldHandleExpiredSubscriptions
             );
 
             $subscription->subscribable->notifySubscriptionChange('trial_expired', [
-                'plan' => $subscription->plan->trans_name,
+                'plan' => $subscription->plan?->trans_name,
                 'expiry_date' => $subscription->ends_at->format('Y-m-d')
             ]);
         }
@@ -63,7 +63,7 @@ trait ShouldHandleExpiredSubscriptions
         );
 
         $subscription->subscribable->notifySubscriptionChange('trial_expired', [
-            'plan' => $subscription->plan->trans_name,
+            'plan' => $subscription->plan?->trans_name,
             'expiry_date' => $subscription->ends_at->format('Y-m-d')
         ]);
     }

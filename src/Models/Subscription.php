@@ -149,7 +149,7 @@ class Subscription extends Model
             return null;
         }
 
-        $gracePeriodDays = $subscription->plan->period_grace;
+        $gracePeriodDays = $subscription->plan?->period_grace ?? 0;
 
         return $subscription->ends_at->copy()->addDays($gracePeriodDays);
     }

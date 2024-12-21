@@ -49,7 +49,7 @@ class ScheduleInvoiceGeneration extends Command
     {
         try {
             // Handle trial plan expiration
-            if ($subscription->plan->isTrialPlan() && $subscription->ends_at && $subscription->ends_at->isPast()) {
+            if ($subscription->plan && $subscription->plan->isTrialPlan() && $subscription->ends_at && $subscription->ends_at->isPast()) {
                 $this->handleTrialExpiration($subscription, $logService);
                 return;
             }

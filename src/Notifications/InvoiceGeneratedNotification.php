@@ -38,7 +38,7 @@ class InvoiceGeneratedNotification extends Notification
             'subtotal' => $this->invoice->subtotal,
             'tax' => $this->invoice->tax,
             'amount' => $this->invoice->amount,
-            'currency' => $this->invoice->subscription->plan->currency,
+            'currency' =>  config('filament-modular-subscriptions.main_currency'),
             'due_date' => $this->invoice->due_date->format('Y-m-d')
         ];
     }
