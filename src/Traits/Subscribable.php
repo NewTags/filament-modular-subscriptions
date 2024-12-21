@@ -190,7 +190,6 @@ trait Subscribable
                         'currency' => $finalInvoice->currency,
                     ]);
                 }
-                $activeSubscription->moduleUsages()->delete();
             }
             // Clean up pending invoices when cancelling a non-PAYG plan
             if (!$activeSubscription->plan->is_pay_as_you_go) {
@@ -317,7 +316,11 @@ trait Subscribable
             if ($activeSubscription->is_pay_as_you_go) {
                 $activeSubscription->moduleUsages()->delete();
             } elseif ($newPlan->is_pay_as_you_go && !$activeSubscription->plan->is_pay_as_you_go) {
-                $activeSubscription->moduleUsages()->delete();
+                $activeSubscription->moduleUsages()
+                    ->whereHas('module', function ($query) {
+                        $query->where('is_persistent', false);
+                    })
+                    ->delete();
             }
 
             // Update subscription
@@ -460,7 +463,7 @@ trait Subscribable
 
             // Send appropriate notifications
             if ($plan->is_pay_as_you_go) {
-                $this->notifySubscriptionChange('started', [
+                $this->notifySubscriptionChange('payg_started', [
                     'plan' => $plan->trans_name,
                     'type' => 'pay_as_you_go',
                     'trial' => $subscription->onTrial(),
@@ -471,6 +474,12 @@ trait Subscribable
                     'status' => $status->getLabel(),
                     'trial' => true,
                     'date' => now()->format('Y-m-d H:i:s')
+                ]);
+            }else{
+                $this->notifySubscriptionChange('started', [
+                    'plan' => $plan->trans_name,
+                    'type' => 'fixed',
+                    'trial' => $subscription->onTrial(),
                 ]);
             }
 

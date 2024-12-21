@@ -100,12 +100,12 @@ trait GeneratesInvoices
 
     private function createPayAsYouGoItems(Invoice $invoice, Subscription $subscription): void
     {
-        $subscription->load('moduleUsages.module');
+        $subscription->load('moduleUsages.module', 'plan');
         $plan = $subscription->plan;
         foreach ($subscription->moduleUsages as $moduleUsage) {
             $unitPrice = $plan->modulePrice($moduleUsage->module);
             $total = $moduleUsage->usage * $unitPrice;
-
+            
             $invoice->items()->create([
                 'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', [
                     'module' => $moduleUsage->module->getName(),

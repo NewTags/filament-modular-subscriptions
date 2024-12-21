@@ -32,7 +32,7 @@ class InvoiceService
 
         return DB::transaction(function () use ($subscription, $moduleUsages) {
             $invoice = $this->createInvoice($subscription);
-            $this->processModuleUsages($invoice, $moduleUsages, $subscription);
+            $this->createInvoiceItems($invoice, $subscription);
             $this->updateInvoiceTotals($invoice);
 
             return $invoice;

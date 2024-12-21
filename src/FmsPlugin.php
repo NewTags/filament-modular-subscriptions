@@ -183,9 +183,10 @@ class FmsPlugin implements Plugin
     protected function generateModuleUsageAlerts($subscription, $tenant): array
     {
         $alerts = [];
-        $moduleUsages = $subscription->moduleUsages()->with(['module.planModules' => function ($query) use ($subscription) {
-            $query->where('plan_id', $subscription->plan_id);
-        }])->get();
+        $moduleUsages = $subscription->moduleUsages()
+            ->with(['module.planModules' => function ($query) use ($subscription) {
+                $query->where('plan_id', $subscription->plan_id);
+            }])->get();
 
         foreach ($moduleUsages as $moduleUsage) {
             $module = $moduleUsage->module;
