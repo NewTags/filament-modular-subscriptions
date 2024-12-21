@@ -3,6 +3,7 @@
 namespace NewTags\FilamentModularSubscriptions\Commands\Concerns;
 
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\Services\SubscriptionLogService;
 
 trait ShouldHandleExpiredSubscriptions
 {
@@ -29,16 +30,19 @@ trait ShouldHandleExpiredSubscriptions
         }
     }
 
-    protected function handleExpiredSubscriptions($subscription, $logService): void
+    protected function handleExpiredSubscriptions($subscription,SubscriptionLogService $logService): void
     {
         if ($subscription->isExpired()) {
             $subscription->update(['status' => SubscriptionStatus::EXPIRED]);
             $logService->log(
                 $subscription,
                 'subscription_expired',
+                __('filament-modular-subscriptions::fms.logs.subscription_expired'),
+                $subscription->status->value,
+                SubscriptionStatus::EXPIRED->value
             );
 
-            $subscription->subscribable->notifySubscriptionChange('trial_expired', [
+            $subscription->subscribable->notifySubscriptionChange('subscription_expired', [
                 'plan' => $subscription->plan?->trans_name,
                 'expiry_date' => $subscription->ends_at->format('Y-m-d')
             ]);
