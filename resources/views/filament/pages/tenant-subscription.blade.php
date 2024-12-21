@@ -73,7 +73,7 @@
                                     <div class="text-sm text-gray-500 dark:text-gray-400">
                                         {{ __('filament-modular-subscriptions::fms.tenant_subscription.plan') }}:
                                         <span class="font-semibold text-primary-600 dark:text-primary-400">
-                                            {{ $activeSubscription->plan->trans_name }}
+                                            {{ $activeSubscription->plan?->trans_name ?? __('filament-modular-subscriptions::fms.tenant_subscription.no_plan') }}
                                         </span>
                                     </div>
                                 </div>

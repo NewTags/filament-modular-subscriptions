@@ -11,7 +11,7 @@ return new class extends Migration
     {
         Schema::create(config('filament-modular-subscriptions.tables.subscription'), function (Blueprint $table) {
             $table->id();
-            $table->foreignId('plan_id')->constrained(config('filament-modular-subscriptions.tables.plan'))->onDelete('cascade');
+            $table->foreignId('plan_id')->nullable()->constrained(config('filament-modular-subscriptions.tables.plan'))->onDelete('cascade');
             $table->morphs('subscribable');
             $table->timestamp('starts_at');
             $table->timestamp('ends_at')->nullable();
