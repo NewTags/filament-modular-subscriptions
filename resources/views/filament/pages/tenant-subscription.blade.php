@@ -24,18 +24,19 @@
                             <x-slot name="heading">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <span class="text-2xl font-bold text-primary-500 dark:text-primary-400">
+                                        <span class="text-2xl font-bold  text-primary-500 dark:text-primary-400">
                                             {{ __('filament-modular-subscriptions::fms.tenant_subscription.current_subscription') }}
                                         </span>
                                         <x-filament::badge size="lg" :color="$activeSubscription->status->getColor()">
                                             {{ $activeSubscription->status->getLabel() }}
                                         </x-filament::badge>
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    <x-filament::badge size="xl" class="text-sm text-gray-500 dark:text-gray-400">
                                         {{ __('filament-modular-subscriptions::fms.tenant_subscription.plan') }}:
                                         <span
-                                            class="font-semibold text-primary-600 dark:text-primary-400">{{ $activeSubscription->plan->trans_name }}</span>
-                                    </div>
+                                            class="font-semibold text-primary-600 dark:text-primary-400">{{ $activeSubscription->plan->trans_name }}
+                                        </span>
+                                    </x-filament::badge>
                                 </div>
                             </x-slot>
 
@@ -69,7 +70,7 @@
                                         <div class="relative">
                                             <div
                                                 class="w-full h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                                                <div class="h-full bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-400 dark:to-primary-500 rounded-full transition-all duration-500 shadow-sm"
+                                                <div class="h-full bg-gradient-to-r from-primary-200 to-primary-600 dark:from-primary-400 dark:to-primary-500 rounded-full transition-all duration-500 shadow-sm"
                                                     style="width: {{ $progress }}%"
                                                     x-tooltip.raw="{{ $daysLeft }} days remaining">
                                                 </div>
@@ -180,7 +181,10 @@
                 </div>
 
                 {{-- Available Plans Tab --}}
-                <div x-show="tab === 'plans'" class="animate-fade-in">
+                <div x-show="tab === 'plans'" class="animate-fade-in" x-cloak
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 transform -translate-x-2"
+                    x-transition:enter-end="opacity-100 transform translate-x-0">
                     <x-filament::section class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl"
                         icon="heroicon-o-currency-dollar">
                         <x-slot name="heading">
