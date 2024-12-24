@@ -3,6 +3,8 @@
 return [
     'modules' => [
         // List all available module classes here
+        // Example:
+        // 'App\Fms\Modules\SubscriberModule::class',
     ],
     'models' => [
         'plan' => NewTags\FilamentModularSubscriptions\Models\Plan::class,

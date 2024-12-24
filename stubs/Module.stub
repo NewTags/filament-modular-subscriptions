@@ -5,8 +5,7 @@ namespace {{ namespace }};
 use NewTags\FilamentModularSubscriptions\Modules\BaseModule;
 use NewTags\FilamentModularSubscriptions\FmsPlugin;
 use {{ subscription_model }};
-use {{ plan_model }};
-use Filament\Facades\Filament;
+
 class {{ class }} extends BaseModule
 {
     public function getName(): string
