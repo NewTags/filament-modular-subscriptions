@@ -25,16 +25,21 @@ class {{ class }} extends BaseModule
         return FmsPlugin::getTenant()->moduleUsage(get_class($this));
     }
 
-    public function getPricing(Subscription $subscription): float
+    public function getPrice(Subscription $subscription): float
     {
-        // Implement your pricing logic here
-        return $this->calculateUsage($subscription) * $subscription->plan->modulePrice(get_class($this));
+
+        $subscription->loadMissing('plan');
+        return $subscription->plan->modulePrice(get_class($this));
     }
 
     public function canUse(Subscription $subscription): bool
     {
-        // Implement your access control logic here
+        $subscription->loadMissing('plan');
         if ($subscription->plan->is_pay_as_you_go) {
+            return true;
+        }
+
+        if($subscription->plan->moduleLimit(get_class($this)) == 0){
             return true;
         }
 
