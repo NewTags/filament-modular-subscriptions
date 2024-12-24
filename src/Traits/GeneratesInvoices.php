@@ -101,28 +101,25 @@ trait GeneratesInvoices
 
     private function createPayAsYouGoItems(Invoice $invoice, Subscription $subscription): void
     {
-        $subscription->loadMissing('moduleUsages.module', 'plan');
-        foreach ($subscription->moduleUsages as $moduleUsage) {
+        $subscription->loadMissing('plan.modules');
+        foreach ($subscription->plan->modules as $module) {
             /** @var Module $module */
-            $module = $moduleUsage->module;
             $moduleInstance = $module->getInstance();
             $usage = $moduleInstance->calculateUsage($subscription);
             $unitPrice = $moduleInstance->getPrice($subscription);
             $total = $usage * $unitPrice;
             $label = $moduleInstance->getLabel();
-            if ($total > 0) {
-                $invoice->items()->create([
-                    'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', [
-                        'module' => $label,
-                    ]),
-                    'quantity' => $usage,
-                    'unit_price' => $unitPrice,
-                    'total' => $total,
-                ]);
-            }
+            $invoice->items()->create([
+                'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', [
+                    'module' => $label,
+                ]),
+                'quantity' => $usage,
+                'unit_price' => $unitPrice,
+                'total' => $total,
+            ]);
 
-            if (!$moduleUsage->not_persistent) {
-                $moduleUsage->delete();
+            if (!$module->not_persistent) {
+                $subscription->moduleUsages()->where('module_id', $module->id)->delete();
             }
         }
     }

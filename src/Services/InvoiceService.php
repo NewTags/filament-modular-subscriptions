@@ -26,12 +26,12 @@ class InvoiceService
 
     public function generatePayAsYouGoInvoice(Subscription $subscription): ?Invoice
     {
-        $moduleUsages = $subscription->moduleUsages()->get();
-        if ($moduleUsages->isEmpty()) {
+        $modules = $subscription->plan->modules;
+        if ($modules->isEmpty()) {
             return null;
         }
 
-        return DB::transaction(function () use ($subscription, $moduleUsages) {
+        return DB::transaction(function () use ($subscription) {
             $invoice = $this->createInvoice($subscription);
             $this->createInvoiceItems($invoice, $subscription);
             $this->updateInvoiceTotals($invoice);

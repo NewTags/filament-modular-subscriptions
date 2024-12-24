@@ -377,11 +377,69 @@
                 <x-filament-actions::modals />
 
                 <div x-show="tab === 'usage'" class="animate-fade-in">
-                    @livewire(\NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget::class)
-                </div>
+                    @php
+                    $currentSubscription = $tenant->currentSubscription();
+                    if ($currentSubscription) {
+                        $currentSubscription->load(['moduleUsages', 'plan.modules']);
+                        // Pre-instantiate module instances
+                        $moduleInstances = collect($currentSubscription->plan->modules)->mapWithKeys(function($module) {
+                            return [$module->id => $module->getInstance()];
+                        });
+                    }
+                @endphp
 
+                @if($currentSubscription && $currentSubscription->moduleUsages->count() > 0)
+                     @livewire(\NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget::class)
+                @else
+                    <x-filament::section>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-medium">
+                                    {{ __('filament-modular-subscriptions::fms.resources.module_usage.name') }}
+                                </h3>
+                            </div>
+                            @if($currentSubscription)
+                                @foreach($currentSubscription->plan->modules as $module)
+                                @php
+                                    $instance = $moduleInstances[$module->id];
+                                    $usage = $instance->calculateUsage($currentSubscription);
+                                    $price = $instance->getPrice($currentSubscription);
+                                @endphp
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                                    <div class="flex justify-between items-center">
+                                                <div>
+                                                    <h4 class="font-medium">{{ $module->getLabel() }}</h4>
+                                                    <p class="text-sm text-gray-500">
+                                                        {{ __('filament-modular-subscriptions::fms.resources.module_usage.fields.usage') }}: 
+                                                        {{ $usage }}
+                                                    </p>
+                                                </div>
+                                                <div class="text-right">
+                                                    <p class="font-medium">
+                                                        {{ number_format($usage * $price, 2) }}
+                                                        {{ config('filament-modular-subscriptions.main_currency') }}
+                                                    </p>
+                                                    <p class="text-sm text-gray-500">
+                                                        {{ $currentSubscription->plan->trans_name }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                @endforeach
+                            @else
+                                
+                                <div class="text-center py-6">
+                                    <p class="text-gray-500">
+                                        {{ __('filament-modular-subscriptions::fms.tenant_subscription.no_plan') }}
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
+                    </x-filament::section>
+                @endif
+                </div>
                 <div x-show="tab === 'invoices'" class="animate-fade-in" x-cloak>
-                    {{ $this->getTable() }}
+                  {{ $this->getTable() }}
                 </div>
 
             </div>

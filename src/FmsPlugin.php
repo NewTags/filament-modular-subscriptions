@@ -13,6 +13,8 @@ use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
+use NewTags\FilamentModularSubscriptions\Models\Module;
+use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
 class FmsPlugin implements Plugin
@@ -183,16 +185,11 @@ class FmsPlugin implements Plugin
     protected function generateModuleUsageAlerts($subscription, $tenant): array
     {
         $alerts = [];
-        $moduleUsages = $subscription->moduleUsages()
-            ->with(['module.planModules' => function ($query) use ($subscription) {
-                $query->where('plan_id', $subscription->plan_id);
-            }])->get();
+        $modules = $subscription->plan->modules;
 
-        foreach ($moduleUsages as $moduleUsage) {
-            $module = $moduleUsage->module;
-            $planModule = $module->planModules->first();
-            $limit = $planModule?->limit;
-            
+        foreach ($modules as $module) {
+            $limit = $subscription->plan->moduleLimit($module);
+            $usage = $module->calculateUsage($subscription);
             if (! $tenant->canUseModule($module->class)) {
                 $alerts[] = $this->createModuleLimitAlert($module, $limit, $subscription);
             }
@@ -256,11 +253,12 @@ class FmsPlugin implements Plugin
         );
     }
 
-    protected function createModuleLimitAlert($module, $limit, $subscription): array
+    protected function createModuleLimitAlert(Module $module, Subscription $subscription): array
     {
         $moduleInstance = $module->getInstance();
         $label = $moduleInstance->getLabel();
         $usage = $moduleInstance->calculateUsage($subscription);
+        $limit = $subscription->plan->moduleLimit($module);
         $percentage = ($usage / $limit) * 100;
         return $this->createAlert(
             'danger',
