@@ -84,6 +84,10 @@ class TenantSubscription extends Page implements HasTable
             ->visible(function () {
                 $tenant = FmsPlugin::getTenant();
 
+                if (!$tenant->subscription) {
+                    return true;
+                }
+
                 if ($tenant->unpaidInvoices()->exists()) {
                     return false;
                 }

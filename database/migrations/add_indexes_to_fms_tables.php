@@ -29,7 +29,6 @@ return new class extends Migration
             $table->index('ends_at');
             $table->index('trial_ends_at');
             $table->index('has_used_trial');
-            $table->index(['subscribable_type', 'subscribable_id']);
         });
 
         // Modules table indexes
