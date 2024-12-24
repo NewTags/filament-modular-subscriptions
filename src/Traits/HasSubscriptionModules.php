@@ -290,7 +290,14 @@ trait HasSubscriptionModules
             return 0;
         }
 
-        $remaining = $activeSubscription->plan->moduleLimit($moduleClass) - $module->calculateUsage($activeSubscription);
+        $moduleLimit = $activeSubscription->plan->moduleLimit($moduleClass);
+        
+        // Return a large number if module limit is null or 0
+        if ($moduleLimit === null || $moduleLimit === 0) {
+            return PHP_INT_MAX;
+        }
+
+        $remaining = $moduleLimit - $module->calculateUsage($activeSubscription);
 
         return $remaining > 0 ? $remaining : 0;
     }
