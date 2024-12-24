@@ -328,4 +328,9 @@ return [
     'logs' => [
         'trial_expired' => 'Trial period has expired',
     ],
+    'alerts' => [
+        'total' => 'alerts in total',
+        'expand' => 'Show all alerts',
+        'collapse' => 'Hide alerts',
+    ],
 ];
