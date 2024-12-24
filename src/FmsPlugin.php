@@ -83,7 +83,7 @@ class FmsPlugin implements Plugin
                 ->pages([TenantSubscription::class])
                 ->bootUsing(function () {
                     FilamentView::registerRenderHook(
-                        PanelsRenderHook::PAGE_START,
+                        PanelsRenderHook::BODY_START,
                         fn(): string => $this->renderSubscriptionAlerts()
                     );
                 });

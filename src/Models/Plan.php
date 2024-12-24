@@ -128,7 +128,7 @@ class Plan extends Model
         $moduleModel = config('filament-modular-subscriptions.models.module');
         $module = $module instanceof $moduleModel ? $module : $moduleModel::where('class', $module)->first();
 
-        return $this->planModules()->where('module_id', $module->id)->first()->limit;
+        return $this->planModules()->where('module_id', $module->id)->first()?->limit ?? 0;
     }
 
     public function scopeActive(Builder $query): Builder

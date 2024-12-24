@@ -276,7 +276,24 @@ trait HasSubscriptionModules
 
         $this->clearFmsCache();
     }
+    public function remainingUsage(string $moduleClass): int
+    {
+        $activeSubscription = $this->activeSubscription();
+        if (! $activeSubscription) {
+            return 0;
+        }
 
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+        $module = $moduleModel::where('class', $moduleClass)->first();
+
+        if (! $module) {
+            return 0;
+        }
+
+        $remaining = $activeSubscription->plan->moduleLimit($moduleClass) - $module->calculateUsage($activeSubscription);
+
+        return $remaining > 0 ? $remaining : 0;
+    }
     public function createSubscriptionModulesUsages(): void
     {
         $subscription = $this->currentSubscription();
@@ -285,13 +302,16 @@ trait HasSubscriptionModules
         }
         $subscription->loadMissing('plan.modules');
         $subscription->plan->modules->each(function ($module) use ($subscription) {
-            $moduleUsage = $subscription->moduleUsages()->firstOrCreate(
-                ['module_id' => $module->id],
-                [
-                    'usage' => 0,
-                    'calculated_at' => now(),
-                ]
-            );
+            $plan = $subscription->plan;
+            if (!$plan->is_pay_as_you_go && $plan->moduleLimit($module) > 0) {
+                $subscription->moduleUsages()->firstOrCreate(
+                    ['module_id' => $module->id],
+                    [
+                        'usage' => 0,
+                        'calculated_at' => now(),
+                    ]
+                );
+            }
         });
     }
 }

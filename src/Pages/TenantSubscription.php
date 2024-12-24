@@ -180,15 +180,17 @@ class TenantSubscription extends Page implements HasTable
                         ])
                 ];
             })
-            ->visible(function () {
+            ->hidden(function () {
                 $tenant = FmsPlugin::getTenant();
                 if (!$tenant->subscription) {
-                    return false;
+                    return true;
                 }
 
-                $isPayAsYouGo = $tenant->subscription->plan?->is_pay_as_you_go ?? false;
-                $payAsYouGoInvoice = $isPayAsYouGo && $tenant->unpaidInvoices()?->exists();
-                return !$payAsYouGoInvoice;
+                if ($tenant->subscription->is_pay_as_you_go && $tenant->unpaidInvoices()->exists()) {
+                    return true;
+                }
+
+                return false;
             })
             ->label(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);

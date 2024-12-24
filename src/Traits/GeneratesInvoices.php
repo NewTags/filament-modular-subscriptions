@@ -9,6 +9,7 @@ use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use NewTags\FilamentModularSubscriptions\Models\Module;
+use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
 
 trait GeneratesInvoices
 {
@@ -63,8 +64,8 @@ trait GeneratesInvoices
             'tax' => $invoice->tax,
             'amount' => $invoice->amount,
             'currency' => config('filament-modular-subscriptions.main_currency'),
-            'due_date' => $invoice->due_date->format('Y-m-d')
-        ]);
+            'due_date' => $invoice->due_date->format('Y-m-d'),
+        ], url: TenantSubscription::getUrl(['tab' => 'invoices']));
 
         $subscribable->notifySuperAdmins('invoice_generated', [
             'invoice_id' => $invoice->id,
@@ -109,17 +110,19 @@ trait GeneratesInvoices
             $unitPrice = $moduleInstance->getPrice($subscription);
             $total = $usage * $unitPrice;
             $label = $moduleInstance->getLabel();
-            $invoice->items()->create([
-                'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', [
-                    'module' => $label,
-                ]),
-                'quantity' => $usage,
-                'unit_price' => $unitPrice,
-                'total' => $total,
-            ]);
+            if ($total > 0) {
+                $invoice->items()->create([
+                    'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', [
+                        'module' => $label,
+                    ]),
+                    'quantity' => $usage,
+                    'unit_price' => $unitPrice,
+                    'total' => $total,
+                ]);
 
-            if (!$module->not_persistent) {
-                $subscription->moduleUsages()->where('module_id', $module->id)->delete();
+                if (!$module->not_persistent) {
+                    $subscription->moduleUsages()->where('module_id', $module->id)->delete();
+                }
             }
         }
     }

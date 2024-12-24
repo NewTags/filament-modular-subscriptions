@@ -3,6 +3,7 @@
 namespace NewTags\FilamentModularSubscriptions\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -126,6 +127,14 @@ class Subscription extends Model
         $gracePeriodEndDate = $this->getGracePeriodEndDate();
         
         return $gracePeriodEndDate && now()->isAfter($gracePeriodEndDate);
+    }
+
+
+    public function IsPayAsYouGo() : Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->plan->is_pay_as_you_go,
+        );
     }
 
     public function isInGracePeriod(): bool

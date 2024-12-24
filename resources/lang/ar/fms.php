@@ -689,6 +689,10 @@ return [
                 'title' => '[إدارة النظام] فاتورة متأخرة السداد',
                 'body' => 'الفاتورة #:invoice_id للعميل :tenant متأخرة السداد منذ :days يوم. المبلغ المستحق: :amount :currency'
             ],
+            'invoice_cancelled' => [
+                'title' => '[إدارة النظام] فاتورة ملغية',
+                'body' => 'الفاتورة #:invoice_id للعميل :tenant ملغية. المبلغ المستحق: :amount :currency'
+            ],
             'subscription_near_expiry' => [
                 'title' => '[إدارة النظام] اشتراك على وشك الانتهاء',
                 'body' => 'اشتراك العميل :tenant في خطة :plan سينتهي خلال :days يوم (في :expiry_date)'
