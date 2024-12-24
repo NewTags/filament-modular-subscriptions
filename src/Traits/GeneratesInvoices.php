@@ -89,7 +89,7 @@ trait GeneratesInvoices
             ->where('status', '!=', InvoiceStatus::CANCELLED)
             ->count();
 
-        if ($nonCancelledInvoicesCount === 0 && $plan->setup_fee > 0) {
+        if ($nonCancelledInvoicesCount === 1 && $plan->setup_fee > 0) {
             $invoice->items()->create([
                 'description' => __('filament-modular-subscriptions::fms.invoice.setup_fee'),
                 'total' => $plan->setup_fee,

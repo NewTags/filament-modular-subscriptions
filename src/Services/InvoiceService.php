@@ -40,27 +40,6 @@ class InvoiceService
         });
     }
 
-    private function processModuleUsages(Invoice $invoice, $moduleUsages, Subscription $subscription): void
-    {
-        $moduleUsages->loadMissing('module');
-
-        foreach ($moduleUsages->groupBy('module_id') as $moduleId => $usages) {
-            /** @var Module $module */
-            $module = config('filament-modular-subscriptions.models.module')::find($moduleId);
-            $moduleInstance = $module->getInstance();
-            $totalUsage = $moduleInstance->calculateUsage($subscription);
-            $modulePrice = $moduleInstance->getPrice($subscription);
-            $total = $totalUsage * $modulePrice;
-
-            $invoice->items()->create([
-                'description' => $module->getLabel(),
-                'quantity' => $totalUsage,
-                'unit_price' => $modulePrice,
-                'total' => $total,
-            ]);
-        }
-    }
-
     public function generateInitialPlanInvoice($tenant, $plan): Invoice
     {
         return DB::transaction(function () use ($tenant, $plan) {

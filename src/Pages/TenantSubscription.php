@@ -75,7 +75,9 @@ class TenantSubscription extends Page implements HasTable
         return Action::make('newSubscription')
             ->label(function () {
                 $tenant = FmsPlugin::getTenant();
-                if ($tenant->unpaidInvoices()->exists()) {
+
+
+                if ($tenant->subscription && $tenant->unpaidInvoices()->exists()) {
                     return __('filament-modular-subscriptions::fms.notifications.subscription.pay_all_invoices_to_activate.title');
                 }
                 return __('filament-modular-subscriptions::fms.tenant_subscription.choose_plan');
@@ -84,11 +86,8 @@ class TenantSubscription extends Page implements HasTable
             ->visible(function () {
                 $tenant = FmsPlugin::getTenant();
 
-                if (!$tenant->subscription) {
-                    return true;
-                }
 
-                if ($tenant->unpaidInvoices()->exists()) {
+                if ($tenant->subscription && $tenant->unpaidInvoices()->exists()) {
                     return false;
                 }
 
@@ -110,7 +109,7 @@ class TenantSubscription extends Page implements HasTable
                 $plan = config('filament-modular-subscriptions.models.plan')::findOrFail($arguments['plan_id']);
                 $tenant = FmsPlugin::getTenant();
 
-                if ($tenant->unpaidInvoices()->exists()) {
+                if ($tenant->subscription && $tenant->unpaidInvoices()->exists()) {
                     Notification::make()
                         ->title(__('filament-modular-subscriptions::fms.notifications.subscription.pay_all_invoices_to_activate.title'))
                         ->body(__('filament-modular-subscriptions::fms.notifications.subscription.pay_all_invoices_to_activate.body', [
