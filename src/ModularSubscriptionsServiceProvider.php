@@ -137,6 +137,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             '7_create_invoice_items_table',
             '8_create_payments_table',
             'create_subscription_logs_table',
+            'add_indexes_to_fms_tables',
         ];
     }
 
