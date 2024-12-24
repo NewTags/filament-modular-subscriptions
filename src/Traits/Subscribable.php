@@ -317,7 +317,6 @@ trait Subscribable
                 'ends_at' => $this->calculateEndDate($newPlan),
                 'status' => $status ?? $activeSubscription->status,
             ]);
-
             // Generate initial invoice for non-trial plans
             if (!$newPlan->is_trial_plan && !$newPlan->is_pay_as_you_go) {
                 $initialInvoice = $invoiceService->generateInitialPlanInvoice($this, $newPlan);
@@ -327,7 +326,7 @@ trait Subscribable
                     'currency' => $initialInvoice->currency,
                 ]);
             }
-
+            $this->createSubscriptionModulesUsages();
             // Send notification for subscription switch
             $this->notifySubscriptionChange('subscription_switched', [
                 'plan' => $newPlan->trans_name,
@@ -430,6 +429,7 @@ trait Subscribable
                 $subscription->save();
             }
             $this->refresh();
+            $this->createSubscriptionModulesUsages();
             // Generate initial invoice for non-trial, non-PAYG plans
             if (!$plan->is_trial_plan && !$plan->is_pay_as_you_go) {
                 $invoiceService = app(InvoiceService::class);

@@ -276,4 +276,22 @@ trait HasSubscriptionModules
 
         $this->clearFmsCache();
     }
+
+    public function createSubscriptionModulesUsages(): void
+    {
+        $subscription = $this->currentSubscription();
+        if (! $subscription) {
+            return;
+        }
+        $subscription->loadMissing('plan.modules');
+        $subscription->plan->modules->each(function ($module) use ($subscription) {
+            $moduleUsage = $subscription->moduleUsages()->firstOrCreate(
+                ['module_id' => $module->id],
+                [
+                    'usage' => 0,
+                    'calculated_at' => now(),
+                ]
+            );
+        });
+    }
 }
