@@ -8,6 +8,7 @@ use NewTags\FilamentModularSubscriptions\Models\Invoice;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use NewTags\FilamentModularSubscriptions\Models\Module;
 
 trait GeneratesInvoices
 {
@@ -72,7 +73,7 @@ trait GeneratesInvoices
             'currency' =>  config('filament-modular-subscriptions.main_currency')
         ]);
 
-        $subscribable->invalidateSubscriptionCache();
+        $subscribable->clearFmsCache();
     }
 
     private function createInvoiceItems(Invoice $invoice, Subscription $subscription, $plan = null): void
@@ -100,22 +101,29 @@ trait GeneratesInvoices
 
     private function createPayAsYouGoItems(Invoice $invoice, Subscription $subscription): void
     {
-        $subscription->load('moduleUsages.module', 'plan');
-        $plan = $subscription->plan;
+        $subscription->loadMissing('moduleUsages.module', 'plan');
         foreach ($subscription->moduleUsages as $moduleUsage) {
-            $unitPrice = $plan->modulePrice($moduleUsage->module);
-            $total = $moduleUsage->usage * $unitPrice;
-            
-            $invoice->items()->create([
-                'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', [
-                    'module' => $moduleUsage->module->getName(),
-                ]),
-                'quantity' => $moduleUsage->usage,
-                'unit_price' => $unitPrice,
-                'total' => $total,
-            ]);
+            /** @var Module $module */
+            $module = $moduleUsage->module;
+            $moduleInstance = $module->getInstance();
+            $usage = $moduleInstance->calculateUsage($subscription);
+            $unitPrice = $moduleInstance->getPrice($subscription);
+            $total = $usage * $unitPrice;
+            $label = $moduleInstance->getLabel();
+            if ($total > 0) {
+                $invoice->items()->create([
+                    'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', [
+                        'module' => $label,
+                    ]),
+                    'quantity' => $usage,
+                    'unit_price' => $unitPrice,
+                    'total' => $total,
+                ]);
+            }
 
-            $moduleUsage->delete();
+            if (!$moduleUsage->not_persistent) {
+                $moduleUsage->delete();
+            }
         }
     }
 

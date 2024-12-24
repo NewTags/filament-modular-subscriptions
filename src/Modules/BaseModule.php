@@ -12,7 +12,7 @@ abstract class BaseModule
 
     abstract public function calculateUsage(Subscription $subscription): int;
 
-    abstract public function getPricing(Subscription $subscription): float;
+    abstract public function getPrice(Subscription $subscription): float;
 
     abstract public function canUse(Subscription $subscription): bool;
 

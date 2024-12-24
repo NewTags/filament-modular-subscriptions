@@ -15,14 +15,14 @@ class EditSubscription extends EditRecord
         return [
             Actions\DeleteAction::make()
                 ->after(function ($record) {
-                    $record->subscribable->invalidateSubscriptionCache();
+                    $record->subscribable->clearFmsCache();
                 }),
         ];
     }
 
     public function afterSave(): void
     {
-        $this->record->load('subscribable');
-        $this->getRecord()->subscribable->invalidateSubscriptionCache();
+        $this->record->loadMissing('subscribable');
+        $this->getRecord()->subscribable->clearFmsCache();
     }
 }

@@ -174,7 +174,7 @@ class InvoiceResource extends Resource
                     ->modalWidth('4xl')
                     ->modalHeading(fn($record) => __('filament-modular-subscriptions::fms.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
-                        $invoice = $record->load(['items', 'subscription.plan']);
+                        $invoice = $record->loadMissing(['items', 'subscription.plan']);
 
                         return View::make('filament-modular-subscriptions::pages.invoice-details', compact('invoice'));
                     })

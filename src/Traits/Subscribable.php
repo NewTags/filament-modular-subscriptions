@@ -40,7 +40,7 @@ trait Subscribable
 
     private const CACHE_TTL = 1800; // 30 minutes in seconds
 
-    private const DAYS_LEFT_CACHE_TTL = 86400; // 24 hours in seconds
+    private const DAYS_LEFT_CACHE_TTL = 14400; // 4 hours in seconds
 
 
     /**
@@ -83,7 +83,7 @@ trait Subscribable
                     ->with(['plan', 'moduleUsages.module']) // Eager load relationships
                     ->whereDate('starts_at', '<=', now())
                     ->where(function ($query) {
-                        $this->load('plan');
+                        $this->loadMissing('plan');
                         $query
                             ->whereDate('ends_at', '>', now())
                             ->orWhereDate('ends_at', '>=', now()->subDays(
@@ -99,7 +99,7 @@ trait Subscribable
     /**
      * Invalidate active subscription cache
      */
-    public function invalidateSubscriptionCache(): void
+    public function clearFmsCache(): void
     {
         // Clear active subscription cache
         Cache::forget(self::ACTIVE_SUBSCRIPTION_CACHE_KEY . $this->id);
@@ -208,7 +208,7 @@ trait Subscribable
 
             // Clean up module usages
 
-            $this->invalidateSubscriptionCache();
+            $this->clearFmsCache();
         });
 
         return true;
@@ -231,16 +231,10 @@ trait Subscribable
         DB::transaction(function () use ($subscription, $days, $plan) {
             // Only delete non-persistent module usages
             // Clean up module usages based on plan type
-            if ($subscription->is_pay_as_you_go) {
-                $subscription->moduleUsages()
-                    ->delete();
-            } else {
-                $subscription->moduleUsages()
-                    ->whereHas('module', function ($query) {
-                        $query->where('is_persistent', false);
-                    })
-                    ->delete();
-            }
+
+            $subscription->moduleUsages()
+                ->notPersistent()
+                ->delete();
 
             $subscription->update([
                 'ends_at' => $this->calculateEndDate($plan, $days),
@@ -249,7 +243,7 @@ trait Subscribable
                 'trial_ends_at' => null,
             ]);
 
-            $this->invalidateSubscriptionCache();
+            $this->clearFmsCache();
         });
 
         return true;
@@ -312,16 +306,9 @@ trait Subscribable
                 }
             }
 
-            // Clean up module usages based on plan type
-            if ($activeSubscription->is_pay_as_you_go) {
-                $activeSubscription->moduleUsages()->delete();
-            } elseif ($newPlan->is_pay_as_you_go && !$activeSubscription->plan->is_pay_as_you_go) {
-                $activeSubscription->moduleUsages()
-                    ->whereHas('module', function ($query) {
-                        $query->where('is_persistent', false);
-                    })
-                    ->delete();
-            }
+            $activeSubscription->moduleUsages()
+                ->notPersistent()
+                ->delete();
 
             // Update subscription
             $activeSubscription->update([
@@ -347,7 +334,7 @@ trait Subscribable
                 'date' => now()->format('Y-m-d H:i:s')
             ]);
 
-            $this->invalidateSubscriptionCache();
+            $this->clearFmsCache();
         });
 
         return true;
@@ -475,7 +462,7 @@ trait Subscribable
                     'trial' => true,
                     'date' => now()->format('Y-m-d H:i:s')
                 ]);
-            }else{
+            } else {
                 $this->notifySubscriptionChange('started', [
                     'plan' => $plan->trans_name,
                     'type' => 'fixed',
@@ -483,7 +470,7 @@ trait Subscribable
                 ]);
             }
 
-            $this->invalidateSubscriptionCache();
+            $this->clearFmsCache();
         });
         return $subscription;
     }

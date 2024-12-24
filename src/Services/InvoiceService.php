@@ -7,6 +7,7 @@ use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use NewTags\FilamentModularSubscriptions\Traits\GeneratesInvoices;
 use NewTags\FilamentModularSubscriptions\Traits\ManagesSubscriptions;
 use Illuminate\Support\Facades\DB;
+use NewTags\FilamentModularSubscriptions\Models\Module;
 
 class InvoiceService
 {
@@ -41,12 +42,14 @@ class InvoiceService
 
     private function processModuleUsages(Invoice $invoice, $moduleUsages, Subscription $subscription): void
     {
-        $moduleUsages->load('module');
+        $moduleUsages->loadMissing('module');
 
         foreach ($moduleUsages->groupBy('module_id') as $moduleId => $usages) {
+            /** @var Module $module */
             $module = config('filament-modular-subscriptions.models.module')::find($moduleId);
-            $totalUsage = $usages->sum('usage');
-            $modulePrice = $subscription->plan?->modulePrice($module) ?? 0;
+            $moduleInstance = $module->getInstance();
+            $totalUsage = $moduleInstance->calculateUsage($subscription);
+            $modulePrice = $moduleInstance->getPrice($subscription);
             $total = $totalUsage * $modulePrice;
 
             $invoice->items()->create([
@@ -66,7 +69,7 @@ class InvoiceService
             } else {
                 $subscription = $tenant->subscription;
             }
-            $subscription->load('plan');
+            $subscription->loadMissing('plan');
             $subscription->refresh();
             $invoice = $this->createInvoice(
                 $subscription

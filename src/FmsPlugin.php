@@ -192,9 +192,9 @@ class FmsPlugin implements Plugin
             $module = $moduleUsage->module;
             $planModule = $module->planModules->first();
             $limit = $planModule?->limit;
-
+            
             if (! $tenant->canUseModule($module->class)) {
-                $alerts[] = $this->createModuleLimitAlert($module, $moduleUsage, $limit);
+                $alerts[] = $this->createModuleLimitAlert($module, $limit, $subscription);
             }
         }
 
@@ -256,17 +256,21 @@ class FmsPlugin implements Plugin
         );
     }
 
-    protected function createModuleLimitAlert($module, $moduleUsage, $limit): array
+    protected function createModuleLimitAlert($module, $limit, $subscription): array
     {
+        $moduleInstance = $module->getInstance();
+        $label = $moduleInstance->getLabel();
+        $usage = $moduleInstance->calculateUsage($subscription);
+        $percentage = ($usage / $limit) * 100;
         return $this->createAlert(
             'danger',
             __('filament-modular-subscriptions::fms.tenant_subscription.you_have_reached_the_limit_of_this_module'),
             sprintf(
                 '%s: %d/%d (%d%%)',
-                $module->getName(),
-                $moduleUsage->usage,
+                $label,
+                $usage,
                 $limit,
-                ($moduleUsage->usage / $limit) * 100
+                $percentage
             ),
             __('filament-modular-subscriptions::fms.tenant_subscription.upgrade_now'),
             'plans'

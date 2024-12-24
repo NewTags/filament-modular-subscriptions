@@ -100,7 +100,7 @@ class TenantSubscription extends Page implements HasTable
                     return true;
                 }
 
-                return true;
+                return false;
             })
             ->action(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::findOrFail($arguments['plan_id']);

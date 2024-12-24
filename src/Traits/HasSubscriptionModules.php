@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Modules\BaseModule;
 
 trait HasSubscriptionModules
 {
@@ -65,7 +66,7 @@ trait HasSubscriptionModules
             ->with(['plan', 'moduleUsages.module']) // Eager load relationships
             ->whereDate('starts_at', '<=', now())
             ->where(function ($query) {
-                $this->load('plan');
+                $this->loadMissing('plan');
                 $query
                     ->whereDate('ends_at', '>', now())
                     ->orWhereDate('ends_at', '>=', now()->subDays(
@@ -130,6 +131,12 @@ trait HasSubscriptionModules
         }
     }
 
+
+    public function clearModuleCache(BaseModule $module): void
+    {
+        Cache::forget($this->getCacheKey($module::class));
+    }
+
     public function record(string $moduleClass, int $quantity, bool $incremental, Subscription $activeSubscription): void
     {
         // Load module with a single query including plan modules
@@ -163,7 +170,7 @@ trait HasSubscriptionModules
             'pricing' => $pricing,
         ]);
 
-        $this->invalidateSubscriptionCache();
+        $this->clearFmsCache();
     }
 
     /**
@@ -217,7 +224,7 @@ trait HasSubscriptionModules
             );
         }
 
-        $this->invalidateSubscriptionCache();
+        $this->clearFmsCache();
 
         return $usage;
     }
@@ -267,6 +274,6 @@ trait HasSubscriptionModules
             $moduleUsage->decrement('usage', $quantity);
         }
 
-        $this->invalidateSubscriptionCache();
+        $this->clearFmsCache();
     }
 }

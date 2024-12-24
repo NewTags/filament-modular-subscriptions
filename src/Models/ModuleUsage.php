@@ -2,6 +2,8 @@
 
 namespace NewTags\FilamentModularSubscriptions\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -31,5 +33,27 @@ class ModuleUsage extends Model
     {
         $moduleModel = config('filament-modular-subscriptions.models.module');
         return $this->belongsTo($moduleModel);
+    }
+
+    public function scopeNotPersistent(Builder $query): Builder
+    {
+        return $query->whereHas('module', function ($query) {
+            $query->where('is_persistent', false);
+        });
+    }
+
+    public function scopePersistent(Builder $query): Builder
+    {
+        return $query->whereHas('module', function ($query) {
+            $query->where('is_persistent', true);
+        });
+    }
+
+    public function notPersistent(): Attribute
+    {
+        $this->loadMissing('module');
+        return new Attribute(
+            get: fn() => !$this->module->is_persistent,
+        );
     }
 }

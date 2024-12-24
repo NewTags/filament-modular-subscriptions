@@ -20,7 +20,7 @@ trait CanGenerateInvoices
         if ($invoice = $invoiceService->generate($subscription)) {
             $this->info("Invoice generated successfully for subscription {$subscription->subscribable->name}");
             $this->updateSubscriptionStatus($subscription, $invoice, $logService);
-            $subscription->subscribable->invalidateSubscriptionCache();
+            $subscription->subscribable->clearFmsCache();
         }
     }
 

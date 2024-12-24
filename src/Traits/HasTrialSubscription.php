@@ -53,7 +53,7 @@ trait HasTrialSubscription
             $subscription = $this->activeSubscription();
             $subscription->trial_ends_at = $subscription->trial_ends_at->addDays($days);
             $subscription->save();
-            $this->invalidateSubscriptionCache();
+            $this->clearFmsCache();
         } elseif ($this->onGenericTrial()) {
             $this->trial_ends_at = $this->trial_ends_at->addDays($days);
             $this->save();
@@ -69,14 +69,14 @@ trait HasTrialSubscription
             $subscription = $this->activeSubscription();
             $subscription->trial_ends_at = now();
             $subscription->save();
-            $this->invalidateSubscriptionCache();
+            $this->clearFmsCache();
         } elseif ($this->onGenericTrial()) {
             $this->trial_ends_at = now();
             $this->save();
         }
     }
 
-    
+
     public function canUseTrial(): bool
     {
         return !$this->subscription?->has_used_trial;
