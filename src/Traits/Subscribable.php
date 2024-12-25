@@ -429,6 +429,7 @@ trait Subscribable
                 $subscription->save();
             }
             $this->refresh();
+            // Create module usages
             $this->createSubscriptionModulesUsages();
             // Generate initial invoice for non-trial, non-PAYG plans
             if (!$plan->is_trial_plan && !$plan->is_pay_as_you_go) {

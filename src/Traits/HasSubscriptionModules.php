@@ -30,17 +30,6 @@ trait HasSubscriptionModules
                     return false;
                 }
 
-                // Check if subscription is on hold or pending payment
-                if ($subscription->status === SubscriptionStatus::ON_HOLD || $subscription->status === SubscriptionStatus::PENDING_PAYMENT) {
-                    if ($subscription->ends_at->isPast()) {
-                        $latestInvoice = $subscription->invoices()->whereIn('status', [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID])->latest()->first();
-                        if ($latestInvoice && $latestInvoice->due_date->isPast()) {
-                            return false;
-                        } elseif ($latestInvoice && $latestInvoice->due_date->isFuture()) {
-                            return true;
-                        }
-                    }
-                }
 
                 $moduleModel = config('filament-modular-subscriptions.models.module');
                 /** @var \NewTags\FilamentModularSubscriptions\Models\Module $module */
@@ -53,6 +42,7 @@ trait HasSubscriptionModules
                 if (! $module) {
                     return false;
                 }
+
 
                 return $module->canUse($subscription);
             }
@@ -291,7 +281,7 @@ trait HasSubscriptionModules
         }
 
         $moduleLimit = $activeSubscription->plan->moduleLimit($moduleClass);
-        
+
         // Return a large number if module limit is null or 0
         if ($moduleLimit === null || $moduleLimit === 0) {
             return PHP_INT_MAX;
@@ -301,6 +291,7 @@ trait HasSubscriptionModules
 
         return $remaining > 0 ? $remaining : 0;
     }
+
     public function createSubscriptionModulesUsages(): void
     {
         $subscription = $this->currentSubscription();
@@ -310,7 +301,11 @@ trait HasSubscriptionModules
         $subscription->loadMissing('plan.modules');
         $subscription->plan->modules->each(function ($module) use ($subscription) {
             $plan = $subscription->plan;
-            if (!$plan->is_pay_as_you_go && $plan->moduleLimit($module) > 0) {
+
+            if ($plan->moduleLimit($module) == 0 && !$plan->is_pay_as_you_go) {
+                return;
+            }
+
                 $subscription->moduleUsages()->firstOrCreate(
                     ['module_id' => $module->id],
                     [
@@ -318,7 +313,7 @@ trait HasSubscriptionModules
                         'calculated_at' => now(),
                     ]
                 );
-            }
+            
         });
     }
 }
