@@ -43,6 +43,8 @@ class BaseModule
                 } elseif ($latestInvoice && $latestInvoice->due_date->isFuture()) {
                     return true;
                 }
+            } else {
+                return false;
             }
         }
         if ($subscription->is_pay_as_you_go) {

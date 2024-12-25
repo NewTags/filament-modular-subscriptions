@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use NewTags\FilamentModularSubscriptions\Models\Module;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
 class FmsPlugin implements Plugin
@@ -81,6 +82,9 @@ class FmsPlugin implements Plugin
         } else {
             $panel
                 ->pages([TenantSubscription::class])
+                ->widgets([
+                    ModuleUsageWidget::class,
+                ])
                 ->bootUsing(function () {
                     FilamentView::registerRenderHook(
                         PanelsRenderHook::BODY_START,

@@ -20,6 +20,7 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use NewTags\FilamentModularSubscriptions\FmsPlugin;
 use NewTags\FilamentModularSubscriptions\Resources\ModuleUsageResource;
+use NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget;
 
 class TenantSubscription extends Page implements HasTable
 {

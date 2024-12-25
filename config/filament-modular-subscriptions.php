@@ -107,4 +107,7 @@ return [
     ],
     'tenant_data_resolver' => null, // Can be set to a callable
     'invoice_generation_grace_period' => 0,
+    'widgets' => [
+        'enable_module_usage' => true,
+    ],
 ];

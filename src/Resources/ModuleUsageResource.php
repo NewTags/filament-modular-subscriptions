@@ -74,6 +74,7 @@ class ModuleUsageResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.plan'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('module.name')
+                    ->getStateUsing(fn($record) => $record->module->getLabel())
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.module_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('usage')
@@ -95,7 +96,7 @@ class ModuleUsageResource extends Resource
                         $pricing = $moduleInstance->getPrice($record->subscription);
                         return $usage * $pricing;
                     })
-                    ->sortable(), 
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('module_id')
