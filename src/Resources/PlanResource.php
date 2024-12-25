@@ -151,12 +151,12 @@ class PlanResource extends Resource
                                         Forms\Components\TextInput::make('grace_period')
                                             ->numeric()
                                             ->default(0)
-                                            ->hidden(fn(Forms\Get $get) => !$get('is_trial_plan'))
+                                            ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_period')),
                                         Forms\Components\Select::make('grace_interval')
                                             ->options(Interval::class)
                                             ->default(Interval::DAY)
-                                            ->hidden(fn(Forms\Get $get) => !$get('is_trial_plan'))
+                                            ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_interval')),
                                     ]),
                             ]),
