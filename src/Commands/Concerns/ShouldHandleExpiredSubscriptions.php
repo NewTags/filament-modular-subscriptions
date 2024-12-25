@@ -29,7 +29,7 @@ trait ShouldHandleExpiredSubscriptions
             $subscription->subscribable->notifySuperAdmins('subscription_near_expiry', $adminNotificationData);
         }
     }
-
+    
     protected function handleExpiredSubscriptions($subscription,SubscriptionLogService $logService): void
     {
         if ($subscription->isExpired()) {

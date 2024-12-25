@@ -2,7 +2,7 @@
 
 namespace NewTags\FilamentModularSubscriptions\Traits;
 
-
+use Filament\Notifications\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
 use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
@@ -51,7 +51,7 @@ trait HasSubscriptionNotifications
         )
             ->icon($this->getNotificationIcon($action))
             ->iconColor($this->getNotificationColor($action))
-            ->url($url ?? TenantSubscription::getUrl(['tab' => 'subscription']))
+           
             ->sendToDatabase($users);
     }
 

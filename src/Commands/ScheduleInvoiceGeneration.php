@@ -40,7 +40,9 @@ class ScheduleInvoiceGeneration extends Command
             ->with(['plan', 'invoices', 'subscribable'])
             ->chunk(100, function ($subscriptions) use ($invoiceService, $logService) {
                 foreach ($subscriptions as $subscription) {
+                    filament()->setTenant($subscription->subscribable, true);
                     $this->processSubscription($subscription, $invoiceService, $logService);
+                    filament()->setTenant(null, true);
                 }
             });
     }

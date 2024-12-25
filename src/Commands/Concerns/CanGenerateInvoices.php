@@ -99,7 +99,6 @@ trait CanGenerateInvoices
         }
 
         $today = now();
-
         if ($plan->is_pay_as_you_go) {
             return $this->shouldGeneratePayAsYouGoInvoice($subscription, $plan, $today);
         }

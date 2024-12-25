@@ -65,7 +65,7 @@ trait GeneratesInvoices
             'amount' => $invoice->amount,
             'currency' => config('filament-modular-subscriptions.main_currency'),
             'due_date' => $invoice->due_date->format('Y-m-d'),
-        ], url: TenantSubscription::getUrl(['tab' => 'invoices']));
+        ]);
 
         $subscribable->notifySuperAdmins('invoice_generated', [
             'invoice_id' => $invoice->id,
