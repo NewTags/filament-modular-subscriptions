@@ -57,9 +57,12 @@ class ScheduleInvoiceGeneration extends Command
             }
 
 
-
-            $this->handlePastDueInvoice($subscription);
-            // $this->handleSubscriptionNearExpiry($subscription);
+            if(config('filament-modular-subscriptions.notifications.enable_past_due_invoice_notification', false)){
+                $this->handlePastDueInvoice($subscription);
+            }
+            if(config('filament-modular-subscriptions.notifications.enable_subscription_near_expiry_notification', false)){
+                $this->handleSubscriptionNearExpiry($subscription);
+            }
 
             if ($this->shouldGenerateInvoice($subscription)) {
                 $this->generateInvoice($subscription, $invoiceService, $logService);

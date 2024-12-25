@@ -9,27 +9,38 @@ trait ShouldHandleExpiredSubscriptions
 {
     protected function handleSubscriptionNearExpiry($subscription): void
     {
-        if (!$subscription->ends_at || $subscription->ends_at->diffInDays(now()) > 5) {
+        // Return early if subscription has no end date or is not near expiry
+        if (!$subscription->ends_at) {
+            return;
+        }
+
+        $daysUntilExpiry = $subscription->ends_at->diffInDays(now());
+        
+        // Only notify if within 5 days of expiry
+        if ($daysUntilExpiry > config('filament-modular-subscriptions.notifications.subscription_near_expiry_days', 5)) {
             return;
         }
 
         $notificationData = [
-            'days' => number_format($subscription->ends_at->diffInDays(now())),
+            'days' => number_format($daysUntilExpiry),
             'expiry_date' => $subscription->ends_at->format('Y-m-d'),
-            'plan' => $subscription->plan?->trans_name
+            'plan' => $subscription->plan?->trans_name,
+            'subscription_id' => $subscription->id
         ];
 
+        // Notify subscriber
         $subscription->subscribable->notifySubscriptionChange('subscription_near_expiry', $notificationData);
 
-        if ($subscription->ends_at->diffInDays(now()) <= 3) {
+        // Notify admins if within 3 days of expiry
+        if ($daysUntilExpiry <= 3) {
             $adminNotificationData = array_merge($notificationData, [
-                'tenant' => $subscription->subscribable->name
+                'tenant' => $subscription->subscribable->name,
+                'tenant_id' => $subscription->subscribable->id
             ]);
 
             $subscription->subscribable->notifySuperAdmins('subscription_near_expiry', $adminNotificationData);
         }
     }
-    
     protected function handleExpiredSubscriptions($subscription,SubscriptionLogService $logService): void
     {
         if ($subscription->isExpired()) {

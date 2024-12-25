@@ -42,30 +42,7 @@ return [
         'payment' => 'fms_payments',
         'subscription_log' => 'fms_subscription_logs',
     ],
-    'currencies' => [
-        'USD',
-        'SAR',
-        'EUR',
-        'GBP',
-        'MAD',
-        'AED',
-        'QAR',
-        'KWD',
-        'BHD',
-        'OMR',
-        'JOD',
-        'LYD',
-        'EGP',
-        'SDG',
-        'TND',
-        'LBP',
-        'SYP',
-        'IQD',
-        'KHR',
-        'LAK',
-        'MMK',
-        'MNT',
-    ],
+ 
     'main_currency' => 'USD',
     'translatable' => true,
     'locales' => [
@@ -108,6 +85,15 @@ return [
     'tenant_data_resolver' => null, // Can be set to a callable
     'invoice_generation_grace_period' => 0,
     'widgets' => [
+        // enable module usage widget to show the usage of each module in  subscription
         'enable_module_usage' => true,
+    ],
+    'notifications' => [
+        // enable past due invoice notification to notify the tenant when their invoice is past due
+        'enable_past_due_invoice_notification' => false,
+        // enable subscription near expiry notification to notify the tenant when their subscription is near expiry
+        'enable_subscription_near_expiry_notification' => false,
+        // number of days before subscription expiry to notify the tenant
+        'subscription_near_expiry_days' => 5,
     ],
 ];
