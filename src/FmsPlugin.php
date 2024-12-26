@@ -38,6 +38,9 @@ class FmsPlugin implements Plugin
     public ?string $navigationGroup = null;
     public ?string $tenantNavigationGroup = null;
     public ?string $subscriptionNavigationLabel = null;
+    public bool | Closure $subscriptionPageInTenantMenu = true;
+    public bool | Closure $subscriptionPageInUserMenu = false;
+    public static bool | Closure $subscriptionPageInNavigationMenu = false;
 
     public static function make(): static
     {
@@ -88,7 +91,15 @@ class FmsPlugin implements Plugin
                         ->label(fn() => $this->getSubscriptionNavigationLabel())
                         ->url(fn() => TenantSubscription::getUrl())
                         ->color(fn() => Color::Emerald)
-                        ->visible(fn() => $this->canSeeTenantSubscription())
+                        ->visible(fn() => $this->subscriptionPageInTenantMenu && $this->canSeeTenantSubscription())
+                        ->icon('heroicon-o-credit-card'),
+                ])
+                ->userMenuItems([
+                    MenuItem::make()
+                        ->label(fn() => $this->getSubscriptionNavigationLabel())
+                        ->url(fn() => TenantSubscription::getUrl())
+                        ->color(fn() => Color::Emerald)
+                        ->visible(fn() => $this->subscriptionPageInUserMenu && $this->canSeeTenantSubscription())
                         ->icon('heroicon-o-credit-card'),
                 ])
                 ->widgets([
@@ -114,15 +125,33 @@ class FmsPlugin implements Plugin
     public function boot(Panel $panel): void {}
 
 
-    public function canSeeTenantSubscription(): bool
+    public static function canSeeTenantSubscription(): bool
     {
-        return cache()->store('file')->remember(
+        return  cache()->store('file')->remember(
             'tenant_subscription_nav_' . auth()->id() . '_' . FmsPlugin::getTenant()->id,
             now()->addMinutes(60),
             fn() => FmsPlugin::getTenant()->admins()->where('users.id', auth()->id())->exists()
         );
     }
 
+    public function subscriptionPageInTenantMenu(bool | Closure $condition = true): static
+    {
+        $this->subscriptionPageInTenantMenu = $condition instanceof Closure ? $condition() : $condition;
+
+        return $this;
+    }
+    public function subscriptionPageInUserMenu(bool | Closure $condition = true): static
+    {
+        $this->subscriptionPageInUserMenu = $condition instanceof Closure ? $condition() : $condition;
+
+        return $this;
+    }
+    public static function subscriptionPageInNavigationMenu(bool | Closure $condition = true): static
+    {
+        static::$subscriptionPageInNavigationMenu = $condition instanceof Closure ? $condition() : $condition;
+
+        return new static();
+    }
 
     public function subscriptionStats(bool $condition = true): static
     {

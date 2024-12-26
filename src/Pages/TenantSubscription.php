@@ -50,7 +50,7 @@ class TenantSubscription extends Page implements HasTable
 
     public static function shouldRegisterNavigation(): bool
     {
-        return false;
+        return FmsPlugin::$subscriptionPageInNavigationMenu && FmsPlugin::canSeeTenantSubscription();
     }
 
     public function getViewData(): array
