@@ -6,6 +6,7 @@ use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Navigation\MenuItem;
 use Filament\Panel;
+use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
@@ -82,6 +83,14 @@ class FmsPlugin implements Plugin
         } else {
             $panel
                 ->pages([TenantSubscription::class])
+                ->tenantMenuItems([
+                    MenuItem::make()
+                        ->label(fn() => $this->getSubscriptionNavigationLabel())
+                        ->url(fn() => TenantSubscription::getUrl())
+                        ->color(fn() => Color::Emerald)
+                        ->visible(fn() => $this->canSeeTenantSubscription())
+                        ->icon('heroicon-o-credit-card'),
+                ])
                 ->widgets([
                     ModuleUsageWidget::class,
                 ])
@@ -100,8 +109,19 @@ class FmsPlugin implements Plugin
         }
     }
 
+
+
     public function boot(Panel $panel): void {}
 
+
+    public function canSeeTenantSubscription(): bool
+    {
+        return cache()->store('file')->remember(
+            'tenant_subscription_nav_' . auth()->id() . '_' . FmsPlugin::getTenant()->id,
+            now()->addMinutes(60),
+            fn() => FmsPlugin::getTenant()->admins()->where('users.id', auth()->id())->exists()
+        );
+    }
 
 
     public function subscriptionStats(bool $condition = true): static

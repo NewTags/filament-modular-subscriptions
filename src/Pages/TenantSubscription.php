@@ -50,11 +50,7 @@ class TenantSubscription extends Page implements HasTable
 
     public static function shouldRegisterNavigation(): bool
     {
-        return cache()->remember(
-            'tenant_subscription_nav_' . auth()->id() . '_' . FmsPlugin::getTenant()->id,
-            now()->addMinutes(60),
-            fn() => FmsPlugin::getTenant()->admins()->where('users.id', auth()->id())->exists()
-        );
+        return false;
     }
 
     public function getViewData(): array
@@ -62,7 +58,6 @@ class TenantSubscription extends Page implements HasTable
         $tenant = FmsPlugin::getTenant();
         $activeSubscription = $tenant->subscription;
         $planModel = config('filament-modular-subscriptions.models.plan');
-
 
         return [
             'tenant' => $tenant,
