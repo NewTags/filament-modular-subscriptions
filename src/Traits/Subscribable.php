@@ -404,7 +404,11 @@ trait Subscribable
         }
 
         if ($endDate === null) {
-            $endDate = $startDate->copy()->addDays($plan->period);
+            if ($plan->is_trial_plan) {
+                $endDate = $startDate->copy()->addDays($plan->period_trial);
+            } else {
+                $endDate = $startDate->copy()->addDays($plan->period);
+            }
         }
 
         // Determine initial status
