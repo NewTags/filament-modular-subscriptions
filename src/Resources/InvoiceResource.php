@@ -54,7 +54,7 @@ class InvoiceResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        if (FmsPlugin::get()->onTenantPanel) {
+        if (FmsPlugin::get()->isOnTenantPanel()) {
             return FmsPlugin::get()->getTenantNavigationGroup();
         }
 

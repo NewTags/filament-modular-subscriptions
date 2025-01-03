@@ -43,7 +43,7 @@ class FmsPlugin implements Plugin
         return 'filament-modular-subscriptions';
     }
 
-    public static function get(): Plugin
+    public static function get(): static
     {
         return filament('filament-modular-subscriptions');
     }
@@ -278,5 +278,10 @@ class FmsPlugin implements Plugin
     public function getSubscriptionNavigationLabel(): string
     {
         return $this->subscriptionNavigationLabel ?? __('filament-modular-subscriptions::fms.tenant_subscription.your_subscription');
+    }
+
+    public function isOnTenantPanel(): bool
+    {
+        return $this->onTenantPanel;
     }
 }
