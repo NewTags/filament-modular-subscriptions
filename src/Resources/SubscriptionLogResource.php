@@ -38,22 +38,22 @@ class SubscriptionLogResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('subscription.id')
-                    ->label(__('filament-modular-subscriptions::fms.fields.subscription_id'))
+                TextColumn::make('subscription.subscribable.name')
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.subscription_id'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('event')
-                    ->label(__('filament-modular-subscriptions::fms.fields.event'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.event'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('old_status')
-                    ->label(__('filament-modular-subscriptions::fms.fields.old_status'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.old_status'))
                     ->sortable(),
                 TextColumn::make('new_status')
-                    ->label(__('filament-modular-subscriptions::fms.fields.new_status'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.new_status'))
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->label(__('filament-modular-subscriptions::fms.fields.created_at'))
+                    ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.created_at'))
                     ->dateTime()
                     ->sortable(),
             ])
@@ -74,23 +74,23 @@ class SubscriptionLogResource extends Resource
             ->schema([
                 Infolists\Components\Section::make()
                     ->schema([
-                        TextEntry::make('subscription.id')
-                            ->label(__('filament-modular-subscriptions::fms.fields.subscription_id')),
+                        TextEntry::make('subscription.subscribable.name')
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.subscription_id')),
                         TextEntry::make('event')
-                            ->label(__('filament-modular-subscriptions::fms.fields.event')),
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.event')),
                         TextEntry::make('description')
-                            ->label(__('filament-modular-subscriptions::fms.fields.description'))
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.description'))
                             ->columnSpanFull(),
                         TextEntry::make('old_status')
-                            ->label(__('filament-modular-subscriptions::fms.fields.old_status')),
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.old_status')),
                         TextEntry::make('new_status')
-                            ->label(__('filament-modular-subscriptions::fms.fields.new_status')),
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.new_status')),
                         TextEntry::make('metadata')
-                            ->label(__('filament-modular-subscriptions::fms.fields.metadata'))
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.metadata'))
                             ->columnSpanFull()
                             ->formatStateUsing(fn($state) => json_encode($state, JSON_PRETTY_PRINT)),
                         TextEntry::make('created_at')
-                            ->label(__('filament-modular-subscriptions::fms.fields.created_at'))
+                            ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.created_at'))
                             ->dateTime(),
                     ])
                     ->columns(2)

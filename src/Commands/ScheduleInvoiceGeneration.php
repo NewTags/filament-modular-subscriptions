@@ -2,6 +2,8 @@
 
 namespace HoceineEl\FilamentModularSubscriptions\Commands;
 
+use HoceineEl\FilamentModularSubscriptions\Enums\Interval;
+use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use HoceineEl\FilamentModularSubscriptions\Services\InvoiceService;
 use HoceineEl\FilamentModularSubscriptions\Services\SubscriptionLogService;
@@ -125,6 +127,8 @@ class ScheduleInvoiceGeneration extends Command
                                     }
                                 });
                             }
+
+                            $subscription->subscribable->invalidateSubscriptionCache();
                         }
                     } catch (\Exception $e) {
                         defer(function () use ($e, $subscription, $logService) {
@@ -169,7 +173,11 @@ class ScheduleInvoiceGeneration extends Command
     protected function shouldGenerateInvoice($subscription): bool
     {
         $plan = $subscription->plan;
-        $lastInvoice = $subscription->invoices->sortByDesc('created_at')->first();
+        $lastInvoice = $subscription->invoices()
+            ->where('status', InvoiceStatus::UNPAID)
+            ->orWhere('status', InvoiceStatus::PARTIALLY_PAID)
+            ->latest()
+            ->first();
         $today = now();
 
         // If no previous invoice exists, generate one
@@ -200,19 +208,15 @@ class ScheduleInvoiceGeneration extends Command
     protected function calculateNextInvoiceDate($subscription, $lastInvoice): Carbon
     {
         $plan = $subscription->plan;
-        // Always use last invoice date as base if available
         $baseDate = $subscription->starts_at;
 
-        if (! $baseDate) {
-            throw new \InvalidArgumentException('Invalid base date for invoice calculation');
-        }
 
         // Calculate next date based on invoice interval
-        return match ($plan->invoice_interval->value) {
-            'day' => $baseDate->copy()->addDays($plan->invoice_period),
-            'week' => $baseDate->copy()->addWeeks($plan->invoice_period),
-            'month' => $baseDate->copy()->addMonths($plan->invoice_period),
-            'year' => $baseDate->copy()->addYears($plan->invoice_period),
+        return match ($plan->invoice_interval) {
+            Interval::DAY => $baseDate->copy()->addDays($plan->invoice_period),
+            Interval::WEEK => $baseDate->copy()->addWeeks($plan->invoice_period),
+            Interval::MONTH => $baseDate->copy()->addMonths($plan->invoice_period),
+            Interval::YEAR => $baseDate->copy()->addYears($plan->invoice_period),
             default => throw new \InvalidArgumentException("Invalid invoice interval: {$plan->invoice_interval->getLabel()}"),
         };
     }

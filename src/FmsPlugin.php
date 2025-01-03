@@ -8,6 +8,7 @@ use Filament\Panel;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use HoceineEl\FilamentModularSubscriptions\Pages\TenantSubscription;
+use HoceineEl\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
@@ -139,10 +140,13 @@ class FmsPlugin implements Plugin
     protected function generateAlerts(Model $tenant): array
     {
         $alerts = [];
-        $subscription = $tenant->activeSubscription();
+        $subscription = $tenant->subscription;
 
-        if (! $subscription) {
+        if (! $subscription || $subscription->status === SubscriptionStatus::CANCELLED) {
             return [$this->createNoSubscriptionAlert()];
+        }
+        if ($subscription->status === SubscriptionStatus::ON_HOLD || $subscription->status === SubscriptionStatus::PENDING_PAYMENT) {
+            return [$this->createOnHoldSubscriptionAlert()];
         }
 
         if ($this->isSubscriptionExpired($subscription)) {
@@ -195,6 +199,16 @@ class FmsPlugin implements Plugin
             __('filament-modular-subscriptions::fms.tenant_subscription.no_active_subscription'),
             __('filament-modular-subscriptions::fms.tenant_subscription.no_subscription_message'),
             __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
+        );
+    }
+
+    protected function createOnHoldSubscriptionAlert(): array
+    {
+        return $this->createAlert(
+            'warning',
+            __('filament-modular-subscriptions::fms.statuses.on_hold'),
+            __('filament-modular-subscriptions::fms.messages.subscription_on_hold'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.contact_support')
         );
     }
 

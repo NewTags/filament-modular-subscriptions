@@ -13,7 +13,8 @@ class EditModule extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->visible(fn($record) => $record->whereHas('plans', fn($query) => $query->whereHas('subscriptions'))->count() === 0),
         ];
     }
 }

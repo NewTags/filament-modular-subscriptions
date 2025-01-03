@@ -19,4 +19,9 @@ class EditSubscription extends EditRecord
                 }),
         ];
     }
+
+    public function afterSave(): void
+    {
+        $this->getRecord()->subscribable->invalidateSubscriptionCache();
+    }
 }

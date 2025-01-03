@@ -46,13 +46,15 @@ class InvoiceService
             $this->updateInvoiceTotals($invoice);
 
             event(new InvoiceGenerated($invoice));
-
-            $subscription->subscribable->notifySubscriptionChange('invoice_generated', [
+            $subscribable = $subscription->subscribable;
+            $subscribable->notifySubscriptionChange('invoice_generated', [
                 'invoice_id' => $invoice->id,
                 'amount' => $invoice->total,
                 'currency' => $subscription->plan->currency,
                 'due_date' => $dueDate->format('Y-m-d')
             ]);
+
+            $subscribable->invalidateSubscriptionCache();
 
             return $invoice;
         });
@@ -130,7 +132,6 @@ class InvoiceService
         $subscription->load('moduleUsages');
         foreach ($subscription->moduleUsages as $moduleUsage) {
             $invoice->items()->create([
-                'module_id' => $moduleUsage->module_id,
                 'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', [
                     'module' => $moduleUsage->module->getName(),
                 ]),
