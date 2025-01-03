@@ -55,7 +55,7 @@ class InvoiceService
             ]);
 
             $subscribable->invalidateSubscriptionCache();
-
+  
             return $invoice;
         });
     }
@@ -157,13 +157,17 @@ class InvoiceService
 
     private function updateInvoiceTotals(Invoice $invoice): void
     {
-        $totalAmount = $invoice->items()->sum('total');
-        $tax = $totalAmount * $this->taxPercentage / 100;
+        DB::transaction(function () use ($invoice) {
+            $items = $invoice->items;
+            $totalBeforeTax = $items->sum('total');
+            $tax = $totalBeforeTax * $this->taxPercentage / 100;
 
-        $invoice->update([
-            'amount' => $totalAmount + $tax,
-            'tax' => $tax,
-        ]);
+            $invoice->update([
+                'subtotal' => $totalBeforeTax,
+                'tax' => $tax,
+                'amount' => $totalBeforeTax + $tax,
+            ]);
+        });
     }
 
     private function isPayAsYouGo(Subscription $subscription): bool

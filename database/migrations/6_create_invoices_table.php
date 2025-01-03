@@ -15,6 +15,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->decimal('tax', 10, 2);
             $table->string('status');
+            $table->decimal('subtotal', 10, 2);
             $table->date('due_date');
             $table->timestamp('paid_at')->nullable();
             $table->timestamps();

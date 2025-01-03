@@ -122,11 +122,13 @@ class PlanResource extends Resource
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.invoice_interval')),
                                         Forms\Components\TextInput::make('grace_period')
                                             ->numeric()
+                                            ->hidden()
                                             ->default(0)
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_period')),
                                         Forms\Components\Select::make('grace_interval')
                                             ->options(Interval::class)
                                             ->default(Interval::DAY)
+                                            ->hidden()
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_interval')),
                                     ]),
                             ]),

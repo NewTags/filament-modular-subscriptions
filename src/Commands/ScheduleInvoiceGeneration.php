@@ -174,50 +174,51 @@ class ScheduleInvoiceGeneration extends Command
     {
         $plan = $subscription->plan;
         $lastInvoice = $subscription->invoices()
-            ->where('status', InvoiceStatus::UNPAID)
-            ->orWhere('status', InvoiceStatus::PARTIALLY_PAID)
+            ->where(function ($query) {
+                $query->where('status', InvoiceStatus::UNPAID)
+                      ->orWhere('status', InvoiceStatus::PARTIALLY_PAID);
+            })
             ->latest()
             ->first();
         $today = now();
 
-        // If no previous invoice exists, generate one
         if (! $lastInvoice) {
             return true;
         }
 
-        // If plan has fixed invoice day
         if ($plan->fixed_invoice_day) {
-            // Check if today is the fixed invoice day
             if ($today->day == $plan->fixed_invoice_day) {
-                // Check if we already generated an invoice this month
                 return ! $subscription->invoices
-                    ->where('created_at', '>=', now()->startOfMonth())
-                    ->where('created_at', '<=', now()->endOfMonth())
+                    ->whereBetween('created_at', [
+                        now()->startOfMonth(),
+                        now()->endOfMonth()
+                    ])
                     ->count();
             }
-
             return false;
         }
 
-        // For interval-based billing
         $nextInvoiceDate = $subscription->ends_at ?? $subscription->starts_at;
-
-        return $today->copy()->subDays($plan->grace_period)->startOfDay()->gte($nextInvoiceDate);
+        return $today->startOfDay()->gte(
+            $nextInvoiceDate->copy()->addDays($plan->grace_period)
+        );
     }
 
     protected function calculateNextInvoiceDate($subscription, $lastInvoice): Carbon
     {
         $plan = $subscription->plan;
-        $baseDate = $subscription->starts_at;
+        $baseDate = $lastInvoice?->created_at ?? $subscription->starts_at;
 
-
-        // Calculate next date based on invoice interval
-        return match ($plan->invoice_interval) {
+        $nextDate = match ($plan->invoice_interval) {
             Interval::DAY => $baseDate->copy()->addDays($plan->invoice_period),
             Interval::WEEK => $baseDate->copy()->addWeeks($plan->invoice_period),
             Interval::MONTH => $baseDate->copy()->addMonths($plan->invoice_period),
             Interval::YEAR => $baseDate->copy()->addYears($plan->invoice_period),
-            default => throw new \InvalidArgumentException("Invalid invoice interval: {$plan->invoice_interval->getLabel()}"),
+            default => throw new \InvalidArgumentException(
+                "Invalid invoice interval: {$plan->invoice_interval->getLabel()}"
+            ),
         };
+
+        return $nextDate;
     }
 }
