@@ -19,19 +19,19 @@ class FmsPlugin implements Plugin
 
     private const ALERTS_CACHE_TTL = 30; // minutes
 
-    protected bool $hasSubscriptionStats = true;
+    public bool $hasSubscriptionStats = true;
 
-    protected bool $onTenantPanel = false;
+    public bool $onTenantPanel = false;
 
-    protected static ?Closure $getTenantUsing = null;
+    public static ?Closure $getTenantUsing = null;
 
-    protected ?Model $tenant = null;
+    public ?Model $tenant = null;
 
-    protected array $cachedAlerts = [];
+    public array $cachedAlerts = [];
 
-    protected ?string $navigationGroup = null;
-    protected ?string $tenantNavigationGroup = null;
-    protected ?string $subscriptionNavigationLabel = null;
+    public ?string $navigationGroup = null;
+    public ?string $tenantNavigationGroup = null;
+    public ?string $subscriptionNavigationLabel = null;
 
     public static function make(): static
     {
