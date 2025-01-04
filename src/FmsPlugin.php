@@ -239,15 +239,12 @@ class FmsPlugin implements Plugin
     {
         $alerts = [];
         $modules = $subscription->plan->modules;
-
         foreach ($modules as $module) {
             $limit = $subscription->plan->moduleLimit($module);
-            $usage = $module->calculateUsage($subscription);
-            if (! $tenant->canUseModule($module->class)) {
-                $alerts[] = $this->createModuleLimitAlert($module, $limit, $subscription);
+            if (! $tenant->canUseModule($module->class) && $limit > 0) {
+                $alerts[] = $this->createModuleLimitAlert($module, $subscription, $limit);
             }
         }
-
         return $alerts;
     }
 
@@ -306,12 +303,12 @@ class FmsPlugin implements Plugin
         );
     }
 
-    protected function createModuleLimitAlert(Module $module, Subscription $subscription): array
+    protected function createModuleLimitAlert(Module $module, Subscription $subscription, $limit = null): array
     {
         $moduleInstance = $module->getInstance();
         $label = $moduleInstance->getLabel();
         $usage = $moduleInstance->calculateUsage($subscription);
-        $limit = $subscription->plan->moduleLimit($module);
+        $limit = $limit ?? $subscription->plan->moduleLimit($module);
         $percentage = ($usage / $limit) * 100;
         return $this->createAlert(
             'danger',
