@@ -35,7 +35,7 @@ class InvoiceResource extends Resource
 
     protected static ?string $tenantOwnershipRelationshipName = 'tenant';
 
-    protected static ?string $slug = 'ms-nvoices';
+    protected static ?string $slug = 'ms-invoices';
 
     public static function getModel(): string
     {
