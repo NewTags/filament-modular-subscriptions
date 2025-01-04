@@ -91,18 +91,18 @@ class PaymentResource extends Resource
                 Tables\Columns\TextColumn::make('reviewer.name')
                     ->toggledHiddenByDefault()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.reviewed_by')),
-                Tables\Columns\TextColumn::make('invoice.subtotal')
-                    ->money(fn($record) => $record->invoice->subscription->plan->currency)
-                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subtotal'))
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('invoice.tax')
-                    ->money(fn($record) => $record->invoice->subscription->plan->currency)
-                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.tax'))
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('invoice.amount')
-                    ->money(fn($record) => $record->invoice->subscription->plan->currency)
-                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.total'))
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('invoice.subtotal')
+                //     ->money(fn($record) => $record->invoice->subscription->plan->currency)
+                //     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subtotal'))
+                //     ->sortable(),
+                // Tables\Columns\TextColumn::make('invoice.tax')
+                //     ->money(fn($record) => $record->invoice->subscription->plan->currency)
+                //     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.tax'))
+                //     ->sortable(),
+                // Tables\Columns\TextColumn::make('invoice.amount')
+                //     ->money(fn($record) => $record->invoice->subscription->plan->currency)
+                //     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.total'))
+                // ->sortable(),
             ])
             ->filters([
                 Tables\Filters\Filter::make('created_at')
@@ -181,7 +181,7 @@ class PaymentResource extends Resource
 
                                 // Store the old plan ID before renewal
                                 $oldPlanId = $subscription->plan_id;
-                                
+
                                 // Renew the subscription
                                 $subscription->renew();
 

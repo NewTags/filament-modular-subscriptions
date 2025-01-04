@@ -159,7 +159,7 @@ class FmsPlugin implements Plugin
         if ($this->isSubscriptionExpired($subscription)) {
             return [$this->createExpiredSubscriptionAlert()];
         }
-        
+
         if ($this->isSubscriptionEndingSoon($subscription)) {
             $alerts[] = $this->createEndingSoonAlert($subscription);
         }

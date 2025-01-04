@@ -421,7 +421,8 @@ return [
         'you_have_to_renew_your_subscription' => 'عليك تجديد اشتراكك',
         'pay_invoice' => 'إدفع فاتورتك',
         'subscription_on_hold' => 'الاشتراك معلق',
-        'subscription_pending_payment' => 'الاشتراك في انتظار الدفع',       
+        'subscription_pending_payment' => 'الاشتراك في انتظار الدفع',
+        'subscription_pending_payment_message' => 'يرجى دفع الفاتورة المرتبطة بالاشتراك لتفعيله',
     ],
     'pay_as_you_go' => 'الدفع حسب الاستخدام',
     'logs' => [
