@@ -146,9 +146,7 @@ class FmsPlugin implements Plugin
             return [$this->createNoSubscriptionAlert()];
         }
 
-        if ($this->isSubscriptionExpired($subscription)) {
-            return [$this->createExpiredSubscriptionAlert()];
-        }
+
 
         if ($subscription->status === SubscriptionStatus::ON_HOLD) {
             return [$this->createOnHoldAlert()];
@@ -158,6 +156,10 @@ class FmsPlugin implements Plugin
             return [$this->createPendingPaymentAlert()];
         }
 
+        if ($this->isSubscriptionExpired($subscription)) {
+            return [$this->createExpiredSubscriptionAlert()];
+        }
+        
         if ($this->isSubscriptionEndingSoon($subscription)) {
             $alerts[] = $this->createEndingSoonAlert($subscription);
         }
