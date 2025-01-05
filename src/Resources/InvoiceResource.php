@@ -99,13 +99,13 @@ class InvoiceResource extends Resource
                     ->money($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subtotal'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('amount')
-                    ->money($currency)
-                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.amount'))
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('tax')
                     ->money($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.tax'))
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('amount')
+                    ->money($currency)
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.total'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()

@@ -168,6 +168,7 @@ class PaymentResource extends Resource
                             ]);
 
                             $invoice = $record->invoice;
+                            $subscription = $invoice->subscription;
                             $totalPaid = $invoice->payments()
                                 ->where('status', PaymentStatus::PAID)
                                 ->sum('amount');
@@ -178,8 +179,44 @@ class PaymentResource extends Resource
                                     'paid_at' => now(),
                                 ]);
 
-                                $invoice->subscription->renew();
+                                // Store the old plan ID before renewal
+                                $oldPlanId = $subscription->plan_id;
+                                
+                                // Renew the subscription
+                                $subscription->renew();
 
+                                // Determine the type of subscription change
+                                if ($subscription->plan_id !== $oldPlanId) {
+                                    // Plan was switched
+                                    $subscription->subscribable->notifySubscriptionChange('subscription_switched', [
+                                        'old_plan' => $oldPlanId,
+                                        'new_plan' => $subscription->plan_id,
+                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                        'currency' => $subscription->plan->currency,
+                                        'amount' => $invoice->amount,
+                                    ]);
+                                } elseif ($subscription->wasRecentlyCreated) {
+                                    // New subscription
+                                    $subscription->subscribable->notifySubscriptionChange('subscription_activated', [
+                                        'plan' => $subscription->plan_id,
+                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                        'currency' => $subscription->plan->currency,
+                                        'amount' => $invoice->amount,
+                                    ]);
+                                } else {
+                                    // Regular renewal
+                                    $subscription->subscribable->notifySubscriptionChange('subscription_renewed', [
+                                        'plan' => $subscription->plan_id,
+                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                        'currency' => $subscription->plan->currency,
+                                        'amount' => $invoice->amount,
+                                    ]);
+                                }
+
+                                // Payment received notification
                                 $invoice->subscription->subscribable->notifySubscriptionChange('payment_received', [
                                     'amount' => $record->amount,
                                     'subtotal' => $invoice->subtotal,

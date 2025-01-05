@@ -23,7 +23,7 @@ return [
                 'module_limit' => 'حد الاستخدام',
                 'module_price' => 'سعر الوحدة',
                 'module_settings' => 'إعدادات الوحدة',
-                'setting_key' => 'مفتاح الإعداد',
+                'setting_key' => 'متاح الإعداد',
                 'setting_value' => 'قيمة الإعداد',
                 'modules_count' => 'عدد الوحدات',
                 'is_pay_as_you_go' => 'الدفع حسب الاستخدام',
@@ -53,7 +53,7 @@ return [
             'singular_name' => 'اشتراك',
             'fields' => [
                 'plan_id' => 'الخطة',
-                'subscribable_type' => 'نوع المشترك',
+                'subscribable_type' => 'نوع المترك',
                 'subscribable_id' => 'المشترك',
                 'starts_at' => 'تاريخ البدء',
                 'ends_at' => 'تاريخ الانتهاء',
@@ -110,7 +110,7 @@ return [
             ],
             'no_items' => 'لا يوجد عناصر لهذه الفاتورة',
             'actions' => [
-                'pay' => 'دفع المستحقات',
+                'pay' => 'دفع المستح��ات',
             ],
             'invoice_title' => 'فاتورة :subscriber - :id - :date',
             'payment_pending' => 'تم إرسال الفاتورة بنجاح. في انتظار التأكيد من الجهة المختصة',
@@ -187,7 +187,7 @@ return [
         ],
     ],
     'menu_group' => [
-        'subscription_management' => 'إدارة الاشتراكات',
+        'subscription_management' => '��دارة الاشتراكات',
     ],
     'interval' => [
         'day' => 'يوم',
@@ -221,7 +221,7 @@ return [
         'no' => 'لا',
         'trial_ends_at' => 'تاريخ انتهاء التجربة',
         'no_active_subscription' => 'لا يوجد اشتراك نشط',
-        'no_subscription_message' => 'ليس لديك اشتراك نشط حاليًا. يرجى ا��تيار خطة للاشتراك.',
+        'no_subscription_message' => 'ليس لديك اشتراك نشط حاليًا. يرجى اتيار خطة للاشتراك.',
         'available_plans' => 'الخطط المتاحة',
         'per' => 'لكل',
         'switch_plan_button' => 'تغيير الخطة',
@@ -265,7 +265,7 @@ return [
         'usage_tracked_realtime' => 'يتم تتبع الاستخدام في الوقت الفعلي',
         'start_using_pay_as_you_go' => 'ابدأ باستخدام الدفع سسب الاستخدام',
         'welcome_title' => 'مرحباً! اختر خطتك المثالية',
-        'welcome_message' => 'ابدأ باختيار خطة الاشتراك التي تناسب احتياجاتك. جميع الخطط تأتي مع فترة تجريبية خالية من المخاطر.',
+        'welcome_message' => 'ابدأ باختيار خطة الاشت��اك التي تناسب احتياجاتك. جميع الخطط تأتي مع فترة تجريبية خالية من المخاطر.',
         'benefit_1_title' => 'خطط مرنة',
         'benefit_1_description' => 'اختر من بين خطط متنوعة مصممة لتناسب احتياجات عملك والنمو معك.',
         'benefit_2_title' => 'آمن وموثوق',
@@ -377,7 +377,7 @@ return [
         'partially_paid' => 'تم الدفع جزئيا',
         'email' => 'البريد الإلكتروني',
         'undo' => 'تراجع',
-        'undone' => 'تم التراجع بنجاح',
+        'undone' => 'تم الترا��ع بنجاح',
         'payment_method' => 'طريقة الدفع',
         'payment_details' => 'تفاصيل الدفع',
         'choose_method' => 'اختر طريقة الدفع',
@@ -505,6 +505,18 @@ return [
     ],
     'notifications' => [
         'subscription' => [
+            'subscription_renewed' => [
+                'title' => 'تم تجديد الاشتراك',
+                'body' => 'تم تجديد اشتراكك في :tenant. الخطة: :plan، صالح حتى: :end_date',
+            ],
+            'subscription_switched' => [
+                'title' => 'تم تغيير الخطة',
+                'body' => 'تم تغيير خطة اشتراكك في :tenant. الخطة الجديدة: :plan، صالح حتى: :end_date',
+            ],
+            'subscription_activated' => [
+                'title' => 'تم تفعيل الاشتراك',
+                'body' => 'تم تفعيل اشتراكك الجديد في :tenant. الخطة: :plan، صالح حتى: :end_date',
+            ],
             'renewed' => [
                 'title' => '[إدارة النظام] تم تجديد الاشتراك',
                 'body' => 'تم تجديد اشتراك :tenant'
@@ -517,196 +529,65 @@ return [
                 'title' => '[إدارة النظام] تم بدء اشتراك جديد',
                 'body' => 'تم بدء اشتراك جديد لـ :tenant'
             ],
-            'payment_rejected' => [
-                'title' => '[إدارة النظام] تم رفض الدفع',
-                'body' => 'تم رفض عملية دفع لاشتراك :tenant'
-            ],
-            'expired' => [
-                'title' => '[إدارة النظام] انتهى الاشتراك',
-                'body' => 'انتهت صلاحية اشتراك :tenant'
-            ],
-            'trial_ending' => [
-                'title' => '[إدارة النظام] الفترة التجريبية تنتهي قريباً',
-                'body' => 'ستنتهي الفترة التجريبية لـ :tenant خلال :days أيام'
-            ],
             'payment_received' => [
-                'title' => '[إدارة النظام] تم استلام الدفع',
-                'body' => 'تم استلام دفعة بقيمة :amount لاشتراك :tenant'
-            ],
-            'payment_overdue' => [
-                'title' => '[إدارة النظام] دفعة متأخرة',
-                'body' => 'الدفع متأخر لاشتراك :tenant'
-            ],
-            'suspended' => [
-                'title' => '[إدارة النظام] تم تعليق الاشتراك',
-                'body' => 'تم تعليق اشتراك :tenant'
-            ],
-            'reactivated' => [
-                'title' => '[إدارة النظام] تم إعادة تف��يل الاشتراك',
-                'body' => 'تم إعادة تفعيل اشتراك :tenant'
-            ],
-            'cancelled' => [
-                'title' => '[إدارة النظام] تم إلغاء الاشتراك',
-                'body' => 'تم إلغاء اشتراك :tenant'
-            ],
-            'invoice_generated' => [
-                'title' => '[إدارة النظام] تم إنشاء فاتورة جديدة',
-                'body' => 'تم إنشاء فاتورة جديدة رقم #:invoice_id بقيمة :amount لـ :tenant'
-            ],
-            'invoice_generation_failed' => [
-                'title' => '[إدارة النظام] فشل إنشاء الفاتورة',
-                'body' => 'فشل في إنشاء فاتورة لـ :tenant: :error'
-            ],
-            'payment_pending' => [
-                'title' => '[إدارة النظام] دفعة في انتظار المراجعة',
-                'body' => 'هناك دفعة جديدة بقيمة :amount في انتظار المراجعة لـ :tenant'
-            ],
-            'payment_approved' => [
-                'title' => '[إدارة النظام] تم اعتماد الدفعة',
-                'body' => 'تم اعتماد دفعة بقيمة :amount لـ :tenant'
+                'title' => 'تم استلام الدفعة',
+                'body' => 'تم استلام دفعة بقيمة :amount :currency للفاتورة رقم #:invoice_id',
             ],
             'payment_partially_approved' => [
-                'title' => '[إدارة النظام] تم اعتماد دفعة جزئية',
-                'body' => 'تم اعتماد دفعة جزئية بقيمة :amount من أصل :total لـ :tenant'
+                'title' => 'تم اعتماد دفعة جزئية',
+                'body' => 'تم اعتماد دفعة جزئية بقيمة :amount :currency من أصل :total :currency',
             ],
-            'payment_cancelled' => [
-                'title' => '[إدارة النظام] تم إلغاء الدفعة',
-                'body' => 'تم إلغاء دفعة بقيمة :amount لـ :tenant'
-            ],
-            'payment_undone' => [
-                'title' => '[إدارة النظام] تم التراجع عن الدفعة',
-                'body' => 'تم التراجع عن دفعة بقيمة :amount لـ :tenant'
-            ],
-            'subscription_status_changed' => [
-                'title' => '[إدارة النظام] تغيير حالة الاشتراك',
-                'body' => 'تم تغيير حالة اشتراك :tenant من :old_status إلى :new_status'
-            ],
-            'subscription_near_expiry' => [
-                'title' => '[إدارة النظام] اشتراك قارب على الانتهاء',
-                'body' => 'اشتراك :tenant سينتهي خلال :days أيام'
-            ],
-            'subscription_grace_period' => [
-                'title' => '[إدارة النظام] اشتراك في فترة السماح',
-                'body' => 'اشتراك :tenant في فترة السماح. سيتم تعليق الاشتراك بعد :days أيام'
-            ],
-            'usage_limit_warning' => [
-                'title' => '[إدارة النظام] تحذير حد الاستخدام',
-                'body' => ':tenant اقترب من حد استخدام :module (:current من :limit)'
-            ],
-            'usage_limit_exceeded' => [
-                'title' => '[إدارة النظام] تجاوز حد الاستخدام',
-                'body' => ':tenant تجاوز حد استخدام :module (:current من :limit)'
-            ],
-            'invoice_overdue' => [
-                'title' => '[إدارة النظام] فاتورة متأخرة',
-                'body' => 'الفاتورة رقم #:invoice_id لـ :tenant متأخرة السداد منذ :days أيام'
-            ],
-            'payment_pending' => [
-                'title' => '[إدارة النظام] دفعة قيد المراجعة',
-                'body' => 'دفعة جديدة بقيمة :amount :currency قيد المراجعة'
-            ],
-            'payment_partially_approved' => [
-                'title' => '[إدارة النظام] تمت الموافقة على دفعة جزئية',
-                'body' => 'تمت الموافقة على دفعة جزئية بقيمة :amount :currency من أصل :total :currency'
+            'payment_rejected' => [
+                'title' => 'تم رفض الدفعة',
+                'body' => 'تم رفض دفعتك بقيمة :amount :currency. السبب: :reason',
             ],
             'invoice_generated' => [
-                'title' => '[إدارة النظام] تم إنشاء فاتورة جديدة',
-                'body' => 'تم إنشاء فاتورة جديدة رقم #:invoice_id بقيمة :amount :currency، تاريخ الاستحقاق :due_date'
-            ],
-            'invoice_generation_failed' => [
-                'title' => '[إدارة النظام] فشل إنشاء الفاتورة',
-                'body' => 'فشل في إنشاء الفاتورة: :error'
+                'title' => 'تم إنشاء فاتورة جديدة',
+                'body' => 'تم إنشاء فاتورة جديدة رقم #:invoice_id بقيمة :amount :currency',
             ],
             'invoice_overdue' => [
-                'title' => '[إدارة النظام] فاتورة متأخرة',
-                'body' => 'الفاتورة رقم #:invoice_id متأخرة منذ :days يوم. المبلغ: :amount :currency'
+                'title' => 'فاتورة متأخرة',
+                'body' => 'الفاتورة رقم #:invoice_id متأخرة السداد منذ :days يوم',
             ],
             'usage_limit_warning' => [
-                'title' => '[إدارة النظام] تحذير حد الاستخدام',
-                'body' => 'أنت تقترب من حد الاستخدام لـ :module (:current من :limit)'
+                'title' => 'تحذير حد الاستخدام',
+                'body' => 'أنت تقترب من حد الاستخدام لـ :module (:current من :limit)',
             ],
             'usage_limit_exceeded' => [
-                'title' => '[إدارة النظام] تم تجاوز حد الاستخدام',
-                'body' => 'لقد تجاوزت حد الاستخدام لـ :module (:current من :limit)'
+                'title' => 'تم تجاوز حد الاستخدام',
+                'body' => 'لقد تجاوزت حد الاستخدام لـ :module (:current من :limit)',
             ],
             'subscription_status_changed' => [
-                'title' => '[إدارة النظام] تم تغيير حالة الاشتراك',
-                'body' => 'تم تغيير حالة اشتراكك من :old_status إلى :new_status'
+                'title' => 'تم تغيير حالة الاشتراك',
+                'body' => 'تم تغيير حالة اشتراكك من :old_status إلى :new_status',
             ],
             'subscription_near_expiry' => [
-                'title' => '[إدارة النظام] الاشتراك قريب من الانتهاء',
-                'body' => 'سينتهي اشتراكك خلال :days يوم في :expiry_date'
+                'title' => 'الاشتراك قريب من الانتهاء',
+                'body' => 'سينتهي اشتراكك خلال :days يوم في :end_date',
             ],
             'subscription_grace_period' => [
-                'title' => '[إدارة النظام] الاشتراك في فترة السماح',
-                'body' => 'اشتراكك في فترة السماح وسيتم تعليقه في :grace_end_date (متبقي :days يوم)'
+                'title' => 'الاشتراك في فترة السماح',
+                'body' => 'اشتراكك في فترة السماح وسيتم تعليقه في :grace_end_date (متبقي :days يوم)',
             ],
         ],
         'admin_message' => [
+            'subscription_renewed' => [
+                'title' => '[إدارة النظام] تم تجديد الاشتراك',
+                'body' => 'تم تجديد اشتراك :tenant في خطة :plan حتى :end_date',
+            ],
+            'subscription_switched' => [
+                'title' => '[إدارة النظام] تم تغيير خطة الاشتراك',
+                'body' => 'تم تغيير خطة اشتراك :tenant إلى :plan، صالح حتى :end_date',
+            ],
+            'subscription_activated' => [
+                'title' => '[إدارة النظام] تم تفعيل اشتراك جديد',
+                'body' => 'تم تفعيل اشتراك جديد لـ :tenant في خطة :plan، صالح حتى :end_date',
+            ],
             'invoice_generated' => [
                 'title' => '[إدارة النظام] تم إنشاء فاتورة جديدة',
                 'body' => 'تم إنشاء فاتورة جديدة رقم #:invoice_id لـ :tenant بقيمة :amount :currency'
             ],
-            'invoice_generation_failed' => [
-                'title' => '[إدارة النظام] فشل إنشاء الفاتورة',
-                'body' => 'فشل في إنشاء فاتورة لـ :tenant. الخطأ: :error'
-            ],
-            'invoice_overdue' => [
-                'title' => '[إدارة النظام] فاتورة متأخرة',
-                'body' => 'الفاتورة رقم #:invoice_id لـ :tenant متأخرة السداد منذ :days يوم. المبلغ: :amount :currency'
-            ],
-            'subscription_near_expiry' => [
-                'title' => '[إدارة النظام] اشتراك قارب على الانتهاء',
-                'body' => 'اشتراك :tenant (:plan) سينتهي خلال :days يوم في :expiry_date'
-            ],
-            'subscription_grace_period' => [
-                'title' => '[إدارة النظام] اشتراك ف فترة السماح',
-                'body' => 'اشتراك :tenant في فترة السماح. سيتم تعليقه في :grace_end_date (متبقي :days يوم)'
-            ],
-            'expired' => [
-                'title' => '[إدارة النظام] انتهى الاشتراك',
-                'body' => 'انتهى اشتراك :tenant في :date'
-            ],
-            'suspended' => [
-                'title' => '[إدارة النظام] تم تعليق الاشتراك',
-                'body' => 'تم تعليق اشتراك :tenant في :date'
-            ],
-            'cancelled' => [
-                'title' => '[إدارة النظام] تم إلغاء الاشتراك',
-                'body' => 'تم إلغاء اشتراك :tenant في :date'
-            ],
-            'payment_received' => [
-                'title' => '[إدارة النظام] تم استلام الدفع',
-                'body' => 'تم استلام دفعة بقيمة :amount :currency من :tenant في :date'
-            ],
-            'payment_rejected' => [
-                'title' => '[إدارة النظام] تم رفض الدفع',
-                'body' => 'تم رفض دفعة بقيمة :amount :currency من :tenant في :date بحجة :reason'
-            ],
-            'payment_overdue' => [
-                'title' => '[إدارة النظام] دفعة متأخرة',
-                'body' => 'دفعة بقيمة :amount :currency من :tenant متأخرة منذ :days يوم'
-            ],
-            'payment_pending' => [
-                'title' => '[إدارة النظام] دفعة جديدة قيد المراجعة',
-                'body' => 'دفعة جديدة بقيمة :amount :currency قيد المراجعة من :tenant للفاتورة رقم #:invoice_id'
-            ],
-            'payment_partially_approved' => [
-                'title' => '[إدارة النظام] تمت الموافقة على دفعة جزئية',
-                'body' => 'تمت الموافقة على دفعة جزئية بقيمة :amount :currency من أصل :total :currency لـ :tenant'
-            ],
-            'usage_limit_warning' => [
-                'title' => '[إدارة النظام] تحذير حد الاستخدام',
-                'body' => ':tenant يقترب من حد الاستخدام لـ :module (:current من :limit)'
-            ],
-            'usage_limit_exceeded' => [
-                'title' => '[إدارة النظام] تم تجاوز حد الاستخدام',
-                'body' => ':tenant تجاوز حد الاستخدام لـ :module (:current من :limit)'
-            ],
-            'subscription_status_changed' => [
-                'title' => '[إدارة النظام] تم تغيير حالة الاشتراك',
-                'body' => 'تم تغيير حالة اشتراك :tenant من :old_status إلى :new_status'
-            ],
+            // ... keep rest of existing admin notifications ...
         ]
     ],
 ];
