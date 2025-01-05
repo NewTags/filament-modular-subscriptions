@@ -95,6 +95,10 @@ class InvoiceResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subscription_id'))
                     ->sortable(),
 
+                Tables\Columns\TextColumn::make('subtotal')
+                    ->money($currency)
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subtotal'))
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->money($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.amount'))
@@ -102,10 +106,6 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('tax')
                     ->money($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.tax'))
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('total')
-                    ->money($currency)
-                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.total'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
@@ -118,10 +118,6 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('paid_at')
                     ->dateTime()
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.paid_at'))
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('subtotal')
-                    ->money($currency)
-                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subtotal'))
                     ->sortable(),
             ])
             ->filters([

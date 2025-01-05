@@ -39,10 +39,10 @@ class Invoice extends Model
                 $totalPayments = $this->payments()
                     ->where('status', PaymentStatus::PAID)
                     ->sum('amount');
-                
-                $totalAmount = $this->amount + $this->tax;
+
+                $totalAmount = $this->amount;
                 $remaining = $totalAmount - $totalPayments;
-                
+
                 return number_format($remaining, 2);
             }
         );
@@ -80,12 +80,6 @@ class Invoice extends Model
         return $this->status === PaymentStatus::PAID;
     }
 
-    public function total(): Attribute
-    {
-        return new Attribute(
-            get: fn () => $this->amount + $this->tax,
-        );
-    }
 
     public function getTitleAttribute()
     {
@@ -99,5 +93,4 @@ class Invoice extends Model
             'date' => $this->created_at->translatedFormat('Y-m-d'),
         ]);
     }
-
 }
