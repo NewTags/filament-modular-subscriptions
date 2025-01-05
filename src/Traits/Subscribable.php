@@ -419,13 +419,26 @@ trait Subscribable
         };
 
         DB::transaction(function () use (&$subscription, $plan, $startDate, $endDate, $status, $trialDays) {
-            $subscription = $this->subscription()->create([
-                'plan_id' => $plan->id,
-                'starts_at' => $startDate,
-                'ends_at' => $endDate,
-                'status' => $status,
-                'has_used_trial' => $plan->isTrialPlan() || $this->subscription?->has_used_trial,
-            ]);
+            if (!$this->subscription) {
+                $subscription = $this->subscription()
+                    ->create([
+                        'plan_id' => $plan->id,
+                        'starts_at' => $startDate,
+                        'ends_at' => $endDate,
+                        'status' => $status,
+                        'has_used_trial' => $plan->isTrialPlan() || $this->subscription?->has_used_trial,
+                    ]);
+            }else{
+                $this->subscription->update([
+                    'plan_id' => $plan->id,
+                    'starts_at' => $startDate,
+                    'ends_at' => $endDate,
+                    'status' => $status,
+                    'has_used_trial' => $plan->isTrialPlan() || $this->subscription?->has_used_trial,
+                ]);
+
+                $subscription = $this->subscription;
+            }
             // Handle trial period
             if ($trialDays || $plan->period_trial > 0) {
                 $trialDays = $trialDays ?? $plan->period_trial;
