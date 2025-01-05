@@ -23,7 +23,7 @@ return [
                 'module_limit' => 'حد الاستخدام',
                 'module_price' => 'سعر الوحدة',
                 'module_settings' => 'إعدادات الوحدة',
-                'setting_key' => 'متاح الإعداد',
+                'setting_key' => 'م��اح الإعداد',
                 'setting_value' => 'قيمة الإعداد',
                 'modules_count' => 'عدد الوحدات',
                 'is_pay_as_you_go' => 'الدفع حسب الاستخدام',
@@ -53,7 +53,7 @@ return [
             'singular_name' => 'اشتراك',
             'fields' => [
                 'plan_id' => 'الخطة',
-                'subscribable_type' => 'نوع المترك',
+                'subscribable_type' => 'نوع المت��ك',
                 'subscribable_id' => 'المشترك',
                 'starts_at' => 'تاريخ البدء',
                 'ends_at' => 'تاريخ الانتهاء',
@@ -110,7 +110,7 @@ return [
             ],
             'no_items' => 'لا يوجد عناصر لهذه الفاتورة',
             'actions' => [
-                'pay' => 'دفع المستح��ات',
+                'pay' => 'دفع المستحات',
             ],
             'invoice_title' => 'فاتورة :subscriber - :id - :date',
             'payment_pending' => 'تم إرسال الفاتورة بنجاح. في انتظار التأكيد من الجهة المختصة',
@@ -187,7 +187,7 @@ return [
         ],
     ],
     'menu_group' => [
-        'subscription_management' => '��دارة الاشتراكات',
+        'subscription_management' => 'دارة الاشتراكات',
     ],
     'interval' => [
         'day' => 'يوم',
@@ -247,7 +247,7 @@ return [
         'on_trial' => 'في فترة التجربة',
         'yes' => 'نعم',
         'no' => 'لا',
-        'trial_ends_at' => 'تنتهي فترة التجربة في',
+        'trial_ends_at' => '��نتهي فترة التجربة في',
         'no_active_subscription' => 'لا يوجد اشتراك نشط',
         'no_subscription_message' => 'ليس لديك اشتراك نشط حالياً. يرجى اختيار خطة للاشتراك.',
         'available_plans' => 'الخطط المتاحة',
@@ -265,7 +265,7 @@ return [
         'usage_tracked_realtime' => 'يتم تتبع الاستخدام في الوقت الفعلي',
         'start_using_pay_as_you_go' => 'ابدأ باستخدام الدفع سسب الاستخدام',
         'welcome_title' => 'مرحباً! اختر خطتك المثالية',
-        'welcome_message' => 'ابدأ باختيار خطة الاشت��اك التي تناسب احتياجاتك. جميع الخطط تأتي مع فترة تجريبية خالية من المخاطر.',
+        'welcome_message' => 'ابدأ باختيار خطة الاشتاك التي تناسب احتياجاتك. جميع الخطط تأتي مع فترة تجريبية خالية من المخاطر.',
         'benefit_1_title' => 'خطط مرنة',
         'benefit_1_description' => 'اختر من بين خطط متنوعة مصممة لتناسب احتياجات عملك والنمو معك.',
         'benefit_2_title' => 'آمن وموثوق',
@@ -302,6 +302,10 @@ return [
         'confirm_subscription' => 'تأكيد الاشتراك في :plan',
         'subscription_created' => 'تم إنشاء الاشتراك بنجاح',
         'subscription_created_pending' => 'تم إنشاء الاشتراك. يرجى دفع الفاتورة للتفعيل.',
+        'subscription_on_hold' => 'اشتراكك معلق حالياً',
+        'subscription_on_hold_message' => 'تم تعليق اشتراكك. يرجى التواصل مع الدعم للمساعدة.',
+        'subscription_pending_payment' => 'اشتراك في انتظار الدفع',
+        'subscription_pending_payment_message' => 'اشتراكك في انتظار تأكيد الدفع. يرجى إكمال عملية الدفع لتفعيل اشتراكك.',
     ],
     'intervals' => [
         'day' => 'يوم',
@@ -357,7 +361,7 @@ return [
         'subtotal' => 'المبلغ الإجمالي بدون الضريبة',
         'tax_amount' => 'مبلغ الضريبة (:percentage%)',
         'total_with_tax' => 'الإجمالي مع الضريبة',
-        'currency' => 'ريال سعودي',
+        'currency' => 'ريال سعو��ي',
     ],
     'payment' => [
         'select_method' => 'اختر طريقة الدفع',
@@ -377,7 +381,7 @@ return [
         'partially_paid' => 'تم الدفع جزئيا',
         'email' => 'البريد الإلكتروني',
         'undo' => 'تراجع',
-        'undone' => 'تم الترا��ع بنجاح',
+        'undone' => 'تم التراع بنجاح',
         'payment_method' => 'طريقة الدفع',
         'payment_details' => 'تفاصيل الدفع',
         'choose_method' => 'اختر طريقة الدفع',
@@ -419,8 +423,11 @@ return [
         'subscription_ending_soon' => 'اشتراكك سينتهي قريباً',
         'you_have_reached_the_limit_of_this_module' => 'لقد وصلت إلى حد استخدام الوحدة',
         'you_have_to_renew_your_subscription' => 'عليك تجديد اشتراكك',
-        'pay_invoice' => 'إدفع فاتورتك'
-
+        'pay_invoice' => 'إدفع فاتورتك',
+        'subscription_on_hold' => 'اشتراكك معلق حالياً',
+        'subscription_on_hold_message' => 'تم تعليق اشتراكك. يرجى التواصل مع الدعم للمساعدة.',
+        'subscription_pending_payment' => 'اشتراك في انتظار الدفع',
+        'subscription_pending_payment_message' => 'اشتراكك في انتظار تأكيد الدفع. يرجى إكمال عملية الدفع لتفعيل اشتراكك.',
     ],
     'pay_as_you_go' => 'الدفع حسب الاستخدام',
     'logs' => [
@@ -460,7 +467,7 @@ return [
         'calculation_error' => 'خطأ في حساب الاستخدام: :error',
         'sync_error' => 'خطأ في مزامنة البيانات: :error',
 
-        'created_by' => 'تم الإنشاء بواسطة :user',
+        'created_by' => 'ت�� الإنشاء بواسطة :user',
         'updated_by' => 'تم التحديث بواسطة :user',
         'deleted_by' => 'تم الحذف بواسطة :user',
         'restored_by' => 'تمت الاستعادة بواسطة :user',

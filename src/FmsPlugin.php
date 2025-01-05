@@ -146,9 +146,16 @@ class FmsPlugin implements Plugin
             return [$this->createNoSubscriptionAlert()];
         }
 
-
-        if ($this->isSubscriptionExpired($subscription) || $subscription->status === SubscriptionStatus::ON_HOLD || $subscription->status === SubscriptionStatus::PENDING_PAYMENT) {
+        if ($this->isSubscriptionExpired($subscription)) {
             return [$this->createExpiredSubscriptionAlert()];
+        }
+
+        if ($subscription->status === SubscriptionStatus::ON_HOLD) {
+            return [$this->createOnHoldAlert()];
+        }
+
+        if ($subscription->status === SubscriptionStatus::PENDING_PAYMENT) {
+            return [$this->createPendingPaymentAlert()];
         }
 
         if ($this->isSubscriptionEndingSoon($subscription)) {
@@ -206,6 +213,26 @@ class FmsPlugin implements Plugin
             'danger',
             __('filament-modular-subscriptions::fms.statuses.expired'),
             __('filament-modular-subscriptions::fms.messages.you_have_to_renew_your_subscription'),
+            __('filament-modular-subscriptions::fms.messages.pay_invoice')
+        );
+    }
+
+    protected function createOnHoldAlert(): array
+    {
+        return $this->createAlert(
+            'warning',
+            __('filament-modular-subscriptions::fms.messages.subscription_on_hold'),
+            __('filament-modular-subscriptions::fms.messages.subscription_on_hold_message'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
+        );
+    }
+
+    protected function createPendingPaymentAlert(): array
+    {
+        return $this->createAlert(
+            'warning',
+            __('filament-modular-subscriptions::fms.messages.subscription_pending_payment'),
+            __('filament-modular-subscriptions::fms.messages.subscription_pending_payment_message'),
             __('filament-modular-subscriptions::fms.messages.pay_invoice')
         );
     }
