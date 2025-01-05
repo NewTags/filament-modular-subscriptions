@@ -122,17 +122,14 @@
         <thead style="border: none;">
             <tr style="background-color: #e5e7eb;border: none;">
                 <th style="border: none;border-left: none; border-right: none;" width="10%">No.</th>
-                <th style="border: none;border-left: none; border-right: none;" width="50%">
+                <th style="border: none;border-left: none; border-right: none;" width="40%">
                     {{ __('filament-modular-subscriptions::fms.invoice.item') }}</th>
                 <th style="border: none;border-left: none; border-right: none;" width="10%">
                     {{ __('filament-modular-subscriptions::fms.invoice.quantity') }}</th>
-                <th style="border: none;border-left: none; border-right: none;" width="10%">
+                <th style="border: none;border-left: none; border-right: none;" width="15%">
+                    {{ __('filament-modular-subscriptions::fms.invoice.unit_price') }}</th>
+                <th style="border: none;border-left: none; border-right: none;" width="25%">
                     {{ __('filament-modular-subscriptions::fms.invoice.total') }}</th>
-                <th style="border: none;border-left: none; border-right: none;" width="10%">
-                    {{ __('filament-modular-subscriptions::fms.invoice.tax_amount', ['percentage' => config('filament-modular-subscriptions.tax_percentage')]) }}
-                </th>
-                <th style="border: none;border-left: none; border-right: none;" width="10%">
-                    {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}</th>
             </tr>
         </thead>
         <tbody>

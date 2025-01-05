@@ -282,13 +282,6 @@ class InvoiceResource extends Resource
                     ->color('success')
                     ->visible(
                         function ($record) {
-                            if ($record->payments()->where('status', PaymentStatus::PENDING)->exists()) {
-                                Notification::make()
-                                    ->warning()
-                                    ->title(__('filament-modular-subscriptions::fms.resources.payment.pending_payment_warning'))
-                                    ->send();
-                            }
-
                             return FmsPlugin::get()->isOnTenantPanel()
                                 && in_array(
                                     $record->status,
@@ -369,11 +362,7 @@ class InvoiceResource extends Resource
                             return;
                         }
 
-                        if ($record->payments()->where('status', PaymentStatus::PENDING)->exists()) {
-                            if (! $this->confirm(__('filament-modular-subscriptions::fms.resources.payment.confirm_new_payment'))) {
-                                return;
-                            }
-                        }
+
 
                         $record->payments()->create([
                             'amount' => $data['amount'],
