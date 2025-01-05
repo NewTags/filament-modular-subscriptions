@@ -46,88 +46,56 @@ class ScheduleInvoiceGeneration extends Command
                                     'status' => SubscriptionStatus::PENDING_PAYMENT,
                                 ]);
 
-                                $subscription->subscribable->notifySubscriptionChange('invoice_generated', [
-                                    'invoice_id' => $invoice->id,
-                                    'amount' => $invoice->total,
-                                    'due_date' => $invoice->due_date->format('Y-m-d'),
-                                    'currency' => $subscription->plan->currency
-                                ]);
 
-                                $subscription->subscribable->notifySuperAdmins('invoice_generated', [
-                                    'invoice_id' => $invoice->id,
-                                    'amount' => $invoice->total,
-                                    'tenant' => $subscription->subscribable->name,
-                                    'currency' => $subscription->plan->currency
-                                ]);
 
-                                defer(function () use ($subscription, $logService, $oldStatus, $invoice) {
-                                    $logService->log(
-                                        $subscription,
-                                        'invoice_generated',
-                                        __('filament-modular-subscriptions::fms.logs.invoice_generated', [
-                                            'invoice_id' => $invoice->id,
-                                            'amount' => $invoice->total,
-                                        ]),
-                                        $oldStatus->value,
-                                        SubscriptionStatus::PENDING_PAYMENT->value,
-                                        [
-                                            'invoice_id' => $invoice->id,
-                                            'total' => $invoice->total,
-                                            'items_count' => $invoice->items->count(),
-                                        ]
-                                    );
+                                $logService->log(
+                                    $subscription,
+                                    'invoice_generated',
+                                    __('filament-modular-subscriptions::fms.logs.invoice_generated', [
+                                        'invoice_id' => $invoice->id,
+                                        'amount' => $invoice->total,
+                                    ]),
+                                    $oldStatus->value,
+                                    SubscriptionStatus::PENDING_PAYMENT->value,
+                                    [
+                                        'invoice_id' => $invoice->id,
+                                        'total' => $invoice->total,
+                                        'items_count' => $invoice->items->count(),
+                                    ]
+                                );
 
-                                    if ($invoice->due_date->isPast()) {
-                                        $daysOverdue = now()->diffInDays($invoice->due_date);
-                                        $subscription->subscribable->notifySubscriptionChange('invoice_overdue', [
-                                            'invoice_id' => $invoice->id,
-                                            'days' => $daysOverdue,
-                                            'amount' => $invoice->total,
-                                            'currency' => $subscription->plan->currency
-                                        ]);
+                                if ($invoice->due_date->isPast()) {
+                                    $daysOverdue = now()->diffInDays($invoice->due_date);
+                                    $subscription->subscribable->notifySubscriptionChange('invoice_overdue', [
+                                        'invoice_id' => $invoice->id,
+                                        'days' => $daysOverdue,
+                                        'amount' => $invoice->total,
+                                        'currency' => $subscription->plan->currency
+                                    ]);
 
-                                        $subscription->subscribable->notifySuperAdmins('invoice_overdue', [
-                                            'invoice_id' => $invoice->id,
-                                            'days' => $daysOverdue,
-                                            'tenant' => $subscription->subscribable->name,
-                                            'amount' => $invoice->total,
-                                            'currency' => $subscription->plan->currency
-                                        ]);
-                                    }
+                                    $subscription->subscribable->notifySuperAdmins('invoice_overdue', [
+                                        'invoice_id' => $invoice->id,
+                                        'days' => $daysOverdue,
+                                        'tenant' => $subscription->subscribable->name,
+                                        'amount' => $invoice->total,
+                                        'currency' => $subscription->plan->currency
+                                    ]);
+                                }
 
-                                    if ($subscription->ends_at && $subscription->ends_at->diffInDays(now()) <= 7) {
-                                        $subscription->subscribable->notifySubscriptionChange('subscription_near_expiry', [
-                                            'days' => number_format($subscription->ends_at->diffInDays(now())),
-                                            'expiry_date' => $subscription->ends_at->format('Y-m-d'),
-                                            'plan' => $subscription->plan->trans_name
-                                        ]);
+                                if ($subscription->ends_at && $subscription->ends_at->diffInDays(now()) <= 7) {
+                                    $subscription->subscribable->notifySubscriptionChange('subscription_near_expiry', [
+                                        'days' => number_format($subscription->ends_at->diffInDays(now())),
+                                        'expiry_date' => $subscription->ends_at->format('Y-m-d'),
+                                        'plan' => $subscription->plan->trans_name
+                                    ]);
 
-                                        $subscription->subscribable->notifySuperAdmins('subscription_near_expiry', [
-                                            'tenant' => $subscription->subscribable->name,
-                                            'days' => number_format($subscription->ends_at->diffInDays(now())),
-                                            'expiry_date' => $subscription->ends_at->format('Y-m-d'),
-                                            'plan' => $subscription->plan->trans_name
-                                        ]);
-                                    }
-
-                                    if (
-                                        $subscription->ends_at &&
-                                        $subscription->ends_at->isPast() &&
-                                        $subscription->ends_at->copy()->addDays($subscription->plan->grace_period)->isFuture()
-                                    ) {
-                                        $daysLeft = now()->diffInDays($subscription->ends_at->copy()->addDays($subscription->plan->grace_period));
-                                        $subscription->subscribable->notifySubscriptionChange('subscription_grace_period', [
-                                            'days' => number_format($daysLeft),
-                                            'grace_end_date' => $subscription->ends_at->copy()->addDays($subscription->plan->grace_period)->format('Y-m-d')
-                                        ]);
-
-                                        $subscription->subscribable->notifySuperAdmins('subscription_grace_period', [
-                                            'tenant' => $subscription->subscribable->name,
-                                            'days' => number_format($daysLeft),
-                                            'grace_end_date' => $subscription->ends_at->copy()->addDays($subscription->plan->grace_period)->format('Y-m-d')
-                                        ]);
-                                    }
-                                });
+                                    $subscription->subscribable->notifySuperAdmins('subscription_near_expiry', [
+                                        'tenant' => $subscription->subscribable->name,
+                                        'days' => number_format($subscription->ends_at->diffInDays(now())),
+                                        'expiry_date' => $subscription->ends_at->format('Y-m-d'),
+                                        'plan' => $subscription->plan->trans_name
+                                    ]);
+                                }
                             }
 
                             $subscription->subscribable->invalidateSubscriptionCache();
@@ -178,7 +146,7 @@ class ScheduleInvoiceGeneration extends Command
         $lastInvoice = $subscription->invoices()
             ->where(function ($query) {
                 $query->where('status', InvoiceStatus::UNPAID)
-                      ->orWhere('status', InvoiceStatus::PARTIALLY_PAID);
+                    ->orWhere('status', InvoiceStatus::PARTIALLY_PAID);
             })
             ->latest()
             ->first();
@@ -230,7 +198,7 @@ class ScheduleInvoiceGeneration extends Command
             ->where('status', PaymentStatus::PAID)
             ->sum('amount');
 
-        return $totalPaid < $invoice->amount && 
+        return $totalPaid < $invoice->amount &&
             now()->greaterThan($invoice->due_date);
     }
 }

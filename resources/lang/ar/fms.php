@@ -418,6 +418,9 @@ return [
         'module_limit_warning' => 'تحذير: أنت تقترب من حد استخدام الوحدة',
         'subscription_ending_soon' => 'اشتراكك سينتهي قريباً',
         'you_have_reached_the_limit_of_this_module' => 'لقد وصلت إلى حد استخدام الوحدة',
+        'you_have_to_renew_your_subscription' => 'عليك تجديد اشتراكك',
+        'pay_invoice' => 'إدفع فاتورتك'
+
     ],
     'pay_as_you_go' => 'الدفع حسب الاستخدام',
     'logs' => [

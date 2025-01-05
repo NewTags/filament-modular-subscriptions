@@ -25,7 +25,6 @@ use HoceineEl\FilamentModularSubscriptions\ResolvesCustomerInfo;
 use HoceineEl\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\View;
-use Mpdf\Mpdf;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\ToggleButtons;
 use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
@@ -120,6 +119,10 @@ class InvoiceResource extends Resource
                     ->dateTime()
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.paid_at'))
                     ->sortable(),
+                Tables\Columns\TextColumn::make('subtotal')
+                    ->money($currency)
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subtotal'))
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -194,8 +197,8 @@ class InvoiceResource extends Resource
                             new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
                             new \Salla\ZATCA\Tags\TaxNumber(config('filament-modular-subscriptions.tax_number')),
                             new \Salla\ZATCA\Tags\InvoiceDate($record->created_at),
-                            new \Salla\ZATCA\Tags\InvoiceTotalAmount($totalBeforeTax + $taxAmount), // Total with tax
-                            new \Salla\ZATCA\Tags\InvoiceTaxAmount($taxAmount),
+                            new \Salla\ZATCA\Tags\InvoiceTotalAmount($record->amount), // Total with tax
+                            new \Salla\ZATCA\Tags\InvoiceTaxAmount($record->tax),
                         ])->render();
 
                         // Get view data with additional tax information
@@ -384,13 +387,13 @@ class InvoiceResource extends Resource
                                 'submitted_at' => now(),
                             ],
                         ]);
-
+                        $subscribable = $record->subscription->subscribable;
                         // Notify super admins about new pending payment
-                        $record->subscription->subscribable->notifySuperAdmins('payment_pending', [
+                        $subscribable->notifySuperAdmins('payment_pending', [
                             'amount' => $data['amount'],
                             'currency' => $record->subscription->plan->currency,
                             'invoice_id' => $record->id,
-                            'tenant' => $record->subscription->subscribable->name,
+                            'tenant' => $subscribable->name,
                             'date' => now()->format('Y-m-d H:i:s')
                         ]);
 

@@ -55,6 +55,12 @@ class InvoiceService
                 'due_date' => $dueDate->format('Y-m-d')
             ]);
 
+            $subscribable->notifySuperAdmins('invoice_generated', [
+                'invoice_id' => $invoice->id,
+                'amount' => $invoice->total,
+                'tenant' => $subscription->subscribable->name,
+                'currency' => $subscription->plan->currency
+            ]);
             $subscribable->invalidateSubscriptionCache();
 
             return $invoice;
@@ -135,7 +141,7 @@ class InvoiceService
         foreach ($subscription->moduleUsages as $moduleUsage) {
             $unitPrice = $subscription->plan->modulePrice($moduleUsage->module);
             $total = $moduleUsage->usage * $unitPrice;
-            
+
             $invoice->items()->create([
                 'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', [
                     'module' => $moduleUsage->module->getName(),
