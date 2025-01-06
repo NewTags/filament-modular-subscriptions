@@ -169,7 +169,9 @@ return [
             'please_use_bank_transfer' => 'يرجى استخدام التحويل البنكي في الوقت الحالي',
             'redirect_message' => 'سيتم تحويلك إلى PayPal لإكمال عملية الدفع بشكل آمن',
             'paypal_message' => 'سيتم تحويلك إلى PayPal لإكمال عملية الدفع بشكل آمن',
-            
+            'card_number' => 'رقم البطاقة',
+            'expiry' => 'تاريخ الانتهاء',
+            'cvc' => 'رمز التحقق',
         ],
         'subscription_log' => [
             'label' => 'سجل الاشتراك',
@@ -217,7 +219,7 @@ return [
         'pending_payment' => 'قيد انتظار الدفع',
     ],
     'tenant_subscription' => [
-        'your_subscription' => 'اشتراكك',
+        'your_subscription' => 'تفاصيل اشتراكك',
         'current_subscription' => 'الاشتراك الحالي',
         'plan' => 'الخطة',
         'statuses' => 'الحالة',

@@ -4,6 +4,7 @@ namespace HoceineEl\FilamentModularSubscriptions;
 
 use Closure;
 use Filament\Contracts\Plugin;
+use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
@@ -78,6 +79,18 @@ class FmsPlugin implements Plugin
         } else {
             $panel
                 ->pages([TenantSubscription::class])
+                ->userMenuItems([
+                    MenuItem::make()
+                        ->label(__('filament-modular-subscriptions::fms.tenant_subscription.your_subscription'))
+                        ->url(fn() => TenantSubscription::getUrl())
+                        ->visible(fn() =>
+                        cache()->remember(
+                            'tenant_subscription_nav_' . auth()->id() . '_' . FmsPlugin::getTenant()->id,
+                            now()->addMinutes(60),
+                            fn() => FmsPlugin::getTenant()->admins()->where('users.id', auth()->id())->exists()
+                        ))
+                        ->icon('heroicon-o-credit-card'),
+                ])
                 ->bootUsing(function () {
                     FilamentView::registerRenderHook(
                         PanelsRenderHook::PAGE_START,
