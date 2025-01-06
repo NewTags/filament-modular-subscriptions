@@ -9,7 +9,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\Fieldset;
+use Filament\Forms\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -325,58 +325,93 @@ class InvoiceResource extends Resource
                             ->schema(function ($get) {
                                 if ($get('payment_method') === 'online') {
                                     return [
-                                        Grid::make(2)
+                                        Fieldset::make('payment_details')
                                             ->schema([
-                                                TextInput::make('amount')
-                                                    ->default(fn($record) => $record->remaining_amount)
-                                                    ->disabled()
-                                                    ->numeric()
-                                                    ->required()
-                                                    ->suffix(fn($record) => $record->subscription->plan->currency)
-                                                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount')),
-
-                                                ToggleButtons::make('payment_provider')
-                                                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.provider'))
-                                                    ->options([
-                                                        'stripe' => 'Credit Card (Stripe)',
-                                                        'paypal' => 'PayPal',
-                                                    ])
-                                                    ->default('stripe')
-                                                    ->colors([
-                                                        'stripe' => 'success',
-                                                        'paypal' => 'info',
-                                                    ])
-                                                    ->required()
-                                                    ->inline()
-                                                    ->columnSpanFull(),
-
-                                                // Credit Card Details (shown when Stripe is selected)
-                                                TextInput::make('card_number')
-                                                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.card_number'))
-                                                    ->placeholder('4242 4242 4242 4242')
-                                                    ->mask('9999 9999 9999 9999')
-                                                    ->visible(fn($get) => $get('payment_provider') === 'stripe'),
-
                                                 Grid::make(2)
                                                     ->schema([
-                                                        TextInput::make('expiry')
-                                                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.expiry'))
-                                                            ->placeholder('MM/YY')
-                                                            ->mask('99/99'),
-                                                        TextInput::make('cvc')
-                                                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.cvc'))
-                                                            ->placeholder('123')
-                                                            ->mask('999'),
-                                                    ])
-                                                    ->visible(fn($get) => $get('payment_provider') === 'stripe')
-                                                    ->columnSpanFull(),
+                                                        TextInput::make('amount')
+                                                            ->default(fn($record) => $record->remaining_amount)
+                                                            ->disabled()
+                                                            ->numeric()
+                                                            ->required()
+                                                            ->suffix(fn($record) => $record->subscription->plan->currency)
+                                                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
+                                                            ->extraAttributes(['class' => 'text-lg font-semibold']),
 
-                                                // PayPal message (shown when PayPal is selected)
+                                                        ToggleButtons::make('payment_provider')
+                                                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.provider'))
+                                                            ->options([
+                                                                'stripe' => 'Credit Card (Stripe)',
+                                                                'paypal' => 'PayPal',
+                                                            ])
+                                                            ->default('stripe')
+                                                            ->colors([
+                                                                'stripe' => 'success',
+                                                                'paypal' => 'info',
+                                                            ])
+                                                            ->icons([
+                                                                'stripe' => 'heroicon-o-credit-card',
+                                                                'paypal' => 'heroicon-o-currency-dollar'
+                                                            ])
+                                                            ->required()
+                                                            ->inline()
+                                                            ->live(),
+                                                    ]),
+
+                                                // Credit Card Details Section
+                                                Fieldset::make('credit_card_details')
+                                                    ->schema([
+                                                        TextInput::make('card_number')
+                                                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.card_number'))
+                                                            ->placeholder('4242 4242 4242 4242')
+                                                            ->mask('9999 9999 9999 9999')
+                                                            ->prefixIcon('heroicon-o-credit-card')
+                                                            ->extraAttributes(['class' => 'font-mono']),
+
+                                                        Grid::make(2)
+                                                            ->schema([
+                                                                TextInput::make('expiry')
+                                                                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.expiry'))
+                                                                    ->placeholder('MM/YY')
+                                                                    ->mask('99/99')
+                                                                    ->prefixIcon('heroicon-o-calendar'),
+
+                                                                TextInput::make('cvc')
+                                                                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.cvc'))
+                                                                    ->placeholder('123')
+                                                                    ->mask('999')
+                                                                    ->prefixIcon('heroicon-o-lock-closed')
+                                                                    ->password(),
+                                                            ]),
+                                                    ])
+                                                    ->visible(fn($get) => $get('payment_provider') === 'stripe'),
+
+
                                                 Placeholder::make('paypal_message')
-                                                    ->content('You will be redirected to PayPal to complete your payment.')
+                                                    ->label('')
                                                     ->visible(fn($get) => $get('payment_provider') === 'paypal')
-                                                    ->columnSpanFull(),
-                                            ])
+                                                    ->columnSpanFull()
+                                                    ->content(new HtmlString('
+                                                                <div class="p-6 space-y-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl border border-primary-200 shadow-sm">
+                                                                    <div class="flex items-center gap-4">
+                                                                        <div class="flex-shrink-0">
+                                                                            <svg class="w-10 h-10 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                            </svg>
+                                                                        </div>
+                                                                        <div class="flex flex-col gap-2">
+                                                                            <span class="text-xl font-semibold text-primary-900">
+                                                                                ' . __('filament-modular-subscriptions::fms.resources.payment.paypal_message') . '
+                                                                            </span>
+                                                                            <span class="text-sm text-primary-700">
+                                                                                ' . __('filament-modular-subscriptions::fms.resources.payment.redirect_message') . '
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            '))
+                                            ]),
+
                                     ];
                                 }
 

@@ -141,7 +141,7 @@ return [
                 'payment_details' => 'تفاصيل الدفع',
                 'provider' => 'مزود خدمة الدفع',
                 'card_number' => 'رقم البطاقة',
-                'expiry' => 'تاريخ الانته�',
+                'expiry' => 'تاريخ الانتهاء',
                 'cvc' => 'رمز التحقق',
             ],
             'actions' => [
@@ -167,6 +167,9 @@ return [
             'payment_details' => 'تفاصيل الدفع',
             'online_payment_coming_soon' => 'خدمة الدفع الإلكتروني قريباً',
             'please_use_bank_transfer' => 'يرجى استخدام التحويل البنكي في الوقت الحالي',
+            'redirect_message' => 'سيتم تحويلك إلى PayPal لإكمال عملية الدفع بشكل آمن',
+            'paypal_message' => 'سيتم تحويلك إلى PayPal لإكمال عملية الدفع بشكل آمن',
+            
         ],
         'subscription_log' => [
             'label' => 'سجل الاشتراك',
