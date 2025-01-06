@@ -23,7 +23,7 @@ return [
                 'module_limit' => 'حد الاستخدام',
                 'module_price' => 'سعر الوحدة',
                 'module_settings' => 'إعدادات الوحدة',
-                'setting_key' => 'م��تاح الإعداد',
+                'setting_key' => 'متاح الإعداد',
                 'setting_value' => 'قيمة الإعداد',
                 'modules_count' => 'عدد الوحدات',
                 'is_pay_as_you_go' => 'الدفع حسب الاستخدام',
@@ -49,11 +49,11 @@ return [
             ],
         ],
         'subscription' => [
-            'name' => 'الاشتراكات',
+            'name' => 'الا��تراكات',
             'singular_name' => 'اشتراك',
             'fields' => [
                 'plan_id' => 'الخطة',
-                'subscribable_type' => 'نوع الم��ترك',
+                'subscribable_type' => 'نوع المترك',
                 'subscribable_id' => 'المشترك',
                 'starts_at' => 'تاريخ البدء',
                 'ends_at' => 'تاريخ الانتهاء',
@@ -253,7 +253,7 @@ return [
         'available_plans' => 'الخطط المتاحة',
         'unlimited' => 'غير محدود',
         'current_plan' => 'الخطة الحالية',
-        'switch_to_plan' => 'التبديل إلى هذه الخطة',
+        'switch_to_plan' => 'التبديل إلى هذه الخ��ة',
         'pay_as_you_go' => 'الدفع حسب الاستخدام',
         'subscription' => 'اشتراك',
         'per_unit' => 'لكل وحدة',
@@ -297,7 +297,7 @@ return [
         'pay_as_you_go_activated' => 'تم تفعيل خطة الدفع حسب الاستخدام',
         'please_pay_invoice' => 'يرجى دفع الفاتورة',
         'confirm_switch_plan' => 'تأكيد تغيير الخطة',
-        'switch_plan_description' => 'سيؤدي تغيير اخطة إلى إنشاء فاتورة جديدة. هل تريد المتابعة؟',
+        'switch_plan_description' => 'سيؤدي تغيير اخطة إلى إ��شاء فاتورة جديدة. هل تريد المتابعة؟',
         'subscribe_to_plan' => 'اشترك في هذه الخطة',
         'confirm_subscription' => 'تأكيد الاشتراك في :plan',
         'subscription_created' => 'تم إنشاء الاشتراك بنجاح',
@@ -316,7 +316,15 @@ return [
         'subscription_on_hold' => 'الاشتراك معلق',
         'subscription_pending_payment' => 'الاشتراك في انتظار الدفع',
         'subscription_pending_payment_message' => 'يرجى دفع الفاتورة المرتبطة بالاشتراك لتفعيله',
-        'subscription_on_hold_message' => 'يرجى دفع الفاتورة المرتبطة بالاشتراك لتفعيله',
+        'subscription_on_hold_message' => 'الاشتراك معلق بسبب عدم دفع الفاتورة المرتبطة به',
+        'type_to_confirm' => 'اكتب ":phrase" للتأكيد',
+        'switch_confirmation_phrase' => 'تغيير إلى :plan',
+        'new_subscription_confirmation_phrase' => 'اشتراك في :plan',
+        'confirmation_phrase_mismatch' => 'عبارة التأكيد غير متطابقة',
+        'switch_plan_warning' => 'أنت على وشك التغيير من :current_plan إلى :new_plan. لا يمكن التراجع عن هذا الإجراء.',
+        'new_subscription_info' => 'أنت على وشك الاشتراك في :plan.',
+        'select_plan' => 'اختر الخطة',
+        'invalid_plan' => 'الخطة المختارة غير صالحة.',
     ],
     'intervals' => [
         'day' => 'يوم',
@@ -456,7 +464,7 @@ return [
         'subscription_reactivated' => 'تم إعادة تفعيل الاشتراك',
 
         'trial_started' => 'بدأت فترة التجربة المجانية (:days يوم)',
-        'trial_ended' => 'انتهت فترة التجربة المجانية',
+        'trial_ended' => 'انتهت ف��رة التجربة المجانية',
         'trial_extended' => 'تم تمديد فترة التجربة حتى :date',
 
         'plan_changed' => 'تم تغيير الخطة من :old_plan إلى :new_plan',
@@ -531,7 +539,7 @@ return [
                 'body' => 'تم تغيير خطة اشتراكك في :tenant. الخطة الجديدة: :plan، صالح حتى: :end_date',
             ],
             'subscription_activated' => [
-                'title' => 'تم تفعيل الاشتراك',
+                'title' => 'تم تفعيل الاشتر��ك',
                 'body' => 'تم تفعيل اشتراكك الجديد في :tenant. الخطة: :plan، صالح حتى: :end_date',
             ],
             'payment_received' => [
@@ -642,7 +650,7 @@ return [
             ],
             'subscription_renewed' => [
                 'title' => '[إدارة النظام] تم تجديد الاشتراك',
-                'body' => 'تم تجديد اشتراك :tenant في خطة :plan حتى :end_date',
+                'body' => 'تم تجديد اشتراك :tenant ف�� خطة :plan حتى :end_date',
             ],
             'subscription_switched' => [
                 'title' => '[إدارة النظام] تم تغيير خطة الاشتراك',

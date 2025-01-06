@@ -225,7 +225,7 @@ class FmsPlugin implements Plugin
             'warning',
             __('filament-modular-subscriptions::fms.tenant_subscription.subscription_on_hold'),
             __('filament-modular-subscriptions::fms.tenant_subscription.subscription_on_hold_message'),
-            __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
+            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice')
         );
     }
 
