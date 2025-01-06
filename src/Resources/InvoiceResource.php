@@ -117,6 +117,7 @@ class InvoiceResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('paid_at')
                     ->dateTime()
+                    ->toggledHiddenByDefault()
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.paid_at'))
                     ->sortable(),
             ])
@@ -324,11 +325,62 @@ class InvoiceResource extends Resource
                             ->schema(function ($get) {
                                 if ($get('payment_method') === 'online') {
                                     return [
-                                        Placeholder::make('online_payment')
-                                            ->content(__('filament-modular-subscriptions::fms.resources.payment.online_coming_soon'))
+                                        Grid::make(2)
+                                            ->schema([
+                                                TextInput::make('amount')
+                                                    ->default(fn($record) => $record->remaining_amount)
+                                                    ->disabled()
+                                                    ->numeric()
+                                                    ->required()
+                                                    ->suffix(fn($record) => $record->subscription->plan->currency)
+                                                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount')),
+
+                                                ToggleButtons::make('payment_provider')
+                                                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.provider'))
+                                                    ->options([
+                                                        'stripe' => 'Credit Card (Stripe)',
+                                                        'paypal' => 'PayPal',
+                                                    ])
+                                                    ->default('stripe')
+                                                    ->colors([
+                                                        'stripe' => 'success',
+                                                        'paypal' => 'info',
+                                                    ])
+                                                    ->required()
+                                                    ->inline()
+                                                    ->columnSpanFull(),
+
+                                                // Credit Card Details (shown when Stripe is selected)
+                                                TextInput::make('card_number')
+                                                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.card_number'))
+                                                    ->placeholder('4242 4242 4242 4242')
+                                                    ->mask('9999 9999 9999 9999')
+                                                    ->visible(fn($get) => $get('payment_provider') === 'stripe'),
+
+                                                Grid::make(2)
+                                                    ->schema([
+                                                        TextInput::make('expiry')
+                                                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.expiry'))
+                                                            ->placeholder('MM/YY')
+                                                            ->mask('99/99'),
+                                                        TextInput::make('cvc')
+                                                            ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.cvc'))
+                                                            ->placeholder('123')
+                                                            ->mask('999'),
+                                                    ])
+                                                    ->visible(fn($get) => $get('payment_provider') === 'stripe')
+                                                    ->columnSpanFull(),
+
+                                                // PayPal message (shown when PayPal is selected)
+                                                Placeholder::make('paypal_message')
+                                                    ->content('You will be redirected to PayPal to complete your payment.')
+                                                    ->visible(fn($get) => $get('payment_provider') === 'paypal')
+                                                    ->columnSpanFull(),
+                                            ])
                                     ];
                                 }
 
+                                // Existing bank transfer form
                                 return [
                                     TextInput::make('amount')
                                         ->default(fn($record) => $record->remaining_amount)
@@ -353,12 +405,12 @@ class InvoiceResource extends Resource
                         if ($data['payment_method'] === 'online') {
                             Notification::make()
                                 ->warning()
-                                ->title(__('filament-modular-subscriptions::fms.resources.payment.online_not_available'))
+                                ->title(__('filament-modular-subscriptions::fms.resources.payment.online_payment_coming_soon'))
+                                ->body(__('filament-modular-subscriptions::fms.resources.payment.please_use_bank_transfer'))
+                                ->persistent()
                                 ->send();
                             return;
                         }
-
-
 
                         $record->payments()->create([
                             'amount' => $data['amount'],

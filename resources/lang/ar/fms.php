@@ -49,7 +49,7 @@ return [
             ],
         ],
         'subscription' => [
-            'name' => 'الا��تراكات',
+            'name' => 'اشتراكات المستخدمين',
             'singular_name' => 'اشتراك',
             'fields' => [
                 'plan_id' => 'الخطة',
@@ -107,6 +107,7 @@ return [
                 'items' => 'العناصر',
                 'items_count' => 'عدد العناصر',
                 'subtotal' => 'المجموع بدون ضريبة',
+                'pdf_generation_error' => 'حدث خطأ أثناء إنشاء ملف PDF',
             ],
             'no_items' => 'لا يوجد عناصر لهذه الفاتورة',
             'actions' => [
@@ -138,6 +139,10 @@ return [
                 'amount_to' => 'المبلغ إلى',
                 'payment_method' => 'طريقة الدفع',
                 'payment_details' => 'تفاصيل الدفع',
+                'provider' => 'مزود خدمة الدفع',
+                'card_number' => 'رقم البطاقة',
+                'expiry' => 'تاريخ الانته�',
+                'cvc' => 'رمز التحقق',
             ],
             'actions' => [
                 'approve' => 'تأكيد',
@@ -160,6 +165,8 @@ return [
             'online_not_available' => 'الدفع الإلكتروني غير متاح حالياً',
             'payment_method' => 'طريقة الدفع',
             'payment_details' => 'تفاصيل الدفع',
+            'online_payment_coming_soon' => 'خدمة الدفع الإلكتروني قريباً',
+            'please_use_bank_transfer' => 'يرجى استخدام التحويل البنكي في الوقت الحالي',
         ],
         'subscription_log' => [
             'label' => 'سجل الاشتراك',
@@ -253,7 +260,7 @@ return [
         'available_plans' => 'الخطط المتاحة',
         'unlimited' => 'غير محدود',
         'current_plan' => 'الخطة الحالية',
-        'switch_to_plan' => 'التبديل إلى هذه الخ��ة',
+        'switch_to_plan' => 'التبديل إلى هذه الخطة',
         'pay_as_you_go' => 'الدفع حسب الاستخدام',
         'subscription' => 'اشتراك',
         'per_unit' => 'لكل وحدة',
@@ -297,7 +304,7 @@ return [
         'pay_as_you_go_activated' => 'تم تفعيل خطة الدفع حسب الاستخدام',
         'please_pay_invoice' => 'يرجى دفع الفاتورة',
         'confirm_switch_plan' => 'تأكيد تغيير الخطة',
-        'switch_plan_description' => 'سيؤدي تغيير اخطة إلى إ��شاء فاتورة جديدة. هل تريد المتابعة؟',
+        'switch_plan_description' => 'سيؤدي تغيير اخطة إلى إلغاء الاشتراك الحالي وإنشاء اشتراك جديد بالخطة الجديدة. هل تريد المتابعة؟',
         'subscribe_to_plan' => 'اشترك في هذه الخطة',
         'confirm_subscription' => 'تأكيد الاشتراك في :plan',
         'subscription_created' => 'تم إنشاء الاشتراك بنجاح',
@@ -374,7 +381,7 @@ return [
         'no' => 'رقم',
         'item' => 'الصنف | Item',
         'quantity' => 'الكمية | Qty',
-        'unit_price' => 'السع | Price',
+        'unit_price' => 'السعر | Price',
         'vat' => 'الضريبة | VAT',
         'total' => 'الإجمالي | Total',
         'subtotal' => 'المبلغ الإجمالي بدون الضريبة',
@@ -464,7 +471,7 @@ return [
         'subscription_reactivated' => 'تم إعادة تفعيل الاشتراك',
 
         'trial_started' => 'بدأت فترة التجربة المجانية (:days يوم)',
-        'trial_ended' => 'انتهت ف��رة التجربة المجانية',
+        'trial_ended' => 'انتهت فترة التجربة المجانية',
         'trial_extended' => 'تم تمديد فترة التجربة حتى :date',
 
         'plan_changed' => 'تم تغيير الخطة من :old_plan إلى :new_plan',
@@ -539,7 +546,7 @@ return [
                 'body' => 'تم تغيير خطة اشتراكك في :tenant. الخطة الجديدة: :plan، صالح حتى: :end_date',
             ],
             'subscription_activated' => [
-                'title' => 'تم تفعيل الاشتر��ك',
+                'title' => 'تم تفعيل الاشتراك',
                 'body' => 'تم تفعيل اشتراكك الجديد في :tenant. الخطة: :plan، صالح حتى: :end_date',
             ],
             'payment_received' => [
@@ -650,7 +657,7 @@ return [
             ],
             'subscription_renewed' => [
                 'title' => '[إدارة النظام] تم تجديد الاشتراك',
-                'body' => 'تم تجديد اشتراك :tenant ف�� خطة :plan حتى :end_date',
+                'body' => 'تم تجديد اشتراك :tenant في خطة :plan حتى :end_date',
             ],
             'subscription_switched' => [
                 'title' => '[إدارة النظام] تم تغيير خطة الاشتراك',
