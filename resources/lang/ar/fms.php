@@ -222,6 +222,7 @@ return [
         'pending_payment' => 'قيد انتظار الدفع',
     ],
     'tenant_subscription' => [
+        'renew_subscription' => 'تجديد الاشتراك',
         'your_subscription' => 'تفاصيل اشتراكك',
         'current_subscription' => 'الاشتراك الحالي',
         'subscription_progress' => 'تقدم الاشتراك',

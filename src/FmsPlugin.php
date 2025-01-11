@@ -172,7 +172,7 @@ class FmsPlugin implements Plugin
 
     protected function isSubscriptionExpired($subscription): bool
     {
-        return $subscription->ends_at && $subscription->ends_at->isPast();
+        return $subscription->status === SubscriptionStatus::EXPIRED || ($subscription->ends_at && $subscription->ends_at->isPast());
     }
 
     protected function isSubscriptionEndingSoon($subscription): bool
@@ -216,7 +216,7 @@ class FmsPlugin implements Plugin
             'danger',
             __('filament-modular-subscriptions::fms.statuses.expired'),
             __('filament-modular-subscriptions::fms.tenant_subscription.you_have_to_renew_your_subscription'),
-            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice')
+            __('filament-modular-subscriptions::fms.tenant_subscription.renew_subscription')
         );
     }
 

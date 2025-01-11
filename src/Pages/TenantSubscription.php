@@ -135,30 +135,28 @@ class TenantSubscription extends Page implements HasTable
 
                 DB::transaction(function () use ($tenant, $oldSubscription, $newPlan, $invoiceService) {
                     // Handle existing subscription if any
-                    if ($oldSubscription) {
-                        if ($oldSubscription->plan->is_pay_as_you_go) {
-                            // Generate final invoice for pay-as-you-go plan
-                            $finalInvoice = $invoiceService->generatePayAsYouGoInvoice($oldSubscription);
+                    if ($oldSubscription->plan->is_pay_as_you_go) {
+                        // Generate final invoice for pay-as-you-go plan
+                        $finalInvoice = $invoiceService->generatePayAsYouGoInvoice($oldSubscription);
 
-                            $oldSubscription->update(['status' => SubscriptionStatus::ON_HOLD]);
+                        $oldSubscription->update(['status' => SubscriptionStatus::ON_HOLD]);
 
-                            // Send notifications for final invoice
-                            if ($finalInvoice) {
-                                $tenant->notifySuperAdmins('invoice_generated', [
-                                    'invoice_id' => $finalInvoice->id,
-                                    'amount' => $finalInvoice->amount,
-                                    'currency' => $finalInvoice->currency,
-                                ]);
+                        // Send notifications for final invoice
+                        if ($finalInvoice) {
+                            $tenant->notifySuperAdmins('invoice_generated', [
+                                'invoice_id' => $finalInvoice->id,
+                                'amount' => $finalInvoice->amount,
+                                'currency' => $finalInvoice->currency,
+                            ]);
 
-                                Notification::make()
-                                    ->title(__('filament-modular-subscriptions::fms.tenant_subscription.final_invoice_generated'))
-                                    ->info()
-                                    ->send();
-                            } else {
-                                $tenant->notifySuperAdmins('invoice_generation_failed', [
-                                    'error' => 'Failed to generate final invoice for pay-as-you-go plan',
-                                ]);
-                            }
+                            Notification::make()
+                                ->title(__('filament-modular-subscriptions::fms.tenant_subscription.final_invoice_generated'))
+                                ->info()
+                                ->send();
+                        } else {
+                            $tenant->notifySuperAdmins('invoice_generation_failed', [
+                                'error' => 'Failed to generate final invoice for pay-as-you-go plan',
+                            ]);
                         }
                     }
 
@@ -189,18 +187,17 @@ class TenantSubscription extends Page implements HasTable
                             ->success()
                             ->send();
                     } elseif (!$newPlan->is_trial_plan) {
-                        // Generate initial invoice first (this will create the subscription if needed)
-                        $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $newPlan);
-                        $tenant->notifySuperAdmins('invoice_generated', [
-                            'invoice_id' => $initialInvoice->id,
-                            'amount' => $initialInvoice->amount,
-                            'currency' => $initialInvoice->currency,
-                        ]);
-
+                       
                         // Update existing subscription if any
                         if ($oldSubscription) {
                             $tenant->switchPlan($newPlan->id, SubscriptionStatus::ON_HOLD);
-
+                            $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $newPlan);
+                            $tenant->notifySuperAdmins('invoice_generated', [
+                                'invoice_id' => $initialInvoice->id,
+                                'amount' => $initialInvoice->amount,
+                                'currency' => $initialInvoice->currency,
+                            ]);
+    
                             // Send notifications for subscription switch
                             $tenant->notifySubscriptionChange('subscription_switched', [
                                 'plan' => $newPlan->trans_name,

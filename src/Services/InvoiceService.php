@@ -150,9 +150,9 @@ class InvoiceService
         }
     }
 
-    private function createFixedPriceItem(Invoice $invoice, Subscription $subscription): void
+    private function createFixedPriceItem(Invoice $invoice, Subscription $subscription, $plan = null): void
     {
-        $price = $subscription->plan->price;
+        $price = $plan ? $plan->price : $subscription->plan->price;
         $invoice->items()->create([
             'description' => __('filament-modular-subscriptions::fms.invoice.subscription_fee', [
                 'plan' => $subscription->plan->trans_name,
@@ -237,7 +237,7 @@ class InvoiceService
                 now()->addDays(config('filament-modular-subscriptions.payment_due_days', 7))
             );
 
-            $this->createFixedPriceItem($invoice, $subscription);
+            $this->createFixedPriceItem($invoice, $subscription, $plan);
             $this->updateInvoiceTotals($invoice);
 
             return $invoice;
@@ -248,7 +248,7 @@ class InvoiceService
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
         $startDate = now();
-        
+
         return $subscriptionModel::create([
             'plan_id' => $plan->id,
             'subscribable_id' => $tenant->id,
@@ -272,7 +272,7 @@ class InvoiceService
         };
     }
 
-    protected function calculateTrialEndDate($plan, Carbon $startDate): ?Carbon 
+    protected function calculateTrialEndDate($plan, Carbon $startDate): ?Carbon
     {
         if (!$plan->trial_period || !$plan->trial_interval) {
             return null;
