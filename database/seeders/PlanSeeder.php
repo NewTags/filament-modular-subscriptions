@@ -28,7 +28,7 @@ class PlanSeeder extends Seeder
                 'grace_interval' => Interval::DAY,
                 'is_trial_plan' => true,
                 'modules' => [
-                    ['limit' => 10, 'price' => 0],
+                    ['limit' => 3, 'price' => 0],
                     ['limit' => 5, 'price' => 0],
                 ],
             ],
@@ -46,7 +46,7 @@ class PlanSeeder extends Seeder
                 'grace_period' => 0,
                 'grace_interval' => Interval::DAY,
                 'modules' => [
-                    ['limit' => 100, 'price' => 0],
+                    ['limit' => 4, 'price' => 0],
                     ['limit' => 50, 'price' => 0],
                 ],
             ],

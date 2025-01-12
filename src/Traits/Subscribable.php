@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
 use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * Trait Subscribable
@@ -563,9 +564,9 @@ trait Subscribable
         return $this->activeSubscription() && $this->activeSubscription()->onTrial();
     }
 
-    public function invoices() : HasMany
+    public function invoices()
     {
-        return $this->hasMany(Invoice::class);
+        return $this->subscription?->invoices();
     }
 
     /**
