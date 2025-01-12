@@ -141,7 +141,9 @@ class TenantSubscription extends Page implements HasTable
                         // Generate final invoice for pay-as-you-go plan
                         $finalInvoice = $invoiceService->generatePayAsYouGoInvoice($oldSubscription);
 
-                        $oldSubscription->update(['status' => SubscriptionStatus::ON_HOLD]);
+                        $oldSubscription->update([
+                            'status' => SubscriptionStatus::ON_HOLD
+                        ]);
 
                         // Send notifications for final invoice
                         if ($finalInvoice) {

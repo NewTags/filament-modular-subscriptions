@@ -303,7 +303,11 @@ class ScheduleInvoiceGeneration extends Command
     protected function handleTrialExpiration($subscription, $logService): void
     {
         $oldStatus = $subscription->status;
-        $subscription->update(['status' => SubscriptionStatus::EXPIRED]);
+        $subscription->update([
+            'status' => SubscriptionStatus::EXPIRED,
+            'trial_ends_at' => null,
+            'has_used_trial' => true,
+        ]);
 
         $logService->log(
             $subscription,
