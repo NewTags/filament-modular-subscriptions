@@ -54,7 +54,7 @@ class ScheduleInvoiceGeneration extends Command
 
 
             $this->handlePastDueInvoice($subscription);
-            $this->handleSubscriptionNearExpiry($subscription);
+            // $this->handleSubscriptionNearExpiry($subscription);
 
             if ($this->shouldGenerateInvoice($subscription)) {
                 $this->generateInvoice($subscription, $invoiceService, $logService);
