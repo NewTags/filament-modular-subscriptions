@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
+use HoceineEl\FilamentModularSubscriptions\Models\Invoice;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Trait Subscribable
@@ -559,6 +561,11 @@ trait Subscribable
     public function onTrial(): bool
     {
         return $this->activeSubscription() && $this->activeSubscription()->onTrial();
+    }
+
+    public function invoices() : HasMany
+    {
+        return $this->hasMany(Invoice::class);
     }
 
     /**
