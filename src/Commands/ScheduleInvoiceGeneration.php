@@ -31,7 +31,7 @@ class ScheduleInvoiceGeneration extends Command
     protected function processActiveSubscriptions(InvoiceService $invoiceService, SubscriptionLogService $logService): void
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
-        
+
         $subscriptionModel::query()
             ->where('status', SubscriptionStatus::ACTIVE)
             ->with(['plan', 'invoices', 'subscribable'])
@@ -46,7 +46,7 @@ class ScheduleInvoiceGeneration extends Command
     {
         try {
             $this->handlePastDueInvoice($subscription);
-            $this->handleSubscriptionNearExpiry($subscription);
+            // $this->handleSubscriptionNearExpiry($subscription);
 
             if ($this->shouldGenerateInvoice($subscription)) {
                 $this->generateInvoice($subscription, $invoiceService, $logService);
