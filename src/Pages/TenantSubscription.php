@@ -38,6 +38,11 @@ class TenantSubscription extends Page implements HasTable
         return __('filament-modular-subscriptions::fms.tenant_subscription.your_subscription');
     }
 
+    public static function canAccess(): bool
+    {
+        return FmsPlugin::canSeeTenantSubscription();
+    }
+
     public static function getNavigationLabel(): string
     {
         return FmsPlugin::get()->getSubscriptionNavigationLabel();

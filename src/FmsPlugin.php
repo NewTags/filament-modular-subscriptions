@@ -94,21 +94,14 @@ class FmsPlugin implements Plugin
                         ->visible(fn() => $this->subscriptionPageInTenantMenu && $this->canSeeTenantSubscription())
                         ->icon('heroicon-o-credit-card'),
                 ])
-                ->userMenuItems([
-                    MenuItem::make()
-                        ->label(fn() => $this->getSubscriptionNavigationLabel())
-                        ->url(fn() => TenantSubscription::getUrl())
-                        ->color(fn() => Color::Emerald)
-                        ->visible(fn() => $this->subscriptionPageInUserMenu && $this->canSeeTenantSubscription())
-                        ->icon('heroicon-o-credit-card'),
-                ])
+
                 ->widgets([
                     ModuleUsageWidget::class,
                 ])
                 ->bootUsing(function () {
                     FilamentView::registerRenderHook(
                         PanelsRenderHook::BODY_START,
-                        fn(): string => $this->renderSubscriptionAlerts()
+                        fn(): string => $this->canSeeTenantSubscription() ? $this->renderSubscriptionAlerts() : ''
                     );
                 });
         }
