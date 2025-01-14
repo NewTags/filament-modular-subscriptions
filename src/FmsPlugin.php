@@ -120,10 +120,14 @@ class FmsPlugin implements Plugin
 
     public static function canSeeTenantSubscription(): bool
     {
+        if (!auth()->check()) {
+            return false;
+        }
+        $auth =  auth()->user();
         return  cache()->store('file')->remember(
-            'tenant_subscription_nav_' . auth()->id() . '_' . FmsPlugin::getTenant()->id,
+            'tenant_subscription_nav_' . $auth->id . '_' . FmsPlugin::getTenant()->id,
             now()->addMinutes(60),
-            fn() => FmsPlugin::getTenant()->admins()->where('users.id', auth()->id())->exists()
+            fn() => FmsPlugin::getTenant()->admins()->where('users.id', $auth->id)->exists()
         );
     }
 
