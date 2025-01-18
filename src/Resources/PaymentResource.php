@@ -179,55 +179,40 @@ class PaymentResource extends Resource
                                     'paid_at' => now(),
                                 ]);
 
-                                $unpaidInvoices = $subscription->invoices()
-                                    ->whereIn('status', [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID])
-                                    ->get();
+                                // Store the old plan ID before renewal
+                                $oldPlanId = $subscription->plan_id;
 
-                                // Check if there are any unpaid or partially paid invoices
-                                $hasUnpaidInvoices = $unpaidInvoices->isNotEmpty();
+                                // Renew the subscription
+                                $subscription->renew();
 
-                                if (!$hasUnpaidInvoices) {
-                                    // Store the old plan ID before renewal
-                                    $oldPlanId = $subscription->plan_id;
-
-                                    // Renew the subscription
-                                    $subscription->renew();
-
-                                    // Determine the type of subscription change
-                                    if ($subscription->plan_id !== $oldPlanId) {
-                                        // Plan was switched
-                                        $subscription->subscribable->notifySubscriptionChange('subscription_switched', [
-                                            'old_plan' => $oldPlanId,
-                                            'new_plan' => $subscription->plan_id,
-                                            'start_date' => $subscription->starts_at->format('Y-m-d'),
-                                            'end_date' => $subscription->ends_at->format('Y-m-d'),
-                                            'currency' => $subscription->plan->currency,
-                                            'amount' => $invoice->amount,
-                                        ]);
-                                    } elseif ($subscription->wasRecentlyCreated) {
-                                        // New subscription
-                                        $subscription->subscribable->notifySubscriptionChange('subscription_activated', [
-                                            'plan' => $subscription->plan_id,
-                                            'start_date' => $subscription->starts_at->format('Y-m-d'),
-                                            'end_date' => $subscription->ends_at->format('Y-m-d'),
-                                            'currency' => $subscription->plan->currency,
-                                            'amount' => $invoice->amount,
-                                        ]);
-                                    } else {
-                                        // Regular renewal
-                                        $subscription->subscribable->notifySubscriptionChange('subscription_renewed', [
-                                            'plan' => $subscription->plan_id,
-                                            'start_date' => $subscription->starts_at->format('Y-m-d'),
-                                            'end_date' => $subscription->ends_at->format('Y-m-d'),
-                                            'currency' => $subscription->plan->currency,
-                                            'amount' => $invoice->amount,
-                                        ]);
-                                    }
+                                // Determine the type of subscription change
+                                if ($subscription->plan_id !== $oldPlanId) {
+                                    // Plan was switched
+                                    $subscription->subscribable->notifySubscriptionChange('subscription_switched', [
+                                        'old_plan' => $oldPlanId,
+                                        'new_plan' => $subscription->plan_id,
+                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                        'currency' => $subscription->plan->currency,
+                                        'amount' => $invoice->amount,
+                                    ]);
+                                } elseif ($subscription->wasRecentlyCreated) {
+                                    // New subscription
+                                    $subscription->subscribable->notifySubscriptionChange('subscription_activated', [
+                                        'plan' => $subscription->plan_id,
+                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                        'currency' => $subscription->plan->currency,
+                                        'amount' => $invoice->amount,
+                                    ]);
                                 } else {
-                                    // Notify about remaining unpaid invoices
-                                    $subscription->subscribable->notifySubscriptionChange('pay_all_invoices_to_activate', [
-                                        'total' => $unpaidInvoices->sum('amount'),
-                                        'currency' => $invoice->subscription->plan->currency,
+                                    // Regular renewal
+                                    $subscription->subscribable->notifySubscriptionChange('subscription_renewed', [
+                                        'plan' => $subscription->plan_id,
+                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                        'currency' => $subscription->plan->currency,
+                                        'amount' => $invoice->amount,
                                     ]);
                                 }
 

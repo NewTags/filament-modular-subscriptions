@@ -73,6 +73,7 @@ class TenantSubscription extends Page implements HasTable
     {
         return Action::make('switchPlanAction')
             ->requiresConfirmation()
+
             ->form(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
                 return [
@@ -102,6 +103,10 @@ class TenantSubscription extends Page implements HasTable
                             }
                         ])
                 ];
+            })
+            ->visible(function () {
+                $tenant = FmsPlugin::getTenant();
+                return $tenant && $tenant->subscription && !$tenant->unpaidInvoices()?->exists();
             })
             ->label(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
