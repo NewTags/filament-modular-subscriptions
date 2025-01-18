@@ -537,6 +537,9 @@ trait Subscribable
 
     public function unpaidInvoices(): HasMany
     {
-        return $this->invoices()->where('status', '!=', InvoiceStatus::PAID);
+        return $this->invoices()->where(function ($query) {
+            $query->where('status', '!=', InvoiceStatus::PAID)
+                ->orWhere('status', '!=', InvoiceStatus::CANCELLED);
+        });
     }
 }
