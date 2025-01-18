@@ -539,7 +539,7 @@ trait Subscribable
     {
         return $this->invoices()->where(function ($query) {
             $query->where('status', '!=', InvoiceStatus::PAID)
-                ->orWhere('status', '!=', InvoiceStatus::CANCELLED);
+                ->where('status', '!=', InvoiceStatus::CANCELLED);
         });
     }
 }
