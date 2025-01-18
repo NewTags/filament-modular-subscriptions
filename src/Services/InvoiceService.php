@@ -67,13 +67,14 @@ class InvoiceService
             } else {
                 $subscription = $tenant->subscription;
             }
-
+            $subscription->refresh();
             $invoice = $this->createInvoice(
                 $subscription,
                 now()->addDays(config('filament-modular-subscriptions.payment_due_days', 7))
             );
 
-            $this->createFixedPriceItem($invoice, $subscription, $plan);
+            $this->createInvoiceItems($invoice, $subscription, $plan);
+            $invoice->refresh();
             $this->updateInvoiceTotals($invoice);
 
             return $invoice;

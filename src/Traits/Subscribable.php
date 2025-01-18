@@ -445,24 +445,29 @@ trait Subscribable
                 'status' => $status,
                 'has_used_trial' => $plan->isTrialPlan() || $this->subscription?->has_used_trial,
             ]);
-
             // Handle trial period
             if ($trialDays || $plan->period_trial > 0) {
                 $trialDays = $trialDays ?? $plan->period_trial;
                 $subscription->trial_ends_at = $startDate->copy()->addDays($trialDays);
                 $subscription->save();
             }
-
+            $this->refresh();
             // Generate initial invoice for non-trial, non-PAYG plans
             if (!$plan->is_trial_plan && !$plan->is_pay_as_you_go) {
                 $invoiceService = app(InvoiceService::class);
                 $initialInvoice = $invoiceService->generateInitialPlanInvoice($this, $plan);
 
-                $this->notifySuperAdmins('invoice_generated', [
-                    'invoice_id' => $initialInvoice->id,
-                    'amount' => $initialInvoice->amount,
-                    'currency' => $initialInvoice->currency,
-                ]);
+                if ($initialInvoice) {
+                    $this->notifySuperAdmins('invoice_generated', [
+                        'invoice_id' => $initialInvoice->id,
+                        'amount' => $initialInvoice->amount,
+                        'currency' => $initialInvoice->currency,
+                    ]);
+                } else {
+                    $this->notifySuperAdmins('invoice_generation_failed', [
+                        'error' => 'Failed to generate initial invoice for plan',
+                    ]);
+                }
             }
 
             // Send appropriate notifications
@@ -483,7 +488,6 @@ trait Subscribable
 
             $this->invalidateSubscriptionCache();
         });
-
         return $subscription;
     }
 

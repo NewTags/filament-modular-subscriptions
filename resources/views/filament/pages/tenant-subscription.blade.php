@@ -5,14 +5,21 @@
             init() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const tabParam = urlParams.get('tab');
-                if (['subscription', 'plans', 'invoices', 'usage'].includes(tabParam)) {
-                    this.tab = tabParam;
+                if (tabParam) {
+                    if ('{{ $tenant->subscription }}') {
+                        if (['subscription', 'plans', 'invoices', 'usage'].includes(tabParam)) {
+                            this.tab = tabParam;
+                        }
+                    } else {
+                        this.tab = 'plans';
+                        window.history.pushState(null, '', window.location.pathname + '?tab=plans');
+                    }
                 }
             }
         }">
             <div class="overflow-x-auto">
                 <x-filament::tabs label="Subscription tabs" class="flex-nowrap">
-
+                    
                     @if ($tenant->subscription)
                         <x-filament::tabs.item icon="heroicon-o-credit-card"
                             @click="tab = 'subscription'; $dispatch('change-tab', 'subscription'); window.history.pushState(null, '', window.location.pathname + '?tab=subscription')"
@@ -36,7 +43,7 @@
                             </x-slot>
                             {{ __('filament-modular-subscriptions::fms.tenant_subscription.invoices') }}
                         </x-filament::tabs.item>
-                        <x-filament::tabs.item icon="heroicon-o-document-text"
+                        <x-filament::tabs.item icon="heroicon-o-chart-bar"
                             @click="tab = 'usage'; $dispatch('change-tab', 'usage'); window.history.pushState(null, '', window.location.pathname + '?tab=usage')"
                             :alpine-active="'tab === \'usage\''">
                             {{ __('filament-modular-subscriptions::fms.tenant_subscription.usage') }}

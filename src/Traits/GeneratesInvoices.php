@@ -75,12 +75,12 @@ trait GeneratesInvoices
         $subscribable->invalidateSubscriptionCache();
     }
 
-    private function createInvoiceItems(Invoice $invoice, Subscription $subscription): void
+    private function createInvoiceItems(Invoice $invoice, Subscription $subscription, $plan = null): void
     {
         if ($this->isPayAsYouGo($subscription)) {
             $this->createPayAsYouGoItems($invoice, $subscription);
         } else {
-            $this->createFixedPriceItem($invoice, $subscription);
+            $this->createFixedPriceItem($invoice, $subscription, $plan);
         }
         $plan = $subscription->plan;
         if ($subscription->invoices()->count() == 1 && $plan->setup_fee > 0) {
