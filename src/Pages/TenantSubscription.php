@@ -16,6 +16,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Closure;
+use HoceineEl\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use HoceineEl\FilamentModularSubscriptions\FmsPlugin;
 
 class TenantSubscription extends Page implements HasTable
@@ -130,10 +131,11 @@ class TenantSubscription extends Page implements HasTable
                 $planId = $arguments['plan_id'];
                 $tenant = FmsPlugin::getTenant();
                 $newPlan = config('filament-modular-subscriptions.models.plan')::findOrFail($planId);
+                $oldPlan = $tenant->subscription?->plan;
                 $oldSubscription = $tenant->subscription;
                 $invoiceService = app(InvoiceService::class);
 
-                DB::transaction(function () use ($tenant, $oldSubscription, $newPlan, $invoiceService) {
+                DB::transaction(function () use ($tenant, $oldSubscription, $newPlan, $invoiceService, $oldPlan) {
                     // Handle existing subscription if any
                     if ($oldSubscription->plan->is_pay_as_you_go) {
                         // Generate final invoice for pay-as-you-go plan
@@ -156,6 +158,23 @@ class TenantSubscription extends Page implements HasTable
                         } else {
                             $tenant->notifySuperAdmins('invoice_generation_failed', [
                                 'error' => 'Failed to generate final invoice for pay-as-you-go plan',
+                            ]);
+                        }
+                    }
+
+                    if (($oldPlan && $oldPlan->id != $newPlan->id) && !$oldPlan->is_pay_as_you_go) {
+                        // Clean up any pending invoices from old subscription
+                        $pendingInvoices = $tenant->invoices()
+                            ->whereIn('status', [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID])
+                            ->where('subscription_id', $oldSubscription->id)
+                            ->get();
+
+                        foreach ($pendingInvoices as $invoice) {
+                            $invoice->update(['status' => InvoiceStatus::CANCELLED]);
+
+                            $tenant->notifySuperAdmins('invoice_cancelled', [
+                                'invoice_id' => $invoice->id,
+                                'reason' => 'Plan switch',
                             ]);
                         }
                     }
@@ -187,7 +206,7 @@ class TenantSubscription extends Page implements HasTable
                             ->success()
                             ->send();
                     } elseif (!$newPlan->is_trial_plan) {
-                       
+
                         // Update existing subscription if any
                         if ($oldSubscription) {
                             $tenant->switchPlan($newPlan->id, SubscriptionStatus::ON_HOLD);
@@ -197,7 +216,7 @@ class TenantSubscription extends Page implements HasTable
                                 'amount' => $initialInvoice->amount,
                                 'currency' => $initialInvoice->currency,
                             ]);
-    
+
                             // Send notifications for subscription switch
                             $tenant->notifySubscriptionChange('subscription_switched', [
                                 'plan' => $newPlan->trans_name,

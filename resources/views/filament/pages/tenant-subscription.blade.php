@@ -179,7 +179,7 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                             @foreach ($availablePlans as $plan)
-                                @if ($plan->is_trial_plan && $activeSubscription->has_used_trial)
+                                @if ($activeSubscription && $plan->is_trial_plan && $activeSubscription->has_used_trial)
                                 @else
                                     <div
                                         class="relative group h-full transform transition hover:-translate-y-1 duration-300">
