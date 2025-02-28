@@ -165,12 +165,13 @@ class TenantSubscription extends Page implements HasTable
                     if (($oldPlan && $oldPlan->id != $newPlan->id) && !$oldPlan->is_pay_as_you_go) {
                         // Clean up any pending invoices from old subscription
                         $pendingInvoices = $tenant->invoices()
-                            ->whereIn('status', [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID])
+                            ->whereIn('status', [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID, InvoiceStatus::REFUNDED])
                             ->where('subscription_id', $oldSubscription->id)
                             ->get();
 
                         foreach ($pendingInvoices as $invoice) {
-                            $invoice->update(['status' => InvoiceStatus::CANCELLED]);
+                            $invoice
+                                ->update(['status' => InvoiceStatus::CANCELLED]);
 
                             $tenant->notifySuperAdmins('invoice_cancelled', [
                                 'invoice_id' => $invoice->id,
@@ -296,6 +297,8 @@ class TenantSubscription extends Page implements HasTable
                             $subscription = $this->createSubscription($tenant, $plan, SubscriptionStatus::ACTIVE);
                             $this->sendTrialStartedNotification($subscription);
                         } elseif (!$plan->is_trial_plan) {
+                            $subscription = $this->createSubscription($tenant, $plan, SubscriptionStatus::ON_HOLD);
+                            $tenant->refresh();
                             $initialInvoice = $invoiceService->generateInitialPlanInvoice($tenant, $plan);
                             $subscription = $tenant->subscription;
                             $this->sendSubscriptionNotification($subscription, false);
@@ -341,7 +344,7 @@ class TenantSubscription extends Page implements HasTable
             'ends_at' => $this->calculateEndDate($plan),
             'trial_ends_at' => $this->calculateTrialEndDate($plan, $startDate, $canUseTrial),
             'status' => $initialStatus,
-            'has_used_trial' => $canUseTrial && $plan->trial_period > 0,
+            'has_used_trial' => $canUseTrial && $plan->is_trial_plan,
         ]);
     }
 
@@ -388,16 +391,16 @@ class TenantSubscription extends Page implements HasTable
         }
 
         $notificationTitle = $isPayAsYouGo
-            ? __('filament-modular-subscriptions::fms.notifications.subscription.starter.title_payg')
-            : __('filament-modular-subscriptions::fms.notifications.subscription.starter.title');
+            ? __('filament-modular-subscriptions::fms.notifications.subscription.started.title_payg')
+            : __('filament-modular-subscriptions::fms.notifications.subscription.started.title');
 
         $notificationBody = $isPayAsYouGo
-            ? __('filament-modular-subscriptions::fms.notifications.subscription.starter.payg_body', [
+            ? __('filament-modular-subscriptions::fms.notifications.subscription.started.payg_body', [
                 'tenant' => $subscription->subscribable->name,
                 'plan' => $subscription->plan->trans_name,
                 'end_date' => $subscription->ends_at->format('Y-m-d H:i:s')
             ])
-            : __('filament-modular-subscriptions::fms.notifications.subscription.starter.body', [
+            : __('filament-modular-subscriptions::fms.notifications.subscription.started.body', [
                 'tenant' => $subscription->subscribable->name,
                 'plan' => $subscription->plan->trans_name,
                 'end_date' => $subscription->ends_at->format('Y-m-d H:i:s')

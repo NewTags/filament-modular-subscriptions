@@ -147,6 +147,9 @@ class InvoiceService
                 'unit_price' => $unitPrice,
                 'total' => $total,
             ]);
+
+            // Delete the usage after creating invoice item
+            $moduleUsage->delete();
         }
     }
 
@@ -256,8 +259,8 @@ class InvoiceService
             'starts_at' => $startDate,
             'ends_at' => $this->calculateSubscriptionEndDate($plan),
             'trial_ends_at' => $this->calculateTrialEndDate($plan, $startDate),
-            'status' => $plan->trial_period ? SubscriptionStatus::ACTIVE : SubscriptionStatus::ON_HOLD,
-            'has_used_trial' => false,
+            'status' => $plan->is_trial_plan ? SubscriptionStatus::ACTIVE : SubscriptionStatus::ON_HOLD,
+            'has_used_trial' => $tenant->canUseTrial() && $plan->is_trial_plan,
         ]);
     }
 
