@@ -77,13 +77,13 @@ class FmsPlugin implements Plugin
                 ->plugin(FilamentTranslatableFieldsPlugin::make())
                 ->resources(config('filament-modular-subscriptions.resources'))
                 ->assets([
-                    '/css/saudi-riyal.css',
+                    \Filament\Support\Assets\Css::make('saudi-riyal-styles', '/css/saudi-riyal.css'),
                 ]);
         } else {
             $panel
                 ->pages([TenantSubscription::class])
                 ->assets([
-                    '/css/saudi-riyal.css',
+                    \Filament\Support\Assets\Css::make('saudi-riyal-styles', '/css/saudi-riyal.css'),
                 ])
                 ->bootUsing(function () {
                     FilamentView::registerRenderHook(

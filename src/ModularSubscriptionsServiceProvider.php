@@ -97,7 +97,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
     {
         return [
             // AlpineComponent::make('skeleton', __DIR__ . '/../resources/dist/components/skeleton.js'),
-            Css::make('saudi-riyal-styles', __DIR__ . '/../public/css/saudi-riyal.css'),
+            // Css::make('saudi-riyal-styles', __DIR__ . '/../public/css/saudi-riyal.css'),
             // Js::make('skeleton-scripts', __DIR__ . '/../resources/dist/skeleton.js'),
         ];
     }
