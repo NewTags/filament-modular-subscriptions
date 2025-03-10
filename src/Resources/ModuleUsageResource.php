@@ -52,7 +52,7 @@ class ModuleUsageResource extends Resource
                 TextEntry::make('usage')
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.usage')),
                 TextEntry::make('pricing')
-                    ->money(config('filament-modular-subscriptions.main_currency'), locale: 'en')
+                    ->prefix(config('filament-modular-subscriptions.main_currency'))
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.pricing')),
                 TextEntry::make('calculated_at')
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.calculated_at')),
@@ -87,7 +87,7 @@ class ModuleUsageResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.usage'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pricing')
-                    ->money(config('filament-modular-subscriptions.main_currency'), locale: 'en')
+                    ->prefix(config('filament-modular-subscriptions.main_currency'))
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.pricing'))
                     ->getStateUsing(function ($record) {
                         $module = $record->module;

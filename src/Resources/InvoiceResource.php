@@ -97,15 +97,15 @@ class InvoiceResource extends Resource
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('subtotal')
-                    ->money($currency)
+                    ->prefix($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subtotal'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tax')
-                    ->money($currency)
+                    ->prefix($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.tax'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money($currency)
+                    ->prefix($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.total'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
@@ -407,7 +407,7 @@ class InvoiceResource extends Resource
                                 ->schema([
                                     TextEntry::make('amount')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
-                                        ->money(fn($record) =>  config('filament-modular-subscriptions.main_currency'), locale: 'en')
+                                        ->prefix(fn($record) =>  config('filament-modular-subscriptions.main_currency'))
                                         ->getStateUsing(fn($record) => $record->amount),
                                     TextEntry::make('payment_method')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.payment_method'))

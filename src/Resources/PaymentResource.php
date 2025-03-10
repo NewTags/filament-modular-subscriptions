@@ -65,7 +65,7 @@ class PaymentResource extends Resource
                     ->sortable()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.subscriber')),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn($record) =>  config('filament-modular-subscriptions.main_currency'), locale: 'en')
+                    ->prefix(fn($record) =>  config('filament-modular-subscriptions.main_currency'))
                     ->sortable()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount')),
                 Tables\Columns\TextColumn::make('payment_method')
@@ -353,7 +353,7 @@ class PaymentResource extends Resource
                         Infolists\Components\TextEntry::make('invoice.subscription.subscriber.name')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.subscriber')),
                         Infolists\Components\TextEntry::make('amount')
-                            ->money(fn($record) =>  config('filament-modular-subscriptions.main_currency'), locale: 'en')
+                            ->prefix(fn($record) =>  config('filament-modular-subscriptions.main_currency'))
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount')),
                         Infolists\Components\TextEntry::make('payment_method')
                             ->badge()
