@@ -75,7 +75,7 @@ class InvoiceResource extends Resource
     public static function table(Tables\Table $table): Tables\Table
     {
         $currency = Plan::first()->currency ?? config('filament-modular-subscriptions.main_currency');
-
+        $currency_symbol = get_currency_symbol($currency);
         return $table
             ->modifyQueryUsing(function ($query) {
                 $tenant = FmsPlugin::getTenant();
@@ -97,15 +97,18 @@ class InvoiceResource extends Resource
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('subtotal')
-                    ->money($currency)
+                    ->prefix($currency_symbol)
+                    ->extraAttributes(['class' => 'money'])
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subtotal'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tax')
-                    ->money($currency)
+                    ->prefix($currency_symbol)
+                    ->extraAttributes(['class' => 'money'])
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.tax'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money($currency)
+                    ->prefix($currency_symbol)
+                    ->extraAttributes(['class' => 'money'])
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.total'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')

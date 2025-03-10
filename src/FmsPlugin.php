@@ -75,10 +75,16 @@ class FmsPlugin implements Plugin
         if (! $this->onTenantPanel) {
             $panel
                 ->plugin(FilamentTranslatableFieldsPlugin::make())
-                ->resources(config('filament-modular-subscriptions.resources'));
+                ->resources(config('filament-modular-subscriptions.resources'))
+                ->assets([
+                    '/css/saudi-riyal.css',
+                ]);
         } else {
             $panel
                 ->pages([TenantSubscription::class])
+                ->assets([
+                    '/css/saudi-riyal.css',
+                ])
                 ->bootUsing(function () {
                     FilamentView::registerRenderHook(
                         PanelsRenderHook::PAGE_START,
@@ -354,5 +360,14 @@ class FmsPlugin implements Plugin
             __('filament-modular-subscriptions::fms.tenant_subscription.trial_expired_message'),
             __('filament-modular-subscriptions::fms.tenant_subscription.choose_plan')
         );
+    }
+
+    protected function getRoutes(): array
+    {
+        return [
+            'copy-saudi-riyal-symbol' => function () {
+                return view('filament-modular-subscriptions::pages.copy-saudi-riyal-symbol');
+            },
+        ];
     }
 }

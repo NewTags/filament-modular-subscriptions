@@ -180,8 +180,7 @@
                     {{ __('filament-modular-subscriptions::fms.invoice.subtotal') }}
                 </td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
-                    {{ number_format($invoice->subtotal, 2) }}
-                    {{ __('filament-modular-subscriptions::fms.invoice.currency') }}
+                    {!! fms_format_currency($invoice->subtotal, 2) !!}
                 </td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: ltr;">
                     Subtotal
@@ -192,8 +191,7 @@
                     {{ __('filament-modular-subscriptions::fms.invoice.tax_amount', ['percentage' => config('filament-modular-subscriptions.tax_percentage')]) }}
                 </td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
-                    {{ number_format($invoice->tax, 2) }}
-                    {{ __('filament-modular-subscriptions::fms.invoice.currency') }}
+                    {!! fms_format_currency($invoice->tax, 2) !!}
                 </td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: ltr;">
                     VAT({{ config('filament-modular-subscriptions.tax_percentage') }}%)
@@ -203,8 +201,7 @@
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
                     {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}</td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;">
-                    {{ number_format($invoice->amount, 2, '.', '') }}
-                    {{ __('filament-modular-subscriptions::fms.invoice.currency') }}
+                    {!! fms_format_currency($invoice->amount, 2, '.', '') !!}
                 </td>
                 <td style="border: 1px solid #e5e7eb; border-collapse: collapse;border-left: none;direction: ltr;">
                     Total with VAT

@@ -62,7 +62,11 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
         }
     }
 
-    public function packageRegistered(): void {}
+    public function packageRegistered(): void
+    {
+        // Register the helpers file
+        require_once __DIR__ . '/helpers.php';
+    }
 
     public function packageBooted(): void
     {
@@ -93,7 +97,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
     {
         return [
             // AlpineComponent::make('skeleton', __DIR__ . '/../resources/dist/components/skeleton.js'),
-            // Css::make('skeleton-styles', __DIR__ . '/../resources/dist/skeleton.css'),
+            Css::make('saudi-riyal-styles', __DIR__ . '/../public/css/saudi-riyal.css'),
             // Js::make('skeleton-scripts', __DIR__ . '/../resources/dist/skeleton.js'),
         ];
     }
@@ -145,7 +149,9 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../database/seeders' => database_path('seeders'),
-            ], 'filament-modular-subscriptions-seeders');
+                __DIR__ . '/../public/fonts/saudi_riyal' => public_path('fonts/saudi_riyal'),
+                __DIR__ . '/../public/css/saudi-riyal.css' => public_path('css/saudi-riyal.css'),
+            ], 'filament-modular-subscriptions-assets');
         }
     }
 }

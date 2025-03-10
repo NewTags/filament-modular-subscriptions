@@ -16,6 +16,7 @@ use NewTags\FilamentModularSubscriptions\ModularSubscription;
 use NewTags\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use NewTags\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\Models\Plan;
 
 class ModuleUsageResource extends Resource
 {
@@ -61,6 +62,8 @@ class ModuleUsageResource extends Resource
 
     public static function table(Tables\Table $table): Tables\Table
     {
+        $currency = Plan::first()->currency ?? config('filament-modular-subscriptions.main_currency');
+        $currency_symbol = get_currency_symbol($currency);
         return $table
             ->heading(__('filament-modular-subscriptions::fms.resources.module_usage.name'))
             ->modelLabel(__('filament-modular-subscriptions::fms.resources.module_usage.singular_name'))
@@ -80,7 +83,8 @@ class ModuleUsageResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.usage'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pricing')
-                    ->money(config('filament-modular-subscriptions.main_currency'), locale: 'en')
+                    ->prefix($currency_symbol)
+                    ->extraAttributes(['class' => 'money'])
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.pricing'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('calculated_at')
@@ -104,7 +108,7 @@ class ModuleUsageResource extends Resource
                             ->numeric()
                             ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.usage_to')),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {        
+                    ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
                                 $data['usage_from'],

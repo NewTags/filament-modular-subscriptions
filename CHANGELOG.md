@@ -5,3 +5,5 @@ All notable changes to `filament-modular-subscriptions` will be documented in th
 ## 1.0.0 - 2024-10-19
 
 - initial release
+
+

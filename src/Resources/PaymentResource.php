@@ -22,6 +22,7 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use NewTags\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\Models\Plan;
 
 class PaymentResource extends Resource
 {
@@ -59,13 +60,16 @@ class PaymentResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $currency = Plan::first()->currency ?? config('filament-modular-subscriptions.main_currency');
+        $currency_symbol = get_currency_symbol($currency);
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('invoice.subscription.subscribable.name')
                     ->sortable()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.subscriber')),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn($record) => $record->invoice->subscription->plan->currency, locale: 'en')
+                    ->prefix($currency_symbol)
+                    ->extraAttributes(['class' => 'money'])
                     ->sortable()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount')),
                 Tables\Columns\TextColumn::make('payment_method')

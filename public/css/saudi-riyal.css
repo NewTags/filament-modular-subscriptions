@@ -1,0 +1,13 @@
+@font-face {
+    font-family: 'SaudiRiyal';
+    src: url('/fonts/saudi_riyal/saudi_riyal.woff2') format('woff2'),
+         url('/fonts/saudi_riyal/saudi_riyal.woff') format('woff'),
+         url('/fonts/saudi_riyal/saudi_riyal.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+.money {
+    font-family: 'SaudiRiyal', sans-serif;
+}
