@@ -40,7 +40,7 @@ trait Subscribable
 
     private const CACHE_TTL = 1800; // 30 minutes in seconds
 
-    private const DAYS_LEFT_CACHE_TTL = 86400; // 24 hours in seconds
+    private const DAYS_LEFT_CACHE_TTL = 14400; // 4 hours in seconds
 
 
     /**
@@ -52,7 +52,9 @@ trait Subscribable
     {
         $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
 
-        return $this->morphOne($subscriptionModel, 'subscribable')->latest('starts_at');
+        return $this->morphOne($subscriptionModel, 'subscribable')
+            ->with(['plan', 'moduleUsages.module'])
+            ->latest('starts_at');
     }
 
     /**
@@ -81,9 +83,9 @@ trait Subscribable
                     ->with(['plan', 'moduleUsages.module']) // Eager load relationships
                     ->whereDate('starts_at', '<=', now())
                     ->where(function ($query) {
-                        $this->load('plan');
-                        $query->whereNull('ends_at')
-                            ->orWhereDate('ends_at', '>', now())
+                        $this->loadMissing('plan');
+                        $query
+                            ->whereDate('ends_at', '>', now())
                             ->orWhereDate('ends_at', '>=', now()->subDays(
                                 $this->plan?->period_grace ?? 0
                             ));
@@ -97,7 +99,7 @@ trait Subscribable
     /**
      * Invalidate active subscription cache
      */
-    public function invalidateSubscriptionCache(): void
+    public function clearFmsCache(): void
     {
         // Clear active subscription cache
         Cache::forget(self::ACTIVE_SUBSCRIPTION_CACHE_KEY . $this->id);
@@ -134,16 +136,7 @@ trait Subscribable
             $cacheKey,
             self::DAYS_LEFT_CACHE_TTL,
             function () {
-                $activeSubscription = $this->activeSubscription();
-                if (! $activeSubscription) {
-                    return null;
-                }
-
-                $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
-
-                return $gracePeriodEndDate
-                    ? number_format(now()->diffInDays($gracePeriodEndDate, false))
-                    : null;
+                return $this->subscription->daysLeft();
             }
         );
     }
@@ -153,14 +146,15 @@ trait Subscribable
      */
     public function isExpired(): bool
     {
-        $activeSubscription = $this->activeSubscription();
-        if (! $activeSubscription) {
-            return true;
-        }
+        return $this->subscription->isExpired();
+    }
 
-        $gracePeriodEndDate = $this->getGracePeriodEndDate($activeSubscription);
-
-        return $gracePeriodEndDate && $gracePeriodEndDate->isPast();
+    /**
+     * Check if the subscription is in the grace period.
+     */
+    public function isInGracePeriod(): bool
+    {
+        return $this->subscription->isInGracePeriod();
     }
 
     /**
@@ -168,17 +162,53 @@ trait Subscribable
      */
     public function cancel(): bool
     {
-        $activeSubscription = $this->activeSubscription();
-        if (! $activeSubscription) {
+        $activeSubscription = $this->subscription;
+        if (!$activeSubscription) {
+            return false;
+        }
+
+        // Check for unpaid pay-as-you-go invoices
+        if ($activeSubscription->plan->is_pay_as_you_go && $this->unpaidInvoices()->exists()) {
+            Notification::make()
+                ->title(__('filament-modular-subscriptions::fms.notifications.subscription.cancelled.failed'))
+                ->body(__('filament-modular-subscriptions::fms.notifications.subscription.cancelled.unpaid_invoices'))
+                ->danger()
+                ->send();
             return false;
         }
 
         DB::transaction(function () use ($activeSubscription) {
+            // Generate final invoice for pay-as-you-go plans
+            if ($activeSubscription->plan->is_pay_as_you_go) {
+                $invoiceService = app(InvoiceService::class);
+                $finalInvoice = $invoiceService->generatePayAsYouGoInvoice($activeSubscription);
+
+                if ($finalInvoice) {
+                    $this->notifySuperAdmins('invoice_generated', [
+                        'invoice_id' => $finalInvoice->id,
+                        'amount' => $finalInvoice->amount,
+                        'currency' => $finalInvoice->currency,
+                    ]);
+                }
+            }
+            // Clean up pending invoices when cancelling a non-PAYG plan
+            if (!$activeSubscription->plan->is_pay_as_you_go) {
+                $pendingInvoices = $this->unpaidInvoices()
+                    ->get();
+
+                foreach ($pendingInvoices as $invoice) {
+                    $invoice->update(['status' => InvoiceStatus::CANCELLED]);
+                }
+            }
             $activeSubscription->update([
                 'status' => SubscriptionStatus::CANCELLED,
                 'ends_at' => now(),
+                'plan_id' => null,
             ]);
-            $this->invalidateSubscriptionCache();
+
+            // Clean up module usages
+
+            $this->clearFmsCache();
         });
 
         return true;
@@ -191,29 +221,29 @@ trait Subscribable
      */
     public function renew(?int $days = null): bool
     {
-        $activeSubscription = $this->subscription;
-        if (! $activeSubscription) {
+        $subscription = $this->subscription;
+        if (! $subscription) {
             return false;
         }
 
-        $plan = $activeSubscription->plan;
+        $plan = $subscription->plan;
 
-        DB::transaction(function () use ($activeSubscription, $days, $plan) {
+        DB::transaction(function () use ($subscription, $days, $plan) {
             // Only delete non-persistent module usages
-            $activeSubscription->moduleUsages()
-                ->whereHas('module', function ($query) {
-                    $query->where('is_persistent', false);
-                })
+            // Clean up module usages based on plan type
+
+            $subscription->moduleUsages()
+                ->notPersistent()
                 ->delete();
 
-            $activeSubscription->update([
+            $subscription->update([
                 'ends_at' => $this->calculateEndDate($plan, $days),
                 'starts_at' => now(),
                 'status' => SubscriptionStatus::ACTIVE,
                 'trial_ends_at' => null,
             ]);
 
-            $this->invalidateSubscriptionCache();
+            $this->clearFmsCache();
         });
 
         return true;
@@ -276,12 +306,9 @@ trait Subscribable
                 }
             }
 
-            // Clean up module usages based on plan type
-            if ($activeSubscription->is_pay_as_you_go) {
-                $activeSubscription->moduleUsages()->delete();
-            } elseif ($newPlan->is_pay_as_you_go && !$activeSubscription->plan->is_pay_as_you_go) {
-                $activeSubscription->moduleUsages()->delete();
-            }
+            $activeSubscription->moduleUsages()
+                ->notPersistent()
+                ->delete();
 
             // Update subscription
             $activeSubscription->update([
@@ -290,7 +317,6 @@ trait Subscribable
                 'ends_at' => $this->calculateEndDate($newPlan),
                 'status' => $status ?? $activeSubscription->status,
             ]);
-
             // Generate initial invoice for non-trial plans
             if (!$newPlan->is_trial_plan && !$newPlan->is_pay_as_you_go) {
                 $initialInvoice = $invoiceService->generateInitialPlanInvoice($this, $newPlan);
@@ -300,52 +326,20 @@ trait Subscribable
                     'currency' => $initialInvoice->currency,
                 ]);
             }
-
+            $this->createSubscriptionModulesUsages();
             // Send notification for subscription switch
             $this->notifySubscriptionChange('subscription_switched', [
                 'plan' => $newPlan->trans_name,
                 'date' => now()->format('Y-m-d H:i:s')
             ]);
 
-            $this->invalidateSubscriptionCache();
+            $this->clearFmsCache();
         });
 
         return true;
     }
 
-    public function shouldGenerateInvoice(): bool
-    {
-        $subscription = $this->subscription()
-            ->with([
-                'moduleUsages.module.planModules' => function ($query) {
-                    $query->select('plan_id', 'module_id', 'limit');
-                },
-                'plan:id,is_pay_as_you_go',
-            ])
-            ->first();
 
-        if (! $subscription) {
-            return false;
-        }
-
-        $expired = $subscription->subscriber->isExpired();
-
-        if ($subscription->plan->is_pay_as_you_go) {
-            return $expired;
-        }
-
-        foreach ($subscription->moduleUsages as $moduleUsage) {
-            $planModule = $moduleUsage->module->planModules
-                ->where('plan_id', $subscription->plan_id)
-                ->first();
-
-            if ($planModule && $planModule->limit !== null && $moduleUsage->usage >= $planModule->limit) {
-                return true;
-            }
-        }
-
-        return $expired;
-    }
 
     /**
      * Calculate the end date for a given plan.
@@ -410,7 +404,11 @@ trait Subscribable
         }
 
         if ($endDate === null) {
-            $endDate = $startDate->copy()->addDays($plan->period);
+            if ($plan->is_trial_plan) {
+                $endDate = $startDate->copy()->addDays($plan->period_trial);
+            } else {
+                $endDate = $startDate->copy()->addDays($plan->period);
+            }
         }
 
         // Determine initial status
@@ -421,36 +419,56 @@ trait Subscribable
         };
 
         DB::transaction(function () use (&$subscription, $plan, $startDate, $endDate, $status, $trialDays) {
-            $subscription = $this->subscription()->create([
-                'plan_id' => $plan->id,
-                'starts_at' => $startDate,
-                'ends_at' => $endDate,
-                'status' => $status,
-                'has_used_trial' => $plan->isTrialPlan() || $this->subscription?->has_used_trial,
-            ]);
+            if (!$this->subscription) {
+                $subscription = $this->subscription()
+                    ->create([
+                        'plan_id' => $plan->id,
+                        'starts_at' => $startDate,
+                        'ends_at' => $endDate,
+                        'status' => $status,
+                        'has_used_trial' => $plan->isTrialPlan() || $this->subscription?->has_used_trial,
+                    ]);
+            }else{
+                $this->subscription->update([
+                    'plan_id' => $plan->id,
+                    'starts_at' => $startDate,
+                    'ends_at' => $endDate,
+                    'status' => $status,
+                    'has_used_trial' => $plan->isTrialPlan() || $this->subscription?->has_used_trial,
+                ]);
 
+                $subscription = $this->subscription;
+            }
             // Handle trial period
             if ($trialDays || $plan->period_trial > 0) {
                 $trialDays = $trialDays ?? $plan->period_trial;
                 $subscription->trial_ends_at = $startDate->copy()->addDays($trialDays);
                 $subscription->save();
             }
-
+            $this->refresh();
+            // Create module usages
+            $this->createSubscriptionModulesUsages();
             // Generate initial invoice for non-trial, non-PAYG plans
             if (!$plan->is_trial_plan && !$plan->is_pay_as_you_go) {
                 $invoiceService = app(InvoiceService::class);
                 $initialInvoice = $invoiceService->generateInitialPlanInvoice($this, $plan);
 
-                $this->notifySuperAdmins('invoice_generated', [
-                    'invoice_id' => $initialInvoice->id,
-                    'amount' => $initialInvoice->amount,
-                    'currency' => $initialInvoice->currency,
-                ]);
+                if ($initialInvoice) {
+                    $this->notifySuperAdmins('invoice_generated', [
+                        'invoice_id' => $initialInvoice->id,
+                        'amount' => $initialInvoice->amount,
+                        'currency' => $initialInvoice->currency,
+                    ]);
+                } else {
+                    $this->notifySuperAdmins('invoice_generation_failed', [
+                        'error' => 'Failed to generate initial invoice for plan',
+                    ]);
+                }
             }
 
             // Send appropriate notifications
             if ($plan->is_pay_as_you_go) {
-                $this->notifySubscriptionChange('started', [
+                $this->notifySubscriptionChange('payg_started', [
                     'plan' => $plan->trans_name,
                     'type' => 'pay_as_you_go',
                     'trial' => $subscription->onTrial(),
@@ -462,11 +480,16 @@ trait Subscribable
                     'trial' => true,
                     'date' => now()->format('Y-m-d H:i:s')
                 ]);
+            } else {
+                $this->notifySubscriptionChange('started', [
+                    'plan' => $plan->trans_name,
+                    'type' => 'fixed',
+                    'trial' => $subscription->onTrial(),
+                ]);
             }
 
-            $this->invalidateSubscriptionCache();
+            $this->clearFmsCache();
         });
-
         return $subscription;
     }
 
@@ -516,6 +539,9 @@ trait Subscribable
 
     public function unpaidInvoices(): HasMany
     {
-        return $this->invoices()->where('status', '!=', InvoiceStatus::PAID);
+        return $this->invoices()->where(function ($query) {
+            $query->where('status', '!=', InvoiceStatus::PAID)
+                ->where('status', '!=', InvoiceStatus::CANCELLED);
+        });
     }
 }

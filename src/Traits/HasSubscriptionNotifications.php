@@ -2,11 +2,10 @@
 
 namespace NewTags\FilamentModularSubscriptions\Traits;
 
-
+use Filament\Notifications\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
-
-
+use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
 
 trait HasSubscriptionNotifications
 {
@@ -25,18 +24,18 @@ trait HasSubscriptionNotifications
     /**
      * Notify users about subscription changes
      */
-    public function notifySubscriptionChange(string $action, array $additionalData = []): void
+    public function notifySubscriptionChange(string $action, array $additionalData = [], string $url = null): void
     {
         if (version_compare(app()->version(), '11.23', '>=')) {
-            defer(function () use ($action, $additionalData) {
-                $this->notifyAdminsUsing($action, $additionalData);
+            defer(function () use ($action, $additionalData, $url) {
+                $this->notifyAdminsUsing($action, $additionalData, $url);
             });
         } else {
-            $this->notifyAdminsUsing($action, $additionalData);
+            $this->notifyAdminsUsing($action, $additionalData, $url);
         }
     }
 
-    public function notifyAdminsUsing(string $action, array $additionalData = []): void
+    public function notifyAdminsUsing(string $action, array $additionalData = [], string $url = null): void
     {
         $users = $this->getTenantAdminsUsing()->get();
 
@@ -52,6 +51,7 @@ trait HasSubscriptionNotifications
         )
             ->icon($this->getNotificationIcon($action))
             ->iconColor($this->getNotificationColor($action))
+           
             ->sendToDatabase($users);
     }
 
@@ -60,7 +60,7 @@ trait HasSubscriptionNotifications
         return config('filament-modular-subscriptions.user_model')::query()->role('super_admin');
     }
 
-    public function notifySuperAdmins(string $action, array $additionalData = []): void
+    public function notifySuperAdmins(string $action, array $additionalData = [], string $url = null): void
     {
         $users = $this->getSuperAdminsQuery()->get();
         $data = array_merge([

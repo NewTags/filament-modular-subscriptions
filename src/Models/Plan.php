@@ -4,6 +4,7 @@ namespace NewTags\FilamentModularSubscriptions\Models;
 
 use NewTags\FilamentModularSubscriptions\Enums\Interval;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -30,7 +31,6 @@ class Plan extends Model
         'grace_interval',
         'sort_order',
         'is_pay_as_you_go',
-        'due_days',
         'fixed_invoice_day',
         'is_trial_plan',
     ];
@@ -48,7 +48,6 @@ class Plan extends Model
         'invoice_interval' => Interval::class,
         'grace_interval' => Interval::class,
         'is_pay_as_you_go' => 'boolean',
-        'due_days' => 'integer',
         'fixed_invoice_day' => 'integer',
         'is_trial_plan' => 'boolean',
     ];
@@ -65,12 +64,11 @@ class Plan extends Model
         return $this->hasMany($subscriptionModel);
     }
 
-    public function getTransNameAttribute()
+    public function TransName(): Attribute
     {
-        $locale = app()->getLocale();
-        $names = $this->name;
-
-        return $names[$locale] ?? $names['en'] ?? '';
+        return Attribute::make(
+            get: fn() => $this->name[app()->getLocale()] ?? $this->name['en'] ?? '',
+        );
     }
 
     public function planModules(): HasMany
@@ -78,19 +76,25 @@ class Plan extends Model
         return $this->hasMany(PlanModule::class);
     }
 
-    public function getPeriodAttribute()
+    public function Period(): Attribute
     {
-        return $this->invoice_interval->days() * $this->invoice_period;
+        return Attribute::make(
+            get: fn() => $this->invoice_interval->days() * $this->invoice_period,
+        );
     }
 
-    public function getPeriodTrialAttribute()
+    public function PeriodTrial(): Attribute
     {
-        return $this->trial_interval->days() * $this->trial_period;
+        return Attribute::make(
+            get: fn() => $this->trial_interval->days() * $this->trial_period,
+        );
     }
 
-    public function getPeriodGraceAttribute()
+    public function PeriodGrace(): Attribute
     {
-        return $this->grace_interval->days() * $this->grace_period;
+        return Attribute::make(
+            get: fn() => $this->grace_interval->days() * $this->grace_period,
+        );
     }
 
     public function modules(): BelongsToMany
@@ -124,7 +128,7 @@ class Plan extends Model
         $moduleModel = config('filament-modular-subscriptions.models.module');
         $module = $module instanceof $moduleModel ? $module : $moduleModel::where('class', $module)->first();
 
-        return $this->planModules()->where('module_id', $module->id)->first()->limit;
+        return $this->planModules()->where('module_id', $module->id)->first()?->limit ?? 0;
     }
 
     public function scopeActive(Builder $query): Builder

@@ -3,6 +3,7 @@
 namespace NewTags\FilamentModularSubscriptions\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -89,15 +90,62 @@ class Subscription extends Model
     }
 
     /**
-     * Get the number of days left in the current subscription period including grace period.
+     * Get the number of days left in the current subscription period.
      */
     public function daysLeft(): ?float
+    {
+        if (! $this->ends_at) {
+            return null;
+        }
+
+        return round(now()->diffInDays($this->ends_at, false), 1);
+    }
+
+    /**
+     * Get the number of days left including grace period.
+     */
+    public function daysLeftWithGrace(): ?float
     {
         $gracePeriodEndDate = $this->getGracePeriodEndDate($this);
 
         return $gracePeriodEndDate
             ? round(now()->diffInDays($gracePeriodEndDate, false), 1)
             : null;
+    }
+
+
+    public function isExpired(): bool
+    {
+        if ($this->status === SubscriptionStatus::EXPIRED) {
+            return true;
+        }
+
+        if (!$this->ends_at) {
+            return false;
+        }
+
+        $gracePeriodEndDate = $this->getGracePeriodEndDate();
+        
+        return $gracePeriodEndDate && now()->isAfter($gracePeriodEndDate);
+    }
+
+
+    public function IsPayAsYouGo() : Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->plan->is_pay_as_you_go,
+        );
+    }
+
+    public function isInGracePeriod(): bool
+    {
+        $now = now();
+        $endsAt = $this->ends_at;
+        $gracePeriodEndDate = $this->getGracePeriodEndDate();
+
+        return $endsAt && $gracePeriodEndDate &&
+            $now->isAfter($endsAt) &&
+            $now->isBefore($gracePeriodEndDate);
     }
 
     /**
@@ -110,7 +158,7 @@ class Subscription extends Model
             return null;
         }
 
-        $gracePeriodDays = $subscription->plan->period_grace;
+        $gracePeriodDays = $subscription->plan?->period_grace ?? 0;
 
         return $subscription->ends_at->copy()->addDays($gracePeriodDays);
     }

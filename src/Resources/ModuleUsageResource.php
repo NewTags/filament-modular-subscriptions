@@ -70,22 +70,32 @@ class ModuleUsageResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.subscriber'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('subscription.plan.name')
-                    ->getStateUsing(fn($record) => $record->subscription->plan->trans_name)
+                    ->getStateUsing(fn($record) => $record->subscription->plan?->trans_name ?? __('filament-modular-subscriptions::fms.tenant_subscription.no_plan'))
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.plan'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('module.name')
+                    ->getStateUsing(fn($record) => $record->module->getLabel())
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.module_id'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('usage')
+                    ->getStateUsing(function ($record) {
+                        $module = $record->module;
+                        $moduleInstance = $module->getInstance();
+                        $usage = $moduleInstance->calculateUsage($record->subscription);
+                        return $usage;
+                    })
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.usage'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pricing')
                     ->money(config('filament-modular-subscriptions.main_currency'), locale: 'en')
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.pricing'))
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('calculated_at')
-                    ->dateTime()
-                    ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.calculated_at'))
+                    ->getStateUsing(function ($record) {
+                        $module = $record->module;
+                        $moduleInstance = $module->getInstance();
+                        $usage = $moduleInstance->calculateUsage($record->subscription);
+                        $pricing = $moduleInstance->getPrice($record->subscription);
+                        return $usage * $pricing;
+                    })
                     ->sortable(),
             ])
             ->filters([
@@ -104,7 +114,7 @@ class ModuleUsageResource extends Resource
                             ->numeric()
                             ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.usage_to')),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {        
+                    ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
                                 $data['usage_from'],

@@ -174,104 +174,14 @@ class InvoiceResource extends Resource
                     ->modalWidth('4xl')
                     ->modalHeading(fn($record) => __('filament-modular-subscriptions::fms.invoice.details_title', ['number' => $record->id]))
                     ->modalContent(function ($record) {
-                        $invoice = $record->load(['items', 'subscription.plan']); // Eager load relationships
+                        $invoice = $record->loadMissing(['items', 'subscription.plan']);
 
                         return View::make('filament-modular-subscriptions::pages.invoice-details', compact('invoice'));
                     })
-                    ->modalFooterActions([]),
-                Action::make('download')
-                    ->label(__('filament-modular-subscriptions::fms.invoice.download_pdf'))
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function ($record) {
-                        // Calculate tax amounts correctly
-                        $taxPercentage = config('filament-modular-subscriptions.tax_percentage', 15);
-                        $totalBeforeTax = $record->amount;
-                        $taxAmount = $record->tax;
-
-
-
-                        // Generate QR code with correct amounts
-                        $QrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
-                            new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
-                            new \Salla\ZATCA\Tags\TaxNumber(config('filament-modular-subscriptions.tax_number')),
-                            new \Salla\ZATCA\Tags\InvoiceDate($record->created_at),
-                            new \Salla\ZATCA\Tags\InvoiceTotalAmount($record->amount), // Total with tax
-                            new \Salla\ZATCA\Tags\InvoiceTaxAmount($record->tax),
-                        ])->render();
-
-                        // Get view data with additional tax information
-                        $data = [
-                            'invoice' => $record,
-                            'QrCode' => $QrCode,
-                            'user' => ResolvesCustomerInfo::take($record->tenant),
-                            'company_logo' => public_path(config('filament-modular-subscriptions.company_logo')),
-                            'tax_percentage' => $taxPercentage,
-                            'total_before_tax' => $totalBeforeTax,
-                            'tax_amount' => $taxAmount,
-                        ];
-
-                        // Configure mPDF with better Arabic support
-                        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
-                        $fontDirs = $defaultConfig['fontDir'];
-
-                        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
-                        $fontData = $defaultFontConfig['fontdata'];
-
-                        $mpdf = new \Mpdf\Mpdf([
-                            'fontDir' => array_merge($fontDirs, [
-                                config('filament-modular-subscriptions.font_path'),
-                            ]),
-                            'fontdata' => $fontData + [
-                                'dinnextltarabic-medium' => [
-                                    'R' => 'dinnextltarabic_medium_normal_ab9f5a2326967c69e338559eaff07d99.ttf',
-                                    'B' => 'DINNextLTArabic-Medium.ttf',
-                                    'I' => 'DINNextLTArabic-Medium.ttf',
-                                    'BI' => 'DINNextLTArabic-Medium.ttf',
-                                    'useOTL' => 0xFF,
-                                    'useKashida' => 75,
-                                    'unAGlyphs' => true,
-                                ],
-                            ],
-                            'default_font' => 'dinnextltarabic-medium',
-                            'mode' => 'utf-8',
-                            'format' => 'A4',
-                            'tempDir' => storage_path('app/pdf_fonts'),
-                            'orientation' => 'P',
-                            'margin_left' => 10,
-                            'margin_right' => 10,
-                            'margin_top' => 10,
-                            'margin_bottom' => 10,
-                            'direction' => 'rtl',
-                            'autoScriptToLang' => true,
-                            'autoLangToFont' => true,
-                            'useSubstitutions' => true,
-                            'biDirectional' => true,
-                            'text_input_as_HTML' => true,
-                        ]);
-                        $mpdf->SetTitle('Invoice #' . $record->id);
-                        $mpdf->SetAuthor(config('filament-modular-subscriptions.company_name'));
-                        $mpdf->SetCreator(config('filament-modular-subscriptions.company_name'));
-                        $mpdf->SetDirectionality('rtl');
-                        $mpdf->SetFont('dinnextltarabic-medium', '', 14);
-                        $view = view('filament-modular-subscriptions::pages.invoice-pdf', $data);
-                        $html = $view->render();
-                        $mpdf->WriteHTML($html);
-
-                        try {
-                            return response()->streamDownload(function () use ($mpdf) {
-                                echo $mpdf->Output('', 'S');
-                            }, 'invoice_' . $record->id . '_' . $record->created_at->format('Y-m-d') . '.pdf');
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->title(__('filament-modular-subscriptions::fms.invoice.pdf_generation_error'))
-                                ->danger()
-                                ->send();
-
-                            report($e);
-
-                            return null;
-                        }
-                    }),
+                    ->modalFooterActions([
+                        self::downloadAction(),
+                    ]),
+                self::downloadAction(),
                 Action::make('pay')
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.actions.pay'))
                     ->slideOver()
@@ -327,6 +237,7 @@ class InvoiceResource extends Resource
                                 if ($get('payment_method') === 'online') {
                                     return [
                                         Fieldset::make('payment_details')
+                                            ->label('')
                                             ->schema([
                                                 Grid::make(2)
                                                     ->schema([
@@ -335,7 +246,7 @@ class InvoiceResource extends Resource
                                                             ->disabled()
                                                             ->numeric()
                                                             ->required()
-                                                            ->suffix(fn($record) => $record->subscription->plan->currency)
+                                                            ->suffix(fn($record) => config('filament-modular-subscriptions.main_currency'))
                                                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
                                                             ->extraAttributes(['class' => 'text-lg font-semibold']),
 
@@ -361,6 +272,7 @@ class InvoiceResource extends Resource
 
                                                 // Credit Card Details Section
                                                 Fieldset::make('credit_card_details')
+                                                    ->label('')
                                                     ->schema([
                                                         TextInput::make('card_number')
                                                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.card_number'))
@@ -387,7 +299,7 @@ class InvoiceResource extends Resource
                                                     ])
                                                     ->visible(fn($get) => $get('payment_provider') === 'stripe'),
 
-
+                                                //@todo : use Filament Shout
                                                 Placeholder::make('paypal_message')
                                                     ->label('')
                                                     ->visible(fn($get) => $get('payment_provider') === 'paypal')
@@ -416,13 +328,18 @@ class InvoiceResource extends Resource
                                     ];
                                 }
 
-                                // Existing bank transfer form
+                                // Bank transfer form
                                 return [
+
+                                    Placeholder::make('bank_card')
+                                        ->label('')
+                                        ->content(fn($record) => view('filament-modular-subscriptions::filament.components.bank-card'))
+                                        ->columnSpanFull(),
                                     TextInput::make('amount')
                                         ->default(fn($record) => $record->remaining_amount)
                                         ->numeric()
                                         ->required()
-                                        ->suffix(fn($record) => $record->subscription->plan->currency)
+                                        ->suffix(fn($record) =>  config('filament-modular-subscriptions.main_currency'))
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
                                         ->maxValue(fn($record) => $record->remaining_amount)
                                         ->minValue(1),
@@ -464,7 +381,7 @@ class InvoiceResource extends Resource
                         // Notify super admins about new pending payment
                         $subscribable->notifySuperAdmins('payment_pending', [
                             'amount' => $data['amount'],
-                            'currency' => $record->subscription->plan->currency,
+                            'currency' => config('filament-modular-subscriptions.main_currency'),
                             'invoice_id' => $record->id,
                             'tenant' => $subscribable->name,
                             'date' => now()->format('Y-m-d H:i:s')
@@ -490,7 +407,7 @@ class InvoiceResource extends Resource
                                 ->schema([
                                     TextEntry::make('amount')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
-                                        ->money(fn($record) => $record->subscription->plan->currency, locale: 'en')
+                                        ->money(fn($record) =>  config('filament-modular-subscriptions.main_currency'), locale: 'en')
                                         ->getStateUsing(fn($record) => $record->amount),
                                     TextEntry::make('payment_method')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.payment_method'))
@@ -510,6 +427,103 @@ class InvoiceResource extends Resource
                     }),
             ])
             ->bulkActions([]);
+    }
+
+    public static function downloadAction(): Action
+    {
+        return   Action::make('download')
+            ->label(__('filament-modular-subscriptions::fms.invoice.download_pdf'))
+            ->icon('heroicon-o-arrow-down-tray')
+            ->action(function ($record) {
+                // Calculate tax amounts correctly
+                $taxPercentage = config('filament-modular-subscriptions.tax_percentage', 15);
+                $totalBeforeTax = $record->amount;
+                $taxAmount = $record->tax;
+
+
+
+                // Generate QR code with correct amounts
+                $QrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
+                    new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
+                    new \Salla\ZATCA\Tags\TaxNumber(config('filament-modular-subscriptions.tax_number')),
+                    new \Salla\ZATCA\Tags\InvoiceDate($record->created_at),
+                    new \Salla\ZATCA\Tags\InvoiceTotalAmount($record->amount), // Total with tax
+                    new \Salla\ZATCA\Tags\InvoiceTaxAmount($record->tax),
+                ])->render();
+
+                // Get view data with additional tax information
+                $data = [
+                    'invoice' => $record,
+                    'QrCode' => $QrCode,
+                    'user' => ResolvesCustomerInfo::take($record->tenant),
+                    'company_logo' => public_path(config('filament-modular-subscriptions.company_logo')),
+                    'tax_percentage' => $taxPercentage,
+                    'total_before_tax' => $totalBeforeTax,
+                    'tax_amount' => $taxAmount,
+                ];
+
+                // Configure mPDF with better Arabic support
+                $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+                $fontDirs = $defaultConfig['fontDir'];
+
+                $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+                $fontData = $defaultFontConfig['fontdata'];
+
+                $mpdf = new \Mpdf\Mpdf([
+                    'fontDir' => array_merge($fontDirs, [
+                        config('filament-modular-subscriptions.font_path'),
+                    ]),
+                    'fontdata' => $fontData + [
+                        'dinnextltarabic-medium' => [
+                            'R' => 'dinnextltarabic_medium_normal_ab9f5a2326967c69e338559eaff07d99.ttf',
+                            'B' => 'DINNextLTArabic-Medium.ttf',
+                            'I' => 'DINNextLTArabic-Medium.ttf',
+                            'BI' => 'DINNextLTArabic-Medium.ttf',
+                            'useOTL' => 0xFF,
+                            'useKashida' => 75,
+                            'unAGlyphs' => true,
+                        ],
+                    ],
+                    'default_font' => 'dinnextltarabic-medium',
+                    'mode' => 'utf-8',
+                    'format' => 'A4',
+                    'tempDir' => storage_path('app/pdf_fonts'),
+                    'orientation' => 'P',
+                    'margin_left' => 10,
+                    'margin_right' => 10,
+                    'margin_top' => 10,
+                    'margin_bottom' => 10,
+                    'direction' => 'rtl',
+                    'autoScriptToLang' => true,
+                    'autoLangToFont' => true,
+                    'useSubstitutions' => true,
+                    'biDirectional' => true,
+                    'text_input_as_HTML' => true,
+                ]);
+                $mpdf->SetTitle('Invoice #' . $record->id);
+                $mpdf->SetAuthor(config('filament-modular-subscriptions.company_name'));
+                $mpdf->SetCreator(config('filament-modular-subscriptions.company_name'));
+                $mpdf->SetDirectionality('rtl');
+                $mpdf->SetFont('dinnextltarabic-medium', '', 14);
+                $view = view('filament-modular-subscriptions::pages.invoice-pdf', $data);
+                $html = $view->render();
+                $mpdf->WriteHTML($html);
+
+                try {
+                    return response()->streamDownload(function () use ($mpdf) {
+                        echo $mpdf->Output('', 'S');
+                    }, 'invoice_' . $record->id . '_' . $record->created_at->format('Y-m-d') . '.pdf');
+                } catch (\Exception $e) {
+                    Notification::make()
+                        ->title(__('filament-modular-subscriptions::fms.invoice.pdf_generation_error'))
+                        ->danger()
+                        ->send();
+
+                    report($e);
+
+                    return null;
+                }
+            });
     }
 
     public static function getRelations(): array

@@ -32,7 +32,7 @@ class PaymentReceivedNotification extends Notification
             'subtotal' => $this->payment->invoice->subtotal,
             'tax' => $this->payment->invoice->tax,
             'total' => $this->payment->invoice->amount,
-            'currency' => $this->payment->invoice->subscription->plan->currency,
+            'currency' =>  config('filament-modular-subscriptions.main_currency'),
             'status' => $this->payment->status->value,
         ];
     }

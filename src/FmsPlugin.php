@@ -6,6 +6,7 @@ use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Navigation\MenuItem;
 use Filament\Panel;
+use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
@@ -13,6 +14,9 @@ use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
+use NewTags\FilamentModularSubscriptions\Models\Module;
+use NewTags\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
 class FmsPlugin implements Plugin
@@ -34,6 +38,9 @@ class FmsPlugin implements Plugin
     public ?string $navigationGroup = null;
     public ?string $tenantNavigationGroup = null;
     public ?string $subscriptionNavigationLabel = null;
+    public bool | Closure $subscriptionPageInTenantMenu = true;
+    public bool | Closure $subscriptionPageInUserMenu = false;
+    public static bool | Closure $subscriptionPageInNavigationMenu = false;
 
     public static function make(): static
     {
@@ -79,10 +86,22 @@ class FmsPlugin implements Plugin
         } else {
             $panel
                 ->pages([TenantSubscription::class])
+                ->tenantMenuItems([
+                    MenuItem::make()
+                        ->label(fn() => $this->getSubscriptionNavigationLabel())
+                        ->url(fn() => TenantSubscription::getUrl())
+                        ->color(fn() => Color::Emerald)
+                        ->visible(fn() => $this->subscriptionPageInTenantMenu && $this->canSeeTenantSubscription())
+                        ->icon('heroicon-o-credit-card'),
+                ])
+
+                ->widgets([
+                    ModuleUsageWidget::class,
+                ])
                 ->bootUsing(function () {
                     FilamentView::registerRenderHook(
-                        PanelsRenderHook::PAGE_START,
-                        fn(): string => $this->renderSubscriptionAlerts()
+                        PanelsRenderHook::BODY_START,
+                        fn(): string => $this->canSeeTenantSubscription() ? $this->renderSubscriptionAlerts() : ''
                     );
                 });
         }
@@ -94,9 +113,42 @@ class FmsPlugin implements Plugin
         }
     }
 
+
+
     public function boot(Panel $panel): void {}
 
 
+    public static function canSeeTenantSubscription(): bool
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+        $auth =  auth()->user();
+        return  cache()->store('file')->remember(
+            'tenant_subscription_nav_' . $auth->id . '_' . FmsPlugin::getTenant()->id,
+            now()->addMinutes(60),
+            fn() => FmsPlugin::getTenant()->admins()->where('users.id', $auth->id)->exists()
+        );
+    }
+
+    public function subscriptionPageInTenantMenu(bool | Closure $condition = true): static
+    {
+        $this->subscriptionPageInTenantMenu = $condition instanceof Closure ? $condition() : $condition;
+
+        return $this;
+    }
+    public function subscriptionPageInUserMenu(bool | Closure $condition = true): static
+    {
+        $this->subscriptionPageInUserMenu = $condition instanceof Closure ? $condition() : $condition;
+
+        return $this;
+    }
+    public static function subscriptionPageInNavigationMenu(bool | Closure $condition = true): static
+    {
+        static::$subscriptionPageInNavigationMenu = $condition instanceof Closure ? $condition() : $condition;
+
+        return new static();
+    }
 
     public function subscriptionStats(bool $condition = true): static
     {
@@ -133,7 +185,7 @@ class FmsPlugin implements Plugin
     {
         $cacheKey = self::ALERTS_CACHE_KEY . $tenant->id;
 
-        return Cache::remember($cacheKey, now()->addHours(5), function () use ($tenant) {
+        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($tenant) {
             return $this->generateAlerts($tenant);
         });
     }
@@ -157,7 +209,7 @@ class FmsPlugin implements Plugin
             return [$this->createPendingPaymentAlert()];
         }
 
-        if ($this->isSubscriptionExpired($subscription)) {
+        if ($subscription->isExpired()) {
             return [$this->createExpiredSubscriptionAlert()];
         }
 
@@ -172,31 +224,24 @@ class FmsPlugin implements Plugin
 
     protected function isSubscriptionExpired($subscription): bool
     {
-        return $subscription->status === SubscriptionStatus::EXPIRED || ($subscription->ends_at && $subscription->ends_at->isPast());
+        return $subscription->isExpired();
     }
 
     protected function isSubscriptionEndingSoon($subscription): bool
     {
-        return $subscription->ends_at && $subscription->daysLeft() <= 7;
+        return $subscription->ends_at && $subscription->daysLeft() <= 3;
     }
 
     protected function generateModuleUsageAlerts($subscription, $tenant): array
     {
         $alerts = [];
-        $moduleUsages = $subscription->moduleUsages()->with(['module.planModules' => function ($query) use ($subscription) {
-            $query->where('plan_id', $subscription->plan_id);
-        }])->get();
-
-        foreach ($moduleUsages as $moduleUsage) {
-            $module = $moduleUsage->module;
-            $planModule = $module->planModules->first();
-            $limit = $planModule?->limit;
-
-            if (! $tenant->canUseModule($module->class)) {
-                $alerts[] = $this->createModuleLimitAlert($module, $moduleUsage, $limit);
+        $modules = $subscription->plan->modules;
+        foreach ($modules as $module) {
+            $limit = $subscription->plan->moduleLimit($module);
+            if (! $tenant->canUseModule($module->class) && $limit > 0) {
+                $alerts[] = $this->createModuleLimitAlert($module, $subscription, $limit);
             }
         }
-
         return $alerts;
     }
 
@@ -206,7 +251,8 @@ class FmsPlugin implements Plugin
             'warning',
             __('filament-modular-subscriptions::fms.tenant_subscription.no_active_subscription'),
             __('filament-modular-subscriptions::fms.tenant_subscription.no_subscription_message'),
-            __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
+            __('filament-modular-subscriptions::fms.tenant_subscription.select_plan'),
+            'plans'
         );
     }
 
@@ -216,7 +262,8 @@ class FmsPlugin implements Plugin
             'danger',
             __('filament-modular-subscriptions::fms.statuses.expired'),
             __('filament-modular-subscriptions::fms.tenant_subscription.you_have_to_renew_your_subscription'),
-            __('filament-modular-subscriptions::fms.tenant_subscription.renew_subscription')
+            __('filament-modular-subscriptions::fms.tenant_subscription.renew_subscription'),
+            'invoices'
         );
     }
 
@@ -226,7 +273,8 @@ class FmsPlugin implements Plugin
             'warning',
             __('filament-modular-subscriptions::fms.tenant_subscription.subscription_on_hold'),
             __('filament-modular-subscriptions::fms.tenant_subscription.subscription_on_hold_message'),
-            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice')
+            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice'),
+            'invoices'
         );
     }
 
@@ -236,7 +284,8 @@ class FmsPlugin implements Plugin
             'warning',
             __('filament-modular-subscriptions::fms.tenant_subscription.subscription_pending_payment'),
             __('filament-modular-subscriptions::fms.tenant_subscription.subscription_pending_payment_message'),
-            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice')
+            __('filament-modular-subscriptions::fms.tenant_subscription.pay_invoice'),
+            'invoices'
         );
     }
 
@@ -246,27 +295,34 @@ class FmsPlugin implements Plugin
             'warning',
             __('filament-modular-subscriptions::fms.tenant_subscription.subscription_ending_soon'),
             __('filament-modular-subscriptions::fms.tenant_subscription.days_left') . ': ' . $subscription->daysLeft(),
-            __('filament-modular-subscriptions::fms.tenant_subscription.select_plan')
+            __('filament-modular-subscriptions::fms.tenant_subscription.select_plan'),
+            'plans'
         );
     }
 
-    protected function createModuleLimitAlert($module, $moduleUsage, $limit): array
+    protected function createModuleLimitAlert(Module $module, Subscription $subscription, $limit = null): array
     {
+        $moduleInstance = $module->getInstance();
+        $label = $moduleInstance->getLabel();
+        $usage = $moduleInstance->calculateUsage($subscription);
+        $limit = $limit ?? $subscription->plan->moduleLimit($module);
+        $percentage = ($usage / $limit) * 100;
         return $this->createAlert(
             'danger',
             __('filament-modular-subscriptions::fms.tenant_subscription.you_have_reached_the_limit_of_this_module'),
             sprintf(
                 '%s: %d/%d (%d%%)',
-                $module->getName(),
-                $moduleUsage->usage,
+                $label,
+                $usage,
                 $limit,
-                ($moduleUsage->usage / $limit) * 100
+                $percentage
             ),
-            __('filament-modular-subscriptions::fms.tenant_subscription.upgrade_now')
+            __('filament-modular-subscriptions::fms.tenant_subscription.upgrade_now'),
+            'plans'
         );
     }
 
-    protected function createAlert(string $type, string $title, string $body, string $actionLabel): array
+    protected function createAlert(string $type, string $title, string $body, string $actionLabel, string $param = 'subscription'): array
     {
         return [
             'type' => $type,
@@ -274,7 +330,7 @@ class FmsPlugin implements Plugin
             'body' => $body,
             'action' => [
                 'label' => $actionLabel,
-                'url' => TenantSubscription::getUrl(),
+                'url' => TenantSubscription::getUrl(['tab' => $param]),
             ],
         ];
     }
@@ -321,7 +377,7 @@ class FmsPlugin implements Plugin
     {
         $subscription = $this->tenant?->subscription;
 
-        if ($subscription && $subscription->plan->isTrialPlan()) {
+        if ($subscription && $subscription->plan && $subscription->plan->isTrialPlan()) {
             if ($subscription->ends_at?->diffInDays(now()) <= 5) {
                 $alerts[] = $this->createTrialEndingSoonAlert($subscription);
             }

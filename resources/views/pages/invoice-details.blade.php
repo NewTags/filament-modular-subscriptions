@@ -59,12 +59,23 @@
                             {{ __('filament-modular-subscriptions::fms.invoice.unit_price') }}
                         </th>
                         <th scope="col" class="px-6 py-3 text-right">
+                            {{ __('filament-modular-subscriptions::fms.invoice.vat') }}
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-right">
                             {{ __('filament-modular-subscriptions::fms.invoice.total') }}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($invoice->items as $item)
+                        @php
+                            $itemTax =
+                                ($item->unit_price *
+                                    $item->quantity *
+                                    config('filament-modular-subscriptions.tax_percentage')) /
+                                100;
+                            $itemTotal = $item->unit_price * $item->quantity + $itemTax;
+                        @endphp
                         <tr class="bg-white border-b">
                             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                                 {{ $item->description }}
@@ -73,10 +84,13 @@
                                 {{ $item->quantity }}
                             </td>
                             <td class="px-6 py-4 text-right">
-                                {{ number_format($item->unit_price, 2) }} {{ $invoice->subscription->plan->currency }}
+                                {{ number_format($item->unit_price, 2) }} {{  config('filament-modular-subscriptions.main_currency') }}
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                {{ number_format($itemTax, 2) }} {{ config('filament-modular-subscriptions.main_currency')}}
                             </td>
                             <td class="px-6 py-4 text-right font-medium">
-                                {{ number_format($item->total, 2) }} {{ $invoice->subscription->plan->currency }}
+                                {{ number_format($itemTotal, 2) }} {{  config('filament-modular-subscriptions.main_currency') }}
                             </td>
                         </tr>
                     @endforeach
@@ -87,7 +101,7 @@
                             {{ __('filament-modular-subscriptions::fms.invoice.subtotal') }}
                         </td>
                         <td class="px-6 py-4 text-right">
-                            {{ number_format($invoice->subtotal, 2) }} {{ $invoice->subscription->plan->currency }}
+                            {{ number_format($invoice->subtotal, 2) }} {{  config('filament-modular-subscriptions.main_currency') }}
                         </td>
                     </tr>
                     <tr class="font-semibold text-gray-900 bg-gray-50">
@@ -95,7 +109,7 @@
                             {{ __('filament-modular-subscriptions::fms.invoice.tax_amount', ['percentage' => config('filament-modular-subscriptions.tax_percentage')]) }}
                         </td>
                         <td class="px-6 py-4 text-right">
-                            {{ number_format($invoice->tax, 2) }} {{ $invoice->subscription->plan->currency }}
+                            {{ number_format($invoice->tax, 2) }} {{  config('filament-modular-subscriptions.main_currency') }}
                         </td>
                     </tr>
                     <tr class="font-semibold text-gray-900 bg-gray-50 border-t-2 border-gray-200">
@@ -103,7 +117,7 @@
                             {{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}
                         </td>
                         <td class="px-6 py-4 text-right text-lg">
-                            {{ number_format($invoice->amount, 2) }} {{ $invoice->subscription->plan->currency }}
+                            {{ number_format($invoice->amount, 2) }} {{  config('filament-modular-subscriptions.main_currency') }}
                         </td>
                     </tr>
                 </tfoot>

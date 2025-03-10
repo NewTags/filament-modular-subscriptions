@@ -8,11 +8,14 @@ use NewTags\FilamentModularSubscriptions\Models\Invoice;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use NewTags\FilamentModularSubscriptions\Models\Module;
+use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
 
 trait GeneratesInvoices
 {
-    private function createInvoice(Subscription $subscription, Carbon $dueDate): Invoice
+    private function createInvoice(Subscription $subscription, Carbon $dueDate = null): Invoice
     {
+        $dueDate = $dueDate ?? now()->addDays($subscription->plan->period_grace);
         return $this->invoiceModel::create([
             'subscription_id' => $subscription->id,
             'tenant_id' => $subscription->subscribable_id,
@@ -39,10 +42,9 @@ trait GeneratesInvoices
             return null;
         }
 
-        $dueDate = $this->calculateDueDate($subscription);
 
-        return DB::transaction(function () use ($subscription, $dueDate) {
-            $invoice = $this->createInvoice($subscription, $dueDate);
+        return DB::transaction(function () use ($subscription) {
+            $invoice = $this->createInvoice($subscription);
             $this->createInvoiceItems($invoice, $subscription);
             $this->updateInvoiceTotals($invoice);
 
@@ -61,56 +63,78 @@ trait GeneratesInvoices
             'subtotal' => $invoice->subtotal,
             'tax' => $invoice->tax,
             'amount' => $invoice->amount,
-            'currency' => $subscription->plan->currency,
-            'due_date' => $invoice->due_date->format('Y-m-d')
+            'currency' => config('filament-modular-subscriptions.main_currency'),
+            'due_date' => $invoice->due_date->format('Y-m-d'),
         ]);
 
         $subscribable->notifySuperAdmins('invoice_generated', [
             'invoice_id' => $invoice->id,
             'amount' => $invoice->total,
             'tenant' => $subscription->subscribable->name,
-            'currency' => $subscription->plan->currency
+            'currency' =>  config('filament-modular-subscriptions.main_currency')
         ]);
-        
-        $subscribable->invalidateSubscriptionCache();
+
+        $subscribable->clearFmsCache();
     }
 
-    private function createInvoiceItems(Invoice $invoice, Subscription $subscription): void
+    private function createInvoiceItems(Invoice $invoice, Subscription $subscription, $plan = null): void
     {
-        if ($this->isPayAsYouGo($subscription)) {
+        $plan = $subscription->plan;
+        if ($plan->is_pay_as_you_go) {
             $this->createPayAsYouGoItems($invoice, $subscription);
         } else {
-            $this->createFixedPriceItem($invoice, $subscription);
+            $this->createFixedPriceItem($invoice, $subscription, $plan);
+        }
+
+        $nonCancelledInvoicesCount = $subscription->invoices()
+            ->where('status', '!=', InvoiceStatus::CANCELLED)
+            ->count();
+
+        if ($nonCancelledInvoicesCount === 1 && $plan->setup_fee > 0) {
+            $invoice->items()->create([
+                'description' => __('filament-modular-subscriptions::fms.invoice.setup_fee'),
+                'total' => $plan->setup_fee,
+                'quantity' => 1,
+                'unit_price' => $plan->setup_fee,
+            ]);
         }
     }
 
     private function createPayAsYouGoItems(Invoice $invoice, Subscription $subscription): void
     {
-        $subscription->load('moduleUsages.module');
-        foreach ($subscription->moduleUsages as $moduleUsage) {
-            $unitPrice = $subscription->plan->modulePrice($moduleUsage->module);
-            $total = $moduleUsage->usage * $unitPrice;
+        $subscription->loadMissing('plan.modules');
+        foreach ($subscription->plan->modules as $module) {
+            /** @var Module $module */
+            $moduleInstance = $module->getInstance();
+            $usage = $moduleInstance->calculateUsage($subscription);
+            $unitPrice = $moduleInstance->getPrice($subscription);
+            $total = $usage * $unitPrice;
+            $label = $moduleInstance->getLabel();
+            if ($total > 0) {
+                $invoice->items()->create([
+                    'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', [
+                        'module' => $label,
+                    ]),
+                    'quantity' => $usage,
+                    'unit_price' => $unitPrice,
+                    'total' => $total,
+                ]);
 
-            $invoice->items()->create([
-                'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', [
-                    'module' => $moduleUsage->module->getName(),
-                ]),
-                'quantity' => $moduleUsage->usage,
-                'unit_price' => $unitPrice,
-                'total' => $total,
-            ]);
-
-            $moduleUsage->delete();
+                if (!$module->not_persistent) {
+                    $subscription->moduleUsages()->where('module_id', $module->id)->delete();
+                }
+            }
         }
     }
 
     private function createFixedPriceItem(Invoice $invoice, Subscription $subscription, $plan = null): void
     {
-        $price = $plan ? $plan->price : $subscription->plan->price;
+        $plan = $plan ?? $subscription->plan;
+        $price = $plan->price;
         $invoice->items()->create([
             'description' => __('filament-modular-subscriptions::fms.invoice.subscription_fee', [
-                'plan' => $subscription->plan->trans_name,
-                'currency' => $subscription->plan->currency
+                'plan' => $plan->trans_name,
+                'currency' => $plan->currency
             ]),
             'quantity' => 1,
             'unit_price' => $price,
@@ -134,4 +158,4 @@ trait GeneratesInvoices
             return $invoice;
         });
     }
-} 
+}

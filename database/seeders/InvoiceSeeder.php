@@ -30,7 +30,7 @@ class InvoiceSeeder extends Seeder
                         ->setDay($plan->fixed_invoice_day);
                 } else {
                     $dueDate = $invoiceDate->copy()
-                        ->addDays($plan->due_days ?: config('filament-modular-subscriptions.invoice_due_date_days', 7));
+                        ->addDays($plan->period_grace);
                 }
 
                 $invoice = $invoiceModel::create([

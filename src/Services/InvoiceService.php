@@ -7,6 +7,7 @@ use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use NewTags\FilamentModularSubscriptions\Traits\GeneratesInvoices;
 use NewTags\FilamentModularSubscriptions\Traits\ManagesSubscriptions;
 use Illuminate\Support\Facades\DB;
+use NewTags\FilamentModularSubscriptions\Models\Module;
 
 class InvoiceService
 {
@@ -25,38 +26,18 @@ class InvoiceService
 
     public function generatePayAsYouGoInvoice(Subscription $subscription): ?Invoice
     {
-        $moduleUsages = $subscription->moduleUsages()->get();
-
-        if ($moduleUsages->isEmpty()) {
+        $modules = $subscription->plan->modules;
+        if ($modules->isEmpty()) {
             return null;
         }
 
-        return DB::transaction(function () use ($subscription, $moduleUsages) {
-            $invoice = $this->createInvoice($subscription, now()->addDays(7));
-            $this->processModuleUsages($invoice, $moduleUsages, $subscription);
+        return DB::transaction(function () use ($subscription) {
+            $invoice = $this->createInvoice($subscription);
+            $this->createInvoiceItems($invoice, $subscription);
             $this->updateInvoiceTotals($invoice);
 
             return $invoice;
         });
-    }
-
-    private function processModuleUsages(Invoice $invoice, $moduleUsages, Subscription $subscription): void
-    {
-        $moduleUsages->load('module');
-
-        foreach ($moduleUsages->groupBy('module_id') as $moduleId => $usages) {
-            $module = config('filament-modular-subscriptions.models.module')::find($moduleId);
-            $totalUsage = $usages->sum('usage');
-            $modulePrice = $subscription->plan->modulePrice($module);
-            $total = $totalUsage * $modulePrice;
-
-            $invoice->items()->create([
-                'description' => $module->getLabel(),
-                'quantity' => $totalUsage,
-                'unit_price' => $modulePrice,
-                'total' => $total,
-            ]);
-        }
     }
 
     public function generateInitialPlanInvoice($tenant, $plan): Invoice
@@ -67,13 +48,14 @@ class InvoiceService
             } else {
                 $subscription = $tenant->subscription;
             }
-
+            $subscription->loadMissing('plan');
+            $subscription->refresh();
             $invoice = $this->createInvoice(
-                $subscription,
-                now()->addDays(config('filament-modular-subscriptions.payment_due_days', 7))
+                $subscription
             );
 
-            $this->createFixedPriceItem($invoice, $subscription, $plan);
+            $this->createInvoiceItems($invoice, $subscription, $plan);
+            $invoice->refresh();
             $this->updateInvoiceTotals($invoice);
 
             return $invoice;

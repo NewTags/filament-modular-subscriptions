@@ -65,7 +65,7 @@ class PaymentResource extends Resource
                     ->sortable()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.subscriber')),
                 Tables\Columns\TextColumn::make('amount')
-                    ->money(fn($record) => $record->invoice->subscription->plan->currency, locale: 'en')
+                    ->money(fn($record) =>  config('filament-modular-subscriptions.main_currency'), locale: 'en')
                     ->sortable()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount')),
                 Tables\Columns\TextColumn::make('payment_method')
@@ -91,19 +91,8 @@ class PaymentResource extends Resource
                 Tables\Columns\TextColumn::make('reviewer.name')
                     ->toggledHiddenByDefault()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.reviewed_by')),
-                // Tables\Columns\TextColumn::make('invoice.subtotal')
-                //     ->money(fn($record) => $record->invoice->subscription->plan->currency)
-                //     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subtotal'))
-                //     ->sortable(),
-                // Tables\Columns\TextColumn::make('invoice.tax')
-                //     ->money(fn($record) => $record->invoice->subscription->plan->currency)
-                //     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.tax'))
-                //     ->sortable(),
-                // Tables\Columns\TextColumn::make('invoice.amount')
-                //     ->money(fn($record) => $record->invoice->subscription->plan->currency)
-                //     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.total'))
-                // ->sortable(),
             ])
+
             ->filters([
                 Tables\Filters\Filter::make('created_at')
                     ->columns(2)
@@ -179,41 +168,44 @@ class PaymentResource extends Resource
                                     'paid_at' => now(),
                                 ]);
 
-                                // Store the old plan ID before renewal
-                                $oldPlanId = $subscription->plan_id;
+                                // Only handle subscription renewal if there's a plan
+                                if ($subscription->plan_id) {
+                                    // Store the old plan ID before renewal
+                                    $oldPlanId = $subscription->plan_id;
 
-                                // Renew the subscription
-                                $subscription->renew();
+                                    // Renew the subscription
+                                    $subscription->renew();
 
-                                // Determine the type of subscription change
-                                if ($subscription->plan_id !== $oldPlanId) {
-                                    // Plan was switched
-                                    $subscription->subscribable->notifySubscriptionChange('subscription_switched', [
-                                        'old_plan' => $oldPlanId,
-                                        'new_plan' => $subscription->plan_id,
-                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
-                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
-                                        'currency' => $subscription->plan->currency,
-                                        'amount' => $invoice->amount,
-                                    ]);
-                                } elseif ($subscription->wasRecentlyCreated) {
-                                    // New subscription
-                                    $subscription->subscribable->notifySubscriptionChange('subscription_activated', [
-                                        'plan' => $subscription->plan_id,
-                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
-                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
-                                        'currency' => $subscription->plan->currency,
-                                        'amount' => $invoice->amount,
-                                    ]);
-                                } else {
-                                    // Regular renewal
-                                    $subscription->subscribable->notifySubscriptionChange('subscription_renewed', [
-                                        'plan' => $subscription->plan_id,
-                                        'start_date' => $subscription->starts_at->format('Y-m-d'),
-                                        'end_date' => $subscription->ends_at->format('Y-m-d'),
-                                        'currency' => $subscription->plan->currency,
-                                        'amount' => $invoice->amount,
-                                    ]);
+                                    // Determine the type of subscription change
+                                    if ($subscription->plan_id !== $oldPlanId) {
+                                        // Plan was switched
+                                        $subscription->subscribable->notifySubscriptionChange('subscription_switched', [
+                                            'old_plan' => $oldPlanId,
+                                            'new_plan' => $subscription->plan_id,
+                                            'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                            'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                            'currency' => config('filament-modular-subscriptions.main_currency'),
+                                            'amount' => $invoice->amount,
+                                        ]);
+                                    } elseif ($subscription->wasRecentlyCreated) {
+                                        // New subscription
+                                        $subscription->subscribable->notifySubscriptionChange('subscription_activated', [
+                                            'plan' => $subscription->plan_id,
+                                            'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                            'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                            'currency' => config('filament-modular-subscriptions.main_currency'),
+                                            'amount' => $invoice->amount,
+                                        ]);
+                                    } else {
+                                        // Regular renewal
+                                        $subscription->subscribable->notifySubscriptionChange('subscription_renewed', [
+                                            'plan' => $subscription->plan_id,
+                                            'start_date' => $subscription->starts_at->format('Y-m-d'),
+                                            'end_date' => $subscription->ends_at->format('Y-m-d'),
+                                            'currency' => config('filament-modular-subscriptions.main_currency'),
+                                            'amount' => $invoice->amount,
+                                        ]);
+                                    }
                                 }
 
                                 // Payment received notification
@@ -222,7 +214,7 @@ class PaymentResource extends Resource
                                     'subtotal' => $invoice->subtotal,
                                     'tax' => $invoice->tax,
                                     'total' => $invoice->amount,
-                                    'currency' => $invoice->subscription->plan->currency,
+                                    'currency' => config('filament-modular-subscriptions.main_currency'),
                                     'invoice_id' => $invoice->id,
                                     'status' => PaymentStatus::PAID->getLabel(),
                                     'date' => now()->format('Y-m-d H:i:s')
@@ -236,7 +228,7 @@ class PaymentResource extends Resource
                                     'subtotal' => $invoice->subtotal,
                                     'tax' => $invoice->tax,
                                     'total' => $invoice->amount,
-                                    'currency' => $invoice->subscription->plan->currency,
+                                    'currency' => config('filament-modular-subscriptions.main_currency'),
                                     'status' => PaymentStatus::PARTIALLY_PAID->getLabel(),
                                     'date' => now()->format('Y-m-d H:i:s')
                                 ]);
@@ -269,7 +261,7 @@ class PaymentResource extends Resource
 
                         $record->invoice->subscription->subscribable->notifySubscriptionChange('payment_rejected', [
                             'amount' => $record->amount,
-                            'currency' => $record->invoice->subscription->plan->currency,
+                            'currency' => config('filament-modular-subscriptions.main_currency'),
                             'reason' => $data['admin_notes'],
                             'date' => now()->format('Y-m-d H:i:s'),
                             'invoice_id' => $record->invoice->id
@@ -331,7 +323,7 @@ class PaymentResource extends Resource
                                     'subtotal' => $invoice->subtotal,
                                     'tax' => $invoice->tax,
                                     'total' => $invoice->amount,
-                                    'currency' => $subscription->plan->currency,
+                                    'currency' => config('filament-modular-subscriptions.main_currency'),
                                 ]);
                             }
 
@@ -361,7 +353,7 @@ class PaymentResource extends Resource
                         Infolists\Components\TextEntry::make('invoice.subscription.subscriber.name')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.subscriber')),
                         Infolists\Components\TextEntry::make('amount')
-                            ->money(fn($record) => $record->invoice->subscription->plan->currency, locale: 'en')
+                            ->money(fn($record) =>  config('filament-modular-subscriptions.main_currency'), locale: 'en')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount')),
                         Infolists\Components\TextEntry::make('payment_method')
                             ->badge()

@@ -103,10 +103,16 @@ class PlanResource extends Resource
                                     ->required()
                                     ->hidden(fn(Forms\Get $get) => $get('is_trial_plan') || $get('is_pay_as_you_go'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.price')),
+                                Forms\Components\TextInput::make('setup_fee')
+                                    ->numeric()
+                                    ->helperText(__('filament-modular-subscriptions::fms.resources.plan.hints.setup_fee'))
+                                    ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
+                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.setup_fee')),
                                 Forms\Components\Select::make('currency')
                                     ->options(config('filament-modular-subscriptions.currencies'))
                                     ->default(config('filament-modular-subscriptions.main_currency'))
                                     ->required()
+                                    ->hidden()
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.currency')),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-modular-subscriptions::fms.resources.plan.tabs.billing'))
@@ -115,6 +121,8 @@ class PlanResource extends Resource
                                 Forms\Components\Select::make('fixed_invoice_day')
                                     ->options(fn() => collect(range(1, 28))->mapWithKeys(fn($day) => [$day => $day]))
                                     ->default(1)
+                                    ->columnSpanFull()
+                                    ->helperText(__('filament-modular-subscriptions::fms.resources.plan.hints.fixed_invoice_day'))
                                     ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.fixed_invoice_day')),
                                 Fieldset::make()
@@ -142,13 +150,13 @@ class PlanResource extends Resource
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.invoice_interval')),
                                         Forms\Components\TextInput::make('grace_period')
                                             ->numeric()
-                                            ->hidden()
                                             ->default(0)
+                                            ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_period')),
                                         Forms\Components\Select::make('grace_interval')
                                             ->options(Interval::class)
                                             ->default(Interval::DAY)
-                                            ->hidden()
+                                            ->hidden(fn(Forms\Get $get) => $get('is_trial_plan'))
                                             ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.grace_interval')),
                                     ]),
                             ]),

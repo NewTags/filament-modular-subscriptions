@@ -11,7 +11,7 @@ trait ManagesSubscriptions
 {
     protected function calculateDueDate(Subscription $subscription): Carbon
     {
-        return now()->addDays($subscription->plan->due_days);
+        return now()->addDays($subscription->plan->period_grace);
     }
 
     protected function hasCurrentPeriodInvoice(Subscription $subscription): bool

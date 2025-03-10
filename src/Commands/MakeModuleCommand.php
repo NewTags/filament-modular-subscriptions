@@ -25,8 +25,8 @@ class MakeModuleCommand extends Command
     {
         $name = $this->argument('name');
         $className = Str::studly($name) . 'Module';
-        $namespace = $this->laravel->getNamespace() . 'Modules';
-        $path = app_path('Modules/' . $className . '.php');
+        $namespace = $this->laravel->getNamespace() . 'Fms\Modules';
+        $path = app_path('Fms/Modules/' . $className . '.php');
 
         if ($this->files->exists($path)) {
             $this->error('Module already exists!');
@@ -39,15 +39,15 @@ class MakeModuleCommand extends Command
         $stub = $this->files->get(__DIR__ . '/../../stubs/Module.stub');
 
         $stub = str_replace(
-            ['{{ namespace }}', '{{ subscription_model }}', '{{ plan_model }}', '{{ class }}', '{{ name }}', '{{ label_key }}'],
-            [$namespace, config('filament-modular-subscriptions.models.subscription'), config('filament-modular-subscriptions.models.plan'), $className, $name, Str::snake($name) . '_module'],
+            ['{{ namespace }}', '{{ subscription_model }}', '{{ class }}', '{{ name }}', '{{ label_key }}'],
+            [$namespace, config('filament-modular-subscriptions.models.subscription'), $className, $name, Str::snake($name) . '_module'],
             $stub
         );
 
         $this->files->put($path, $stub);
 
         $this->info('Module created successfully.');
-
+        $this->info('Your module has been created at: ' . $path);
         $this->info('Don\'t forget to register your new module in the config/filament-modular-subscriptions.php file.');
 
         return true;

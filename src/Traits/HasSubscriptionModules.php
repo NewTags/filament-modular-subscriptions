@@ -6,7 +6,10 @@ namespace NewTags\FilamentModularSubscriptions\Traits;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
+use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Modules\BaseModule;
 
 trait HasSubscriptionModules
 {
@@ -18,21 +21,21 @@ trait HasSubscriptionModules
     public function canUseModule(string $moduleClass): bool
     {
         $cacheKey = $this->getCacheKey($moduleClass);
-
         return Cache::remember(
             $cacheKey,
             self::MODULE_ACCESS_CACHE_TTL,
             function () use ($moduleClass) {
-                $activeSubscription = $this->activeSubscription();
-                if (! $activeSubscription) {
+                $subscription = $this->currentSubscription();
+                if (! $subscription) {
                     return false;
                 }
+
 
                 $moduleModel = config('filament-modular-subscriptions.models.module');
                 /** @var \NewTags\FilamentModularSubscriptions\Models\Module $module */
                 $module = $moduleModel::where('class', $moduleClass)
-                    ->with(['planModules' => function ($query) use ($activeSubscription) {
-                        $query->where('plan_id', $activeSubscription->plan_id);
+                    ->with(['planModules' => function ($query) use ($subscription) {
+                        $query->where('plan_id', $subscription->plan_id);
                     }])
                     ->first();
 
@@ -40,9 +43,28 @@ trait HasSubscriptionModules
                     return false;
                 }
 
-                return $module->canUse($activeSubscription);
+
+                return $module->canUse($subscription);
             }
         );
+    }
+
+    public function currentSubscription(): ?Subscription
+    {
+
+        return $this->subscription()
+            ->with(['plan', 'moduleUsages.module']) // Eager load relationships
+            ->whereDate('starts_at', '<=', now())
+            ->where(function ($query) {
+                $this->loadMissing('plan');
+                $query
+                    ->whereDate('ends_at', '>', now())
+                    ->orWhereDate('ends_at', '>=', now()->subDays(
+                        $this->plan?->period_grace ?? 0
+                    ));
+            })
+            ->whereIn('status', [SubscriptionStatus::ACTIVE, SubscriptionStatus::ON_HOLD, SubscriptionStatus::PENDING_PAYMENT])
+            ->first();
     }
 
     /**
@@ -58,7 +80,7 @@ trait HasSubscriptionModules
      */
     public function moduleUsage(string $moduleClass): ?int
     {
-        $activeSubscription = $this->activeSubscription();
+        $activeSubscription = $this->currentSubscription();
         if (! $activeSubscription) {
             return null;
         }
@@ -85,7 +107,7 @@ trait HasSubscriptionModules
      */
     public function recordUsage(string $moduleClass, int $quantity = 1, bool $incremental = true): void
     {
-        $activeSubscription = $this->activeSubscription();
+        $activeSubscription = $this->currentSubscription();
         if (! $activeSubscription) {
             return;
         }
@@ -97,6 +119,12 @@ trait HasSubscriptionModules
         } else {
             $this->record($moduleClass, $quantity, $incremental, $activeSubscription);
         }
+    }
+
+
+    public function clearModuleCache(BaseModule $module): void
+    {
+        Cache::forget($this->getCacheKey($module::class));
     }
 
     public function record(string $moduleClass, int $quantity, bool $incremental, Subscription $activeSubscription): void
@@ -132,7 +160,7 @@ trait HasSubscriptionModules
             'pricing' => $pricing,
         ]);
 
-        $this->invalidateSubscriptionCache();
+        $this->clearFmsCache();
     }
 
     /**
@@ -186,7 +214,7 @@ trait HasSubscriptionModules
             );
         }
 
-        $this->invalidateSubscriptionCache();
+        $this->clearFmsCache();
 
         return $usage;
     }
@@ -236,6 +264,56 @@ trait HasSubscriptionModules
             $moduleUsage->decrement('usage', $quantity);
         }
 
-        $this->invalidateSubscriptionCache();
+        $this->clearFmsCache();
+    }
+    public function remainingUsage(string $moduleClass): int
+    {
+        $activeSubscription = $this->activeSubscription();
+        if (! $activeSubscription) {
+            return 0;
+        }
+
+        $moduleModel = config('filament-modular-subscriptions.models.module');
+        $module = $moduleModel::where('class', $moduleClass)->first();
+
+        if (! $module) {
+            return 0;
+        }
+
+        $moduleLimit = $activeSubscription->plan->moduleLimit($moduleClass);
+
+        // Return a large number if module limit is null or 0
+        if ($moduleLimit === null || $moduleLimit === 0) {
+            return PHP_INT_MAX;
+        }
+
+        $remaining = $moduleLimit - $module->calculateUsage($activeSubscription);
+
+        return $remaining > 0 ? $remaining : 0;
+    }
+
+    public function createSubscriptionModulesUsages(): void
+    {
+        $subscription = $this->currentSubscription();
+        if (! $subscription) {
+            return;
+        }
+        $subscription->loadMissing('plan.modules');
+        $subscription->plan->modules->each(function ($module) use ($subscription) {
+            $plan = $subscription->plan;
+
+            if ($plan->moduleLimit($module) == 0 && !$plan->is_pay_as_you_go) {
+                return;
+            }
+
+                $subscription->moduleUsages()->firstOrCreate(
+                    ['module_id' => $module->id],
+                    [
+                        'usage' => 0,
+                        'calculated_at' => now(),
+                    ]
+                );
+            
+        });
     }
 }

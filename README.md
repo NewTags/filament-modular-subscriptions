@@ -259,6 +259,13 @@ foreach ($invoices as $invoice) {
 }
 ```
 
+
+## Clear Cache when needed for tenant
+
+```php
+clear_fms_cache();
+```
+
 ## Use Case: Online Academy
 
 Here's a complete example of implementing a subscription system for an online academy.

@@ -5,8 +5,7 @@ namespace {{ namespace }};
 use NewTags\FilamentModularSubscriptions\Modules\BaseModule;
 use NewTags\FilamentModularSubscriptions\FmsPlugin;
 use {{ subscription_model }};
-use {{ plan_model }};
-use Filament\Facades\Filament;
+
 class {{ class }} extends BaseModule
 {
     public function getName(): string
@@ -17,27 +16,5 @@ class {{ class }} extends BaseModule
     public function getLabelKey(): string
     {
         return '{{ label_key }}';
-    }
-
-    public function calculateUsage(Subscription $subscription): int
-    {
-        // Implement your usage calculation logic here
-        return FmsPlugin::getTenant()->moduleUsage(get_class($this));
-    }
-
-    public function getPricing(Subscription $subscription): float
-    {
-        // Implement your pricing logic here
-        return $this->calculateUsage($subscription) * $subscription->plan->modulePrice(get_class($this));
-    }
-
-    public function canUse(Subscription $subscription): bool
-    {
-        // Implement your access control logic here
-        if ($subscription->plan->is_pay_as_you_go) {
-            return true;
-        }
-
-        return $this->calculateUsage($subscription) < $subscription->plan->moduleLimit(get_class($this));
     }
 }

@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('subscription_id')->constrained(config('filament-modular-subscriptions.tables.subscription'))->cascadeOnDelete();
             $table->string('event');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->string('old_status')->nullable();
             $table->string('new_status')->nullable();
             $table->json('metadata')->nullable();
