@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
+use Filament\Support\Assets\Css;
+use Illuminate\Contracts\Support\Htmlable;
 
 class FmsPlugin implements Plugin
 {
@@ -76,15 +78,10 @@ class FmsPlugin implements Plugin
             $panel
                 ->plugin(FilamentTranslatableFieldsPlugin::make())
                 ->resources(config('filament-modular-subscriptions.resources'))
-                ->assets([
-                    \Filament\Support\Assets\Css::make('saudi-riyal-styles', '/css/saudi-riyal.css'),
-                ]);
+            ;
         } else {
             $panel
                 ->pages([TenantSubscription::class])
-                ->assets([
-                    \Filament\Support\Assets\Css::make('saudi-riyal-styles', '/css/saudi-riyal.css'),
-                ])
                 ->bootUsing(function () {
                     FilamentView::registerRenderHook(
                         PanelsRenderHook::PAGE_START,
@@ -92,7 +89,12 @@ class FmsPlugin implements Plugin
                     );
                 });
         }
-
+        $panel->bootUsing(function () {
+            FilamentView::registerRenderHook(
+                PanelsRenderHook::HEAD_END,
+                fn(): Htmlable => Css::make('saudi-riyal-styles', asset('vendor/filament-modular-subscriptions/css/saudi-riyal.css'))->getHtml()
+            );
+        });
         if ($this->hasSubscriptionStats) {
             $panel->widgets([
                 // SubscriptionStatsWidget::class,

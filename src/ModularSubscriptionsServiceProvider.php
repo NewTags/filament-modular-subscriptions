@@ -64,8 +64,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        // Register the helpers file
-        // require_once __DIR__ . '/helpers.php';
+        require_once __DIR__ . '/helpers.php';
     }
 
     public function packageBooted(): void
@@ -87,7 +86,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
 
     protected function getAssetPackageName(): ?string
     {
-        return 'hoceineel/filament-modular-subscriptions';
+        return 'newtags/filament-modular-subscriptions';
     }
 
     /**
@@ -96,9 +95,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            // AlpineComponent::make('skeleton', __DIR__ . '/../resources/dist/components/skeleton.js'),
-            // Css::make('saudi-riyal-styles', __DIR__ . '/../public/css/saudi-riyal.css'),
-            // Js::make('skeleton-scripts', __DIR__ . '/../resources/dist/skeleton.js'),
+            Css::make('saudi-riyal-styles', __DIR__ . '/../public/css/saudi-riyal.css'),
         ];
     }
 
@@ -141,6 +138,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             '7_create_invoice_items_table',
             '8_create_payments_table',
             'create_subscription_logs_table',
+            'add_indexes_to_fms_tables',
         ];
     }
 
@@ -149,8 +147,11 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../database/seeders' => database_path('seeders'),
-                __DIR__ . '/../public/fonts/saudi_riyal' => public_path('fonts/saudi_riyal'),
-                __DIR__ . '/../public/css/saudi-riyal.css' => public_path('css/saudi-riyal.css'),
+            ], 'filament-modular-subscriptions-seeders');
+
+            // Publish assets
+            $this->publishes([
+                __DIR__ . '/../public' => public_path('vendor/filament-modular-subscriptions'),
             ], 'filament-modular-subscriptions-assets');
         }
     }
