@@ -149,8 +149,8 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../database/seeders' => database_path('seeders'),
-                __DIR__ . '/../public/fonts/saudi_riyal' => public_path('fonts/saudi_riyal'),
-                __DIR__ . '/../public/css/saudi-riyal.css' => public_path('css/saudi-riyal.css'),
+                // __DIR__ . '/../public/fonts/saudi_riyal' => public_path('fonts/saudi_riyal'),
+                // __DIR__ . '/../public/css/saudi-riyal.css' => public_path('css/saudi-riyal.css'),
             ], 'filament-modular-subscriptions-assets');
         }
     }
