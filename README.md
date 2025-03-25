@@ -114,6 +114,29 @@ class AdminPanelProvider extends PanelProvider
 }
 ```
 
+### Custom Actions After Invoice Payment
+
+You can define custom actions to execute after an invoice is paid by using the `afterInvoicePaid` method:
+
+```php
+use NewTags\FilamentModularSubscriptions\FmsPlugin;
+
+// In your service provider
+FmsPlugin::make()
+    ->afterInvoicePaid(function ($invoice) {
+        // Create expense record
+        Expense::create([
+            'amount' => $invoice->amount,
+            'description' => "Subscription payment for {$invoice->subscription->subscribable->name}",
+            'date' => now(),
+        ]);
+        
+        // Send custom notifications
+        // Update accounting records
+        // Or any other custom logic
+    });
+```
+
 ### Creating a Module
 
 ```php
