@@ -31,6 +31,8 @@ class FmsPlugin implements Plugin
 
     public static ?Closure $getTenantUsing = null;
 
+    public static ?Closure $afterInvoicePaidUsing = null;
+
     public ?Model $tenant = null;
 
     public array $cachedAlerts = [];
@@ -68,6 +70,22 @@ class FmsPlugin implements Plugin
         static::$getTenantUsing = $callback;
 
         return $this;
+    }
+
+    public function afterInvoicePaid(?Closure $callback = null): static
+    {
+        static::$afterInvoicePaidUsing = $callback;
+
+        return $this;
+    }
+
+    public static function runAfterInvoicePaid(Model $invoice): mixed
+    {
+        if (static::$afterInvoicePaidUsing === null) {
+            return null;
+        }
+
+        return app()->call(static::$afterInvoicePaidUsing, ['invoice' => $invoice]);
     }
 
     public static function getTenant(): mixed
@@ -113,10 +131,7 @@ class FmsPlugin implements Plugin
         }
     }
 
-
-
     public function boot(Panel $panel): void {}
-
 
     public static function canSeeTenantSubscription(): bool
     {
@@ -162,7 +177,6 @@ class FmsPlugin implements Plugin
         return $this->hasSubscriptionStats;
     }
 
-
     protected function renderSubscriptionAlerts(): string
     {
         if (! $this->onTenantPanel) {
@@ -198,8 +212,6 @@ class FmsPlugin implements Plugin
         if (! $subscription || $subscription->status === SubscriptionStatus::CANCELLED) {
             return [$this->createNoSubscriptionAlert()];
         }
-
-
 
         if ($subscription->status === SubscriptionStatus::ON_HOLD) {
             return [$this->createOnHoldAlert()];

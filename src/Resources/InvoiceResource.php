@@ -74,7 +74,7 @@ class InvoiceResource extends Resource
 
     public static function table(Tables\Table $table): Tables\Table
     {
-        $currency = Plan::first()->currency ?? config('filament-modular-subscriptions.main_currency');
+        $currency =  config('filament-modular-subscriptions.main_currency');
 
         return $table
             ->modifyQueryUsing(function ($query) {

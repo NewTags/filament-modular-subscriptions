@@ -168,6 +168,9 @@ class PaymentResource extends Resource
                                     'paid_at' => now(),
                                 ]);
 
+                                // Run custom after invoice paid callback
+                                FmsPlugin::runAfterInvoicePaid($invoice);
+
                                 // Only handle subscription renewal if there's a plan
                                 if ($subscription->plan_id) {
                                     // Store the old plan ID before renewal

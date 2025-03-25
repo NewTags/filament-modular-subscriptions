@@ -43,6 +43,8 @@ class ModuleUsageResource extends Resource
 
     public static function infolist(Infolist $infolist): Infolist
     {
+        $currency = config('filament-modular-subscriptions.main_currency');
+
         return $infolist
             ->schema([
                 TextEntry::make('subscription.subscribable.name')
