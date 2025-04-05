@@ -48,7 +48,7 @@ class BaseModule
             }
         }
         if ($subscription->is_pay_as_you_go) {
-            return true;
+            return $subscription->plan->hasModule(get_class($this));
         }
 
         if ($subscription->plan->moduleLimit(get_class($this)) == 0) {

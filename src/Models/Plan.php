@@ -150,4 +150,9 @@ class Plan extends Model
     {
         return $this->is_trial_plan;
     }
+
+    public function hasModule(Model | string $module): bool
+    {
+        return $this->modules()->where('class', $module)->exists();
+    }
 }
