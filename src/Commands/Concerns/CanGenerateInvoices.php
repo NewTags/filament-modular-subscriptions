@@ -20,7 +20,9 @@ trait CanGenerateInvoices
         if ($invoice = $invoiceService->generate($subscription)) {
             $this->info("Invoice generated successfully for subscription {$subscription->subscribable->name}");
             $this->updateSubscriptionStatus($subscription, $invoice, $logService);
-            $subscription->subscribable->clearFmsCache();
+            if ($subscription->subscribable) {
+                $subscription->subscribable->clearFmsCache();
+            }
         }
     }
 
@@ -69,13 +71,15 @@ trait CanGenerateInvoices
 
     protected function notifyError($subscription, \Exception $e): void
     {
-        $subscription->subscribable->notifySuperAdmins('invoice_generation_failed', [
-            'tenant' => $subscription->subscribable->name,
-            'error' => $e->getMessage(),
-            'subscription_id' => $subscription->id
-        ]);
+        if ($subscription->subscribable) {
+            $subscription->subscribable->notifySuperAdmins('invoice_generation_failed', [
+                'tenant' => $subscription->subscribable->name,
+                'error' => $e->getMessage(),
+                'subscription_id' => $subscription->id
+            ]);
+        }
 
-        $this->error("Error generating invoice for subscription {$subscription->subscribable->name}: {$e->getMessage()}");
+        $this->error("Error generating invoice for subscription {$subscription->id}: {$e->getMessage()}");
     }
 
     protected function logError($subscription, \Exception $e): void
@@ -195,6 +199,10 @@ trait CanGenerateInvoices
 
     protected function notifyPastDueInvoice($subscription, $invoice): void
     {
+        if (!$subscription->subscribable) {
+            return;
+        }
+        
         $daysOverdue = number_format(now()->diffInDays($invoice->due_date));
         $notificationData = [
             'invoice_id' => $invoice->id,
