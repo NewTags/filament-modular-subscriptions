@@ -24,22 +24,18 @@ trait HasSubscriptionNotifications
     /**
      * Notify users about subscription changes
      */
-    public function notifySubscriptionChange(string $action, array $additionalData = [], string $url = null): void
+    public function notifySubscriptionChange(string $action, array $additionalData = [], ?string $url = null): void
     {
-        if (version_compare(app()->version(), '11.23', '>=')) {
-            defer(function () use ($action, $additionalData, $url) {
-                $this->notifyAdminsUsing($action, $additionalData, $url);
-            });
-        } else {
-            $this->notifyAdminsUsing($action, $additionalData, $url);
-        }
+        $this->notifyAdminsUsing($action, $additionalData, $url);
     }
 
     public function notifyAdminsUsing(string $action, array $additionalData = [], string $url = null): void
     {
-        $users = $this->getTenantAdminsUsing()->get();
+        $users = $this->getTenantAdminsUsing()?->get();
+        if (! $users) {
+            return;
+        }
 
-        // Merge default subscription data with additional data
         $data = array_merge(
             $this->getSubscriptionNotificationData($action),
             $additionalData
@@ -51,13 +47,13 @@ trait HasSubscriptionNotifications
         )
             ->icon($this->getNotificationIcon($action))
             ->iconColor($this->getNotificationColor($action))
-           
             ->sendToDatabase($users);
     }
 
     public function getSuperAdminsQuery(): Builder
     {
-        return config('filament-modular-subscriptions.user_model')::query()->role('super_admin');
+        return config('filament-modular-subscriptions.user_model')::query()
+            ->role('super_admin');
     }
 
     public function notifySuperAdmins(string $action, array $additionalData = [], string $url = null): void

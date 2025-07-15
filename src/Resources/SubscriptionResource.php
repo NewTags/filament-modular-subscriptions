@@ -103,7 +103,7 @@ class SubscriptionResource extends Resource
                         Forms\Components\DateTimePicker::make('ends_at')
                             ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.ends_at')),
                         Forms\Components\DateTimePicker::make('trial_ends_at')
-                            ->hidden(fn($get) => Plan::find($get('plan_id'))->is_trial_plan)
+                            ->hidden(fn($get) => (Plan::find($get('plan_id'))?->is_trial_plan) ?? false)
                             ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.trial_ends_at')),
                         Forms\Components\Select::make('status')
                             ->options(SubscriptionStatus::class)
