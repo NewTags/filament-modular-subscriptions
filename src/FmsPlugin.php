@@ -148,7 +148,7 @@ class FmsPlugin implements Plugin
 
             $auth = auth()->user();
 
-            return cache()->store('file')->remember(
+            return cache()->remember(
                 'tenant_subscription_nav_' . $auth->id . '_' . $tenant->id,
                 now()->addMinutes(60),
                 fn() => $tenant->admins()->where('users.id', $auth->id)->exists()
