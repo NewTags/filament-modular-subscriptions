@@ -138,11 +138,19 @@ class FmsPlugin implements Plugin
         if (!auth()->check()) {
             return false;
         }
-        $auth =  auth()->user();
-        return  cache()->store('file')->remember(
-            'tenant_subscription_nav_' . $auth->id . '_' . FmsPlugin::getTenant()->id,
+
+        $tenant = FmsPlugin::getTenant();
+
+        if ($tenant === null) {
+            return false;
+        }
+
+        $auth = auth()->user();
+
+        return cache()->store('file')->remember(
+            'tenant_subscription_nav_' . $auth->id . '_' . $tenant->id,
             now()->addMinutes(60),
-            fn() => FmsPlugin::getTenant()->admins()->where('users.id', $auth->id)->exists()
+            fn() => $tenant->admins()->where('users.id', $auth->id)->exists()
         );
     }
 
