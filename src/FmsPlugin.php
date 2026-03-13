@@ -135,23 +135,27 @@ class FmsPlugin implements Plugin
 
     public static function canSeeTenantSubscription(): bool
     {
-        if (!auth()->check()) {
+        try {
+            if (!auth()->check()) {
+                return false;
+            }
+
+            $tenant = FmsPlugin::getTenant();
+
+            if ($tenant === null) {
+                return false;
+            }
+
+            $auth = auth()->user();
+
+            return cache()->store('file')->remember(
+                'tenant_subscription_nav_' . $auth->id . '_' . $tenant->id,
+                now()->addMinutes(60),
+                fn() => $tenant->admins()->where('users.id', $auth->id)->exists()
+            );
+        } catch (\Throwable) {
             return false;
         }
-
-        $tenant = FmsPlugin::getTenant();
-
-        if ($tenant === null) {
-            return false;
-        }
-
-        $auth = auth()->user();
-
-        return cache()->store('file')->remember(
-            'tenant_subscription_nav_' . $auth->id . '_' . $tenant->id,
-            now()->addMinutes(60),
-            fn() => $tenant->admins()->where('users.id', $auth->id)->exists()
-        );
     }
 
     public function subscriptionPageInTenantMenu(bool | Closure $condition = true): static
