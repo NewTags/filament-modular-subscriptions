@@ -482,6 +482,9 @@ return [
         'cash' => 'نقدي',
         'paypal' => 'باي بال',
         'stripe' => 'سترايب',
+        'visa' => 'فيزا',
+        'mastercard' => 'ماستركارد',
+        'paddle' => 'بادل',
     ],
     'invoice_status' => [
         'paid' => 'مدفوع',

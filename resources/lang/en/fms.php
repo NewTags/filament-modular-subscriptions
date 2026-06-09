@@ -481,6 +481,9 @@ return [
         'cash' => 'Cash',
         'paypal' => 'PayPal',
         'stripe' => 'Stripe',
+        'visa' => 'Visa',
+        'mastercard' => 'Mastercard',
+        'paddle' => 'Paddle',
     ],
     'invoice_status' => [
         'paid' => 'Paid',
