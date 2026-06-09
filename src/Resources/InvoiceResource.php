@@ -427,7 +427,137 @@ class InvoiceResource extends Resource
                         return $schema;
                     }),
             ])
+            ->headerActions([
+                self::createManualInvoiceAction(),
+            ])
             ->bulkActions([]);
+    }
+
+    public static function createManualInvoiceAction(): Action
+    {
+        return Action::make('create_manual_invoice')
+            ->label(__('filament-modular-subscriptions::fms.invoice.create_manual_invoice'))
+            ->icon('heroicon-o-plus')
+            ->color('primary')
+            ->modalWidth('4xl')
+            ->modalHeading(__('filament-modular-subscriptions::fms.invoice.create_manual_invoice'))
+            ->visible(fn (): bool => ! FmsPlugin::get()->isOnTenantPanel())
+            ->form([
+                Grid::make(2)->schema([
+                    \Filament\Forms\Components\Select::make('tenant_id')
+                        ->label(__('filament-modular-subscriptions::fms.invoice.subscriber'))
+                        ->options(fn (): array => config('filament-modular-subscriptions.tenant_model')::query()
+                            ->orderBy(config('filament-modular-subscriptions.tenant_attribute'))
+                            ->pluck(config('filament-modular-subscriptions.tenant_attribute'), 'id')
+                            ->all())
+                        ->searchable()
+                        ->preload()
+                        ->live()
+                        ->required()
+                        ->afterStateUpdated(fn (\Filament\Forms\Set $set) => $set('subscription_id', null)),
+                    \Filament\Forms\Components\Select::make('subscription_id')
+                        ->label(__('filament-modular-subscriptions::fms.invoice.subscription'))
+                        ->options(function (\Filament\Forms\Get $get): array {
+                            if (! $get('tenant_id')) {
+                                return [];
+                            }
+
+                            return config('filament-modular-subscriptions.models.subscription')::query()
+                                ->where('subscribable_id', $get('tenant_id'))
+                                ->with('plan')
+                                ->latest()
+                                ->get()
+                                ->mapWithKeys(fn ($subscription): array => [
+                                    $subscription->id => ($subscription->plan?->trans_name ?? __('filament-modular-subscriptions::fms.invoice.subscription')) . ' — #' . $subscription->id,
+                                ])
+                                ->all();
+                        })
+                        ->required()
+                        ->live()
+                        ->disabled(fn (\Filament\Forms\Get $get): bool => ! $get('tenant_id'))
+                        ->helperText(__('filament-modular-subscriptions::fms.invoice.manual_invoice_subscription_hint')),
+                ]),
+                \Filament\Forms\Components\Repeater::make('items')
+                    ->label(__('filament-modular-subscriptions::fms.invoice.items'))
+                    ->schema([
+                        TextInput::make('description')
+                            ->label(__('filament-modular-subscriptions::fms.invoice.description'))
+                            ->required()
+                            ->columnSpan(2),
+                        TextInput::make('quantity')
+                            ->label(__('filament-modular-subscriptions::fms.invoice.quantity'))
+                            ->numeric()
+                            ->default(1)
+                            ->minValue(1)
+                            ->required()
+                            ->live(onBlur: true),
+                        TextInput::make('unit_price')
+                            ->label(__('filament-modular-subscriptions::fms.invoice.unit_price'))
+                            ->numeric()
+                            ->minValue(0)
+                            ->required()
+                            ->live(onBlur: true)
+                            ->suffix(config('filament-modular-subscriptions.main_currency')),
+                    ])
+                    ->columns(4)
+                    ->defaultItems(1)
+                    ->minItems(1)
+                    ->required()
+                    ->addActionLabel(__('filament-modular-subscriptions::fms.invoice.add_item')),
+                Grid::make(2)->schema([
+                    TextInput::make('tax_percentage')
+                        ->label(__('filament-modular-subscriptions::fms.invoice.tax_percentage'))
+                        ->numeric()
+                        ->default(config('filament-modular-subscriptions.tax_percentage', 15))
+                        ->minValue(0)
+                        ->maxValue(100)
+                        ->suffix('%')
+                        ->required(),
+                    DatePicker::make('due_date')
+                        ->label(__('filament-modular-subscriptions::fms.invoice.due_date'))
+                        ->default(now()->addDays(7))
+                        ->required(),
+                ]),
+                Placeholder::make('manual_invoice_total')
+                    ->label(__('filament-modular-subscriptions::fms.invoice.total_with_tax'))
+                    ->content(function (\Filament\Forms\Get $get): HtmlString {
+                        $subtotal = collect($get('items') ?? [])
+                            ->sum(fn ($item): float => (float) ($item['quantity'] ?? 0) * (float) ($item['unit_price'] ?? 0));
+                        $tax = round($subtotal * ((float) $get('tax_percentage') / 100), 2);
+                        $currency = config('filament-modular-subscriptions.main_currency');
+
+                        return new HtmlString(
+                            '<span class="text-base font-semibold">' . number_format($subtotal + $tax, 2) . ' ' . e($currency) . '</span>'
+                            . '<span class="text-gray-500 text-sm"> (' . __('filament-modular-subscriptions::fms.invoice.subtotal') . ': ' . number_format($subtotal, 2) . ' + ' . __('filament-modular-subscriptions::fms.invoice.vat') . ': ' . number_format($tax, 2) . ')</span>'
+                        );
+                    }),
+            ])
+            ->action(function (array $data): void {
+                $subscription = config('filament-modular-subscriptions.models.subscription')::query()
+                    ->whereKey($data['subscription_id'])
+                    ->first();
+
+                if (! $subscription) {
+                    Notification::make()
+                        ->danger()
+                        ->title(__('filament-modular-subscriptions::fms.invoice.manual_invoice_subscription_required'))
+                        ->send();
+
+                    return;
+                }
+
+                $invoice = app(\NewTags\FilamentModularSubscriptions\Services\InvoiceService::class)->createManualInvoice(
+                    $subscription,
+                    $data['items'],
+                    (float) $data['tax_percentage'],
+                    filled($data['due_date']) ? \Illuminate\Support\Carbon::parse($data['due_date']) : null,
+                );
+
+                Notification::make()
+                    ->success()
+                    ->title(__('filament-modular-subscriptions::fms.invoice.manual_invoice_created', ['id' => $invoice->id]))
+                    ->send();
+            });
     }
 
     public static function downloadAction(): Action

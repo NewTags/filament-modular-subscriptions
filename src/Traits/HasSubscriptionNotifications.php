@@ -29,7 +29,7 @@ trait HasSubscriptionNotifications
         $this->notifyAdminsUsing($action, $additionalData, $url);
     }
 
-    public function notifyAdminsUsing(string $action, array $additionalData = [], string $url = null): void
+    public function notifyAdminsUsing(string $action, array $additionalData = [], ?string $url = null): void
     {
         $users = $this->getTenantAdminsUsing()?->get();
         if (! $users) {
@@ -56,7 +56,7 @@ trait HasSubscriptionNotifications
             ->role('super_admin');
     }
 
-    public function notifySuperAdmins(string $action, array $additionalData = [], string $url = null): void
+    public function notifySuperAdmins(string $action, array $additionalData = [], ?string $url = null): void
     {
         $users = $this->getSuperAdminsQuery()->get();
         $data = array_merge([
@@ -124,7 +124,7 @@ trait HasSubscriptionNotifications
 
         return [
             'tenant' => $this->name,
-            'plan' => $plan?->name ?? 'N/A',
+            'plan' => $plan?->trans_name ?? 'N/A',
             'start_date' => $subscription?->starts_at?->format('Y-m-d') ?? now()->format('Y-m-d'),
             'end_date' => $subscription?->ends_at?->format('Y-m-d') ?? 'N/A',
             'currency' => $plan?->currency ?? 'USD',

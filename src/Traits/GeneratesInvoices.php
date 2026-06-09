@@ -13,7 +13,7 @@ use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
 
 trait GeneratesInvoices
 {
-    private function createInvoice(Subscription $subscription, Carbon $dueDate = null): Invoice
+    private function createInvoice(Subscription $subscription, ?Carbon $dueDate = null): Invoice
     {
         $dueDate = $dueDate ?? now()->addDays($subscription->plan->period_grace);
         return $this->invoiceModel::create([

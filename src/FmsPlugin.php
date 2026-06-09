@@ -131,7 +131,49 @@ class FmsPlugin implements Plugin
         }
     }
 
-    public function boot(Panel $panel): void {}
+    public function boot(Panel $panel): void
+    {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_END,
+            fn (): string => self::renderCurrencyFontStyles(),
+        );
+    }
+
+    /**
+     * Inline the Saudi Riyal symbol font so the U+E900 glyph renders inside the
+     * panel (admin included) without an asset-publish step. The font only carries
+     * the riyal glyph, so it is added as a fallback after the panel's own font.
+     */
+    public static function renderCurrencyFontStyles(): string
+    {
+        static $style = null;
+
+        if ($style !== null) {
+            return $style;
+        }
+
+        $fontPath = __DIR__ . '/../public/fonts/saudi_riyal/saudi_riyal.woff2';
+
+        if (! is_file($fontPath)) {
+            return $style = '';
+        }
+
+        $base64 = base64_encode((string) file_get_contents($fontPath));
+
+        return $style = <<<HTML
+            <style>
+                @font-face {
+                    font-family: 'SaudiRiyal';
+                    src: url(data:font/woff2;base64,{$base64}) format('woff2');
+                    font-weight: normal;
+                    font-style: normal;
+                    font-display: swap;
+                }
+                .fi-body * { font-family: var(--font-family), 'SaudiRiyal', sans-serif; }
+                .fms-money { font-family: 'SaudiRiyal', sans-serif; }
+            </style>
+            HTML;
+    }
 
     public static function canSeeTenantSubscription(): bool
     {
