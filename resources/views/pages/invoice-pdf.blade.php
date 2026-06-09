@@ -148,7 +148,7 @@
                 </td>
                 <td colspan="2">
                     <strong>{{ $user['name'] ?? '' }}</strong><br />
-                    {{ __('filament-modular-subscriptions::fms.invoice.address') }}:{{ $user['customerInfo']['address'] ?? '—' }}<br />
+                    {{ __('filament-modular-subscriptions::fms.invoice.address') }}: {{ $user['customerInfo']['address'] ?? '—' }}<br />
                     {{ __('filament-modular-subscriptions::fms.invoice.tax_number') }}: {{ $user['customerInfo']['vat_no'] ?? '—' }}
                 </td>
             </tr>
