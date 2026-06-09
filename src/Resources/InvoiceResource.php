@@ -78,9 +78,12 @@ class InvoiceResource extends Resource
 
         return $table
             ->modifyQueryUsing(function ($query) {
-                $tenant = FmsPlugin::getTenant();
-                if ($tenant) {
-                    $query->where('tenant_id', $tenant->id);
+                // Scope to a tenant only on tenant panels; the admin panel must list every invoice even if the host app resolves a non-null placeholder tenant.
+                if (FmsPlugin::get()->isOnTenantPanel()) {
+                    $tenant = FmsPlugin::getTenant();
+                    if ($tenant) {
+                        $query->where('tenant_id', $tenant->id);
+                    }
                 }
 
                 return $query->with([
