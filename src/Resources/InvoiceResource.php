@@ -477,6 +477,24 @@ class InvoiceResource extends Resource
                         })
                         ->required()
                         ->live()
+                        ->afterStateUpdated(function ($state, \Filament\Forms\Set $set): void {
+                            if (! $state) {
+                                return;
+                            }
+
+                            $subscription = config('filament-modular-subscriptions.models.subscription')::query()
+                                ->with('plan.modules')
+                                ->find($state);
+
+                            if (! $subscription) {
+                                return;
+                            }
+
+                            $items = app(\NewTags\FilamentModularSubscriptions\Services\InvoiceService::class)
+                                ->previewInvoiceItems($subscription);
+
+                            $set('items', $items !== [] ? $items : [['description' => null, 'quantity' => 1, 'unit_price' => null]]);
+                        })
                         ->disabled(fn (\Filament\Forms\Get $get): bool => ! $get('tenant_id'))
                         ->helperText(__('filament-modular-subscriptions::fms.invoice.manual_invoice_subscription_hint')),
                 ]),

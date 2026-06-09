@@ -2,22 +2,24 @@
 
 namespace NewTags\FilamentModularSubscriptions\Services;
 
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use NewTags\FilamentModularSubscriptions\Events\InvoiceGenerated;
 use NewTags\FilamentModularSubscriptions\Models\Invoice;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use NewTags\FilamentModularSubscriptions\Traits\GeneratesInvoices;
 use NewTags\FilamentModularSubscriptions\Traits\ManagesSubscriptions;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
-use NewTags\FilamentModularSubscriptions\Models\Module;
 
 class InvoiceService
 {
-    use GeneratesInvoices, ManagesSubscriptions;
+    use GeneratesInvoices;
+    use ManagesSubscriptions;
 
     private string $invoiceModel;
+
     private string $invoiceItemModel;
+
     private float $taxPercentage;
 
     public function __construct()
@@ -46,7 +48,7 @@ class InvoiceService
     public function generateInitialPlanInvoice($tenant, $plan): Invoice
     {
         return DB::transaction(function () use ($tenant, $plan) {
-            if (!$tenant->subscription) {
+            if (! $tenant->subscription) {
                 $subscription = $this->createInitialSubscription($tenant, $plan);
             } else {
                 $subscription = $tenant->subscription;
@@ -63,6 +65,62 @@ class InvoiceService
 
             return $invoice;
         });
+    }
+
+    /**
+     * Compute the line items the automatic invoice generation would produce for a
+     * subscription, without persisting anything. Used to pre-fill the manual invoice
+     * form so it mirrors how invoices are auto-calculated for academies.
+     *
+     * @return array<int, array{description: string, quantity: float|int, unit_price: float}>
+     */
+    public function previewInvoiceItems(Subscription $subscription): array
+    {
+        $plan = $subscription->plan;
+
+        if (! $plan) {
+            return [];
+        }
+
+        $items = [];
+
+        if ($plan->is_pay_as_you_go) {
+            $subscription->loadMissing('plan.modules');
+
+            foreach ($plan->modules as $module) {
+                $moduleInstance = $module->getInstance();
+                $usage = $moduleInstance->calculateUsage($subscription);
+                $unitPrice = $moduleInstance->getPrice($subscription);
+
+                if ($usage * $unitPrice > 0) {
+                    $items[] = [
+                        'description' => __('filament-modular-subscriptions::fms.invoice.module_usage', ['module' => $moduleInstance->getLabel()]),
+                        'quantity' => $usage,
+                        'unit_price' => round((float) $unitPrice, 2),
+                    ];
+                }
+            }
+        } else {
+            $items[] = [
+                'description' => __('filament-modular-subscriptions::fms.invoice.subscription_fee', ['plan' => $plan->trans_name, 'currency' => $plan->currency]),
+                'quantity' => 1,
+                'unit_price' => round((float) $plan->price, 2),
+            ];
+        }
+
+        $hasNoInvoicesYet = $subscription->invoices()
+            ->where('status', '!=', InvoiceStatus::CANCELLED)
+            ->doesntExist();
+
+        if ($hasNoInvoicesYet && $plan->setup_fee > 0) {
+            $items[] = [
+                'description' => __('filament-modular-subscriptions::fms.invoice.setup_fee'),
+                'quantity' => 1,
+                'unit_price' => round((float) $plan->setup_fee, 2),
+            ];
+        }
+
+        return $items;
     }
 
     /**
