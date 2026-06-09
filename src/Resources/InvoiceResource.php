@@ -457,7 +457,17 @@ class InvoiceResource extends Resource
                         ->preload()
                         ->live()
                         ->required()
-                        ->afterStateUpdated(fn (\Filament\Forms\Set $set) => $set('subscription_id', null)),
+                        ->afterStateUpdated(function ($state, \Filament\Forms\Set $set): void {
+                            $latest = $state
+                                ? config('filament-modular-subscriptions.models.subscription')::query()
+                                    ->where('subscribable_id', $state)
+                                    ->latest()
+                                    ->first()
+                                : null;
+
+                            $set('subscription_id', $latest?->id);
+                            self::fillManualInvoiceItems($latest?->id, $set);
+                        }),
                     \Filament\Forms\Components\Select::make('subscription_id')
                         ->label(__('filament-modular-subscriptions::fms.invoice.subscription'))
                         ->options(function (\Filament\Forms\Get $get): array {
@@ -477,24 +487,7 @@ class InvoiceResource extends Resource
                         })
                         ->required()
                         ->live()
-                        ->afterStateUpdated(function ($state, \Filament\Forms\Set $set): void {
-                            if (! $state) {
-                                return;
-                            }
-
-                            $subscription = config('filament-modular-subscriptions.models.subscription')::query()
-                                ->with('plan.modules')
-                                ->find($state);
-
-                            if (! $subscription) {
-                                return;
-                            }
-
-                            $items = app(\NewTags\FilamentModularSubscriptions\Services\InvoiceService::class)
-                                ->previewInvoiceItems($subscription);
-
-                            $set('items', $items !== [] ? $items : [['description' => null, 'quantity' => 1, 'unit_price' => null]]);
-                        })
+                        ->afterStateUpdated(fn ($state, \Filament\Forms\Set $set) => self::fillManualInvoiceItems($state, $set))
                         ->disabled(fn (\Filament\Forms\Get $get): bool => ! $get('tenant_id'))
                         ->helperText(__('filament-modular-subscriptions::fms.invoice.manual_invoice_subscription_hint')),
                 ]),
@@ -581,6 +574,26 @@ class InvoiceResource extends Resource
             });
     }
 
+    protected static function fillManualInvoiceItems($subscriptionId, \Filament\Forms\Set $set): void
+    {
+        if (! $subscriptionId) {
+            return;
+        }
+
+        $subscription = config('filament-modular-subscriptions.models.subscription')::query()
+            ->with('plan.modules')
+            ->find($subscriptionId);
+
+        if (! $subscription) {
+            return;
+        }
+
+        $items = app(\NewTags\FilamentModularSubscriptions\Services\InvoiceService::class)
+            ->previewInvoiceItems($subscription);
+
+        $set('items', $items !== [] ? $items : [['description' => null, 'quantity' => 1, 'unit_price' => null]]);
+    }
+
     public static function downloadAction(): Action
     {
         return Action::make('download')
@@ -601,12 +614,20 @@ class InvoiceResource extends Resource
                     new \Salla\ZATCA\Tags\InvoiceTaxAmount($record->tax),
                 ])->render();
 
+                // Resolve the company logo to a base64 data URI (config may hold an
+                // absolute path or one relative to public/); embedding avoids mPDF path issues.
+                $logoSource = (string) config('filament-modular-subscriptions.company_logo');
+                $logoPath = is_file($logoSource) ? $logoSource : public_path($logoSource);
+                $companyLogo = is_file($logoPath)
+                    ? 'data:' . ((function_exists('mime_content_type') ? mime_content_type($logoPath) : null) ?: 'image/png') . ';base64,' . base64_encode((string) file_get_contents($logoPath))
+                    : null;
+
                 // Get view data with additional tax information
                 $data = [
                     'invoice' => $record,
                     'QrCode' => $QrCode,
                     'user' => ResolvesCustomerInfo::take($record->tenant),
-                    'company_logo' => public_path(config('filament-modular-subscriptions.company_logo')),
+                    'company_logo' => $companyLogo,
                     'tax_percentage' => $taxPercentage,
                     'total_before_tax' => $totalBeforeTax,
                     'tax_amount' => $taxAmount,

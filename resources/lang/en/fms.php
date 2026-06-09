@@ -440,6 +440,11 @@ return [
         'no_items' => 'No items',
         'tax_invoice' => 'Tax Invoice',
         'from' => 'From',
+        'address' => 'Address',
+        'payment_summary' => 'Payment Summary',
+        'total_amount' => 'Total Amount',
+        'paid_amount' => 'Paid Amount',
+        'remaining_amount' => 'Remaining Amount',
     ],
     'payment' => [
         'select_method' => 'Select Payment Method',

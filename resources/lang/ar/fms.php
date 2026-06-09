@@ -441,6 +441,11 @@ return [
         'no_items' => 'لا توجد بنود',
         'tax_invoice' => 'فاتورة ضريبية',
         'from' => 'من',
+        'address' => 'العنوان',
+        'payment_summary' => 'ملخص الدفع',
+        'total_amount' => 'المبلغ الإجمالي',
+        'paid_amount' => 'المبلغ المدفوع',
+        'remaining_amount' => 'المبلغ المتبقي',
     ],
     'payment' => [
         'select_method' => 'اختر طريقة الدفع',
