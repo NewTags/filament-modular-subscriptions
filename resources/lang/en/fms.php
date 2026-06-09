@@ -436,6 +436,10 @@ return [
         'manual_invoice_subscription_hint' => 'The invoice will be issued to this academy and linked to the selected subscription.',
         'manual_invoice_subscription_required' => 'Please select a valid subscription.',
         'manual_invoice_created' => 'Invoice #:id created successfully.',
+        'paid_at' => 'Paid At',
+        'no_items' => 'No items',
+        'tax_invoice' => 'Tax Invoice',
+        'from' => 'From',
     ],
     'payment' => [
         'select_method' => 'Select Payment Method',

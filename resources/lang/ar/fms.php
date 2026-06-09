@@ -437,6 +437,10 @@ return [
         'manual_invoice_subscription_hint' => 'سيتم إصدار الفاتورة لهذه الأكاديمية وربطها بالاشتراك المحدد.',
         'manual_invoice_subscription_required' => 'يرجى اختيار اشتراك صحيح.',
         'manual_invoice_created' => 'تم إنشاء الفاتورة رقم :id بنجاح.',
+        'paid_at' => 'تاريخ الدفع',
+        'no_items' => 'لا توجد بنود',
+        'tax_invoice' => 'فاتورة ضريبية',
+        'from' => 'من',
     ],
     'payment' => [
         'select_method' => 'اختر طريقة الدفع',
