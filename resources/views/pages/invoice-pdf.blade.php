@@ -4,8 +4,6 @@
     $rate = ((float) $taxPercentage) / 100;
     $subtotal = $total_before_tax ?? $invoice->subtotal;
     $taxValue = $tax_amount ?? $invoice->tax;
-    $remaining = (float) $invoice->remaining_amount;
-    $paid = max(0, round((float) $invoice->amount - $remaining, 2));
 
     $money = fn ($value) => number_format((float) $value, 2) . ' <span class="money">' . e($currency) . '</span>';
 
@@ -94,7 +92,7 @@
             <col style="width: 33.33%;">
             <col style="width: 33.33%;">
         </colgroup>
-        <tr style="height: 110px;">
+        <tr style="height: 80px;">
             <td style="text-align: left; vertical-align: middle; padding: 8px 4px;">
                 <span class="status-badge" style="background-color: {{ $colors['bg'] }}; color: {{ $colors['text'] }};">
                     {{ $invoice->status->getLabel() }}
@@ -107,7 +105,7 @@
             </td>
             <td style="text-align: right; vertical-align: middle; padding: 8px 4px;">
                 @if (!empty($company_logo))
-                    <img src="{{ $company_logo }}" alt="" style="max-width: 100%; max-height: 96px; height: auto;">
+                    <img src="{{ $company_logo }}" alt="" style="max-height: 48px; max-width: 150px; height: auto;">
                 @else
                     <span style="font-size: 13pt; font-weight: bold;">{{ config('filament-modular-subscriptions.company_name') }}</span>
                 @endif
@@ -212,34 +210,6 @@
                 <td>{{ __('filament-modular-subscriptions::fms.invoice.total_with_tax') }}</td>
                 <td>{!! $money($invoice->amount) !!}</td>
                 <td class="ltr">Total (Tax Included)</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <br />
-
-    {{-- Payment summary --}}
-    <table class="section" cellpadding="6">
-        <thead>
-            <tr>
-                <th colspan="3">{{ __('filament-modular-subscriptions::fms.invoice.payment_summary') }} | Payment Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ __('filament-modular-subscriptions::fms.invoice.total_amount') }}</td>
-                <td>{!! $money($invoice->amount) !!}</td>
-                <td class="ltr">Total Amount</td>
-            </tr>
-            <tr>
-                <td>{{ __('filament-modular-subscriptions::fms.invoice.paid_amount') }}</td>
-                <td>{!! $money($paid) !!}</td>
-                <td class="ltr">Paid Amount</td>
-            </tr>
-            <tr style="background-color: {{ $remaining > 0 ? '#fee2e2' : '#dcfce7' }}; font-weight: bold;">
-                <td>{{ __('filament-modular-subscriptions::fms.invoice.remaining_amount') }}</td>
-                <td>{!! $money($remaining) !!}</td>
-                <td class="ltr">Remaining Amount</td>
             </tr>
         </tbody>
     </table>
