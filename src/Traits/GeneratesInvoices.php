@@ -120,7 +120,7 @@ trait GeneratesInvoices
                     'total' => $total,
                 ]);
 
-                if (!$module->not_persistent) {
+                if (! $module->is_persistent) {
                     $subscription->moduleUsages()->where('module_id', $module->id)->delete();
                 }
             }

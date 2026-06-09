@@ -34,11 +34,11 @@ trait HasTrialSubscription
     public function trialDaysLeft(): int
     {
         if ($this->onTrial()) {
-            return (int) $this->activeSubscription()->trial_ends_at->diffInDays(now());
+            return (int) round(now()->diffInDays($this->activeSubscription()->trial_ends_at, false));
         }
 
         if ($this->onGenericTrial()) {
-            return $this->trial_ends_at->diffInDays(now());
+            return (int) round(now()->diffInDays($this->trial_ends_at, false));
         }
 
         return 0;

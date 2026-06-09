@@ -93,10 +93,12 @@ class InvoiceResource extends Resource
                     'tenant',
                 ]);
             })
+            ->defaultSort('created_at', 'desc')
             ->columns([
 
                 Tables\Columns\TextColumn::make('subscription.subscriber.name')
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subscription_id'))
+                    ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('subtotal')
@@ -217,10 +219,12 @@ class InvoiceResource extends Resource
                                             ->label(__('filament-modular-subscriptions::fms.resources.payment.payment_method'))
                                             ->required()
                                             ->inline()
-                                            ->options([
-                                                'online' => __('filament-modular-subscriptions::fms.resources.payment.methods.online'),
+                                            ->options(array_filter([
+                                                'online' => config('filament-modular-subscriptions.online_payment_enabled', false)
+                                                    ? __('filament-modular-subscriptions::fms.resources.payment.methods.online')
+                                                    : null,
                                                 'local' => __('filament-modular-subscriptions::fms.resources.payment.methods.local'),
-                                            ])
+                                            ]))
                                             ->default('local')
                                             ->icons([
                                                 'local' => 'heroicon-o-banknotes',
@@ -349,6 +353,7 @@ class InvoiceResource extends Resource
                                     FileUpload::make('receipt_file')
                                         ->required()
                                         ->maxSize(5120)
+                                        ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp', 'application/pdf'])
                                         ->directory('payment-receipts')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.receipt_file'))
                                         ->helperText(__('filament-modular-subscriptions::fms.resources.payment.receipt_help_text')),
@@ -609,9 +614,9 @@ class InvoiceResource extends Resource
                 $QrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
                     new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
                     new \Salla\ZATCA\Tags\TaxNumber(config('filament-modular-subscriptions.tax_number')),
-                    new \Salla\ZATCA\Tags\InvoiceDate($record->created_at),
-                    new \Salla\ZATCA\Tags\InvoiceTotalAmount($record->amount), // Total with tax
-                    new \Salla\ZATCA\Tags\InvoiceTaxAmount($record->tax),
+                    new \Salla\ZATCA\Tags\InvoiceDate($record->created_at->utc()->format('Y-m-d\TH:i:s\Z')),
+                    new \Salla\ZATCA\Tags\InvoiceTotalAmount(number_format((float) $record->amount, 2, '.', '')), // Total with tax
+                    new \Salla\ZATCA\Tags\InvoiceTaxAmount(number_format((float) $record->tax, 2, '.', '')),
                 ])->render();
 
                 // Resolve the company logo to a base64 data URI (config may hold an

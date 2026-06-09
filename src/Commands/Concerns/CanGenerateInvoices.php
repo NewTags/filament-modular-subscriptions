@@ -136,6 +136,7 @@ trait CanGenerateInvoices
         if ($plan->fixed_invoice_day && $today->day == $plan->fixed_invoice_day) {
             return !$subscription->invoices()
                 ->whereMonth('created_at', $today->month)
+                ->whereYear('created_at', $today->year)
                 ->exists();
         }
 

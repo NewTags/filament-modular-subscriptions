@@ -43,7 +43,7 @@ return [
         'subscription_log' => 'fms_subscription_logs',
     ],
  
-    'main_currency' => 'USD',
+    'main_currency' => 'SAR',
     'translatable' => true,
     'locales' => [
         'en' => 'English',
@@ -51,6 +51,8 @@ return [
     ],
     'sends_invoice_email' => false,
     'payment_enabled' => false,
+    // Set true only once a real online gateway (Stripe/PayPal) is wired up; otherwise only bank transfer is offered.
+    'online_payment_enabled' => false,
     'payment_methods' => [
         'paypal' => [
             'enabled' => env('PAYPAL_ENABLED', false),

@@ -72,6 +72,10 @@ class Invoice extends Model
 
     public function notPaid(): bool
     {
+        if ($this->status === InvoiceStatus::CANCELLED || $this->status === InvoiceStatus::REFUNDED) {
+            return false;
+        }
+
         $totalPayments = $this->payments()->where('status', PaymentStatus::PAID)->sum('amount');
 
         return $this->status === InvoiceStatus::UNPAID || $this->status === InvoiceStatus::PARTIALLY_PAID || $totalPayments < $this->amount;

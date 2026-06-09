@@ -61,9 +61,11 @@ class PaymentResource extends Resource
     {
         return $table
             ->modifyQueryUsing(fn ($query) => $query->with(['invoice.subscription.subscribable', 'invoice.subscription.plan', 'reviewer']))
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('invoice.subscription.subscribable.name')
                     ->sortable()
+                    ->searchable()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.subscriber')),
                 Tables\Columns\TextColumn::make('amount')
                     ->prefix(fn($record) =>  config('filament-modular-subscriptions.main_currency'))
@@ -95,6 +97,9 @@ class PaymentResource extends Resource
             ])
 
             ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->options(PaymentStatus::class)
+                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.status')),
                 Tables\Filters\Filter::make('created_at')
                     ->columns(2)
                     ->form([
@@ -258,7 +263,7 @@ class PaymentResource extends Resource
                     ])
                     ->action(function ($record, array $data) {
                         $record->update([
-                            'status' => PaymentStatus::CANCELLED,
+                            'status' => PaymentStatus::REJECTED,
                             'admin_notes' => $data['admin_notes'],
                             'reviewed_at' => now(),
                             'reviewed_by' => auth()->id(),
@@ -281,7 +286,7 @@ class PaymentResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.actions.undo'))
                     ->color('warning')
                     ->icon('heroicon-o-arrow-uturn-left')
-                    ->visible(fn($record) => in_array($record->status, [PaymentStatus::PAID, PaymentStatus::CANCELLED]))
+                    ->visible(fn($record) => in_array($record->status, [PaymentStatus::PAID, PaymentStatus::CANCELLED, PaymentStatus::REJECTED]))
                     ->requiresConfirmation()
                     ->action(function ($record) {
                         DB::transaction(function () use ($record) {

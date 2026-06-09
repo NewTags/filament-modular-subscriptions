@@ -22,6 +22,7 @@ trait ManagesSubscriptions
         if ($plan->fixed_invoice_day > 0) {
             return $subscription->invoices()
                 ->whereMonth('created_at', $today->month)
+                ->whereYear('created_at', $today->year)
                 ->exists();
         }
 

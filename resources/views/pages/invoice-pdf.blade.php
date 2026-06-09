@@ -1,7 +1,6 @@
 @php
     $currency = config('filament-modular-subscriptions.main_currency');
     $taxPercentage = $tax_percentage ?? config('filament-modular-subscriptions.tax_percentage', 15);
-    $rate = ((float) $taxPercentage) / 100;
     $subtotal = $total_before_tax ?? $invoice->subtotal;
     $taxValue = $tax_amount ?? $invoice->tax;
 
@@ -120,8 +119,8 @@
             <th>{{ $invoice->id }}</th>
             <th class="ltr">Invoice #:</th>
             <th>{{ __('filament-modular-subscriptions::fms.invoice.date') }}</th>
-            <th>{{ $invoice->created_at->format('Y/m/d') }}</th>
-            <th class="ltr">Date:</th>
+            <th>{{ $invoice->created_at->format('Y/m/d H:i') }}</th>
+            <th class="ltr">Date &amp; time:</th>
         </tr>
     </table>
 
@@ -155,32 +154,25 @@
 
     <br />
 
-    {{-- Items --}}
+    {{-- Items (amounts shown excluding VAT; VAT is applied once in the totals) --}}
     <table class="section" cellpadding="6">
         <thead>
             <tr>
                 <th width="8%">#</th>
-                <th width="34%">{{ __('filament-modular-subscriptions::fms.invoice.description') }} | Description</th>
+                <th width="40%">{{ __('filament-modular-subscriptions::fms.invoice.description') }} | Description</th>
                 <th width="10%">{{ __('filament-modular-subscriptions::fms.invoice.quantity') }} | Qty</th>
-                <th width="18%">{{ __('filament-modular-subscriptions::fms.invoice.subtotal') }} | Subtotal</th>
-                <th width="12%">{{ __('filament-modular-subscriptions::fms.invoice.vat') }} | Tax</th>
-                <th width="18%">{{ __('filament-modular-subscriptions::fms.invoice.total') }} | Total</th>
+                <th width="20%">{{ __('filament-modular-subscriptions::fms.invoice.unit_price') }} | Unit Price</th>
+                <th width="22%">{{ __('filament-modular-subscriptions::fms.invoice.subtotal') }} | Amount</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($invoice->items as $item)
-                @php
-                    $lineSubtotal = (float) $item->total;
-                    $lineTax = round($lineSubtotal * $rate, 2);
-                    $lineTotal = $lineSubtotal + $lineTax;
-                @endphp
                 <tr>
                     <td style="text-align: center;">{{ $loop->iteration }}</td>
                     <td>{{ $item->description }}</td>
                     <td style="text-align: center;">{{ (int) $item->quantity }}</td>
-                    <td>{!! $money($lineSubtotal) !!}</td>
-                    <td>{!! $money($lineTax) !!}</td>
-                    <td>{!! $money($lineTotal) !!}</td>
+                    <td>{!! $money($item->unit_price) !!}</td>
+                    <td>{!! $money($item->total) !!}</td>
                 </tr>
             @endforeach
         </tbody>

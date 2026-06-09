@@ -25,6 +25,8 @@ class Subscription extends Model
         'ends_at',
         'trial_ends_at',
         'status',
+        'has_used_trial',
+        'metadata',
     ];
 
     public function getTable()

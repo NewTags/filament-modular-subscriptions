@@ -22,6 +22,7 @@ class Plan extends Model
         'description',
         'is_active',
         'price',
+        'setup_fee',
         'currency',
         'trial_period',
         'trial_interval',
