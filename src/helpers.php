@@ -6,10 +6,16 @@ if (! function_exists('clear_fms_cache')) {
     function clear_fms_cache(): bool
     {
         try {
-            FmsPlugin::getTenant()->clearFmsCache();
+            $tenant = FmsPlugin::getTenant();
+
+            if (! $tenant) {
+                return false;
+            }
+
+            $tenant->clearFmsCache();
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             report($e);
 
             return false;
@@ -21,10 +27,16 @@ if (! function_exists('clear_fms_module_cache')) {
     function clear_fms_module_cache(string $moduleClass): bool
     {
         try {
-            Cache::forget(FmsPlugin::getTenant()->getCacheKey($moduleClass));
+            $tenant = FmsPlugin::getTenant();
+
+            if (! $tenant) {
+                return false;
+            }
+
+            Cache::forget($tenant->getCacheKey($moduleClass));
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             report($e);
 
             return false;

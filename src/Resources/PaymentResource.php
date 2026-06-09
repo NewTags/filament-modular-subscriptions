@@ -60,6 +60,7 @@ class PaymentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with(['invoice.subscription.subscribable', 'invoice.subscription.plan', 'reviewer']))
             ->columns([
                 Tables\Columns\TextColumn::make('invoice.subscription.subscribable.name')
                     ->sortable()
@@ -149,6 +150,8 @@ class PaymentResource extends Resource
                     ])
                     ->action(function ($record, array $data) {
                         DB::transaction(function () use ($record, $data) {
+                            $invoice = $record->invoice()->lockForUpdate()->first();
+
                             $record->update([
                                 'status' => PaymentStatus::PAID,
                                 'admin_notes' => $data['admin_notes'],
@@ -156,7 +159,6 @@ class PaymentResource extends Resource
                                 'reviewed_by' => auth()->id(),
                             ]);
 
-                            $invoice = $record->invoice;
                             $subscription = $invoice->subscription;
                             $totalPaid = $invoice->payments()
                                 ->where('status', PaymentStatus::PAID)

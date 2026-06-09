@@ -15,6 +15,8 @@ class Invoice extends Model
         'subscription_id',
         'tenant_id',
         'amount',
+        'subtotal',
+        'tax',
         'status',
         'due_date',
         'paid_at',
@@ -43,7 +45,7 @@ class Invoice extends Model
                 $totalAmount = $this->amount;
                 $remaining = $totalAmount - $totalPayments;
 
-                return number_format($remaining, 2);
+                return round($remaining, 2);
             }
         );
     }
@@ -72,12 +74,12 @@ class Invoice extends Model
     {
         $totalPayments = $this->payments()->where('status', PaymentStatus::PAID)->sum('amount');
 
-        return $this->status === PaymentStatus::UNPAID || $this->status === PaymentStatus::PARTIALLY_PAID || $this->status === PaymentStatus::PENDING || $totalPayments < $this->amount;
+        return $this->status === InvoiceStatus::UNPAID || $this->status === InvoiceStatus::PARTIALLY_PAID || $totalPayments < $this->amount;
     }
 
     public function paid(): bool
     {
-        return $this->status === PaymentStatus::PAID;
+        return $this->status === InvoiceStatus::PAID;
     }
 
 

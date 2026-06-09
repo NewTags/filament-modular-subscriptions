@@ -67,6 +67,7 @@ class ModuleUsageResource extends Resource
             ->heading(__('filament-modular-subscriptions::fms.resources.module_usage.name'))
             ->modelLabel(__('filament-modular-subscriptions::fms.resources.module_usage.singular_name'))
             ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.module_usage.name'))
+            ->modifyQueryUsing(fn ($query) => $query->with(['subscription.plan', 'module']))
             ->columns([
                 Tables\Columns\TextColumn::make('subscription.subscribable.name')
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.subscriber'))

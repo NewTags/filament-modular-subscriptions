@@ -344,9 +344,9 @@ trait Subscribable
     /**
      * Calculate the end date for a given plan.
      */
-    private function calculateEndDate(Plan $plan): Carbon
+    private function calculateEndDate(Plan $plan, ?int $days = null): Carbon
     {
-        return now()->addDays($plan->period);
+        return now()->addDays($days ?? $plan->period);
     }
 
 
@@ -534,7 +534,13 @@ trait Subscribable
 
     public function invoices(): HasMany
     {
-        return $this->subscription?->invoices();
+        $invoiceModel = config('filament-modular-subscriptions.models.invoice');
+
+        if (! $this->subscription) {
+            return $this->hasMany($invoiceModel, 'tenant_id')->whereRaw('1 = 0');
+        }
+
+        return $this->subscription->invoices();
     }
 
     public function unpaidInvoices(): HasMany

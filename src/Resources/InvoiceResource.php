@@ -25,6 +25,7 @@ use NewTags\FilamentModularSubscriptions\ResolvesCustomerInfo;
 use NewTags\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Str;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Infolists\Components\Fieldset as ComponentsFieldset;
@@ -242,7 +243,7 @@ class InvoiceResource extends Resource
                                                 Grid::make(2)
                                                     ->schema([
                                                         TextInput::make('amount')
-                                                            ->default(fn($record) => $record->remaining_amount)
+                                                            ->default(fn($record) => (float) $record->remaining_amount)
                                                             ->disabled()
                                                             ->numeric()
                                                             ->required()
@@ -336,12 +337,12 @@ class InvoiceResource extends Resource
                                         ->content(fn($record) => view('filament-modular-subscriptions::filament.components.bank-card'))
                                         ->columnSpanFull(),
                                     TextInput::make('amount')
-                                        ->default(fn($record) => $record->remaining_amount)
+                                        ->default(fn($record) => (float) $record->remaining_amount)
                                         ->numeric()
                                         ->required()
                                         ->suffix(fn($record) =>  config('filament-modular-subscriptions.main_currency'))
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
-                                        ->maxValue(fn($record) => $record->remaining_amount)
+                                        ->maxValue(fn($record) => (float) $record->remaining_amount)
                                         ->minValue(1),
                                     FileUpload::make('receipt_file')
                                         ->required()
@@ -370,7 +371,7 @@ class InvoiceResource extends Resource
                             'receipt_file' => $data['receipt_file'],
                             'payment_method' => PaymentMethod::BANK_TRANSFER,
                             'status' => PaymentStatus::PENDING,
-                            'transaction_id' => 'PAY-' . (string) uuid_create(),
+                            'transaction_id' => 'PAY-' . (string) Str::uuid(),
                             'metadata' => [
                                 'notes' => $data['notes'] ?? null,
                                 'submitted_by' => auth()->id(),
@@ -437,7 +438,7 @@ class InvoiceResource extends Resource
             ->action(function ($record) {
                 // Calculate tax amounts correctly
                 $taxPercentage = config('filament-modular-subscriptions.tax_percentage', 15);
-                $totalBeforeTax = $record->amount;
+                $totalBeforeTax = $record->subtotal;
                 $taxAmount = $record->tax;
 
 

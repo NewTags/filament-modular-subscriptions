@@ -157,6 +157,12 @@ trait CanGenerateInvoices
                 ->count();
         }
 
+        if ($subscription->status === SubscriptionStatus::ACTIVE) {
+            return !$subscription->invoices()
+                ->whereDate('created_at', $today->toDateString())
+                ->exists();
+        }
+
         return false;
     }
 
@@ -203,7 +209,7 @@ trait CanGenerateInvoices
             return;
         }
         
-        $daysOverdue = number_format(now()->diffInDays($invoice->due_date));
+        $daysOverdue = number_format($invoice->due_date->diffInDays(now(), true));
         $notificationData = [
             'invoice_id' => $invoice->id,
             'days' => $daysOverdue,

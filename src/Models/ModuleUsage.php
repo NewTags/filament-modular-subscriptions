@@ -14,7 +14,7 @@ class ModuleUsage extends Model
     protected $casts = [
         'calculated_at' => 'datetime',
         'usage' => 'integer',
-        'pricing' => 'float',
+        'pricing' => 'decimal:2',
     ];
 
     public function getTable()

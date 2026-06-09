@@ -14,7 +14,7 @@ trait ShouldHandleExpiredSubscriptions
             return;
         }
 
-        $daysUntilExpiry = $subscription->ends_at->diffInDays(now());
+        $daysUntilExpiry = now()->diffInDays($subscription->ends_at);
         
         // Only notify if within 5 days of expiry
         if ($daysUntilExpiry > config('filament-modular-subscriptions.notifications.subscription_near_expiry_days', 5)) {

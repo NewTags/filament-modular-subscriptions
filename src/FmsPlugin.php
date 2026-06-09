@@ -258,6 +258,9 @@ class FmsPlugin implements Plugin
 
     protected function generateModuleUsageAlerts($subscription, $tenant): array
     {
+        if (! $subscription->plan) {
+            return [];
+        }
         $alerts = [];
         $modules = $subscription->plan->modules;
         foreach ($modules as $module) {

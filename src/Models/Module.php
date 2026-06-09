@@ -77,7 +77,7 @@ class Module extends Model
 
     public function getPricing(Subscription $subscription): float
     {
-        return $this->getInstance()->getPricing($subscription);
+        return $this->getInstance()->getPrice($subscription);
     }
 
     public function canUse(Subscription $subscription): bool

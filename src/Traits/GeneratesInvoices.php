@@ -69,7 +69,7 @@ trait GeneratesInvoices
 
         $subscribable->notifySuperAdmins('invoice_generated', [
             'invoice_id' => $invoice->id,
-            'amount' => $invoice->total,
+            'amount' => $invoice->amount,
             'tenant' => $subscription->subscribable->name,
             'currency' =>  config('filament-modular-subscriptions.main_currency')
         ]);

@@ -37,6 +37,7 @@ class SubscriptionLogResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('subscription.subscribable'))
             ->columns([
                 TextColumn::make('subscription.subscribable.name')
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.subscription_id'))

@@ -15,6 +15,11 @@ class Payment extends Model
         'payment_method',
         'transaction_id',
         'status',
+        'receipt_file',
+        'admin_notes',
+        'reviewed_at',
+        'reviewed_by',
+        'metadata',
     ];
 
     protected $casts = [
@@ -22,6 +27,7 @@ class Payment extends Model
         'metadata' => 'array',
         'amount' => 'decimal:2',
         'payment_method' => PaymentMethod::class,
+        'reviewed_at' => 'datetime',
     ];
 
     public function getTable()
@@ -32,5 +38,10 @@ class Payment extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(config('auth.providers.users.model') ?? \App\Models\User::class, 'reviewed_by');
     }
 }

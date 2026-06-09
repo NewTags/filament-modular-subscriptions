@@ -19,9 +19,11 @@ class CreateSubscription extends CreateRecord
         $plan = config('filament-modular-subscriptions.models.plan')::findOrFail($data['plan_id']);
 
 
-        $tenant = FmsPlugin::getTenant();
+        $subscribable = ! empty($data['subscribable_id'])
+            ? config('filament-modular-subscriptions.tenant_model')::find($data['subscribable_id'])
+            : FmsPlugin::getTenant();
 
-        $record = $tenant->subscribe($plan);
+        $record = $subscribable->subscribe($plan);
 
         return $record;
     }

@@ -6,6 +6,7 @@ namespace NewTags\FilamentModularSubscriptions\Traits;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
@@ -139,26 +140,31 @@ trait HasSubscriptionModules
             throw new \InvalidArgumentException("Module {$moduleClass} not found");
         }
 
-        // Load or create module usage with a single query
-        $moduleUsage = $activeSubscription->moduleUsages()
-            ->where('module_id', $module->id)
-            ->firstOrCreate(
-                ['module_id' => $module->id],
-                [
-                    'usage' => 0,
-                    'calculated_at' => now(),
-                ]
-            );
+        DB::transaction(function () use ($activeSubscription, $module, $quantity, $incremental): void {
+            $activeSubscription->moduleUsages()
+                ->where('module_id', $module->id)
+                ->firstOrCreate(
+                    ['module_id' => $module->id],
+                    [
+                        'usage' => 0,
+                        'calculated_at' => now(),
+                    ]
+                );
 
-        // Update usage in a single query
-        $newUsage = $incremental ? $moduleUsage->usage + $quantity : $quantity;
-        $pricing = $this->calculateModulePricing($activeSubscription, $module, $newUsage);
+            $moduleUsage = $activeSubscription->moduleUsages()
+                ->where('module_id', $module->id)
+                ->lockForUpdate()
+                ->first();
 
-        $moduleUsage->updateQuietly([
-            'usage' => $newUsage,
-            'calculated_at' => now(),
-            'pricing' => $pricing,
-        ]);
+            $newUsage = $incremental ? $moduleUsage->usage + $quantity : $quantity;
+            $pricing = $this->calculateModulePricing($activeSubscription, $module, $newUsage);
+
+            $moduleUsage->updateQuietly([
+                'usage' => $newUsage,
+                'calculated_at' => now(),
+                'pricing' => $pricing,
+            ]);
+        });
 
         $this->clearFmsCache();
     }
@@ -261,7 +267,11 @@ trait HasSubscriptionModules
             ->first();
 
         if ($moduleUsage) {
-            $moduleUsage->decrement('usage', $quantity);
+            $decrementBy = min($moduleUsage->usage, $quantity);
+
+            if ($decrementBy > 0) {
+                $moduleUsage->decrement('usage', $decrementBy);
+            }
         }
 
         $this->clearFmsCache();

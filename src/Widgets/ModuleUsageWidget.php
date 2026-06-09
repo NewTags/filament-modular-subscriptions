@@ -19,6 +19,9 @@ class ModuleUsageWidget extends BaseWidget
     }
     public function table(Table $table): Table
     {
+        $tenant = FmsPlugin::getTenant();
+        $subscriptionId = $tenant?->subscription?->id;
+
         return (new ModuleUsageResource)->table($table)
             ->filters([])
             ->actions([])
@@ -26,7 +29,7 @@ class ModuleUsageWidget extends BaseWidget
             ->searchable(false)
             ->query(
                 config('filament-modular-subscriptions.models.usage')::query()
-                    ->where('subscription_id', FmsPlugin::getTenant()->subscription?->id)
+                    ->when($subscriptionId, fn ($q) => $q->where('subscription_id', $subscriptionId))
                     ->with(['module', 'subscription.plan'])
             );
     }
