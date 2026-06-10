@@ -535,6 +535,7 @@ return [
         'subscription_renewed' => 'Subscription renewed until :date',
         'subscription_cancelled' => 'Subscription cancelled',
         'subscription_expired' => 'Subscription expired',
+        'trial_expired' => 'Trial period expired',
         'subscription_suspended' => 'Subscription suspended: :reason',
         'subscription_reactivated' => 'Subscription reactivated',
 
@@ -593,7 +594,8 @@ return [
             'subscription_suspended' => 'Subscription Suspended',
             'subscription_reactivated' => 'Subscription Reactivated',
             'subscription_cancelled' => 'Subscription Cancelled',
-            'subscription_expired' => 'Subscription Expired',
+            'invoice_generation_failed' => 'Invoice Generation Failed',
+            'trial_expired' => 'Trial Expired',
         ],
     ],
     'details' => 'Details',

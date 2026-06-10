@@ -2,9 +2,9 @@
 
 namespace NewTags\FilamentModularSubscriptions\Services;
 
-use NewTags\FilamentModularSubscriptions\Models\Subscription;
-use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Support\Facades\Log;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\Models\Subscription;
 
 class SubscriptionLogService
 {
@@ -21,7 +21,9 @@ class SubscriptionLogService
 
             $logModel::create([
                 'subscription_id' => $subscription->id,
-                'event' => __('filament-modular-subscriptions::fms.logs.events.' . $event),
+                // Store the raw event key; it is translated at read time so the label is
+                // always locale-correct and new event types never freeze as a raw key.
+                'event' => $event,
                 'description' => $description,
                 'old_status' => $oldStatus instanceof SubscriptionStatus ? $oldStatus->getLabel() : $oldStatus,
                 'new_status' => $newStatus instanceof SubscriptionStatus ? $newStatus->getLabel() : $newStatus,

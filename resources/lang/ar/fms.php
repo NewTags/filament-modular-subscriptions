@@ -536,6 +536,7 @@ return [
         'subscription_renewed' => 'تم تجديد الاشتراك حتى :date',
         'subscription_cancelled' => 'تم إلغاء الاشتراك',
         'subscription_expired' => 'انتهت صلاحية الاشتراك',
+        'trial_expired' => 'انتهت الفترة التجريبية',
         'subscription_suspended' => 'تم تعليق الاشتراك: :reason',
         'subscription_reactivated' => 'تم إعادة تفعيل الاشتراك',
 
@@ -594,7 +595,8 @@ return [
             'subscription_suspended' => 'تعليق اشتراك',
             'subscription_reactivated' => 'إعادة تفعيل اشتراك',
             'subscription_cancelled' => 'إلغاء اشتراك',
-            'subscription_expired' => 'انتهاء اشتراك',
+            'invoice_generation_failed' => 'فشل إنشاء الفاتورة',
+            'trial_expired' => 'انتهاء الفترة التجريبية',
         ],
     ],
     'details' => 'التفاصيل',
