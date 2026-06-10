@@ -354,6 +354,8 @@ class InvoiceResource extends Resource
                                         ->required()
                                         ->maxSize(5120)
                                         ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp', 'application/pdf'])
+                                        ->disk(config('filament-modular-subscriptions.receipts_disk', 'local'))
+                                        ->visibility('private')
                                         ->directory('payment-receipts')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.receipt_file'))
                                         ->helperText(__('filament-modular-subscriptions::fms.resources.payment.receipt_help_text')),

@@ -10,18 +10,15 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
-use NewTags\FilamentModularSubscriptions\Components\FileEntry;
-use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
-use NewTags\FilamentModularSubscriptions\Enums\PaymentMethod;
-use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
-use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
-use NewTags\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use NewTags\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
 
 class PaymentResource extends Resource
 {
@@ -68,7 +65,7 @@ class PaymentResource extends Resource
                     ->searchable()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.subscriber')),
                 Tables\Columns\TextColumn::make('amount')
-                    ->prefix(fn($record) =>  config('filament-modular-subscriptions.main_currency'))
+                    ->prefix(fn ($record) => config('filament-modular-subscriptions.main_currency'))
                     ->sortable()
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount')),
                 Tables\Columns\TextColumn::make('payment_method')
@@ -112,11 +109,11 @@ class PaymentResource extends Resource
                         return $query
                             ->when(
                                 $data['created_from'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
                             )
                             ->when(
                                 $data['created_until'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                             );
                     }),
                 Tables\Filters\Filter::make('amount')
@@ -132,11 +129,11 @@ class PaymentResource extends Resource
                         return $query
                             ->when(
                                 $data['amount_from'],
-                                fn(Builder $query, $amount): Builder => $query->where('amount', '>=', $amount),
+                                fn (Builder $query, $amount): Builder => $query->where('amount', '>=', $amount),
                             )
                             ->when(
                                 $data['amount_to'],
-                                fn(Builder $query, $amount): Builder => $query->where('amount', '<=', $amount),
+                                fn (Builder $query, $amount): Builder => $query->where('amount', '<=', $amount),
                             );
                     }),
 
@@ -144,18 +141,46 @@ class PaymentResource extends Resource
             ->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                Action::make('download_receipt')
+                    ->label(__('filament-modular-subscriptions::fms.resources.payment.actions.download_receipt'))
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('gray')
+                    ->visible(fn ($record) => filled($record->receipt_file))
+                    ->action(function ($record) {
+                        $disk = self::receiptDiskFor($record->receipt_file);
+
+                        if (! $disk) {
+                            Notification::make()
+                                ->warning()
+                                ->title(__('filament-modular-subscriptions::fms.resources.payment.receipt_missing'))
+                                ->send();
+
+                            return null;
+                        }
+
+                        return Storage::disk($disk)->download($record->receipt_file);
+                    }),
                 Action::make('approve')
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.actions.approve'))
                     ->color('success')
                     ->icon('heroicon-o-check-circle')
-                    ->visible(fn($record) => $record->status === PaymentStatus::PENDING)
+                    ->visible(fn ($record) => $record->status === PaymentStatus::PENDING)
                     ->form([
                         TextInput::make('admin_notes')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.admin_notes')),
                     ])
                     ->action(function ($record, array $data) {
-                        DB::transaction(function () use ($record, $data) {
+                        $processed = DB::transaction(function () use ($record, $data) {
+                            // Lock the payment and re-assert it is still pending so a replayed
+                            // or concurrent approval cannot apply the payment (and renewal) twice.
+                            $record = $record->newQuery()->lockForUpdate()->find($record->getKey());
+
+                            if (! $record || $record->status !== PaymentStatus::PENDING) {
+                                return false;
+                            }
+
                             $invoice = $record->invoice()->lockForUpdate()->first();
+                            $invoiceWasPaid = $invoice->status === InvoiceStatus::PAID;
 
                             $record->update([
                                 'status' => PaymentStatus::PAID,
@@ -172,8 +197,14 @@ class PaymentResource extends Resource
                             if ($totalPaid >= $invoice->amount) {
                                 $invoice->update([
                                     'status' => InvoiceStatus::PAID,
-                                    'paid_at' => now(),
+                                    'paid_at' => $invoice->paid_at ?? now(),
                                 ]);
+
+                                // Only apply the paid-side effects (renewal, callbacks, notification)
+                                // the first time the invoice becomes paid, never on a later approval.
+                                if ($invoiceWasPaid) {
+                                    return true;
+                                }
 
                                 // Run custom after invoice paid callback
                                 FmsPlugin::runAfterInvoicePaid($invoice);
@@ -227,7 +258,7 @@ class PaymentResource extends Resource
                                     'currency' => config('filament-modular-subscriptions.main_currency'),
                                     'invoice_id' => $invoice->id,
                                     'status' => PaymentStatus::PAID->getLabel(),
-                                    'date' => now()->format('Y-m-d H:i:s')
+                                    'date' => now()->format('Y-m-d H:i:s'),
                                 ]);
                             } elseif ($totalPaid > 0) {
                                 $invoice->update(['status' => InvoiceStatus::PARTIALLY_PAID]);
@@ -240,10 +271,21 @@ class PaymentResource extends Resource
                                     'total' => $invoice->amount,
                                     'currency' => config('filament-modular-subscriptions.main_currency'),
                                     'status' => PaymentStatus::PARTIALLY_PAID->getLabel(),
-                                    'date' => now()->format('Y-m-d H:i:s')
+                                    'date' => now()->format('Y-m-d H:i:s'),
                                 ]);
                             }
+
+                            return true;
                         });
+
+                        if (! $processed) {
+                            Notification::make()
+                                ->title(__('filament-modular-subscriptions::fms.payment.already_processed'))
+                                ->warning()
+                                ->send();
+
+                            return;
+                        }
 
                         Notification::make()
                             ->title(__('filament-modular-subscriptions::fms.payment.approved'))
@@ -254,7 +296,7 @@ class PaymentResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.actions.reject'))
                     ->color('danger')
                     ->icon('heroicon-o-x-circle')
-                    ->visible(fn($record) => $record->status === PaymentStatus::PENDING)
+                    ->visible(fn ($record) => $record->status === PaymentStatus::PENDING)
                     ->requiresConfirmation()
                     ->form([
                         TextInput::make('admin_notes')
@@ -274,7 +316,7 @@ class PaymentResource extends Resource
                             'currency' => config('filament-modular-subscriptions.main_currency'),
                             'reason' => $data['admin_notes'],
                             'date' => now()->format('Y-m-d H:i:s'),
-                            'invoice_id' => $record->invoice->id
+                            'invoice_id' => $record->invoice->id,
                         ]);
 
                         Notification::make()
@@ -286,7 +328,7 @@ class PaymentResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.actions.undo'))
                     ->color('warning')
                     ->icon('heroicon-o-arrow-uturn-left')
-                    ->visible(fn($record) => in_array($record->status, [PaymentStatus::PAID, PaymentStatus::CANCELLED, PaymentStatus::REJECTED]))
+                    ->visible(fn ($record) => in_array($record->status, [PaymentStatus::PAID, PaymentStatus::CANCELLED, PaymentStatus::REJECTED]))
                     ->requiresConfirmation()
                     ->action(function ($record) {
                         DB::transaction(function () use ($record) {
@@ -363,7 +405,7 @@ class PaymentResource extends Resource
                         Infolists\Components\TextEntry::make('invoice.subscription.subscriber.name')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.subscriber')),
                         Infolists\Components\TextEntry::make('amount')
-                            ->prefix(fn($record) =>  config('filament-modular-subscriptions.main_currency'))
+                            ->prefix(fn ($record) => config('filament-modular-subscriptions.main_currency'))
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount')),
                         Infolists\Components\TextEntry::make('payment_method')
                             ->badge()
@@ -377,11 +419,31 @@ class PaymentResource extends Resource
                             ->dateTime()
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_at')),
                     ])->columns(),
-                FileEntry::make('receipt_file')
+                Infolists\Components\ViewEntry::make('receipt_file')
                     ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.receipt_file'))
-                    ->getStateUsing(fn($record) => $record->receipt_file ? Storage::url($record->receipt_file) : null)
-                    ->visible(fn($record) => $record->receipt_file),
+                    ->view('filament-modular-subscriptions::filament.components.receipt-preview')
+                    ->visible(fn ($record) => filled($record->receipt_file)),
             ]);
+    }
+
+    public static function receiptDiskFor(?string $path): ?string
+    {
+        if (blank($path)) {
+            return null;
+        }
+
+        $disk = config('filament-modular-subscriptions.receipts_disk', 'local');
+
+        if (Storage::disk($disk)->exists($path)) {
+            return $disk;
+        }
+
+        // Fall back to the public disk for receipts uploaded before private storage was enabled.
+        if ($disk !== 'public' && Storage::disk('public')->exists($path)) {
+            return 'public';
+        }
+
+        return null;
     }
 
     public static function getRelations(): array

@@ -42,7 +42,7 @@ return [
         'payment' => 'fms_payments',
         'subscription_log' => 'fms_subscription_logs',
     ],
- 
+
     'main_currency' => 'SAR',
     'translatable' => true,
     'locales' => [
@@ -53,6 +53,8 @@ return [
     'payment_enabled' => false,
     // Set true only once a real online gateway (Stripe/PayPal) is wired up; otherwise only bank transfer is offered.
     'online_payment_enabled' => false,
+    // Payment receipts contain financial data; store them on a PRIVATE disk and serve them only through the panel.
+    'receipts_disk' => 'local',
     'payment_methods' => [
         'paypal' => [
             'enabled' => env('PAYPAL_ENABLED', false),
