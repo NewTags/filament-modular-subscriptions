@@ -498,6 +498,30 @@ class InvoiceResource extends Resource
                         ->disabled(fn (\Filament\Forms\Get $get): bool => ! $get('tenant_id'))
                         ->helperText(__('filament-modular-subscriptions::fms.invoice.manual_invoice_subscription_hint')),
                 ]),
+                Placeholder::make('usage_summary')
+                    ->label(__('filament-modular-subscriptions::fms.invoice.current_usage'))
+                    ->visible(fn (\Filament\Forms\Get $get): bool => filled($get('subscription_id')))
+                    ->content(function (\Filament\Forms\Get $get): HtmlString {
+                        $subscription = config('filament-modular-subscriptions.models.subscription')::query()
+                            ->with('plan.modules')
+                            ->find($get('subscription_id'));
+
+                        if (! $subscription?->plan?->is_pay_as_you_go) {
+                            return new HtmlString('<span class="text-sm text-gray-500">—</span>');
+                        }
+
+                        $rows = [];
+                        foreach ($subscription->plan->modules as $module) {
+                            $instance = $module->getInstance();
+                            $rows[] = e($instance->getLabel()) . ': <strong>' . (int) $instance->calculateUsage($subscription) . '</strong>';
+                        }
+
+                        return new HtmlString(
+                            $rows === []
+                                ? '<span class="text-sm text-gray-500">—</span>'
+                                : '<span class="text-sm">' . implode(' &nbsp;•&nbsp; ', $rows) . '</span>'
+                        );
+                    }),
                 \Filament\Forms\Components\Repeater::make('items')
                     ->label(__('filament-modular-subscriptions::fms.invoice.items'))
                     ->schema([

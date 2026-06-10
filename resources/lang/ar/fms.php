@@ -444,6 +444,7 @@ return [
         'no_items' => 'لا توجد بنود',
         'tax_invoice' => 'فاتورة ضريبية',
         'from' => 'من',
+        'current_usage' => 'الاستخدام الحالي',
         'address' => 'العنوان',
         'payment_summary' => 'ملخص الدفع',
         'total_amount' => 'المبلغ الإجمالي',

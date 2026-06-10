@@ -443,6 +443,7 @@ return [
         'no_items' => 'No items',
         'tax_invoice' => 'Tax Invoice',
         'from' => 'From',
+        'current_usage' => 'Current usage',
         'address' => 'Address',
         'payment_summary' => 'Payment Summary',
         'total_amount' => 'Total Amount',
