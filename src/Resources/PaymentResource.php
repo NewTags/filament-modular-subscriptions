@@ -19,6 +19,7 @@ use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use NewTags\FilamentModularSubscriptions\FmsPlugin;
 use NewTags\FilamentModularSubscriptions\Resources\PaymentResource\Pages;
+use NewTags\FilamentModularSubscriptions\Services\InvoiceService;
 
 class PaymentResource extends Resource
 {
@@ -179,9 +180,6 @@ class PaymentResource extends Resource
                                 return false;
                             }
 
-                            $invoice = $record->invoice()->lockForUpdate()->first();
-                            $invoiceWasPaid = $invoice->status === InvoiceStatus::PAID;
-
                             $record->update([
                                 'status' => PaymentStatus::PAID,
                                 'admin_notes' => $data['admin_notes'],
@@ -189,91 +187,7 @@ class PaymentResource extends Resource
                                 'reviewed_by' => auth()->id(),
                             ]);
 
-                            $subscription = $invoice->subscription;
-                            $totalPaid = $invoice->payments()
-                                ->where('status', PaymentStatus::PAID)
-                                ->sum('amount');
-
-                            if ($totalPaid >= $invoice->amount) {
-                                $invoice->update([
-                                    'status' => InvoiceStatus::PAID,
-                                    'paid_at' => $invoice->paid_at ?? now(),
-                                ]);
-
-                                // Only apply the paid-side effects (renewal, callbacks, notification)
-                                // the first time the invoice becomes paid, never on a later approval.
-                                if ($invoiceWasPaid) {
-                                    return true;
-                                }
-
-                                // Run custom after invoice paid callback
-                                FmsPlugin::runAfterInvoicePaid($invoice);
-
-                                // Only handle subscription renewal if there's a plan
-                                if ($subscription->plan_id) {
-                                    // Store the old plan ID before renewal
-                                    $oldPlanId = $subscription->plan_id;
-
-                                    // Renew the subscription
-                                    $subscription->renew();
-
-                                    // Determine the type of subscription change
-                                    if ($subscription->plan_id !== $oldPlanId) {
-                                        // Plan was switched
-                                        $subscription->subscribable->notifySubscriptionChange('subscription_switched', [
-                                            'old_plan' => $oldPlanId,
-                                            'new_plan' => $subscription->plan_id,
-                                            'start_date' => $subscription->starts_at->format('Y-m-d'),
-                                            'end_date' => $subscription->ends_at->format('Y-m-d'),
-                                            'currency' => config('filament-modular-subscriptions.main_currency'),
-                                            'amount' => $invoice->amount,
-                                        ]);
-                                    } elseif ($subscription->wasRecentlyCreated) {
-                                        // New subscription
-                                        $subscription->subscribable->notifySubscriptionChange('subscription_activated', [
-                                            'plan' => $subscription->plan_id,
-                                            'start_date' => $subscription->starts_at->format('Y-m-d'),
-                                            'end_date' => $subscription->ends_at->format('Y-m-d'),
-                                            'currency' => config('filament-modular-subscriptions.main_currency'),
-                                            'amount' => $invoice->amount,
-                                        ]);
-                                    } else {
-                                        // Regular renewal
-                                        $subscription->subscribable->notifySubscriptionChange('subscription_renewed', [
-                                            'plan' => $subscription->plan_id,
-                                            'start_date' => $subscription->starts_at->format('Y-m-d'),
-                                            'end_date' => $subscription->ends_at->format('Y-m-d'),
-                                            'currency' => config('filament-modular-subscriptions.main_currency'),
-                                            'amount' => $invoice->amount,
-                                        ]);
-                                    }
-                                }
-
-                                // Payment received notification
-                                $invoice->subscription->subscribable->notifySubscriptionChange('payment_received', [
-                                    'amount' => $record->amount,
-                                    'subtotal' => $invoice->subtotal,
-                                    'tax' => $invoice->tax,
-                                    'total' => $invoice->amount,
-                                    'currency' => config('filament-modular-subscriptions.main_currency'),
-                                    'invoice_id' => $invoice->id,
-                                    'status' => PaymentStatus::PAID->getLabel(),
-                                    'date' => now()->format('Y-m-d H:i:s'),
-                                ]);
-                            } elseif ($totalPaid > 0) {
-                                $invoice->update(['status' => InvoiceStatus::PARTIALLY_PAID]);
-
-                                $invoice->subscription->subscribable->notifySubscriptionChange('payment_partially_approved', [
-                                    'amount' => $record->amount,
-                                    'remaining' => $invoice->amount - $totalPaid,
-                                    'subtotal' => $invoice->subtotal,
-                                    'tax' => $invoice->tax,
-                                    'total' => $invoice->amount,
-                                    'currency' => config('filament-modular-subscriptions.main_currency'),
-                                    'status' => PaymentStatus::PARTIALLY_PAID->getLabel(),
-                                    'date' => now()->format('Y-m-d H:i:s'),
-                                ]);
-                            }
+                            app(InvoiceService::class)->settleInvoice($record->invoice, $record);
 
                             return true;
                         });

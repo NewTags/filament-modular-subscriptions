@@ -118,9 +118,12 @@ return [
             'no_items' => 'No items for this invoice',
             'actions' => [
                 'pay' => 'Pay Now',
+                'record_payment' => 'Record Payment',
             ],
             'invoice_title' => 'Invoice :subscriber - :id - :date',
             'payment_pending' => 'Invoice sent successfully. Awaiting payment confirmation',
+            'record_payment_heading' => 'Record payment for invoice #:number',
+            'payment_recorded' => 'Payment recorded and invoice settled successfully',
         ],
         'payment' => [
             'name' => 'Payments',

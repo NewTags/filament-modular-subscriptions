@@ -118,9 +118,12 @@ return [
             'no_items' => 'لا يوجد عناصر لهذه الفاتورة',
             'actions' => [
                 'pay' => 'دفع المستحقات',
+                'record_payment' => 'تسجيل دفعة',
             ],
             'invoice_title' => 'فاتورة :subscriber - :id - :date',
             'payment_pending' => 'تم إرسال الفاتورة بنجاح. في انتظار التأكيد من الجهة المختصة',
+            'record_payment_heading' => 'تسجيل دفعة للفاتورة رقم :number',
+            'payment_recorded' => 'تم تسجيل الدفعة وتسوية الفاتورة بنجاح',
         ],
         'payment' => [
             'name' => 'المدفوعات',

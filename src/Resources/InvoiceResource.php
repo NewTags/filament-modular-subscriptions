@@ -8,6 +8,8 @@ use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\Wizard\Step;
@@ -20,6 +22,7 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -29,6 +32,7 @@ use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
 use NewTags\FilamentModularSubscriptions\FmsPlugin;
 use NewTags\FilamentModularSubscriptions\ResolvesCustomerInfo;
 use NewTags\FilamentModularSubscriptions\Resources\InvoiceResource\Pages;
+use NewTags\FilamentModularSubscriptions\Services\InvoiceService;
 
 class InvoiceResource extends Resource
 {
@@ -403,6 +407,7 @@ class InvoiceResource extends Resource
                             ->success()
                             ->send();
                     }),
+                self::payInvoiceAction(),
                 Action::make('view_payments')
                     ->label(__('filament-modular-subscriptions::fms.invoice.view_payments'))
                     ->icon('heroicon-o-eye')
@@ -441,6 +446,83 @@ class InvoiceResource extends Resource
                 self::createManualInvoiceAction(),
             ])
             ->bulkActions([]);
+    }
+
+    /**
+     * Admin-side action: record a confirmed (offline) payment against an invoice and
+     * immediately settle it — marking the invoice paid/partially paid and renewing the
+     * subscription via the shared, idempotent InvoiceService::settleInvoice().
+     */
+    public static function payInvoiceAction(): Action
+    {
+        return Action::make('pay_invoice')
+            ->label(__('filament-modular-subscriptions::fms.resources.invoice.actions.record_payment'))
+            ->icon('heroicon-o-banknotes')
+            ->color('success')
+            ->visible(fn ($record): bool => ! FmsPlugin::get()->isOnTenantPanel()
+                && in_array($record->status, [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID, InvoiceStatus::OVERDUE], true))
+            ->modalHeading(fn ($record): string => __('filament-modular-subscriptions::fms.resources.invoice.record_payment_heading', ['number' => $record->id]))
+            ->modalWidth('xl')
+            ->modalSubmitActionLabel(__('filament-modular-subscriptions::fms.resources.invoice.actions.record_payment'))
+            ->fillForm(fn ($record): array => [
+                'amount' => (float) $record->remaining_amount,
+                'payment_method' => PaymentMethod::BANK_TRANSFER->value,
+            ])
+            ->form([
+                Placeholder::make('remaining_amount')
+                    ->label(__('filament-modular-subscriptions::fms.invoice.remaining_amount'))
+                    ->content(fn ($record): string => number_format((float) $record->remaining_amount, 2) . ' ' . config('filament-modular-subscriptions.main_currency')),
+                TextInput::make('amount')
+                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
+                    ->numeric()
+                    ->required()
+                    ->minValue(0.01)
+                    ->maxValue(fn ($record): float => (float) $record->remaining_amount)
+                    ->step(0.01)
+                    ->suffix(config('filament-modular-subscriptions.main_currency')),
+                Select::make('payment_method')
+                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.payment_method'))
+                    ->options(collect(PaymentMethod::cases())->mapWithKeys(fn (PaymentMethod $method): array => [$method->value => $method->getLabel()])->all())
+                    ->default(PaymentMethod::BANK_TRANSFER->value)
+                    ->required()
+                    ->native(false),
+                FileUpload::make('receipt_file')
+                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.receipt_file'))
+                    ->maxSize(5120)
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp', 'application/pdf'])
+                    ->disk(config('filament-modular-subscriptions.receipts_disk', 'local'))
+                    ->visibility('private')
+                    ->directory('payment-receipts'),
+                Textarea::make('notes')
+                    ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.notes'))
+                    ->rows(2),
+            ])
+            ->action(function (array $data, $record): void {
+                DB::transaction(function () use ($data, $record): void {
+                    $payment = $record->payments()->create([
+                        'amount' => round((float) $data['amount'], 2),
+                        'payment_method' => $data['payment_method'],
+                        'status' => PaymentStatus::PAID,
+                        'receipt_file' => $data['receipt_file'] ?? null,
+                        'transaction_id' => 'PAY-' . (string) Str::uuid(),
+                        'reviewed_at' => now(),
+                        'reviewed_by' => auth()->id(),
+                        'admin_notes' => $data['notes'] ?? null,
+                        'metadata' => [
+                            'recorded_by' => auth()->id(),
+                            'recorded_at' => now()->format('Y-m-d H:i:s'),
+                            'notes' => $data['notes'] ?? null,
+                        ],
+                    ]);
+
+                    app(InvoiceService::class)->settleInvoice($record, $payment);
+                });
+
+                Notification::make()
+                    ->title(__('filament-modular-subscriptions::fms.resources.invoice.payment_recorded'))
+                    ->success()
+                    ->send();
+            });
     }
 
     public static function createManualInvoiceAction(): Action
