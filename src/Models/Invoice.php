@@ -2,12 +2,12 @@
 
 namespace NewTags\FilamentModularSubscriptions\Models;
 
-use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
-use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
 
 class Invoice extends Model
 {
@@ -86,6 +86,21 @@ class Invoice extends Model
         return $this->status === InvoiceStatus::PAID;
     }
 
+    /**
+     * An invoice may be deleted only when it carries no confirmed money: it must
+     * not be fully paid and must have no PAID payment recorded against it. This
+     * protects settled invoices (and their renewed subscriptions) from removal.
+     */
+    public function isDeletable(): bool
+    {
+        if ($this->status === InvoiceStatus::PAID) {
+            return false;
+        }
+
+        return $this->payments()
+            ->where('status', PaymentStatus::PAID)
+            ->doesntExist();
+    }
 
     public function getTitleAttribute()
     {

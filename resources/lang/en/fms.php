@@ -119,11 +119,15 @@ return [
             'actions' => [
                 'pay' => 'Pay Now',
                 'record_payment' => 'Record Payment',
+                'delete_unpaid' => 'Delete unpaid',
             ],
             'invoice_title' => 'Invoice :subscriber - :id - :date',
             'payment_pending' => 'Invoice sent successfully. Awaiting payment confirmation',
             'record_payment_heading' => 'Record payment for invoice #:number',
             'payment_recorded' => 'Payment recorded and invoice settled successfully',
+            'delete_unpaid_warning' => 'This permanently deletes the selected invoices that have no confirmed payment. Paid invoices are skipped.',
+            'invoices_deleted' => ':count invoice(s) deleted',
+            'invoices_skipped' => ':count paid invoice(s) skipped',
         ],
         'payment' => [
             'name' => 'Payments',

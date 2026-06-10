@@ -119,11 +119,15 @@ return [
             'actions' => [
                 'pay' => 'دفع المستحقات',
                 'record_payment' => 'تسجيل دفعة',
+                'delete_unpaid' => 'حذف غير المدفوعة',
             ],
             'invoice_title' => 'فاتورة :subscriber - :id - :date',
             'payment_pending' => 'تم إرسال الفاتورة بنجاح. في انتظار التأكيد من الجهة المختصة',
             'record_payment_heading' => 'تسجيل دفعة للفاتورة رقم :number',
             'payment_recorded' => 'تم تسجيل الدفعة وتسوية الفاتورة بنجاح',
+            'delete_unpaid_warning' => 'سيتم حذف الفواتير المحددة التي لا تحتوي على أي دفعة مؤكدة نهائيًا. سيتم تجاهل الفواتير المدفوعة.',
+            'invoices_deleted' => 'تم حذف :count فاتورة',
+            'invoices_skipped' => 'تم تجاهل :count فاتورة مدفوعة',
         ],
         'payment' => [
             'name' => 'المدفوعات',

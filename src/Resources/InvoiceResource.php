@@ -445,7 +445,42 @@ class InvoiceResource extends Resource
             ->headerActions([
                 self::createManualInvoiceAction(),
             ])
-            ->bulkActions([]);
+            ->bulkActions([
+                Tables\Actions\BulkAction::make('delete_unpaid')
+                    ->label(__('filament-modular-subscriptions::fms.resources.invoice.actions.delete_unpaid'))
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading(__('filament-modular-subscriptions::fms.resources.invoice.actions.delete_unpaid'))
+                    ->modalDescription(__('filament-modular-subscriptions::fms.resources.invoice.delete_unpaid_warning'))
+                    ->visible(fn (): bool => ! FmsPlugin::get()->isOnTenantPanel())
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
+                        $deleted = 0;
+                        $skipped = 0;
+
+                        DB::transaction(function () use ($records, &$deleted, &$skipped): void {
+                            foreach ($records as $invoice) {
+                                if (! $invoice->isDeletable()) {
+                                    $skipped++;
+
+                                    continue;
+                                }
+
+                                $invoice->payments()->delete();
+                                $invoice->items()->delete();
+                                $invoice->delete();
+                                $deleted++;
+                            }
+                        });
+
+                        Notification::make()
+                            ->title(__('filament-modular-subscriptions::fms.resources.invoice.invoices_deleted', ['count' => $deleted]))
+                            ->body($skipped > 0 ? __('filament-modular-subscriptions::fms.resources.invoice.invoices_skipped', ['count' => $skipped]) : null)
+                            ->{$deleted > 0 ? 'success' : 'warning'}()
+                            ->send();
+                    })
+                    ->deselectRecordsAfterCompletion(),
+            ]);
     }
 
     /**
