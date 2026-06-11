@@ -10,6 +10,7 @@ use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use NewTags\FilamentModularSubscriptions\Commands\MakeModuleCommand;
 use NewTags\FilamentModularSubscriptions\Commands\ScheduleInvoiceGeneration;
+use NewTags\FilamentModularSubscriptions\Payments\PaymentGatewayManager;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -60,9 +61,16 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
         if (file_exists($package->basePath('/../resources/views'))) {
             $package->hasViews(static::$viewNamespace);
         }
+
+        if (file_exists($package->basePath('/../routes/payments.php'))) {
+            $package->hasRoute('payments');
+        }
     }
 
-    public function packageRegistered(): void {}
+    public function packageRegistered(): void
+    {
+        $this->app->singleton(PaymentGatewayManager::class);
+    }
 
     public function packageBooted(): void
     {
@@ -136,6 +144,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             '6_create_invoices_table',
             '7_create_invoice_items_table',
             '8_create_payments_table',
+            '9_create_payment_checkouts_table',
             'create_subscription_logs_table',
             'add_indexes_to_fms_tables',
         ];
