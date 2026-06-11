@@ -153,7 +153,9 @@ return [
                 'payment_method' => 'طريقة الدفع',
                 'payment_details' => 'تفاصيل الدفع',
                 'provider' => 'مزود خدمة الدفع',
-                'gateway' => 'بوابة الدفع',
+                'card_number' => 'رقم البطاقة',
+                'expiry' => 'تاريخ الانتهاء',
+                'cvc' => 'رمز التحقق',
             ],
 
             'actions' => [
@@ -500,7 +502,6 @@ return [
         'visa' => 'فيزا',
         'mastercard' => 'ماستركارد',
         'paddle' => 'بادل',
-        'tap' => 'تاب',
     ],
     'invoice_status' => [
         'paid' => 'مدفوع',
@@ -712,71 +713,71 @@ return [
         'admin_message' => [
             'invoice_generated' => [
                 'title' => '[إدارة النظام] تم إصدار فاتورة جديدة',
-                'body' => 'تم إصدار فاتورة جديدة #:invoice_id للعميل :tenant بقيمة :amount :currency',
+                'body' => 'تم إصدار فاتورة جديدة #:invoice_id للعميل :tenant بقيمة :amount :currency'
             ],
             'invoice_generation_failed' => [
                 'title' => '[إدارة النظام] فشل في إصدار الفاتورة',
-                'body' => 'حدث خطأ أثناء إصدار فاتورة للعميل :tenant. تفاصيل الخطأ: :error',
+                'body' => 'حدث خطأ أثناء إصدار فاتورة للعميل :tenant. تفاصيل الخطأ: :error'
             ],
             'invoice_overdue' => [
                 'title' => '[إدارة النظام] فاتورة متأخرة السداد',
-                'body' => 'الفاتورة #:invoice_id للعميل :tenant متأخرة السداد منذ :days يوم. المبلغ المستحق: :amount :currency',
+                'body' => 'الفاتورة #:invoice_id للعميل :tenant متأخرة السداد منذ :days يوم. المبلغ المستحق: :amount :currency'
             ],
             'invoice_cancelled' => [
                 'title' => '[إدارة النظام] فاتورة ملغية',
-                'body' => 'الفاتورة #:invoice_id للعميل :tenant ملغية. المبلغ المستحق: :amount :currency',
+                'body' => 'الفاتورة #:invoice_id للعميل :tenant ملغية. المبلغ المستحق: :amount :currency'
             ],
             'subscription_near_expiry' => [
                 'title' => '[إدارة النظام] اشتراك على وشك الانتهاء',
-                'body' => 'اشتراك العميل :tenant في خطة :plan سينتهي خلال :days يوم (في :expiry_date)',
+                'body' => 'اشتراك العميل :tenant في خطة :plan سينتهي خلال :days يوم (في :expiry_date)'
             ],
             'subscription_grace_period' => [
                 'title' => '[إدارة النظام] اشتراك في فترة السماح',
-                'body' => 'اشتراك العميل :tenant في فترة السماح. سيتم تعليق الخدمة في :grace_end_date (متبقي :days يوم)',
+                'body' => 'اشتراك العميل :tenant في فترة السماح. سيتم تعليق الخدمة في :grace_end_date (متبقي :days يوم)'
             ],
             'expired' => [
                 'title' => '[إدارة النظام] انتهاء اشتراك',
-                'body' => 'انتهى اشتراك العميل :tenant في :date. يرجى متابعة الحالة',
+                'body' => 'انتهى اشتراك العميل :tenant في :date. يرجى متابعة الحالة'
             ],
             'suspended' => [
                 'title' => '[إدارة النظام] تعليق اشتراك',
-                'body' => 'تم تعليق اشتراك العميل :tenant في :date. يرجى مراجعة السبب واتخاذ الإجراء المناسب',
+                'body' => 'تم تعليق اشتراك العميل :tenant في :date. يرجى مراجعة السبب واتخاذ الإجراء المناسب'
             ],
             'cancelled' => [
                 'title' => '[إدارة النظام] إلغاء اشتراك',
-                'body' => 'قام العميل :tenant بإلغاء اشتراكه في :date. يرجى متابعة الحالة',
+                'body' => 'قام العميل :tenant بإلغاء اشتراكه في :date. يرجى متابعة الحالة'
             ],
             'payment_received' => [
                 'title' => '[إدارة النظام] استلام دفعة جديدة',
-                'body' => 'تم استلام دفعة بقيمة :amount :currency من العميل :tenant في :date',
+                'body' => 'تم استلام دفعة بقيمة :amount :currency من العميل :tenant في :date'
             ],
             'payment_rejected' => [
                 'title' => '[إدارة النظام] رفض دفعة',
-                'body' => 'تم رفض دفعة بقيمة :amount :currency من العميل :tenant في :date. السبب: :reason',
+                'body' => 'تم رفض دفعة بقيمة :amount :currency من العميل :tenant في :date. السبب: :reason'
             ],
             'payment_overdue' => [
                 'title' => '[إدارة النظام] دفعة متأخرة',
-                'body' => 'دفعة بقيمة :amount :currency من العميل :tenant متأخرة منذ :days يوم',
+                'body' => 'دفعة بقيمة :amount :currency من العميل :tenant متأخرة منذ :days يوم'
             ],
             'payment_pending' => [
                 'title' => '[إدارة النظام] دفعة جديدة تنتظر المراجعة',
-                'body' => 'دفعة جديدة بقيمة :amount :currency من العميل :tenant للفاتورة #:invoice_id تنتظر المراجعة',
+                'body' => 'دفعة جديدة بقيمة :amount :currency من العميل :tenant للفاتورة #:invoice_id تنتظر المراجعة'
             ],
             'payment_partially_approved' => [
                 'title' => '[إدارة النظام] موافقة على دفعة جزئية',
-                'body' => 'تمت الموافقة على دفعة جزئية بقيمة :amount :currency من أصل :total :currency للعميل :tenant',
+                'body' => 'تمت الموافقة على دفعة جزئية بقيمة :amount :currency من أصل :total :currency للعميل :tenant'
             ],
             'usage_limit_warning' => [
                 'title' => '[إدارة النظام] تحذير حد الاستخدام',
-                'body' => 'العميل :tenant يقترب من حد الاستخدام لوحدة :module (:current من :limit)',
+                'body' => 'العميل :tenant يقترب من حد الاستخدام لوحدة :module (:current من :limit)'
             ],
             'usage_limit_exceeded' => [
                 'title' => '[إدارة النظام] تجاوز حد الاستخدام',
-                'body' => 'العميل :tenant تجاوز حد الاستخدام لوحدة :module (:current من :limit)',
+                'body' => 'العميل :tenant تجاوز حد الاستخدام لوحدة :module (:current من :limit)'
             ],
             'subscription_status_changed' => [
                 'title' => '[إدارة النظام] تغيير حالة اشتراك',
-                'body' => 'تم تغيير حالة اشتراك العميل :tenant من ":old_status" إلى ":new_status"',
+                'body' => 'تم تغيير حالة اشتراك العميل :tenant من ":old_status" إلى ":new_status"'
             ],
             'subscription_renewed' => [
                 'title' => '[إدارة النظام] تجديد اشتراك',
@@ -792,64 +793,17 @@ return [
             ],
             'invoice_generated' => [
                 'title' => '[إدارة النظام] إصدار فاتورة جديدة',
-                'body' => 'تم إصدار فاتورة جديدة #:invoice_id للعميل :tenant بقيمة :amount :currency',
+                'body' => 'تم إصدار فاتورة جديدة #:invoice_id للعميل :tenant بقيمة :amount :currency'
             ],
             'subscription_cancelled' => [
                 'title' => '[إدارة النظام] تم إلغاء اشتراك',
                 'body' => 'قام العميل :tenant بإلغاء اشتراكه في خطة :plan بتاريخ :date',
             ],
-        ],
+        ]
     ],
     'alerts' => [
         'total' => 'تنبيهات في المجموع',
         'expand' => 'عرض كل التنبيهات',
         'collapse' => 'إخفاء التنبيهات',
-    ],
-    'payments' => [
-        'amount_due' => 'المبلغ المستحق',
-        'secure_redirect_notice' => 'دفع آمن ومشفّر',
-        'checkout_failed_title' => 'تعذر بدء عملية الدفع',
-        'payment_link' => 'رابط الدفع',
-        'click_to_copy' => 'اضغط على الرابط لنسخه',
-        'link_copied' => 'تم نسخ الرابط',
-        'payment_link_help' => 'شارك هذا الرابط لدفع الفاتورة رقم :id إلكترونياً. الرابط صالح لمدة :days يوماً.',
-        'charge_description' => 'دفع فاتورة الاشتراك رقم :id',
-        'gateways' => [
-            'tap' => 'بطاقة / مدى (Tap)',
-        ],
-        'errors' => [
-            'online_payment_unavailable' => 'الدفع الإلكتروني غير متاح حالياً. يرجى استخدام التحويل البنكي أو التواصل مع الدعم.',
-            'invoice_not_payable' => 'لا يمكن دفع هذه الفاتورة إلكترونياً — قد تكون مدفوعة أو ملغاة.',
-            'missing_contact' => 'لا يوجد بريد إلكتروني أو رقم هاتف للفوترة في حسابكم. يرجى تحديث البيانات أو التواصل مع الدعم.',
-            'checkout_failed' => 'تعذر بدء عملية الدفع. يرجى المحاولة مرة أخرى أو التواصل مع الدعم.',
-        ],
-        'checkout_statuses' => [
-            'pending' => 'قيد الإنشاء',
-            'initiated' => 'بانتظار الدفع',
-            'paid' => 'مدفوع',
-            'failed' => 'فشل',
-            'expired' => 'منتهي الصلاحية',
-            'cancelled' => 'ملغي',
-            'error' => 'يحتاج مراجعة',
-        ],
-        'result' => [
-            'invoice_reference' => 'فاتورة رقم :id',
-            'amount_label' => 'المبلغ',
-            'footer' => 'تتم معالجة المدفوعات بشكل آمن لصالح :company.',
-            'success_title' => 'تمت عملية الدفع بنجاح',
-            'success_body' => 'شكراً لكم! تم استلام دفعتكم للفاتورة رقم :id وتم تحديث اشتراككم.',
-            'pending_title' => 'الدفع قيد المعالجة',
-            'pending_body' => 'دفعتكم للفاتورة رقم :id ما زالت قيد المعالجة، وسيتم تحديث الحالة تلقائياً فور تأكيدها.',
-            'failed_title' => 'فشلت عملية الدفع',
-            'failed_body' => 'لم تكتمل عملية دفع الفاتورة رقم :id ولم يتم خصم أي مبلغ — يرجى المحاولة مرة أخرى أو استخدام بطاقة أخرى.',
-            'expired_title' => 'انتهت صلاحية صفحة الدفع',
-            'expired_body' => 'انتهت صلاحية صفحة الدفع للفاتورة رقم :id قبل إتمام العملية. افتح رابط الدفع مرة أخرى لإعادة المحاولة.',
-            'cancelled_title' => 'تم إلغاء عملية الدفع',
-            'cancelled_body' => 'تم إلغاء عملية دفع الفاتورة رقم :id. يمكنكم إعادة المحاولة في أي وقت.',
-            'error_title' => 'حدث خطأ ما',
-            'error_body' => 'تعذر تأكيد عملية دفع الفاتورة رقم :id. تم إشعار فريقنا — يرجى التواصل مع الدعم.',
-            'already_paid_title' => 'الفاتورة مدفوعة بالفعل',
-            'already_paid_body' => 'الفاتورة رقم :id مدفوعة بالكامل، ولا حاجة لأي دفعة إضافية.',
-        ],
     ],
 ];

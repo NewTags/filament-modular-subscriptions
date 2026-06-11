@@ -102,11 +102,6 @@ class Invoice extends Model
             ->doesntExist();
     }
 
-    public function getNumberAttribute(): string
-    {
-        return 'INV-' . str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
-    }
-
     public function getTitleAttribute()
     {
         $subscriber = $this->subscription ? $this->subscription->subscriber : null;

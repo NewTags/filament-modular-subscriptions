@@ -1,23 +1,5 @@
 <?php
 
-use NewTags\FilamentModularSubscriptions\Models\Invoice;
-use NewTags\FilamentModularSubscriptions\Models\InvoiceItem;
-use NewTags\FilamentModularSubscriptions\Models\Module;
-use NewTags\FilamentModularSubscriptions\Models\ModuleUsage;
-use NewTags\FilamentModularSubscriptions\Models\Payment;
-use NewTags\FilamentModularSubscriptions\Models\PaymentCheckout;
-use NewTags\FilamentModularSubscriptions\Models\Plan;
-use NewTags\FilamentModularSubscriptions\Models\PlanModule;
-use NewTags\FilamentModularSubscriptions\Models\Subscription;
-use NewTags\FilamentModularSubscriptions\Models\SubscriptionLog;
-use NewTags\FilamentModularSubscriptions\Resources\InvoiceResource;
-use NewTags\FilamentModularSubscriptions\Resources\ModuleResource;
-use NewTags\FilamentModularSubscriptions\Resources\ModuleUsageResource;
-use NewTags\FilamentModularSubscriptions\Resources\PaymentResource;
-use NewTags\FilamentModularSubscriptions\Resources\PlanResource;
-use NewTags\FilamentModularSubscriptions\Resources\SubscriptionLogResource;
-use NewTags\FilamentModularSubscriptions\Resources\SubscriptionResource;
-
 return [
     'modules' => [
         // List all available module classes here
@@ -25,16 +7,15 @@ return [
         // 'App\Fms\Modules\SubscriberModule::class',
     ],
     'models' => [
-        'plan' => Plan::class,
-        'subscription' => Subscription::class,
-        'module' => Module::class,
-        'usage' => ModuleUsage::class,
-        'plan_module' => PlanModule::class,
-        'invoice' => Invoice::class,
-        'invoice_item' => InvoiceItem::class,
-        'payment' => Payment::class,
-        'payment_checkout' => PaymentCheckout::class,
-        'subscription_log' => SubscriptionLog::class,
+        'plan' => NewTags\FilamentModularSubscriptions\Models\Plan::class,
+        'subscription' => NewTags\FilamentModularSubscriptions\Models\Subscription::class,
+        'module' => NewTags\FilamentModularSubscriptions\Models\Module::class,
+        'usage' => NewTags\FilamentModularSubscriptions\Models\ModuleUsage::class,
+        'plan_module' => NewTags\FilamentModularSubscriptions\Models\PlanModule::class,
+        'invoice' => NewTags\FilamentModularSubscriptions\Models\Invoice::class,
+        'invoice_item' => NewTags\FilamentModularSubscriptions\Models\InvoiceItem::class,
+        'payment' => NewTags\FilamentModularSubscriptions\Models\Payment::class,
+        'subscription_log' => NewTags\FilamentModularSubscriptions\Models\SubscriptionLog::class,
     ],
     // Tenant model and attribute to be used for the subscription relationship
     // 'tenant_model' => App\Models\User::class,
@@ -42,13 +23,13 @@ return [
     // user model
     // 'user_model' => App\Models\User::class,
     'resources' => [
-        'plan' => PlanResource::class,
-        'subscription' => SubscriptionResource::class,
-        'module' => ModuleResource::class,
-        'usage' => ModuleUsageResource::class,
-        'payment' => PaymentResource::class,
-        'invoice' => InvoiceResource::class,
-        'log' => SubscriptionLogResource::class,
+        'plan' => NewTags\FilamentModularSubscriptions\Resources\PlanResource::class,
+        'subscription' => NewTags\FilamentModularSubscriptions\Resources\SubscriptionResource::class,
+        'module' => NewTags\FilamentModularSubscriptions\Resources\ModuleResource::class,
+        'usage' => NewTags\FilamentModularSubscriptions\Resources\ModuleUsageResource::class,
+        'payment' => NewTags\FilamentModularSubscriptions\Resources\PaymentResource::class,
+        'invoice' => NewTags\FilamentModularSubscriptions\Resources\InvoiceResource::class,
+        'log' => NewTags\FilamentModularSubscriptions\Resources\SubscriptionLogResource::class,
     ],
     'tables' => [
         'plan' => 'fms_plans',
@@ -59,14 +40,10 @@ return [
         'invoice' => 'fms_invoices',
         'invoice_item' => 'fms_invoice_items',
         'payment' => 'fms_payments',
-        'payment_checkout' => 'fms_payment_checkouts',
         'subscription_log' => 'fms_subscription_logs',
     ],
 
     'main_currency' => 'SAR',
-    // ISO 4217 code used for payment gateways and webhook signatures. Keep it a real
-    // currency code even when `main_currency` is overridden with a display symbol.
-    'currency_code' => env('FMS_CURRENCY_CODE', 'SAR'),
     'translatable' => true,
     'locales' => [
         'en' => 'English',
@@ -79,17 +56,6 @@ return [
     // Payment receipts contain financial data; store them on a PRIVATE disk and serve them only through the panel.
     'receipts_disk' => 'local',
     'payment_methods' => [
-        'tap' => [
-            'enabled' => env('TAP_ENABLED', false),
-            // 'test' uses the test key pair, 'live' the live pair. The Tap API base
-            // URL is identical for both — the key prefix selects the environment.
-            'mode' => env('TAP_MODE', 'test'),
-            'merchant_id' => env('TAP_MERCHANT_ID'),
-            'test_secret_key' => env('TAP_TEST_SECRET_KEY'),
-            'test_public_key' => env('TAP_TEST_PUBLIC_KEY'),
-            'live_secret_key' => env('TAP_LIVE_SECRET_KEY'),
-            'live_public_key' => env('TAP_LIVE_PUBLIC_KEY'),
-        ],
         'paypal' => [
             'enabled' => env('PAYPAL_ENABLED', false),
             'client_id' => env('PAYPAL_CLIENT_ID'),
@@ -102,17 +68,6 @@ return [
             'secret' => env('STRIPE_SECRET'),
         ],
         // Add other payment method configurations here,
-    ],
-
-    'payments' => [
-        // How long (days) a shared public payment link stays valid.
-        'link_ttl_days' => 30,
-        'http_timeout' => 15,
-        'default_phone_country_code' => '966',
-        // class-string of a ResolvesGatewayCredentials implementation. Leave null to
-        // charge with the platform account configured in `payment_methods` above;
-        // bind a custom resolver to charge per-tenant merchant accounts (B2C).
-        'credentials_resolver' => null,
     ],
     'font_path' => resource_path('fonts/Cairo'),
     'company_name' => 'إسم الشركة',
