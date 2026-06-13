@@ -33,6 +33,7 @@ class PublicPaymentController
             return response()->view('filament-modular-subscriptions::pages.payment-result', [
                 'state' => [
                     'kind' => 'success',
+                    'variant' => 'success',
                     'title' => __('filament-modular-subscriptions::fms.payments.result.already_paid_title'),
                     'body' => __('filament-modular-subscriptions::fms.payments.result.already_paid_body', ['id' => $invoice->getKey()]),
                 ],
@@ -55,6 +56,7 @@ class PublicPaymentController
             return response()->view('filament-modular-subscriptions::pages.payment-result', [
                 'state' => [
                     'kind' => 'danger',
+                    'variant' => 'error',
                     'title' => __('filament-modular-subscriptions::fms.payments.result.error_title'),
                     'body' => $exception->getMessage(),
                 ],

@@ -1,8 +1,13 @@
 @php
     $currency = config('filament-modular-subscriptions.main_currency');
-    $taxPercentage = config('filament-modular-subscriptions.tax_percentage', 15);
+    $taxPercentage = $invoice->subtotal > 0
+        ? round(($invoice->tax / $invoice->subtotal) * 100, 2)
+        : config('filament-modular-subscriptions.tax_percentage', 15);
     $tenantName = optional($invoice->tenant)->{config('filament-modular-subscriptions.tenant_attribute')} ?? __('filament-modular-subscriptions::fms.invoice.subscriber');
     $planName = $invoice->subscription?->plan?->trans_name;
+    $remainingAmount = (float) $invoice->remaining_amount;
+    $paidAmount = (float) $invoice->amount - $remainingAmount;
+    $isPartiallyPaid = $invoice->status === \NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus::PARTIALLY_PAID;
 @endphp
 
 <div class="space-y-6">
@@ -10,7 +15,7 @@
     <div class="flex flex-wrap items-start justify-between gap-4 border-b border-gray-200 pb-5 dark:border-white/10">
         <div class="space-y-1">
             <h2 class="text-2xl font-bold text-gray-950 dark:text-white">
-                {{ __('filament-modular-subscriptions::fms.invoice.invoice_number', ['number' => $invoice->id]) }}
+                {{ __('filament-modular-subscriptions::fms.invoice.invoice_number', ['number' => $invoice->number]) }}
             </h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
                 {{ $invoice->created_at->translatedFormat('d F Y') }}
@@ -111,6 +116,20 @@
                     {{ number_format($invoice->amount, 2) }} <span class="fms-money">{{ $currency }}</span>
                 </span>
             </div>
+            @if ($isPartiallyPaid)
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-500 dark:text-gray-400">{{ __('filament-modular-subscriptions::fms.invoice.paid_amount') }}</span>
+                    <span class="font-medium text-success-600 dark:text-success-400">
+                        {{ number_format($paidAmount, 2) }} <span class="fms-money">{{ $currency }}</span>
+                    </span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-500 dark:text-gray-400">{{ __('filament-modular-subscriptions::fms.invoice.remaining_amount') }}</span>
+                    <span class="font-semibold text-danger-600 dark:text-danger-400">
+                        {{ number_format($remainingAmount, 2) }} <span class="fms-money">{{ $currency }}</span>
+                    </span>
+                </div>
+            @endif
         </div>
     </div>
 
