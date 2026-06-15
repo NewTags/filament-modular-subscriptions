@@ -9,13 +9,13 @@ use Filament\Panel;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
-use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
-use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use NewTags\FilamentModularSubscriptions\Models\Module;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
 use NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
@@ -38,10 +38,15 @@ class FmsPlugin implements Plugin
     public array $cachedAlerts = [];
 
     public ?string $navigationGroup = null;
+
     public ?string $tenantNavigationGroup = null;
+
     public ?string $subscriptionNavigationLabel = null;
+
     public bool | Closure $subscriptionPageInTenantMenu = true;
+
     public bool | Closure $subscriptionPageInUserMenu = false;
+
     public static bool | Closure $subscriptionPageInNavigationMenu = false;
 
     public static function make(): static
@@ -62,10 +67,11 @@ class FmsPlugin implements Plugin
     public function onTenantPanel(Closure | bool $condition = true): static
     {
         $this->onTenantPanel = $condition instanceof Closure ? $condition() : $condition;
+
         return $this;
     }
 
-    public function getTenantUsing(?Closure $callback = null): Closure|static
+    public function getTenantUsing(?Closure $callback = null): Closure | static
     {
         static::$getTenantUsing = $callback;
 
@@ -106,10 +112,10 @@ class FmsPlugin implements Plugin
                 ->pages([TenantSubscription::class])
                 ->tenantMenuItems([
                     MenuItem::make()
-                        ->label(fn() => $this->getSubscriptionNavigationLabel())
-                        ->url(fn() => TenantSubscription::getUrl())
-                        ->color(fn() => Color::Emerald)
-                        ->visible(fn() => $this->subscriptionPageInTenantMenu && $this->canSeeTenantSubscription())
+                        ->label(fn () => $this->getSubscriptionNavigationLabel())
+                        ->url(fn () => TenantSubscription::getUrl())
+                        ->color(fn () => Color::Emerald)
+                        ->visible(fn () => $this->subscriptionPageInTenantMenu && $this->canSeeTenantSubscription())
                         ->icon('heroicon-o-credit-card'),
                 ])
 
@@ -119,7 +125,7 @@ class FmsPlugin implements Plugin
                 ->bootUsing(function () {
                     FilamentView::registerRenderHook(
                         PanelsRenderHook::BODY_START,
-                        fn(): string => $this->canSeeTenantSubscription() ? $this->renderSubscriptionAlerts() : ''
+                        fn (): string => $this->canSeeTenantSubscription() ? $this->renderSubscriptionAlerts() : ''
                     );
                 });
         }
@@ -178,7 +184,7 @@ class FmsPlugin implements Plugin
     public static function canSeeTenantSubscription(): bool
     {
         try {
-            if (!auth()->check()) {
+            if (! auth()->check()) {
                 return false;
             }
 
@@ -193,7 +199,7 @@ class FmsPlugin implements Plugin
             return cache()->remember(
                 'tenant_subscription_nav_' . $auth->id . '_' . $tenant->id,
                 now()->addMinutes(60),
-                fn() => $tenant->admins()->where('users.id', $auth->id)->exists()
+                fn () => $tenant->admins()->where('users.id', $auth->id)->exists()
             );
         } catch (\Throwable) {
             return false;
@@ -206,17 +212,19 @@ class FmsPlugin implements Plugin
 
         return $this;
     }
+
     public function subscriptionPageInUserMenu(bool | Closure $condition = true): static
     {
         $this->subscriptionPageInUserMenu = $condition instanceof Closure ? $condition() : $condition;
 
         return $this;
     }
+
     public static function subscriptionPageInNavigationMenu(bool | Closure $condition = true): static
     {
         static::$subscriptionPageInNavigationMenu = $condition instanceof Closure ? $condition() : $condition;
 
-        return new static();
+        return new static;
     }
 
     public function subscriptionStats(bool $condition = true): static
@@ -283,9 +291,48 @@ class FmsPlugin implements Plugin
             $alerts[] = $this->createEndingSoonAlert($subscription);
         }
 
+        if ($unpaidAlert = $this->createUnpaidInvoicesAlert($tenant)) {
+            $alerts[] = $unpaidAlert;
+        }
+
         $alerts = array_merge($alerts, $this->generateModuleUsageAlerts($subscription, $tenant));
 
         return $alerts;
+    }
+
+    protected function createUnpaidInvoicesAlert(Model $tenant): ?array
+    {
+        if (! method_exists($tenant, 'unpaidInvoices')) {
+            return null;
+        }
+
+        $unpaidInvoices = $tenant->unpaidInvoices()->get();
+
+        if ($unpaidInvoices->isEmpty()) {
+            return null;
+        }
+
+        $total = round($unpaidInvoices->sum(fn ($invoice): float => (float) $invoice->remaining_amount), 2);
+
+        if ($total <= 0) {
+            return null;
+        }
+
+        $alert = $this->createAlert(
+            'danger',
+            __('filament-modular-subscriptions::fms.tenant_subscription.unpaid_invoices_title'),
+            __('filament-modular-subscriptions::fms.tenant_subscription.unpaid_invoices_message', [
+                'count' => $unpaidInvoices->count(),
+                'total' => number_format($total, 2),
+                'currency' => config('filament-modular-subscriptions.main_currency'),
+            ]),
+            __('filament-modular-subscriptions::fms.tenant_subscription.pay_now')
+        );
+
+        $alert['action']['url'] = TenantSubscription::getUrl();
+        $alert['dismissible'] = true;
+
+        return $alert;
     }
 
     protected function isSubscriptionExpired($subscription): bool
@@ -311,6 +358,7 @@ class FmsPlugin implements Plugin
                 $alerts[] = $this->createModuleLimitAlert($module, $subscription, $limit);
             }
         }
+
         return $alerts;
     }
 
@@ -376,6 +424,7 @@ class FmsPlugin implements Plugin
         $usage = $moduleInstance->calculateUsage($subscription);
         $limit = $limit ?? $subscription->plan->moduleLimit($module);
         $percentage = ($usage / $limit) * 100;
+
         return $this->createAlert(
             'danger',
             __('filament-modular-subscriptions::fms.tenant_subscription.you_have_reached_the_limit_of_this_module'),
@@ -407,18 +456,21 @@ class FmsPlugin implements Plugin
     public function navigationGroup(string | Closure $label): static
     {
         $this->navigationGroup = $label instanceof Closure ? $label() : $label;
+
         return $this;
     }
 
     public function tenantNavigationGroup(string | Closure $label): static
     {
         $this->tenantNavigationGroup = $label instanceof Closure ? $label() : $label;
+
         return $this;
     }
 
     public function subscriptionNavigationLabel(string | Closure $label): static
     {
         $this->subscriptionNavigationLabel = $label instanceof Closure ? $label() : $label;
+
         return $this;
     }
 
@@ -465,7 +517,7 @@ class FmsPlugin implements Plugin
             'warning',
             __('filament-modular-subscriptions::fms.tenant_subscription.trial_ending_soon'),
             __('filament-modular-subscriptions::fms.tenant_subscription.trial_ending_soon_message', [
-                'days' => $subscription->ends_at->diffInDays(now())
+                'days' => $subscription->ends_at->diffInDays(now()),
             ]),
             __('filament-modular-subscriptions::fms.tenant_subscription.upgrade_now')
         );
