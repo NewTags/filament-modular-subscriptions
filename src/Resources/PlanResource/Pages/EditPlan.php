@@ -2,6 +2,7 @@
 
 namespace NewTags\FilamentModularSubscriptions\Resources\PlanResource\Pages;
 
+use Filament\Actions\DeleteAction;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use NewTags\FilamentModularSubscriptions\Resources\PlanResource;
@@ -13,7 +14,7 @@ class EditPlan extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
+            DeleteAction::make()
                 ->visible(fn($record) => $record->subscriptions()->exists()),
         ];
     }

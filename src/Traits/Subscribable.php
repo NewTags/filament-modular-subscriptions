@@ -2,6 +2,8 @@
 
 namespace NewTags\FilamentModularSubscriptions\Traits;
 
+use InvalidArgumentException;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Carbon\Carbon;
 use NewTags\FilamentModularSubscriptions\Enums\Interval;
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
@@ -24,9 +26,9 @@ use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
  *
  * Provides subscription management functionality for models.
  *
- * @property-read \NewTags\FilamentModularSubscriptions\Models\Subscription|null $subscription
- * @property-read \NewTags\FilamentModularSubscriptions\Models\Plan|null $plan
- * @property \Carbon\Carbon|null $trial_ends_at
+ * @property-read Subscription|null $subscription
+ * @property-read Plan|null $plan
+ * @property Carbon|null $trial_ends_at
  */
 trait Subscribable
 {
@@ -41,12 +43,10 @@ trait Subscribable
     private const CACHE_TTL = 1800; // 30 minutes in seconds
 
     private const DAYS_LEFT_CACHE_TTL = 14400; // 4 hours in seconds
-
-
     /**
      * Get all subscriptions associated with the model.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return MorphMany
      */
     public function subscription(): MorphOne
     {
@@ -497,7 +497,7 @@ trait Subscribable
     /**
      * Convert interval period to days.
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     private function calculateDaysFromInterval(int $period, Interval $interval): int
     {
@@ -511,7 +511,7 @@ trait Subscribable
             case Interval::YEAR:
                 return $period * 365;
             default:
-                throw new \InvalidArgumentException('Invalid interval');
+                throw new InvalidArgumentException('Invalid interval');
         }
     }
 

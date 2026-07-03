@@ -2,6 +2,7 @@
 
 namespace NewTags\FilamentModularSubscriptions\Commands\Concerns;
 
+use Exception;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
@@ -52,7 +53,7 @@ trait CanGenerateInvoices
         );
     }
 
-    protected function handleError($subscription, SubscriptionLogService $logService, \Exception $e): void
+    protected function handleError($subscription, SubscriptionLogService $logService, Exception $e): void
     {
         $logService->log(
             $subscription,
@@ -69,7 +70,7 @@ trait CanGenerateInvoices
         $this->logError($subscription, $e);
     }
 
-    protected function notifyError($subscription, \Exception $e): void
+    protected function notifyError($subscription, Exception $e): void
     {
         if ($subscription->subscribable) {
             $subscription->subscribable->notifySuperAdmins('invoice_generation_failed', [
@@ -82,7 +83,7 @@ trait CanGenerateInvoices
         $this->error("Error generating invoice for subscription {$subscription->id}: {$e->getMessage()}");
     }
 
-    protected function logError($subscription, \Exception $e): void
+    protected function logError($subscription, Exception $e): void
     {
         Log::error("Invoice generation error for subscription {$subscription->id}", [
             'error' => $e->getMessage(),

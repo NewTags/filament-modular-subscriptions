@@ -2,6 +2,7 @@
 
 namespace NewTags\FilamentModularSubscriptions\Commands;
 
+use Exception;
 use NewTags\FilamentModularSubscriptions\Models\Invoice;
 use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
@@ -67,7 +68,7 @@ class ScheduleInvoiceGeneration extends Command
             if ($this->shouldGenerateInvoice($subscription)) {
                 $this->generateInvoice($subscription, $invoiceService, $logService);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->handleError($subscription, $logService, $e);
         }
     }

@@ -24,8 +24,8 @@ class ModuleUsageWidget extends BaseWidget
 
         return (new ModuleUsageResource)->table($table)
             ->filters([])
-            ->actions([])
-            ->bulkActions([])
+            ->recordActions([])
+            ->toolbarActions([])
             ->searchable(false)
             ->query(
                 config('filament-modular-subscriptions.models.usage')::query()

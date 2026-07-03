@@ -2,6 +2,7 @@
 
 namespace NewTags\FilamentModularSubscriptions;
 
+use Throwable;
 use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Navigation\MenuItem;
@@ -108,7 +109,7 @@ class FmsPlugin implements Plugin
                     MenuItem::make()
                         ->label(fn() => $this->getSubscriptionNavigationLabel())
                         ->url(fn() => TenantSubscription::getUrl())
-                        ->color(fn() => Color::Emerald)
+                        ->color('success')
                         ->visible(fn() => $this->subscriptionPageInTenantMenu && $this->canSeeTenantSubscription())
                         ->icon('heroicon-o-credit-card'),
                 ])
@@ -195,7 +196,7 @@ class FmsPlugin implements Plugin
                 now()->addMinutes(60),
                 fn() => $tenant->admins()->where('users.id', $auth->id)->exists()
             );
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return false;
         }
     }

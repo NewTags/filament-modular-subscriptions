@@ -2,6 +2,7 @@
 
 namespace NewTags\FilamentModularSubscriptions\Models;
 
+use Exception;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
@@ -53,7 +54,7 @@ class Subscription extends Model
 
         $tenantModel = config('filament-modular-subscriptions.tenant_model');
         if (! $tenantModel) {
-            throw new \Exception('Tenant model not set in config/filament-modular-subscriptions.php');
+            throw new Exception('Tenant model not set in config/filament-modular-subscriptions.php');
         }
 
         return $this->belongsTo($tenantModel, 'subscribable_id');

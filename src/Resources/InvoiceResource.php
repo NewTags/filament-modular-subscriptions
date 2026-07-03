@@ -2,24 +2,44 @@
 
 namespace NewTags\FilamentModularSubscriptions\Resources;
 
+use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Actions\ViewAction;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Actions\BulkAction;
+use Illuminate\Database\Eloquent\Collection;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\Repeater;
+use Illuminate\Support\Carbon;
+use Salla\ZATCA\GenerateQrCode;
+use Salla\ZATCA\Tags\Seller;
+use Salla\ZATCA\Tags\TaxNumber;
+use Salla\ZATCA\Tags\InvoiceDate;
+use Salla\ZATCA\Tags\InvoiceTotalAmount;
+use Salla\ZATCA\Tags\InvoiceTaxAmount;
+use Mpdf\Config\ConfigVariables;
+use Mpdf\Config\FontVariables;
+use Mpdf\Mpdf;
+use Exception;
+use NewTags\FilamentModularSubscriptions\Resources\InvoiceResource\Pages\ListInvoices;
 use ArPHP\I18N\Arabic;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
-use Filament\Forms\Components\Wizard\Step;
-use Filament\Infolists\Components\Fieldset as ComponentsFieldset;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +56,7 @@ use NewTags\FilamentModularSubscriptions\Services\InvoiceService;
 
 class InvoiceResource extends Resource
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $tenantOwnershipRelationshipName = 'tenant';
 
@@ -76,7 +96,7 @@ class InvoiceResource extends Resource
         return 'warning';
     }
 
-    public static function table(Tables\Table $table): Tables\Table
+    public static function table(Table $table): Table
     {
         $currency = config('filament-modular-subscriptions.main_currency');
 
@@ -100,43 +120,43 @@ class InvoiceResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
 
-                Tables\Columns\TextColumn::make('subscription.subscriber.name')
+                TextColumn::make('subscription.subscriber.name')
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subscription_id'))
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('subtotal')
+                TextColumn::make('subtotal')
                     ->prefix($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.subtotal'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tax')
+                TextColumn::make('tax')
                     ->prefix($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.tax'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->prefix($currency)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.total'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->badge()
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.status'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('due_date')
+                TextColumn::make('due_date')
                     ->date()
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.due_date'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('paid_at')
+                TextColumn::make('paid_at')
                     ->dateTime()
                     ->toggledHiddenByDefault()
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.paid_at'))
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->options(InvoiceStatus::class)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.status')),
-                Tables\Filters\Filter::make('amount')
-                    ->form([
+                Filter::make('amount')
+                    ->schema([
                         TextInput::make('amount_from')
                             ->numeric()
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount_from')),
@@ -155,8 +175,8 @@ class InvoiceResource extends Resource
                                 fn (Builder $query, $amount): Builder => $query->where('amount', '<=', $amount),
                             );
                     }),
-                Tables\Filters\Filter::make('date')
-                    ->form([
+                Filter::make('date')
+                    ->schema([
                         DatePicker::make('created_from')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_from')),
                         DatePicker::make('created_until')
@@ -177,7 +197,7 @@ class InvoiceResource extends Resource
             ->filtersFormColumns(3)
             ->modelLabel(__('filament-modular-subscriptions::fms.resources.invoice.singular_name'))
             ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.invoice.name'))
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->slideOver()
                     ->modalWidth('4xl')
@@ -414,12 +434,12 @@ class InvoiceResource extends Resource
                     ->slideOver()
                     ->modalWidth('5xl')
                     ->visible(fn ($record) => $record->payments()->exists())
-                    ->infolist(function ($record) {
+                    ->schema(function ($record) {
                         $payments = $record->payments;
                         $schema = [];
 
                         foreach ($payments as $payment) {
-                            $schema[] = ComponentsFieldset::make($payment->created_at->translatedFormat('M d, Y'))
+                            $schema[] = Fieldset::make($payment->created_at->translatedFormat('M d, Y'))
                                 ->schema([
                                     TextEntry::make('amount')
                                         ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount'))
@@ -445,8 +465,8 @@ class InvoiceResource extends Resource
             ->headerActions([
                 self::createManualInvoiceAction(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkAction::make('delete_unpaid')
+            ->toolbarActions([
+                BulkAction::make('delete_unpaid')
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.actions.delete_unpaid'))
                     ->icon('heroicon-o-trash')
                     ->color('danger')
@@ -454,7 +474,7 @@ class InvoiceResource extends Resource
                     ->modalHeading(__('filament-modular-subscriptions::fms.resources.invoice.actions.delete_unpaid'))
                     ->modalDescription(__('filament-modular-subscriptions::fms.resources.invoice.delete_unpaid_warning'))
                     ->visible(fn (): bool => ! FmsPlugin::get()->isOnTenantPanel())
-                    ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
+                    ->action(function (Collection $records): void {
                         $deleted = 0;
                         $skipped = 0;
 
@@ -503,7 +523,7 @@ class InvoiceResource extends Resource
                 'amount' => (float) $record->remaining_amount,
                 'payment_method' => PaymentMethod::BANK_TRANSFER->value,
             ])
-            ->form([
+            ->schema([
                 Placeholder::make('remaining_amount')
                     ->label(__('filament-modular-subscriptions::fms.invoice.remaining_amount'))
                     ->content(fn ($record): string => number_format((float) $record->remaining_amount, 2) . ' ' . config('filament-modular-subscriptions.main_currency')),
@@ -569,9 +589,9 @@ class InvoiceResource extends Resource
             ->modalWidth('4xl')
             ->modalHeading(__('filament-modular-subscriptions::fms.invoice.create_manual_invoice'))
             ->visible(fn (): bool => ! FmsPlugin::get()->isOnTenantPanel())
-            ->form([
+            ->schema([
                 Grid::make(2)->schema([
-                    \Filament\Forms\Components\Select::make('tenant_id')
+                    Select::make('tenant_id')
                         ->label(__('filament-modular-subscriptions::fms.invoice.subscriber'))
                         ->options(fn (): array => config('filament-modular-subscriptions.tenant_model')::query()
                             ->orderBy(config('filament-modular-subscriptions.tenant_attribute'))
@@ -581,7 +601,7 @@ class InvoiceResource extends Resource
                         ->preload()
                         ->live()
                         ->required()
-                        ->afterStateUpdated(function ($state, \Filament\Forms\Set $set): void {
+                        ->afterStateUpdated(function ($state, Set $set): void {
                             $latest = $state
                                 ? config('filament-modular-subscriptions.models.subscription')::query()
                                     ->where('subscribable_id', $state)
@@ -592,9 +612,9 @@ class InvoiceResource extends Resource
                             $set('subscription_id', $latest?->id);
                             self::fillManualInvoiceItems($latest?->id, $set);
                         }),
-                    \Filament\Forms\Components\Select::make('subscription_id')
+                    Select::make('subscription_id')
                         ->label(__('filament-modular-subscriptions::fms.invoice.subscription'))
-                        ->options(function (\Filament\Forms\Get $get): array {
+                        ->options(function (Get $get): array {
                             if (! $get('tenant_id')) {
                                 return [];
                             }
@@ -611,14 +631,14 @@ class InvoiceResource extends Resource
                         })
                         ->required()
                         ->live()
-                        ->afterStateUpdated(fn ($state, \Filament\Forms\Set $set) => self::fillManualInvoiceItems($state, $set))
-                        ->disabled(fn (\Filament\Forms\Get $get): bool => ! $get('tenant_id'))
+                        ->afterStateUpdated(fn ($state, Set $set) => self::fillManualInvoiceItems($state, $set))
+                        ->disabled(fn (Get $get): bool => ! $get('tenant_id'))
                         ->helperText(__('filament-modular-subscriptions::fms.invoice.manual_invoice_subscription_hint')),
                 ]),
                 Placeholder::make('usage_summary')
                     ->label(__('filament-modular-subscriptions::fms.invoice.current_usage'))
-                    ->visible(fn (\Filament\Forms\Get $get): bool => filled($get('subscription_id')))
-                    ->content(function (\Filament\Forms\Get $get): HtmlString {
+                    ->visible(fn (Get $get): bool => filled($get('subscription_id')))
+                    ->content(function (Get $get): HtmlString {
                         $subscription = config('filament-modular-subscriptions.models.subscription')::query()
                             ->with('plan.modules')
                             ->find($get('subscription_id'));
@@ -639,7 +659,7 @@ class InvoiceResource extends Resource
                                 : '<span class="text-sm">' . implode(' &nbsp;•&nbsp; ', $rows) . '</span>'
                         );
                     }),
-                \Filament\Forms\Components\Repeater::make('items')
+                Repeater::make('items')
                     ->label(__('filament-modular-subscriptions::fms.invoice.items'))
                     ->schema([
                         TextInput::make('description')
@@ -682,7 +702,7 @@ class InvoiceResource extends Resource
                 ]),
                 Placeholder::make('manual_invoice_total')
                     ->label(__('filament-modular-subscriptions::fms.invoice.total_with_tax'))
-                    ->content(function (\Filament\Forms\Get $get): HtmlString {
+                    ->content(function (Get $get): HtmlString {
                         $subtotal = collect($get('items') ?? [])
                             ->sum(fn ($item): float => (float) ($item['quantity'] ?? 0) * (float) ($item['unit_price'] ?? 0));
                         $tax = round($subtotal * ((float) $get('tax_percentage') / 100), 2);
@@ -708,11 +728,11 @@ class InvoiceResource extends Resource
                     return;
                 }
 
-                $invoice = app(\NewTags\FilamentModularSubscriptions\Services\InvoiceService::class)->createManualInvoice(
+                $invoice = app(InvoiceService::class)->createManualInvoice(
                     $subscription,
                     $data['items'],
                     (float) $data['tax_percentage'],
-                    filled($data['due_date']) ? \Illuminate\Support\Carbon::parse($data['due_date']) : null,
+                    filled($data['due_date']) ? Carbon::parse($data['due_date']) : null,
                 );
 
                 Notification::make()
@@ -722,7 +742,7 @@ class InvoiceResource extends Resource
             });
     }
 
-    protected static function fillManualInvoiceItems($subscriptionId, \Filament\Forms\Set $set): void
+    protected static function fillManualInvoiceItems($subscriptionId, Set $set): void
     {
         if (! $subscriptionId) {
             return;
@@ -736,7 +756,7 @@ class InvoiceResource extends Resource
             return;
         }
 
-        $items = app(\NewTags\FilamentModularSubscriptions\Services\InvoiceService::class)
+        $items = app(InvoiceService::class)
             ->previewInvoiceItems($subscription);
 
         $set('items', $items !== [] ? $items : [['description' => null, 'quantity' => 1, 'unit_price' => null]]);
@@ -754,12 +774,12 @@ class InvoiceResource extends Resource
                 $taxAmount = $record->tax;
 
                 // Generate QR code with correct amounts
-                $QrCode = \Salla\ZATCA\GenerateQrCode::fromArray([
-                    new \Salla\ZATCA\Tags\Seller(config('filament-modular-subscriptions.company_name')),
-                    new \Salla\ZATCA\Tags\TaxNumber(config('filament-modular-subscriptions.tax_number')),
-                    new \Salla\ZATCA\Tags\InvoiceDate($record->created_at->utc()->format('Y-m-d\TH:i:s\Z')),
-                    new \Salla\ZATCA\Tags\InvoiceTotalAmount(number_format((float) $record->amount, 2, '.', '')), // Total with tax
-                    new \Salla\ZATCA\Tags\InvoiceTaxAmount(number_format((float) $record->tax, 2, '.', '')),
+                $QrCode = GenerateQrCode::fromArray([
+                    new Seller(config('filament-modular-subscriptions.company_name')),
+                    new TaxNumber(config('filament-modular-subscriptions.tax_number')),
+                    new InvoiceDate($record->created_at->utc()->format('Y-m-d\TH:i:s\Z')),
+                    new InvoiceTotalAmount(number_format((float) $record->amount, 2, '.', '')), // Total with tax
+                    new InvoiceTaxAmount(number_format((float) $record->tax, 2, '.', '')),
                 ])->render();
 
                 // Resolve the company logo to a base64 data URI (config may hold an
@@ -782,13 +802,13 @@ class InvoiceResource extends Resource
                 ];
 
                 // Configure mPDF with better Arabic support
-                $defaultConfig = (new \Mpdf\Config\ConfigVariables)->getDefaults();
+                $defaultConfig = (new ConfigVariables)->getDefaults();
                 $fontDirs = $defaultConfig['fontDir'];
 
-                $defaultFontConfig = (new \Mpdf\Config\FontVariables)->getDefaults();
+                $defaultFontConfig = (new FontVariables)->getDefaults();
                 $fontData = $defaultFontConfig['fontdata'];
 
-                $mpdf = new \Mpdf\Mpdf([
+                $mpdf = new Mpdf([
                     'fontDir' => array_merge($fontDirs, [
                         config('filament-modular-subscriptions.font_path'),
                         __DIR__ . '/../../public/fonts/saudi_riyal',
@@ -836,7 +856,7 @@ class InvoiceResource extends Resource
                     return response()->streamDownload(function () use ($mpdf) {
                         echo $mpdf->Output('', 'S');
                     }, 'invoice_' . $record->id . '_' . $record->created_at->format('Y-m-d') . '.pdf');
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Notification::make()
                         ->title(__('filament-modular-subscriptions::fms.invoice.pdf_generation_error'))
                         ->danger()
@@ -859,7 +879,7 @@ class InvoiceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListInvoices::route('/'),
+            'index' => ListInvoices::route('/'),
         ];
     }
 }

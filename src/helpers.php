@@ -15,7 +15,7 @@ if (! function_exists('clear_fms_cache')) {
             $tenant->clearFmsCache();
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             report($e);
 
             return false;
@@ -36,7 +36,7 @@ if (! function_exists('clear_fms_module_cache')) {
             Cache::forget($tenant->getCacheKey($moduleClass));
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             report($e);
 
             return false;

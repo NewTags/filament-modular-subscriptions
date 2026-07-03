@@ -3,6 +3,10 @@
 namespace NewTags\FilamentModularSubscriptions\Traits;
 
 
+use InvalidArgumentException;
+use Exception;
+use NewTags\FilamentModularSubscriptions\Models\Module;
+use RuntimeException;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
@@ -33,7 +37,7 @@ trait HasSubscriptionModules
 
 
                 $moduleModel = config('filament-modular-subscriptions.models.module');
-                /** @var \NewTags\FilamentModularSubscriptions\Models\Module $module */
+                /** @var Module $module */
                 $module = $moduleModel::where('class', $moduleClass)
                     ->with(['planModules' => function ($query) use ($subscription) {
                         $query->where('plan_id', $subscription->plan_id);
@@ -103,8 +107,8 @@ trait HasSubscriptionModules
     /**
      * Record usage for a specific module.
      *
-     * @throws \RuntimeException
-     * @throws \InvalidArgumentException
+     * @throws RuntimeException
+     * @throws InvalidArgumentException
      */
     public function recordUsage(string $moduleClass, int $quantity = 1, bool $incremental = true): void
     {
@@ -137,7 +141,7 @@ trait HasSubscriptionModules
         }])->where('class', $moduleClass)->first();
 
         if (! $module) {
-            throw new \InvalidArgumentException("Module {$moduleClass} not found");
+            throw new InvalidArgumentException("Module {$moduleClass} not found");
         }
 
         DB::transaction(function () use ($activeSubscription, $module, $quantity, $incremental): void {
@@ -240,7 +244,7 @@ trait HasSubscriptionModules
             $moduleUsagePricing = $activeSubscription->moduleUsages()->sum('pricing');
 
             return (float) number_format($basePlanPrice + $moduleUsagePricing, 2, '.', '');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             report($e);
 
             return 0.0;
