@@ -3,29 +3,31 @@
 namespace NewTags\FilamentModularSubscriptions\Resources;
 
 use ArPHP\I18N\Arabic;
-use Filament\Forms\Components\Component;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Infolists\Components\Fieldset as ComponentsFieldset;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Fieldset as ComponentsFieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -60,7 +62,7 @@ use Salla\ZATCA\Tags\TaxNumber;
 
 class InvoiceResource extends Resource
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $tenantOwnershipRelationshipName = 'tenant';
 
@@ -166,7 +168,7 @@ class InvoiceResource extends Resource
                     ->options(InvoiceStatus::class)
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.status')),
                 Tables\Filters\Filter::make('amount')
-                    ->form([
+                    ->schema([
                         TextInput::make('amount_from')
                             ->numeric()
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.amount_from')),
@@ -186,7 +188,7 @@ class InvoiceResource extends Resource
                             );
                     }),
                 Tables\Filters\Filter::make('date')
-                    ->form([
+                    ->schema([
                         DatePicker::make('created_from')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_from')),
                         DatePicker::make('created_until')
@@ -207,7 +209,7 @@ class InvoiceResource extends Resource
             ->filtersFormColumns(3)
             ->modelLabel(__('filament-modular-subscriptions::fms.resources.invoice.singular_name'))
             ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.invoice.name'))
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->slideOver()
                     ->modalWidth('4xl')
@@ -240,9 +242,9 @@ class InvoiceResource extends Resource
                         }
                     )
                     ->fillForm(fn ($record): array => self::paymentFormDefaults($record))
-                    ->form(fn ($record): array => self::paymentFormSchema($record))
+                    ->schema(fn ($record): array => self::paymentFormSchema($record))
                     ->action(fn (array $data, $record, $livewire) => self::handlePayment($data, $record, $livewire)),
-                Tables\Actions\ActionGroup::make([
+                ActionGroup::make([
                     self::downloadAction(),
                     self::payInvoiceAction(),
                     self::copyPaymentLinkAction(),
@@ -252,7 +254,7 @@ class InvoiceResource extends Resource
                         ->slideOver()
                         ->modalWidth('5xl')
                         ->visible(fn ($record) => $record->payments()->exists())
-                        ->infolist(function ($record) {
+                        ->schema(function ($record) {
                             $payments = $record->payments;
                             $schema = [];
 
@@ -285,8 +287,8 @@ class InvoiceResource extends Resource
                 self::autoInvoiceGenerationToggleAction(),
                 self::createManualInvoiceAction(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkAction::make('delete_unpaid')
+            ->toolbarActions([
+                BulkAction::make('delete_unpaid')
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.actions.delete_unpaid'))
                     ->icon('heroicon-o-trash')
                     ->color('danger')
@@ -520,7 +522,7 @@ class InvoiceResource extends Resource
             ]))
             ->modalIcon('heroicon-o-link')
             ->modalWidth('lg')
-            ->infolist(fn ($record) => [
+            ->schema(fn ($record) => [
                 TextEntry::make('payment_link')
                     ->label(__('filament-modular-subscriptions::fms.payments.click_to_copy'))
                     ->state(self::paymentLinkFor($record))
@@ -563,7 +565,7 @@ class InvoiceResource extends Resource
                 'amount' => (float) $record->remaining_amount,
                 'payment_method' => PaymentMethod::BANK_TRANSFER->value,
             ])
-            ->form([
+            ->schema([
                 Placeholder::make('remaining_amount')
                     ->label(__('filament-modular-subscriptions::fms.invoice.remaining_amount'))
                     ->content(fn ($record): string => number_format((float) $record->remaining_amount, 2) . ' ' . config('filament-modular-subscriptions.main_currency')),
@@ -663,7 +665,7 @@ class InvoiceResource extends Resource
             ->modalWidth('4xl')
             ->modalHeading(__('filament-modular-subscriptions::fms.invoice.create_manual_invoice'))
             ->visible(fn (): bool => ! FmsPlugin::get()->isOnTenantPanel())
-            ->form([
+            ->schema([
                 Grid::make(2)->schema([
                     Select::make('tenant_id')
                         ->label(__('filament-modular-subscriptions::fms.invoice.subscriber'))

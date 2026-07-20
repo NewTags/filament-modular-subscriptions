@@ -18,6 +18,7 @@ use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
 use NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
+use Throwable;
 
 class FmsPlugin implements Plugin
 {
@@ -201,7 +202,7 @@ class FmsPlugin implements Plugin
                 now()->addMinutes(60),
                 fn () => $tenant->admins()->where('users.id', $auth->id)->exists()
             );
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return false;
         }
     }

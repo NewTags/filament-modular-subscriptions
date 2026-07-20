@@ -2,6 +2,7 @@
 
 namespace NewTags\FilamentModularSubscriptions\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Log;
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
@@ -29,7 +30,7 @@ class SubscriptionLogService
                 'new_status' => $newStatus instanceof SubscriptionStatus ? $newStatus->getLabel() : $newStatus,
                 'metadata' => $metadata,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to create subscription log', [
                 'subscription_id' => $subscription->id,
                 'event' => $event,
