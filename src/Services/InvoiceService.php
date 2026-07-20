@@ -160,10 +160,11 @@ class InvoiceService
         ?float $taxPercentage = null,
         ?Carbon $dueDate = null,
         int $bonusDays = 0,
+        int $periodDays = 0,
     ): Invoice {
         $taxPercentage = $taxPercentage ?? $this->taxPercentage;
 
-        return DB::transaction(function () use ($subscription, $items, $taxPercentage, $dueDate, $bonusDays): Invoice {
+        return DB::transaction(function () use ($subscription, $items, $taxPercentage, $dueDate, $bonusDays, $periodDays): Invoice {
             $invoice = $this->invoiceModel::create([
                 'subscription_id' => $subscription->id,
                 'tenant_id' => $subscription->subscribable_id,
@@ -172,6 +173,7 @@ class InvoiceService
                 'amount' => 0,
                 'status' => InvoiceStatus::UNPAID,
                 'due_date' => $dueDate ?? now()->addDays($subscription->plan->period_grace ?? 0),
+                'period_days' => max(0, $periodDays),
             ]);
 
             foreach ($items as $item) {
@@ -256,7 +258,10 @@ class InvoiceService
 
             if ($subscription && $subscription->plan_id) {
                 $oldPlanId = $subscription->plan_id;
-                $subscription->renew(bonusDays: (int) $invoice->bonus_days);
+                $subscription->renew(
+                    days: $invoice->period_days > 0 ? (int) $invoice->period_days : null,
+                    bonusDays: (int) $invoice->bonus_days,
+                );
 
                 if ($subscription->plan_id !== $oldPlanId) {
                     $subscription->subscribable->notifySubscriptionChange('subscription_switched', [

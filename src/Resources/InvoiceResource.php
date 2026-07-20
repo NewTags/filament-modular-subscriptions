@@ -724,7 +724,7 @@ class InvoiceResource extends Resource
                     ->minItems(1)
                     ->required()
                     ->addActionLabel(__('filament-modular-subscriptions::fms.invoice.add_item')),
-                Section::make(__('filament-modular-subscriptions::fms.period_bonus.section_title'))
+                Section::make(__('filament-modular-subscriptions::fms.period_bonus.invoice_section_title'))
                     ->description(__('filament-modular-subscriptions::fms.period_bonus.invoice_section_description'))
                     ->icon('heroicon-o-gift')
                     ->compact()
@@ -734,6 +734,13 @@ class InvoiceResource extends Resource
                             ->with('plan')
                             ->find($get('subscription_id'))
                             ?->plan,
+                        withPaidPeriod: true,
+                        resolveAmount: function (Get $get): float {
+                            $subtotal = collect($get('items') ?? [])
+                                ->sum(fn ($item): float => (float) ($item['quantity'] ?? 0) * (float) ($item['unit_price'] ?? 0));
+
+                            return round($subtotal * (1 + ((float) $get('tax_percentage')) / 100), 2);
+                        },
                     )),
                 Grid::make(2)->schema([
                     TextInput::make('tax_percentage')
@@ -743,6 +750,7 @@ class InvoiceResource extends Resource
                         ->minValue(0)
                         ->maxValue(100)
                         ->suffix('%')
+                        ->live(onBlur: true)
                         ->required(),
                     DatePicker::make('due_date')
                         ->label(__('filament-modular-subscriptions::fms.invoice.due_date'))
@@ -783,6 +791,7 @@ class InvoiceResource extends Resource
                     (float) $data['tax_percentage'],
                     filled($data['due_date']) ? Carbon::parse($data['due_date']) : null,
                     max(0, (int) ($data['bonus_days'] ?? 0)),
+                    max(0, (int) ($data['period_days'] ?? 0)),
                 );
 
                 Notification::make()
