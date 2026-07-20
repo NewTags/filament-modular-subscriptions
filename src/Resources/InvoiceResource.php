@@ -43,6 +43,7 @@ use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use NewTags\FilamentModularSubscriptions\Enums\PaymentMethod;
 use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
 use NewTags\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\Models\FmsSetting;
 use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
 use NewTags\FilamentModularSubscriptions\Payments\CheckoutService;
 use NewTags\FilamentModularSubscriptions\Payments\Exceptions\CheckoutException;
@@ -281,6 +282,7 @@ class InvoiceResource extends Resource
                 ]),
             ])
             ->headerActions([
+                self::autoInvoiceGenerationToggleAction(),
                 self::createManualInvoiceAction(),
             ])
             ->bulkActions([
@@ -614,6 +616,40 @@ class InvoiceResource extends Resource
                 Notification::make()
                     ->title(__('filament-modular-subscriptions::fms.resources.invoice.payment_recorded'))
                     ->success()
+                    ->send();
+            });
+    }
+
+    /**
+     * Super-admin switch for the scheduled invoice generator (fms:schedule-invoices):
+     * when off, the daily run exits without billing anyone.
+     */
+    public static function autoInvoiceGenerationToggleAction(): Action
+    {
+        return Action::make('auto_invoice_generation')
+            ->visible(fn (): bool => ! FmsPlugin::get()->isOnTenantPanel())
+            ->label(fn (): string => FmsSetting::autoInvoiceGenerationEnabled()
+                ? __('filament-modular-subscriptions::fms.invoice.auto_generation_enabled')
+                : __('filament-modular-subscriptions::fms.invoice.auto_generation_disabled'))
+            ->icon(fn (): string => FmsSetting::autoInvoiceGenerationEnabled() ? 'heroicon-o-bolt' : 'heroicon-o-bolt-slash')
+            ->color(fn (): string => FmsSetting::autoInvoiceGenerationEnabled() ? 'success' : 'gray')
+            ->requiresConfirmation()
+            ->modalIcon(fn (): string => FmsSetting::autoInvoiceGenerationEnabled() ? 'heroicon-o-bolt-slash' : 'heroicon-o-bolt')
+            ->modalHeading(fn (): string => FmsSetting::autoInvoiceGenerationEnabled()
+                ? __('filament-modular-subscriptions::fms.invoice.auto_generation_disable_heading')
+                : __('filament-modular-subscriptions::fms.invoice.auto_generation_enable_heading'))
+            ->modalDescription(fn (): string => FmsSetting::autoInvoiceGenerationEnabled()
+                ? __('filament-modular-subscriptions::fms.invoice.auto_generation_disable_description')
+                : __('filament-modular-subscriptions::fms.invoice.auto_generation_enable_description'))
+            ->action(function (): void {
+                $enabled = ! FmsSetting::autoInvoiceGenerationEnabled();
+                FmsSetting::set(FmsSetting::AUTO_INVOICE_GENERATION, $enabled ? '1' : '0');
+
+                Notification::make()
+                    ->success()
+                    ->title($enabled
+                        ? __('filament-modular-subscriptions::fms.invoice.auto_generation_enabled_notification')
+                        : __('filament-modular-subscriptions::fms.invoice.auto_generation_disabled_notification'))
                     ->send();
             });
     }

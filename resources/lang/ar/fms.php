@@ -98,6 +98,14 @@ return [
             ],
         ],
         'invoice' => [
+            'auto_generation_enabled' => 'التوليد التلقائي للفواتير: مفعّل',
+            'auto_generation_disabled' => 'التوليد التلقائي للفواتير: معطّل',
+            'auto_generation_enable_heading' => 'تفعيل التوليد التلقائي للفواتير',
+            'auto_generation_disable_heading' => 'تعطيل التوليد التلقائي للفواتير',
+            'auto_generation_enable_description' => 'سيتم توليد فواتير التجديد تلقائياً يومياً لكل اشتراك انتهت فترته (حسب الاستخدام أو الباقة). الأكاديمية التي لديها فاتورة غير مسددة لن تُصدر لها فاتورة جديدة.',
+            'auto_generation_disable_description' => 'سيتوقف توليد فواتير التجديد تلقائياً، وستحتاج لإنشاء الفواتير يدوياً عند نهاية كل فترة.',
+            'auto_generation_enabled_notification' => 'تم تفعيل التوليد التلقائي للفواتير',
+            'auto_generation_disabled_notification' => 'تم تعطيل التوليد التلقائي للفواتير',
             'name' => 'الفواتير',
             'singular_name' => 'فاتورة',
             'fields' => [

@@ -149,6 +149,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             'add_indexes_to_fms_tables',
             'add_bonus_days_to_fms_tables',
             'add_period_days_to_fms_invoices',
+            'create_fms_settings_table',
         ];
     }
 

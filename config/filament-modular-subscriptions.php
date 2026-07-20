@@ -61,6 +61,7 @@ return [
         'payment' => 'fms_payments',
         'payment_checkout' => 'fms_payment_checkouts',
         'subscription_log' => 'fms_subscription_logs',
+        'setting' => 'fms_settings',
     ],
 
     'main_currency' => 'SAR',

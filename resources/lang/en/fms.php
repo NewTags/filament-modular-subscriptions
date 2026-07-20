@@ -98,6 +98,14 @@ return [
             ],
         ],
         'invoice' => [
+            'auto_generation_enabled' => 'Auto invoice generation: On',
+            'auto_generation_disabled' => 'Auto invoice generation: Off',
+            'auto_generation_enable_heading' => 'Enable automatic invoice generation',
+            'auto_generation_disable_heading' => 'Disable automatic invoice generation',
+            'auto_generation_enable_description' => 'Renewal invoices will be generated automatically every day for each subscription whose period has ended (usage-based or fixed). Academies with an unpaid invoice are skipped.',
+            'auto_generation_disable_description' => 'Automatic renewal invoicing will stop; you will need to create invoices manually at the end of each period.',
+            'auto_generation_enabled_notification' => 'Automatic invoice generation enabled',
+            'auto_generation_disabled_notification' => 'Automatic invoice generation disabled',
             'name' => 'Invoices',
             'singular_name' => 'Invoice',
             'fields' => [
