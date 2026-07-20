@@ -3,6 +3,7 @@
 namespace NewTags\FilamentModularSubscriptions\Resources;
 
 use ArPHP\I18N\Arabic;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
@@ -10,6 +11,7 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -36,6 +38,7 @@ use Illuminate\Support\Str;
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
 use Mpdf\Mpdf;
+use NewTags\FilamentModularSubscriptions\Components\PeriodBonusFields;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use NewTags\FilamentModularSubscriptions\Enums\PaymentMethod;
 use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
@@ -340,7 +343,7 @@ class InvoiceResource extends Resource
      * Single-step pay form: a method picker that reactively reveals the secure online
      * checkout summary or the bank-transfer details for the given invoice.
      *
-     * @return array<int, \Filament\Forms\Components\Component>
+     * @return array<int, Component>
      */
     public static function paymentFormSchema($invoice): array
     {
@@ -721,6 +724,17 @@ class InvoiceResource extends Resource
                     ->minItems(1)
                     ->required()
                     ->addActionLabel(__('filament-modular-subscriptions::fms.invoice.add_item')),
+                Section::make(__('filament-modular-subscriptions::fms.period_bonus.section_title'))
+                    ->description(__('filament-modular-subscriptions::fms.period_bonus.invoice_section_description'))
+                    ->icon('heroicon-o-gift')
+                    ->compact()
+                    ->visible(fn (Get $get): bool => filled($get('subscription_id')))
+                    ->schema(PeriodBonusFields::make(
+                        resolvePlan: fn (Get $get) => config('filament-modular-subscriptions.models.subscription')::query()
+                            ->with('plan')
+                            ->find($get('subscription_id'))
+                            ?->plan,
+                    )),
                 Grid::make(2)->schema([
                     TextInput::make('tax_percentage')
                         ->label(__('filament-modular-subscriptions::fms.invoice.tax_percentage'))
@@ -768,6 +782,7 @@ class InvoiceResource extends Resource
                     $data['items'],
                     (float) $data['tax_percentage'],
                     filled($data['due_date']) ? Carbon::parse($data['due_date']) : null,
+                    max(0, (int) ($data['bonus_days'] ?? 0)),
                 );
 
                 Notification::make()

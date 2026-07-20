@@ -20,12 +20,13 @@ class Invoice extends Model
         'status',
         'due_date',
         'paid_at',
-
+        'bonus_days',
     ];
 
     protected $casts = [
         'due_date' => 'datetime',
         'paid_at' => 'datetime',
+        'bonus_days' => 'integer',
         'status' => InvoiceStatus::class,
     ];
 

@@ -3,36 +3,36 @@
 namespace NewTags\FilamentModularSubscriptions\Traits;
 
 use Carbon\Carbon;
-use NewTags\FilamentModularSubscriptions\Enums\Interval;
-use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
-use NewTags\FilamentModularSubscriptions\Models\Plan;
-use NewTags\FilamentModularSubscriptions\Models\Subscription;
+use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Notifications\Notification;
-use NewTags\FilamentModularSubscriptions\Models\Invoice;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use NewTags\FilamentModularSubscriptions\Services\InvoiceService;
+use NewTags\FilamentModularSubscriptions\Enums\Interval;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\Models\Invoice;
+use NewTags\FilamentModularSubscriptions\Models\Plan;
+use NewTags\FilamentModularSubscriptions\Models\Subscription;
+use NewTags\FilamentModularSubscriptions\Services\InvoiceService;
 
 /**
  * Trait Subscribable
  *
  * Provides subscription management functionality for models.
  *
- * @property-read \NewTags\FilamentModularSubscriptions\Models\Subscription|null $subscription
- * @property-read \NewTags\FilamentModularSubscriptions\Models\Plan|null $plan
- * @property \Carbon\Carbon|null $trial_ends_at
+ * @property-read Subscription|null $subscription
+ * @property-read Plan|null $plan
+ * @property Carbon|null $trial_ends_at
  */
 trait Subscribable
 {
-    use HasSubscriptionNotifications;
     use HasSubscriptionModules;
+    use HasSubscriptionNotifications;
     use HasTrialSubscription;
+
     /**
      * Cache key prefix for active subscription
      */
@@ -42,11 +42,10 @@ trait Subscribable
 
     private const DAYS_LEFT_CACHE_TTL = 14400; // 4 hours in seconds
 
-
     /**
      * Get all subscriptions associated with the model.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return MorphMany
      */
     public function subscription(): MorphOne
     {
@@ -163,7 +162,7 @@ trait Subscribable
     public function cancel(): bool
     {
         $activeSubscription = $this->subscription;
-        if (!$activeSubscription) {
+        if (! $activeSubscription) {
             return false;
         }
 
@@ -174,6 +173,7 @@ trait Subscribable
                 ->body(__('filament-modular-subscriptions::fms.notifications.subscription.cancelled.unpaid_invoices'))
                 ->danger()
                 ->send();
+
             return false;
         }
 
@@ -192,7 +192,7 @@ trait Subscribable
                 }
             }
             // Clean up pending invoices when cancelling a non-PAYG plan
-            if (!$activeSubscription->plan->is_pay_as_you_go) {
+            if (! $activeSubscription->plan->is_pay_as_you_go) {
                 $pendingInvoices = $this->unpaidInvoices()
                     ->get();
 
@@ -218,8 +218,9 @@ trait Subscribable
      * Renew the current subscription.
      *
      * @param  int|null  $days  Number of days to renew for. If null, uses plan's default period.
+     * @param  int  $bonusDays  Free bonus days granted on top of the paid period for this term.
      */
-    public function renew(?int $days = null): bool
+    public function renew(?int $days = null, int $bonusDays = 0): bool
     {
         $subscription = $this->subscription;
         if (! $subscription) {
@@ -228,7 +229,7 @@ trait Subscribable
 
         $plan = $subscription->plan;
 
-        DB::transaction(function () use ($subscription, $days, $plan) {
+        DB::transaction(function () use ($subscription, $days, $plan, $bonusDays) {
             // Only delete non-persistent module usages
             // Clean up module usages based on plan type
 
@@ -237,8 +238,9 @@ trait Subscribable
                 ->delete();
 
             $subscription->update([
-                'ends_at' => $this->calculateEndDate($plan, $days),
+                'ends_at' => $this->calculateEndDate($plan, $days)->addDays($bonusDays),
                 'starts_at' => now(),
+                'bonus_days' => $bonusDays,
                 'status' => SubscriptionStatus::ACTIVE,
                 'trial_ends_at' => null,
             ]);
@@ -252,14 +254,13 @@ trait Subscribable
     /**
      * Switch to a different subscription plan.
      *
-     * @param int $newPlanId ID of the new plan
-     * @param SubscriptionStatus|null $status Optional status for the new subscription
-     * @return bool
+     * @param  int  $newPlanId  ID of the new plan
+     * @param  SubscriptionStatus|null  $status  Optional status for the new subscription
      */
     public function switchPlan(int $newPlanId, ?SubscriptionStatus $status = null): bool
     {
         $activeSubscription = $this->subscription;
-        if (!$activeSubscription) {
+        if (! $activeSubscription) {
             return false;
         }
 
@@ -274,7 +275,7 @@ trait Subscribable
                 $finalInvoice = $invoiceService->generatePayAsYouGoInvoice($activeSubscription);
 
                 $activeSubscription->update([
-                    'status' => SubscriptionStatus::ON_HOLD
+                    'status' => SubscriptionStatus::ON_HOLD,
                 ]);
 
                 if ($finalInvoice) {
@@ -291,7 +292,7 @@ trait Subscribable
             }
 
             // Clean up pending invoices when switching from non-PAYG plan
-            if (($oldPlan && $oldPlan->id != $newPlan->id) && !$oldPlan->is_pay_as_you_go) {
+            if (($oldPlan && $oldPlan->id != $newPlan->id) && ! $oldPlan->is_pay_as_you_go) {
                 $pendingInvoices = $this->invoices()
                     ->whereIn('status', [InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID, InvoiceStatus::REFUNDED])
                     ->where('subscription_id', $activeSubscription->id)
@@ -318,7 +319,7 @@ trait Subscribable
                 'status' => $status ?? $activeSubscription->status,
             ]);
             // Generate initial invoice for non-trial plans
-            if (!$newPlan->is_trial_plan && !$newPlan->is_pay_as_you_go) {
+            if (! $newPlan->is_trial_plan && ! $newPlan->is_pay_as_you_go) {
                 $initialInvoice = $invoiceService->generateInitialPlanInvoice($this, $newPlan);
                 $this->notifySuperAdmins('invoice_generated', [
                     'invoice_id' => $initialInvoice->id,
@@ -330,7 +331,7 @@ trait Subscribable
             // Send notification for subscription switch
             $this->notifySubscriptionChange('subscription_switched', [
                 'plan' => $newPlan->trans_name,
-                'date' => now()->format('Y-m-d H:i:s')
+                'date' => now()->format('Y-m-d H:i:s'),
             ]);
 
             $this->clearFmsCache();
@@ -339,8 +340,6 @@ trait Subscribable
         return true;
     }
 
-
-
     /**
      * Calculate the end date for a given plan.
      */
@@ -348,8 +347,6 @@ trait Subscribable
     {
         return now()->addDays($days ?? $plan->period);
     }
-
-
 
     protected function getNextSuitablePlan(): ?Plan
     {
@@ -379,27 +376,25 @@ trait Subscribable
         return $nextPricePlan;
     }
 
-
-
     /**
      * Create a new subscription for the model.
      *
-     * @param Plan $plan The plan to subscribe to
-     * @param Carbon|null $startDate Optional start date
-     * @param Carbon|null $endDate Optional end date
-     * @param int|null $trialDays Optional trial days
-     * @return Subscription|null
+     * @param  Plan  $plan  The plan to subscribe to
+     * @param  Carbon|null  $startDate  Optional start date
+     * @param  Carbon|null  $endDate  Optional end date
+     * @param  int|null  $trialDays  Optional trial days
      */
     public function subscribe(Plan $plan, ?Carbon $startDate = null, ?Carbon $endDate = null, ?int $trialDays = null): ?Subscription
     {
         $startDate = $startDate ?? now();
 
         // Check trial eligibility
-        if ($plan->isTrialPlan() && !$this->canUseTrial()) {
+        if ($plan->isTrialPlan() && ! $this->canUseTrial()) {
             Notification::make()
                 ->title(__('filament-modular-subscriptions::fms.notifications.subscription.trial.you_cant_use_trial'))
                 ->danger()
                 ->send();
+
             return null;
         }
 
@@ -419,7 +414,7 @@ trait Subscribable
         };
 
         DB::transaction(function () use (&$subscription, $plan, $startDate, $endDate, $status, $trialDays) {
-            if (!$this->subscription) {
+            if (! $this->subscription) {
                 $subscription = $this->subscription()
                     ->create([
                         'plan_id' => $plan->id,
@@ -428,7 +423,7 @@ trait Subscribable
                         'status' => $status,
                         'has_used_trial' => $plan->isTrialPlan() || $this->subscription?->has_used_trial,
                     ]);
-            }else{
+            } else {
                 $this->subscription->update([
                     'plan_id' => $plan->id,
                     'starts_at' => $startDate,
@@ -449,7 +444,7 @@ trait Subscribable
             // Create module usages
             $this->createSubscriptionModulesUsages();
             // Generate initial invoice for non-trial, non-PAYG plans
-            if (!$plan->is_trial_plan && !$plan->is_pay_as_you_go) {
+            if (! $plan->is_trial_plan && ! $plan->is_pay_as_you_go) {
                 $invoiceService = app(InvoiceService::class);
                 $initialInvoice = $invoiceService->generateInitialPlanInvoice($this, $plan);
 
@@ -478,7 +473,7 @@ trait Subscribable
                     'plan' => $plan->trans_name,
                     'status' => $status->getLabel(),
                     'trial' => true,
-                    'date' => now()->format('Y-m-d H:i:s')
+                    'date' => now()->format('Y-m-d H:i:s'),
                 ]);
             } else {
                 $this->notifySubscriptionChange('started', [
@@ -490,9 +485,9 @@ trait Subscribable
 
             $this->clearFmsCache();
         });
+
         return $subscription;
     }
-
 
     /**
      * Convert interval period to days.
@@ -529,8 +524,6 @@ trait Subscribable
 
         return $subscription->ends_at->copy()->addDays($gracePeriodDays);
     }
-
-
 
     public function invoices(): HasMany
     {

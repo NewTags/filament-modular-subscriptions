@@ -4,6 +4,7 @@ namespace NewTags\FilamentModularSubscriptions\Services;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use NewTags\FilamentModularSubscriptions\Components\PeriodBonusFields;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
 use NewTags\FilamentModularSubscriptions\Events\InvoiceGenerated;
@@ -48,9 +49,9 @@ class InvoiceService
         });
     }
 
-    public function generateInitialPlanInvoice($tenant, $plan): Invoice
+    public function generateInitialPlanInvoice($tenant, $plan, int $bonusDays = 0): Invoice
     {
-        return DB::transaction(function () use ($tenant, $plan) {
+        return DB::transaction(function () use ($tenant, $plan, $bonusDays) {
             if (! $tenant->subscription) {
                 $subscription = $this->createInitialSubscription($tenant, $plan);
             } else {
@@ -63,11 +64,32 @@ class InvoiceService
             );
 
             $this->createInvoiceItems($invoice, $subscription, $plan);
+            $this->applyBonusPeriod($invoice, $bonusDays);
             $invoice->refresh();
             $this->updateInvoiceTotals($invoice);
 
             return $invoice;
         });
+    }
+
+    /**
+     * Attach a free bonus period to an invoice: a zero-price gift line the customer
+     * sees, plus the bonus_days marker consumed by renewal when the invoice is paid.
+     */
+    private function applyBonusPeriod(Invoice $invoice, int $bonusDays): void
+    {
+        if ($bonusDays <= 0) {
+            return;
+        }
+
+        $invoice->items()->create([
+            'description' => PeriodBonusFields::giftLineDescription($bonusDays),
+            'quantity' => 1,
+            'unit_price' => 0,
+            'total' => 0,
+        ]);
+
+        $invoice->update(['bonus_days' => $bonusDays]);
     }
 
     /**
@@ -137,10 +159,11 @@ class InvoiceService
         array $items,
         ?float $taxPercentage = null,
         ?Carbon $dueDate = null,
+        int $bonusDays = 0,
     ): Invoice {
         $taxPercentage = $taxPercentage ?? $this->taxPercentage;
 
-        return DB::transaction(function () use ($subscription, $items, $taxPercentage, $dueDate): Invoice {
+        return DB::transaction(function () use ($subscription, $items, $taxPercentage, $dueDate, $bonusDays): Invoice {
             $invoice = $this->invoiceModel::create([
                 'subscription_id' => $subscription->id,
                 'tenant_id' => $subscription->subscribable_id,
@@ -162,6 +185,8 @@ class InvoiceService
                     'total' => round($quantity * $unitPrice, 2),
                 ]);
             }
+
+            $this->applyBonusPeriod($invoice, $bonusDays);
 
             $subtotal = round((float) $invoice->items()->sum('total'), 2);
             $tax = round($subtotal * ($taxPercentage / 100), 2);
@@ -231,7 +256,7 @@ class InvoiceService
 
             if ($subscription && $subscription->plan_id) {
                 $oldPlanId = $subscription->plan_id;
-                $subscription->renew();
+                $subscription->renew(bonusDays: (int) $invoice->bonus_days);
 
                 if ($subscription->plan_id !== $oldPlanId) {
                     $subscription->subscribable->notifySubscriptionChange('subscription_switched', [

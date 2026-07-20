@@ -4,13 +4,13 @@ namespace NewTags\FilamentModularSubscriptions\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
 
 class Subscription extends Model
 {
@@ -23,6 +23,7 @@ class Subscription extends Model
         'subscribable_type',
         'starts_at',
         'ends_at',
+        'bonus_days',
         'trial_ends_at',
         'status',
         'has_used_trial',
@@ -37,6 +38,7 @@ class Subscription extends Model
     protected $casts = [
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
+        'bonus_days' => 'integer',
         'trial_ends_at' => 'datetime',
         'status' => SubscriptionStatus::class,
     ];
@@ -86,9 +88,14 @@ class Subscription extends Model
         return $this->trial_ends_at && $this->trial_ends_at->isPast();
     }
 
-    public function renew(?int $days = null): bool
+    public function renew(?int $days = null, int $bonusDays = 0): bool
     {
-        return $this->subscriber->renew($days);
+        return $this->subscriber->renew($days, $bonusDays);
+    }
+
+    public function hasBonus(): bool
+    {
+        return $this->bonus_days > 0;
     }
 
     /**
@@ -115,27 +122,25 @@ class Subscription extends Model
             : null;
     }
 
-
     public function isExpired(): bool
     {
         if ($this->status === SubscriptionStatus::EXPIRED) {
             return true;
         }
 
-        if (!$this->ends_at) {
+        if (! $this->ends_at) {
             return false;
         }
 
         $gracePeriodEndDate = $this->getGracePeriodEndDate();
-        
+
         return $gracePeriodEndDate && now()->isAfter($gracePeriodEndDate);
     }
 
-
-    public function IsPayAsYouGo() : Attribute
+    public function IsPayAsYouGo(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->plan->is_pay_as_you_go,
+            get: fn () => $this->plan->is_pay_as_you_go,
         );
     }
 
