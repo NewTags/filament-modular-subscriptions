@@ -17,10 +17,10 @@ use Illuminate\Support\HtmlString;
 use NewTags\FilamentModularSubscriptions\Models\Plan;
 
 /**
- * Shared "period + bonus" builder: optional paid-period quick picks, gift
- * quick picks, live coverage timeline and gift-value summary. Reused by the
- * subscription form and the manual invoice modal. Dehydrates `bonus_days`
- * (and `period_days` when the paid-period selector is enabled).
+ * Shared "bonus period" builder: gift quick picks, live coverage timeline and
+ * gift-value summary. Reused by the subscription form and the manual invoice
+ * modal. Dehydrates a single `bonus_days` integer; the paid period always
+ * comes from the subscription's plan.
  */
 class PeriodBonusFields
 {
@@ -28,7 +28,6 @@ class PeriodBonusFields
      * @param  Closure(Get): ?Plan  $resolvePlan
      * @param  Closure(Get): ?Carbon  $resolveStart
      * @param  Closure(Get, Set): void  $onBonusUpdated
-     * @param  bool  $withPaidPeriod  Show a paid-period selector (manual invoice quotes) instead of always using the plan period.
      * @param  Closure(Get): float  $resolveAmount  What the customer actually pays; defaults to the plan price.
      * @return array<int, Component>
      */
@@ -36,88 +35,19 @@ class PeriodBonusFields
         Closure $resolvePlan,
         ?Closure $resolveStart = null,
         ?Closure $onBonusUpdated = null,
-        bool $withPaidPeriod = false,
         ?Closure $resolveAmount = null,
     ): array {
         $resolveStart ??= fn (Get $get): Carbon => now();
         $resolveAmount ??= fn (Get $get): float => (float) ($resolvePlan($get)?->price ?? 0);
-        $resolvePaidDays = function (Get $get) use ($resolvePlan, $withPaidPeriod): int {
-            $planDays = max(1, (int) ($resolvePlan($get)?->period ?? 30));
-            if (! $withPaidPeriod) {
-                return $planDays;
-            }
-            $selected = (int) $get('period_days');
-
-            return $selected > 0 ? $selected : $planDays;
-        };
+        $resolvePaidDays = fn (Get $get): int => max(1, (int) ($resolvePlan($get)?->period ?? 30));
         $applyBonus = function (Get $get, Set $set) use ($onBonusUpdated): void {
             $set('bonus_days', self::resolveBonusDays($get));
             if ($onBonusUpdated) {
                 $onBonusUpdated($get, $set);
             }
         };
-        $applyPaidPeriod = function (Get $get, Set $set) use ($onBonusUpdated): void {
-            $set('period_days', self::resolvePaidPeriodDays($get));
-            if ($onBonusUpdated) {
-                $onBonusUpdated($get, $set);
-            }
-        };
-
-        $paidPeriodFields = ! $withPaidPeriod ? [] : [
-            Hidden::make('period_days')
-                ->default(0)
-                ->dehydrateStateUsing(fn ($state): int => max(0, (int) $state)),
-            ToggleButtons::make('paid_period_preset')
-                ->label(__('filament-modular-subscriptions::fms.period_bonus.paid_period'))
-                ->inline()
-                ->live()
-                ->dehydrated(false)
-                ->default('plan')
-                ->options([
-                    'plan' => __('filament-modular-subscriptions::fms.period_bonus.plan_period'),
-                    '30' => __('filament-modular-subscriptions::fms.period_bonus.one_month'),
-                    '90' => __('filament-modular-subscriptions::fms.period_bonus.three_months'),
-                    '180' => __('filament-modular-subscriptions::fms.period_bonus.six_months'),
-                    '365' => __('filament-modular-subscriptions::fms.period_bonus.one_year'),
-                    'custom' => __('filament-modular-subscriptions::fms.period_bonus.custom'),
-                ])
-                ->colors([
-                    'plan' => 'gray',
-                    '30' => 'primary',
-                    '90' => 'primary',
-                    '180' => 'primary',
-                    '365' => 'primary',
-                    'custom' => 'info',
-                ])
-                ->afterStateUpdated($applyPaidPeriod),
-            Grid::make(2)
-                ->visible(fn (Get $get): bool => $get('paid_period_preset') === 'custom')
-                ->schema([
-                    TextInput::make('paid_custom_value')
-                        ->label(__('filament-modular-subscriptions::fms.period_bonus.duration'))
-                        ->numeric()
-                        ->minValue(1)
-                        ->default(1)
-                        ->live(onBlur: true)
-                        ->dehydrated(false)
-                        ->afterStateUpdated($applyPaidPeriod),
-                    Select::make('paid_custom_unit')
-                        ->label(__('filament-modular-subscriptions::fms.period_bonus.unit'))
-                        ->options([
-                            'day' => __('filament-modular-subscriptions::fms.interval.day'),
-                            'month' => __('filament-modular-subscriptions::fms.interval.month'),
-                            'year' => __('filament-modular-subscriptions::fms.interval.year'),
-                        ])
-                        ->default('month')
-                        ->selectablePlaceholder(false)
-                        ->live()
-                        ->dehydrated(false)
-                        ->afterStateUpdated($applyPaidPeriod),
-                ]),
-        ];
 
         return [
-            ...$paidPeriodFields,
             Hidden::make('bonus_days')
                 ->default(0)
                 ->dehydrateStateUsing(fn ($state): int => max(0, (int) $state)),
@@ -224,27 +154,6 @@ class PeriodBonusFields
             $value = max(0, (int) $get('bonus_custom_value'));
 
             return $get('bonus_custom_unit') === 'day' ? $value : $value * 30;
-        }
-
-        return max(0, (int) $preset);
-    }
-
-    public static function resolvePaidPeriodDays(Get $get): int
-    {
-        $preset = $get('paid_period_preset') ?? 'plan';
-
-        if ($preset === 'plan') {
-            return 0;
-        }
-
-        if ($preset === 'custom') {
-            $value = max(0, (int) $get('paid_custom_value'));
-
-            return match ($get('paid_custom_unit')) {
-                'day' => $value,
-                'year' => $value * 365,
-                default => $value * 30,
-            };
         }
 
         return max(0, (int) $preset);

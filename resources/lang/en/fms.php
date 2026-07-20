@@ -862,13 +862,6 @@ return [
         ],
     ],
     'period_bonus' => [
-        'invoice_section_title' => 'Subscription Period & Gift 🎁',
-        'paid_period' => 'Paid period',
-        'plan_period' => 'Plan default',
-        'one_month' => '1 month',
-        'three_months' => '3 months',
-        'six_months' => '6 months',
-        'one_year' => '1 year',
         'starts_label' => 'Starts',
         'paid_until_label' => 'Paid until',
         'ends_label' => 'Ends',

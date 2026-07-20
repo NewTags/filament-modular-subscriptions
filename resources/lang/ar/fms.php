@@ -868,13 +868,6 @@ return [
         ],
     ],
     'period_bonus' => [
-        'invoice_section_title' => 'فترة الاشتراك والهدية 🎁',
-        'paid_period' => 'الفترة المدفوعة',
-        'plan_period' => 'حسب الباقة',
-        'one_month' => 'شهر',
-        'three_months' => '3 أشهر',
-        'six_months' => '6 أشهر',
-        'one_year' => 'سنة',
         'starts_label' => 'البداية',
         'paid_until_label' => 'نهاية المدفوع',
         'ends_label' => 'النهاية',
