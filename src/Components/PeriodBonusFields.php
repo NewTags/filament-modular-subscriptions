@@ -79,8 +79,9 @@ class PeriodBonusFields
                     $component->state($preset);
                     $set('bonus_days', $bonusDays);
                     if ($preset === 'custom') {
-                        $set('bonus_custom_value', $bonusDays % 30 === 0 ? intdiv($bonusDays, 30) : $bonusDays);
-                        $set('bonus_custom_unit', $bonusDays % 30 === 0 ? 'month' : 'day');
+                        $isWholeMonths = $bonusDays % 30 === 0;
+                        $set('bonus_custom_value', $isWholeMonths ? intdiv($bonusDays, 30) : $bonusDays);
+                        $set('bonus_custom_unit', $isWholeMonths ? 'month' : 'day');
                     }
                 })
                 ->afterStateUpdated($applyBonus),
@@ -151,7 +152,9 @@ class PeriodBonusFields
     public static function formatDays(int $days): string
     {
         if ($days > 0 && $days % 30 === 0) {
-            return trans_choice('filament-modular-subscriptions::fms.period_bonus.months_count', intdiv($days, 30), ['count' => intdiv($days, 30)]);
+            $months = intdiv($days, 30);
+
+            return trans_choice('filament-modular-subscriptions::fms.period_bonus.months_count', $months, ['count' => $months]);
         }
 
         return trans_choice('filament-modular-subscriptions::fms.period_bonus.days_count', $days, ['count' => $days]);
