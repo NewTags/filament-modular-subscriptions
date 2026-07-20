@@ -59,22 +59,25 @@ class PeriodBonusFields
                 ->default('0')
                 ->options([
                     '0' => __('filament-modular-subscriptions::fms.period_bonus.no_gift'),
+                    '10' => __('filament-modular-subscriptions::fms.period_bonus.plus_ten_days'),
+                    '15' => __('filament-modular-subscriptions::fms.period_bonus.plus_fifteen_days'),
+                    '20' => __('filament-modular-subscriptions::fms.period_bonus.plus_twenty_days'),
                     '30' => __('filament-modular-subscriptions::fms.period_bonus.plus_one_month'),
-                    '60' => __('filament-modular-subscriptions::fms.period_bonus.plus_two_months'),
-                    '90' => __('filament-modular-subscriptions::fms.period_bonus.plus_three_months'),
                     'custom' => __('filament-modular-subscriptions::fms.period_bonus.custom'),
                 ])
                 ->icons([
+                    '10' => 'heroicon-o-gift',
+                    '15' => 'heroicon-o-gift',
+                    '20' => 'heroicon-o-gift',
                     '30' => 'heroicon-o-gift',
-                    '60' => 'heroicon-o-gift',
-                    '90' => 'heroicon-o-gift',
                     'custom' => 'heroicon-o-adjustments-horizontal',
                 ])
                 ->colors([
                     '0' => 'gray',
+                    '10' => 'warning',
+                    '15' => 'warning',
+                    '20' => 'warning',
                     '30' => 'warning',
-                    '60' => 'warning',
-                    '90' => 'warning',
                     'custom' => 'info',
                 ])
                 ->afterStateHydrated(function (ToggleButtons $component, Set $set, ?string $state, $record): void {
@@ -83,7 +86,7 @@ class PeriodBonusFields
                         return;
                     }
 
-                    $preset = in_array($bonusDays, [30, 60, 90], true) ? (string) $bonusDays : 'custom';
+                    $preset = in_array($bonusDays, [10, 15, 20, 30], true) ? (string) $bonusDays : 'custom';
                     $component->state($preset);
                     $set('bonus_days', $bonusDays);
                     if ($preset === 'custom') {
