@@ -147,6 +147,7 @@ class ModularSubscriptionsServiceProvider extends PackageServiceProvider
             '9_create_payment_checkouts_table',
             'create_subscription_logs_table',
             'add_indexes_to_fms_tables',
+            'add_bonus_days_to_fms_tables',
         ];
     }
 
