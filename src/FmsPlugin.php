@@ -17,7 +17,7 @@ use NewTags\FilamentModularSubscriptions\Models\Module;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
 use NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget;
-use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
+use Outerweb\FilamentTranslatableFields\TranslatableFieldsPlugin;
 use Throwable;
 
 class FmsPlugin implements Plugin
@@ -106,7 +106,7 @@ class FmsPlugin implements Plugin
     {
         if (! $this->onTenantPanel) {
             $panel
-                ->plugin(FilamentTranslatableFieldsPlugin::make())
+                ->plugin(TranslatableFieldsPlugin::make())
                 ->resources(config('filament-modular-subscriptions.resources'));
         } else {
             $panel
