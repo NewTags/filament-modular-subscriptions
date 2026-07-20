@@ -15,10 +15,10 @@ trait CanGenerateInvoices
 {
     protected function generateInvoice($subscription, InvoiceService $invoiceService, SubscriptionLogService $logService): void
     {
-        $this->info("Generating invoice for subscription {$subscription->subscribable->name}");
+        $this->info("Generating invoice for subscription {$subscription->subscribable?->name}");
 
         if ($invoice = $invoiceService->generate($subscription)) {
-            $this->info("Invoice generated successfully for subscription {$subscription->subscribable->name}");
+            $this->info("Invoice generated successfully for subscription {$subscription->subscribable?->name}");
             $this->updateSubscriptionStatus($subscription, $invoice, $logService);
             if ($subscription->subscribable) {
                 $subscription->subscribable->clearFmsCache();
@@ -32,7 +32,7 @@ trait CanGenerateInvoices
 
         $subscription
             ->update([
-                'status' => SubscriptionStatus::PENDING_PAYMENT
+                'status' => SubscriptionStatus::PENDING_PAYMENT,
             ]);
 
         $logService->log(
@@ -52,13 +52,13 @@ trait CanGenerateInvoices
         );
     }
 
-    protected function handleError($subscription, SubscriptionLogService $logService, \Exception $e): void
+    protected function handleError($subscription, SubscriptionLogService $logService, \Throwable $e): void
     {
         $logService->log(
             $subscription,
             'invoice_generation_failed',
             __('filament-modular-subscriptions::fms.logs.invoice_generation_failed', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]),
             null,
             null,
@@ -69,20 +69,20 @@ trait CanGenerateInvoices
         $this->logError($subscription, $e);
     }
 
-    protected function notifyError($subscription, \Exception $e): void
+    protected function notifyError($subscription, \Throwable $e): void
     {
         if ($subscription->subscribable) {
             $subscription->subscribable->notifySuperAdmins('invoice_generation_failed', [
                 'tenant' => $subscription->subscribable->name,
                 'error' => $e->getMessage(),
-                'subscription_id' => $subscription->id
+                'subscription_id' => $subscription->id,
             ]);
         }
 
         $this->error("Error generating invoice for subscription {$subscription->id}: {$e->getMessage()}");
     }
 
-    protected function logError($subscription, \Exception $e): void
+    protected function logError($subscription, \Throwable $e): void
     {
         Log::error("Invoice generation error for subscription {$subscription->id}", [
             'error' => $e->getMessage(),
@@ -107,7 +107,7 @@ trait CanGenerateInvoices
             return $this->shouldGeneratePayAsYouGoInvoice($subscription, $plan, $today);
         }
 
-        if (!$lastInvoice) {
+        if (! $lastInvoice) {
             return true;
         }
 
@@ -134,7 +134,7 @@ trait CanGenerateInvoices
         }
 
         if ($plan->fixed_invoice_day && $today->day == $plan->fixed_invoice_day) {
-            return !$subscription->invoices()
+            return ! $subscription->invoices()
                 ->whereMonth('created_at', $today->month)
                 ->whereYear('created_at', $today->year)
                 ->exists();
@@ -150,16 +150,16 @@ trait CanGenerateInvoices
         }
 
         if ($subscription->ends_at && $today->gte($subscription->ends_at)) {
-            return !$subscription->invoices
+            return ! $subscription->invoices
                 ->whereBetween('created_at', [
                     $subscription->ends_at->startOfMonth(),
-                    $subscription->ends_at->endOfMonth()
+                    $subscription->ends_at->endOfMonth(),
                 ])
                 ->count();
         }
 
         if ($subscription->status === SubscriptionStatus::ACTIVE) {
-            return !$subscription->invoices()
+            return ! $subscription->invoices()
                 ->whereDate('created_at', $today->toDateString())
                 ->exists();
         }
@@ -170,6 +170,7 @@ trait CanGenerateInvoices
     protected function shouldGenerateIntervalInvoice($subscription, $lastInvoice, $today): bool
     {
         $nextInvoiceDate = $this->calculateNextInvoiceDate($subscription, $lastInvoice);
+
         return $today->gte($nextInvoiceDate);
     }
 
@@ -206,22 +207,22 @@ trait CanGenerateInvoices
 
     protected function notifyPastDueInvoice($subscription, $invoice): void
     {
-        if (!$subscription->subscribable) {
+        if (! $subscription->subscribable) {
             return;
         }
-        
+
         $daysOverdue = number_format($invoice->due_date->diffInDays(now(), true));
         $notificationData = [
             'invoice_id' => $invoice->id,
             'days' => $daysOverdue,
             'amount' => $invoice->total,
-            'currency' =>  config('filament-modular-subscriptions.main_currency')
+            'currency' => config('filament-modular-subscriptions.main_currency'),
         ];
 
         $subscription->subscribable->notifySubscriptionChange('invoice_overdue', $notificationData);
 
         $adminNotificationData = array_merge($notificationData, [
-            'tenant' => $subscription->subscribable->name
+            'tenant' => $subscription->subscribable->name,
         ]);
 
         $subscription->subscribable->notifySuperAdmins('invoice_overdue', $adminNotificationData);

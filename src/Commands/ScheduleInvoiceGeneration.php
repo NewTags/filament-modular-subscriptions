@@ -53,6 +53,12 @@ class ScheduleInvoiceGeneration extends Command
     protected function processSubscription($subscription, InvoiceService $invoiceService, SubscriptionLogService $logService): void
     {
         try {
+            if (! $subscription->subscribable) {
+                $this->warn("Skipping subscription {$subscription->id}: tenant no longer exists.");
+
+                return;
+            }
+
             // Handle trial plan expiration
             if ($subscription->plan && $subscription->plan->isTrialPlan() && $subscription->ends_at && $subscription->ends_at->isPast()) {
                 $this->handleTrialExpiration($subscription, $logService);
@@ -70,7 +76,7 @@ class ScheduleInvoiceGeneration extends Command
             if ($this->shouldGenerateInvoice($subscription)) {
                 $this->generateInvoice($subscription, $invoiceService, $logService);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->handleError($subscription, $logService, $e);
         }
     }
