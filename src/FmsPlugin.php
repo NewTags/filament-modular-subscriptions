@@ -115,7 +115,7 @@ class FmsPlugin implements Plugin
                     MenuItem::make()
                         ->label(fn () => $this->getSubscriptionNavigationLabel())
                         ->url(fn () => TenantSubscription::getUrl())
-                        ->color(fn () => Color::Emerald)
+                        ->color('success')
                         ->visible(fn () => $this->subscriptionPageInTenantMenu && $this->canSeeTenantSubscription())
                         ->icon('heroicon-o-credit-card'),
                 ])
