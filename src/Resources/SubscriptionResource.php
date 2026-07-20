@@ -5,17 +5,18 @@ namespace NewTags\FilamentModularSubscriptions\Resources;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Hidden;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
+use NewTags\FilamentModularSubscriptions\Components\PeriodBonusFields;
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\FmsPlugin;
 use NewTags\FilamentModularSubscriptions\Models\Plan;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use NewTags\FilamentModularSubscriptions\Resources\SubscriptionResource\Pages;
-use Illuminate\Database\Eloquent\Builder;
-use NewTags\FilamentModularSubscriptions\FmsPlugin;
 
 class SubscriptionResource extends Resource
 {
@@ -78,22 +79,40 @@ class SubscriptionResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.subscribable_id')),
 
                 Forms\Components\Select::make('plan_id')
-                    ->options(fn() => Plan::all()->mapWithKeys(function ($plan) {
+                    ->options(fn () => Plan::all()->mapWithKeys(function ($plan) {
                         return [$plan->id => $plan->trans_name . ' - ' . $plan->price . ' ' . $plan->currency];
                     }))
                     ->live(debounce: 500)
-                    ->afterStateUpdated(function (Set $set, ?string $state) {
+                    ->afterStateUpdated(function (Forms\Get $get, Set $set, ?string $state) {
                         $plan = Plan::find($state);
                         if ($plan) {
                             $startDate = now();
+                            $bonusDays = PeriodBonusFields::resolveBonusDays($get);
                             $set('starts_at', $startDate->format('Y-m-d H:i:s'));
-                            $set('ends_at', $startDate->copy()->addDays($plan->period)->format('Y-m-d H:i:s'));
+                            $set('ends_at', $startDate->copy()->addDays($plan->period + $bonusDays)->format('Y-m-d H:i:s'));
                             $set('status', SubscriptionStatus::ACTIVE);
                             $set('trial_ends_at', $startDate->copy()->addDays($plan->period_trial)->format('Y-m-d H:i:s'));
                         }
                     })
                     ->required()
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.plan_id')),
+                Forms\Components\Section::make(__('filament-modular-subscriptions::fms.period_bonus.section_title'))
+                    ->description(__('filament-modular-subscriptions::fms.period_bonus.section_description'))
+                    ->icon('heroicon-o-gift')
+                    ->compact()
+                    ->visible(fn (Forms\Get $get): bool => filled($get('plan_id')) && ! (Plan::find($get('plan_id'))?->is_trial_plan ?? false))
+                    ->schema(PeriodBonusFields::make(
+                        resolvePlan: fn (Forms\Get $get): ?Plan => Plan::find($get('plan_id')),
+                        resolveStart: fn (Forms\Get $get) => filled($get('starts_at')) ? Carbon::parse($get('starts_at')) : now(),
+                        onBonusUpdated: function (Forms\Get $get, Set $set): void {
+                            $plan = Plan::find($get('plan_id'));
+                            if (! $plan) {
+                                return;
+                            }
+                            $start = filled($get('starts_at')) ? Carbon::parse($get('starts_at')) : now();
+                            $set('ends_at', $start->copy()->addDays($plan->period + PeriodBonusFields::resolveBonusDays($get))->format('Y-m-d H:i:s'));
+                        },
+                    )),
                 Fieldset::make(__('filament-modular-subscriptions::fms.details'))
                     ->columns()
                     ->schema([
@@ -103,7 +122,7 @@ class SubscriptionResource extends Resource
                         Forms\Components\DateTimePicker::make('ends_at')
                             ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.ends_at')),
                         Forms\Components\DateTimePicker::make('trial_ends_at')
-                            ->hidden(fn($get) => (Plan::find($get('plan_id'))?->is_trial_plan) ?? false)
+                            ->hidden(fn ($get) => (Plan::find($get('plan_id'))?->is_trial_plan) ?? false)
                             ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.trial_ends_at')),
                         Forms\Components\Select::make('status')
                             ->options(SubscriptionStatus::class)
@@ -130,6 +149,15 @@ class SubscriptionResource extends Resource
                     ->dateTime()
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.ends_at'))
                     ->sortable(),
+                Tables\Columns\TextColumn::make('bonus_days')
+                    ->label(__('filament-modular-subscriptions::fms.period_bonus.gift_period'))
+                    ->badge()
+                    ->color('warning')
+                    ->icon('heroicon-o-gift')
+                    ->formatStateUsing(fn (int $state): string => PeriodBonusFields::formatDays($state))
+                    ->visibleFrom('md')
+                    ->placeholder('—')
+                    ->state(fn ($record): ?int => $record->bonus_days > 0 ? $record->bonus_days : null),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.status')),
@@ -139,7 +167,7 @@ class SubscriptionResource extends Resource
                     ->options(SubscriptionStatus::class)
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.status')),
                 Tables\Filters\SelectFilter::make('plan_id')
-                    ->options(fn() => Plan::all()->pluck('trans_name', 'id'))
+                    ->options(fn () => Plan::all()->pluck('trans_name', 'id'))
                     ->label(__('filament-modular-subscriptions::fms.resources.subscription.fields.plan_id')),
                 Filter::make('dates')
                     ->form([

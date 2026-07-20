@@ -8,7 +8,7 @@ return [
             'fields' => [
                 'name' => 'Name',
                 'slug' => 'Slug',
-                'description' => 'Description', 
+                'description' => 'Description',
                 'is_active' => 'Active',
                 'price' => 'Price',
                 'modules' => 'Modules',
@@ -101,6 +101,7 @@ return [
             'name' => 'Invoices',
             'singular_name' => 'Invoice',
             'fields' => [
+                'number' => 'Invoice #',
                 'invoice_number' => 'Invoice Number',
                 'subscription_id' => 'Subscription ID',
                 'amount' => 'Amount',
@@ -123,7 +124,7 @@ return [
             ],
             'invoice_title' => 'Invoice :subscriber - :id - :date',
             'payment_pending' => 'Invoice sent successfully. Awaiting payment confirmation',
-            'record_payment_heading' => 'Record payment for invoice #:number',
+            'record_payment_heading' => 'Record payment for invoice :number',
             'payment_recorded' => 'Payment recorded and invoice settled successfully',
             'delete_unpaid_warning' => 'This permanently deletes the selected invoices that have no confirmed payment. Paid invoices are skipped.',
             'invoices_deleted' => ':count invoice(s) deleted',
@@ -153,9 +154,7 @@ return [
                 'payment_method' => 'Payment Method',
                 'payment_details' => 'Payment Details',
                 'provider' => 'Payment Provider',
-                'card_number' => 'Card Number',
-                'expiry' => 'Expiry Date',
-                'cvc' => 'CVC',
+                'gateway' => 'Payment Gateway',
             ],
             'actions' => [
                 'approve' => 'Approve',
@@ -319,6 +318,10 @@ return [
         'units' => 'units',
         'confirm_switch_plan' => 'Confirm Plan Switch',
         'switch_plan_description' => 'Confirming will cancel your current subscription and create a new one with the new plan. Are you sure you want to switch?',
+        'price' => 'Price',
+        'payments_due_title' => 'Payments due',
+        'payments_due_subtitle' => ':count invoice(s) awaiting payment',
+        'total_due' => 'Total due',
         'unit' => 'unit',
         'units' => 'units',
         'usage_information' => 'Usage Pricing',
@@ -354,6 +357,9 @@ return [
         'you_have_reached_the_limit_of_this_module' => 'You\'ve reached the module usage limit',
         'you_have_to_renew_your_subscription' => 'You need to renew your subscription',
         'pay_invoice' => 'Pay your invoice',
+        'pay_now' => 'Pay now',
+        'unpaid_invoices_title' => 'You have outstanding payments',
+        'unpaid_invoices_message' => 'You have :count unpaid invoice(s) totaling :total :currency. Please pay them to avoid service interruption.',
         'subscription_on_hold' => 'Subscription on hold',
         'subscription_pending_payment' => 'Subscription pending payment',
         'subscription_pending_payment_message' => 'Please pay the associated invoice to activate your subscription',
@@ -399,14 +405,23 @@ return [
         'per' => 'per :interval',
     ],
     'invoice' => [
+        'auto_generation_enabled' => 'Auto invoice generation: On',
+        'auto_generation_disabled' => 'Auto invoice generation: Off',
+        'auto_generation_enable_heading' => 'Enable automatic invoice generation',
+        'auto_generation_disable_heading' => 'Disable automatic invoice generation',
+        'auto_generation_enable_description' => 'Renewal invoices will be generated automatically every day for each subscription whose period has ended (usage-based or fixed). Academies with an unpaid invoice are skipped.',
+        'auto_generation_disable_description' => 'Automatic renewal invoicing will stop; you will need to create invoices manually at the end of each period.',
+        'auto_generation_enabled_notification' => 'Automatic invoice generation enabled',
+        'auto_generation_disabled_notification' => 'Automatic invoice generation disabled',
         'number' => 'Invoice Number',
         'payment_pending' => 'Invoice sent successfully. Awaiting confirmation from the relevant authority',
         'amount' => 'Amount',
         'status' => 'Status',
         'due_date' => 'Due Date',
         'view' => 'View',
-        'details_title' => 'Invoice Details #:number',
-        'invoice_number' => 'Invoice #:number',
+        'details_title' => 'Invoice Details :number',
+        'invoice_number' => 'Invoice :number',
+        'pay_invoice_heading' => 'Pay invoice :number',
         'setup_fee' => 'Initial Setup Fee',
         'billing_to' => 'Bill To',
         'invoice_details' => 'Invoice Details',
@@ -501,6 +516,7 @@ return [
         'visa' => 'Visa',
         'mastercard' => 'Mastercard',
         'paddle' => 'Paddle',
+        'tap' => 'Tap',
     ],
     'invoice_status' => [
         'paid' => 'Paid',
@@ -707,71 +723,71 @@ return [
         'admin_message' => [
             'invoice_generated' => [
                 'title' => '[System Admin] New invoice issued',
-                'body' => 'New invoice #:invoice_id generated for client :tenant for :amount :currency'
+                'body' => 'New invoice #:invoice_id generated for client :tenant for :amount :currency',
             ],
             'invoice_generation_failed' => [
                 'title' => '[System Admin] Invoice generation failed',
-                'body' => 'Error occurred while generating invoice for client :tenant. Error details: :error'
+                'body' => 'Error occurred while generating invoice for client :tenant. Error details: :error',
             ],
             'invoice_overdue' => [
                 'title' => '[System Admin] Overdue invoice',
-                'body' => 'Invoice #:invoice_id for client :tenant is :days days overdue. Amount due: :amount :currency'
+                'body' => 'Invoice #:invoice_id for client :tenant is :days days overdue. Amount due: :amount :currency',
             ],
             'invoice_cancelled' => [
                 'title' => '[System Admin] Cancelled invoice',
-                'body' => 'Invoice #:invoice_id for client :tenant is cancelled. Amount due: :amount :currency'
+                'body' => 'Invoice #:invoice_id for client :tenant is cancelled. Amount due: :amount :currency',
             ],
             'subscription_near_expiry' => [
                 'title' => '[System Admin] Subscription near expiration',
-                'body' => 'Client :tenant\'s subscription to :plan plan will expire in :days days (on :expiry_date)'
+                'body' => 'Client :tenant\'s subscription to :plan plan will expire in :days days (on :expiry_date)',
             ],
             'subscription_grace_period' => [
                 'title' => '[System Admin] Subscription in grace period',
-                'body' => 'Client :tenant\'s subscription is in grace period. Service will be suspended on :grace_end_date (:days days remaining)'
+                'body' => 'Client :tenant\'s subscription is in grace period. Service will be suspended on :grace_end_date (:days days remaining)',
             ],
             'expired' => [
                 'title' => '[System Admin] Subscription expired',
-                'body' => 'Client :tenant\'s subscription expired on :date. Please follow up on the status'
+                'body' => 'Client :tenant\'s subscription expired on :date. Please follow up on the status',
             ],
             'suspended' => [
                 'title' => '[System Admin] Subscription suspended',
-                'body' => 'Client :tenant\'s subscription was suspended on :date. Please review the reason and take appropriate action'
+                'body' => 'Client :tenant\'s subscription was suspended on :date. Please review the reason and take appropriate action',
             ],
             'cancelled' => [
                 'title' => '[System Admin] Subscription cancelled',
-                'body' => 'Client :tenant cancelled their subscription on :date. Please follow up on the status'
+                'body' => 'Client :tenant cancelled their subscription on :date. Please follow up on the status',
             ],
             'payment_received' => [
                 'title' => '[System Admin] New payment received',
-                'body' => 'Payment of :amount :currency received from client :tenant on :date'
+                'body' => 'Payment of :amount :currency received from client :tenant on :date',
             ],
             'payment_rejected' => [
                 'title' => '[System Admin] Payment rejected',
-                'body' => 'Payment of :amount :currency from client :tenant was rejected on :date. Reason: :reason'
+                'body' => 'Payment of :amount :currency from client :tenant was rejected on :date. Reason: :reason',
             ],
             'payment_overdue' => [
                 'title' => '[System Admin] Payment overdue',
-                'body' => 'Payment of :amount :currency from client :tenant is :days days overdue'
+                'body' => 'Payment of :amount :currency from client :tenant is :days days overdue',
             ],
             'payment_pending' => [
                 'title' => '[System Admin] New payment pending review',
-                'body' => 'New payment of :amount :currency from client :tenant for invoice #:invoice_id is pending review'
+                'body' => 'New payment of :amount :currency from client :tenant for invoice #:invoice_id is pending review',
             ],
             'payment_partially_approved' => [
                 'title' => '[System Admin] Partial payment approved',
-                'body' => 'Partial payment of :amount :currency out of :total :currency approved for client :tenant'
+                'body' => 'Partial payment of :amount :currency out of :total :currency approved for client :tenant',
             ],
             'usage_limit_warning' => [
                 'title' => '[System Admin] Usage limit warning',
-                'body' => 'Client :tenant is approaching usage limit for :module module (:current of :limit)'
+                'body' => 'Client :tenant is approaching usage limit for :module module (:current of :limit)',
             ],
             'usage_limit_exceeded' => [
                 'title' => '[System Admin] Usage limit exceeded',
-                'body' => 'Client :tenant has exceeded usage limit for :module module (:current of :limit)'
+                'body' => 'Client :tenant has exceeded usage limit for :module module (:current of :limit)',
             ],
             'subscription_status_changed' => [
                 'title' => '[System Admin] Subscription status change',
-                'body' => 'Client :tenant\'s subscription status changed from ":old_status" to ":new_status"'
+                'body' => 'Client :tenant\'s subscription status changed from ":old_status" to ":new_status"',
             ],
             'subscription_renewed' => [
                 'title' => '[System Admin] Subscription renewed',
@@ -787,17 +803,96 @@ return [
             ],
             'invoice_generated' => [
                 'title' => '[System Admin] New invoice generated',
-                'body' => 'New invoice #:invoice_id generated for client :tenant for :amount :currency'
+                'body' => 'New invoice #:invoice_id generated for client :tenant for :amount :currency',
             ],
             'subscription_cancelled' => [
                 'title' => '[System Admin] Subscription cancelled',
                 'body' => 'Client :tenant cancelled their subscription to :plan plan on :date',
             ],
-        ]
+        ],
     ],
     'alerts' => [
         'total' => 'Total Alerts',
         'expand' => 'Show all alerts',
         'collapse' => 'Hide alerts',
+    ],
+    'payments' => [
+        'amount_due' => 'Amount due',
+        'secure_redirect_notice' => 'Secure encrypted payment',
+        'proceed_to_payment' => 'Proceed to payment',
+        'pay_now' => 'Pay now',
+        'step_choose_card' => 'Choose your card',
+        'step_pay_secure' => 'Pay on the secure Tap page',
+        'step_instant_confirm' => 'Instant subscription confirmation',
+        'checkout_failed_title' => 'Payment could not be started',
+        'payment_link' => 'Payment Link',
+        'click_to_copy' => 'Click the link to copy it',
+        'link_copied' => 'Link copied',
+        'payment_link_help' => 'Share this link to pay invoice :id online. The link stays valid for :days days.',
+        'charge_description' => 'Subscription invoice #:id payment',
+        'gateways' => [
+            'tap' => 'Card / mada (Tap)',
+        ],
+        'errors' => [
+            'online_payment_unavailable' => 'Online payment is currently unavailable. Please use bank transfer or contact support.',
+            'invoice_not_payable' => 'This invoice cannot be paid online — it may already be paid or cancelled.',
+            'missing_contact' => 'No billing email or phone number is set for your account. Please update your details or contact support.',
+            'checkout_failed' => 'We could not start the payment. Please try again or contact support.',
+        ],
+        'checkout_statuses' => [
+            'pending' => 'Pending',
+            'initiated' => 'Awaiting Payment',
+            'paid' => 'Paid',
+            'failed' => 'Failed',
+            'expired' => 'Expired',
+            'cancelled' => 'Cancelled',
+            'error' => 'Needs Review',
+        ],
+        'result' => [
+            'invoice_reference' => 'Invoice #:id',
+            'amount_label' => 'Amount',
+            'footer' => 'Payments are processed securely for :company.',
+            'success_title' => 'Payment successful',
+            'success_body' => 'Thank you! Your payment for invoice #:id has been received and your subscription is up to date.',
+            'pending_title' => 'Payment in progress',
+            'pending_body' => 'Your payment for invoice #:id is still being processed. The status will update automatically once it is confirmed.',
+            'failed_title' => 'Payment failed',
+            'failed_body' => 'The payment for invoice #:id was not completed. No money was taken — please try again or use another card.',
+            'expired_title' => 'Payment session expired',
+            'expired_body' => 'The payment page for invoice #:id expired before the payment was completed. Open the payment link again to retry.',
+            'cancelled_title' => 'Payment cancelled',
+            'cancelled_body' => 'The payment for invoice #:id was cancelled. You can retry at any time.',
+            'error_title' => 'Something went wrong',
+            'error_body' => 'We could not confirm the payment for invoice #:id. Our team has been notified — please contact support.',
+            'already_paid_title' => 'Invoice already paid',
+            'already_paid_body' => 'Invoice #:id has already been paid in full. No further payment is needed.',
+            'retry' => 'Try again',
+        ],
+    ],
+    'period_bonus' => [
+        'starts_label' => 'Starts',
+        'paid_until_label' => 'Paid until',
+        'ends_label' => 'Ends',
+        'and' => ' and ',
+        'years_count' => '{1} 1 year|[2,*] :count years',
+        'section_title' => 'Bonus Gift Period 🎁',
+        'section_description' => 'Grant the academy extra free time on top of the paid subscription period',
+        'invoice_section_description' => 'Attach a free period to this invoice — shown as a zero-priced gift line and added to the subscription once the invoice is paid',
+        'gift_period' => 'Gift period',
+        'no_gift' => 'No gift',
+        'plus_one_month' => '+1 month',
+        'plus_two_months' => '+2 months',
+        'plus_three_months' => '+3 months',
+        'custom' => 'Custom',
+        'duration' => 'Duration',
+        'unit' => 'Unit',
+        'coverage_title' => 'Total coverage',
+        'paid_segment' => 'Paid — :period',
+        'pays_chip' => 'Pays :amount :currency',
+        'gets_chip' => 'Gets :period until :date',
+        'gift_value_chip' => 'Gift worth :amount :currency for free',
+        'gift_line' => 'Complimentary bonus period — :period',
+        'months_count' => '{1} 1 month|[2,*] :count months',
+        'days_count' => '{1} 1 day|[2,*] :count days',
     ],
 ];

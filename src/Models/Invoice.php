@@ -20,12 +20,13 @@ class Invoice extends Model
         'status',
         'due_date',
         'paid_at',
-
+        'bonus_days',
     ];
 
     protected $casts = [
         'due_date' => 'datetime',
         'paid_at' => 'datetime',
+        'bonus_days' => 'integer',
         'status' => InvoiceStatus::class,
     ];
 
@@ -100,6 +101,11 @@ class Invoice extends Model
         return $this->payments()
             ->where('status', PaymentStatus::PAID)
             ->doesntExist();
+    }
+
+    public function getNumberAttribute(): string
+    {
+        return 'INV-' . str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
     }
 
     public function getTitleAttribute()

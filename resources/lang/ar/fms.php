@@ -101,6 +101,7 @@ return [
             'name' => 'الفواتير',
             'singular_name' => 'فاتورة',
             'fields' => [
+                'number' => 'رقم الفاتورة',
                 'invoice_number' => 'رقم الفاتورة',
                 'subscription_id' => 'رقم الاشتراك',
                 'amount' => 'المبلغ',
@@ -153,9 +154,7 @@ return [
                 'payment_method' => 'طريقة الدفع',
                 'payment_details' => 'تفاصيل الدفع',
                 'provider' => 'مزود خدمة الدفع',
-                'card_number' => 'رقم البطاقة',
-                'expiry' => 'تاريخ الانتهاء',
-                'cvc' => 'رمز التحقق',
+                'gateway' => 'بوابة الدفع',
             ],
 
             'actions' => [
@@ -320,6 +319,10 @@ return [
         'units' => 'وحدة',
         'confirm_switch_plan' => 'تأكيد تغيير الخطة',
         'switch_plan_description' => 'تأكيد تغيير الخطة سيؤدي إلى إلغاء الاشتراك الحالي وإنشاء اشتراك جديد بالخطة الجديدة. هل أنت متأكد من رغبتك في التبديل؟',
+        'price' => 'السعر',
+        'payments_due_title' => 'مدفوعات مستحقة',
+        'payments_due_subtitle' => 'لديك :count فاتورة بانتظار السداد',
+        'total_due' => 'الإجمالي المستحق',
         'unit' => 'وحدة',
         'units' => 'وحدات',
         'usage_information' => 'تسعير الاستخدام',
@@ -355,6 +358,9 @@ return [
         'you_have_reached_the_limit_of_this_module' => 'لقد وصلت إلى حد استخدام الوحدة',
         'you_have_to_renew_your_subscription' => 'عليك تجديد اشتراكك',
         'pay_invoice' => 'ادفع فاتورتك',
+        'pay_now' => 'ادفع الآن',
+        'unpaid_invoices_title' => 'لديك مدفوعات مستحقة',
+        'unpaid_invoices_message' => 'لديك :count فاتورة غير مدفوعة بإجمالي :total :currency. يرجى سدادها لتجنب انقطاع الخدمة.',
         'subscription_on_hold' => 'الاشتراك معلق',
         'subscription_pending_payment' => 'الاشتراك في انتظار الدفع',
         'subscription_pending_payment_message' => 'يرجى دفع الفاتورة المرتبطة بالاشتراك لتفعيله',
@@ -400,6 +406,14 @@ return [
         'per' => 'لكل :interval',
     ],
     'invoice' => [
+        'auto_generation_enabled' => 'التوليد التلقائي للفواتير: مفعّل',
+        'auto_generation_disabled' => 'التوليد التلقائي للفواتير: معطّل',
+        'auto_generation_enable_heading' => 'تفعيل التوليد التلقائي للفواتير',
+        'auto_generation_disable_heading' => 'تعطيل التوليد التلقائي للفواتير',
+        'auto_generation_enable_description' => 'سيتم توليد فواتير التجديد تلقائياً يومياً لكل اشتراك انتهت فترته (حسب الاستخدام أو الباقة). الأكاديمية التي لديها فاتورة غير مسددة لن تُصدر لها فاتورة جديدة.',
+        'auto_generation_disable_description' => 'سيتوقف توليد فواتير التجديد تلقائياً، وستحتاج لإنشاء الفواتير يدوياً عند نهاية كل فترة.',
+        'auto_generation_enabled_notification' => 'تم تفعيل التوليد التلقائي للفواتير',
+        'auto_generation_disabled_notification' => 'تم تعطيل التوليد التلقائي للفواتير',
         'number' => 'رقم الفاتورة',
         'payment_pending' => 'تم إرسال الفاتورة بنجاح. في انتظار التأكيد من الجهة المختصة',
         'amount' => 'المبلغ',
@@ -408,6 +422,7 @@ return [
         'view' => 'عرض',
         'details_title' => 'تفاصيل الفاتورة رقم :number',
         'invoice_number' => 'فاتورة رقم :number',
+        'pay_invoice_heading' => 'دفع الفاتورة :number',
         'setup_fee' => 'رسوم الإشتراك الأولية',
         'billing_to' => 'فاتورة إلى',
         'invoice_details' => 'تفاصيل الفاتورة',
@@ -502,6 +517,7 @@ return [
         'visa' => 'فيزا',
         'mastercard' => 'ماستركارد',
         'paddle' => 'بادل',
+        'tap' => 'تاب',
     ],
     'invoice_status' => [
         'paid' => 'مدفوع',
@@ -713,71 +729,71 @@ return [
         'admin_message' => [
             'invoice_generated' => [
                 'title' => '[إدارة النظام] تم إصدار فاتورة جديدة',
-                'body' => 'تم إصدار فاتورة جديدة #:invoice_id للعميل :tenant بقيمة :amount :currency'
+                'body' => 'تم إصدار فاتورة جديدة #:invoice_id للعميل :tenant بقيمة :amount :currency',
             ],
             'invoice_generation_failed' => [
                 'title' => '[إدارة النظام] فشل في إصدار الفاتورة',
-                'body' => 'حدث خطأ أثناء إصدار فاتورة للعميل :tenant. تفاصيل الخطأ: :error'
+                'body' => 'حدث خطأ أثناء إصدار فاتورة للعميل :tenant. تفاصيل الخطأ: :error',
             ],
             'invoice_overdue' => [
                 'title' => '[إدارة النظام] فاتورة متأخرة السداد',
-                'body' => 'الفاتورة #:invoice_id للعميل :tenant متأخرة السداد منذ :days يوم. المبلغ المستحق: :amount :currency'
+                'body' => 'الفاتورة #:invoice_id للعميل :tenant متأخرة السداد منذ :days يوم. المبلغ المستحق: :amount :currency',
             ],
             'invoice_cancelled' => [
                 'title' => '[إدارة النظام] فاتورة ملغية',
-                'body' => 'الفاتورة #:invoice_id للعميل :tenant ملغية. المبلغ المستحق: :amount :currency'
+                'body' => 'الفاتورة #:invoice_id للعميل :tenant ملغية. المبلغ المستحق: :amount :currency',
             ],
             'subscription_near_expiry' => [
                 'title' => '[إدارة النظام] اشتراك على وشك الانتهاء',
-                'body' => 'اشتراك العميل :tenant في خطة :plan سينتهي خلال :days يوم (في :expiry_date)'
+                'body' => 'اشتراك العميل :tenant في خطة :plan سينتهي خلال :days يوم (في :expiry_date)',
             ],
             'subscription_grace_period' => [
                 'title' => '[إدارة النظام] اشتراك في فترة السماح',
-                'body' => 'اشتراك العميل :tenant في فترة السماح. سيتم تعليق الخدمة في :grace_end_date (متبقي :days يوم)'
+                'body' => 'اشتراك العميل :tenant في فترة السماح. سيتم تعليق الخدمة في :grace_end_date (متبقي :days يوم)',
             ],
             'expired' => [
                 'title' => '[إدارة النظام] انتهاء اشتراك',
-                'body' => 'انتهى اشتراك العميل :tenant في :date. يرجى متابعة الحالة'
+                'body' => 'انتهى اشتراك العميل :tenant في :date. يرجى متابعة الحالة',
             ],
             'suspended' => [
                 'title' => '[إدارة النظام] تعليق اشتراك',
-                'body' => 'تم تعليق اشتراك العميل :tenant في :date. يرجى مراجعة السبب واتخاذ الإجراء المناسب'
+                'body' => 'تم تعليق اشتراك العميل :tenant في :date. يرجى مراجعة السبب واتخاذ الإجراء المناسب',
             ],
             'cancelled' => [
                 'title' => '[إدارة النظام] إلغاء اشتراك',
-                'body' => 'قام العميل :tenant بإلغاء اشتراكه في :date. يرجى متابعة الحالة'
+                'body' => 'قام العميل :tenant بإلغاء اشتراكه في :date. يرجى متابعة الحالة',
             ],
             'payment_received' => [
                 'title' => '[إدارة النظام] استلام دفعة جديدة',
-                'body' => 'تم استلام دفعة بقيمة :amount :currency من العميل :tenant في :date'
+                'body' => 'تم استلام دفعة بقيمة :amount :currency من العميل :tenant في :date',
             ],
             'payment_rejected' => [
                 'title' => '[إدارة النظام] رفض دفعة',
-                'body' => 'تم رفض دفعة بقيمة :amount :currency من العميل :tenant في :date. السبب: :reason'
+                'body' => 'تم رفض دفعة بقيمة :amount :currency من العميل :tenant في :date. السبب: :reason',
             ],
             'payment_overdue' => [
                 'title' => '[إدارة النظام] دفعة متأخرة',
-                'body' => 'دفعة بقيمة :amount :currency من العميل :tenant متأخرة منذ :days يوم'
+                'body' => 'دفعة بقيمة :amount :currency من العميل :tenant متأخرة منذ :days يوم',
             ],
             'payment_pending' => [
                 'title' => '[إدارة النظام] دفعة جديدة تنتظر المراجعة',
-                'body' => 'دفعة جديدة بقيمة :amount :currency من العميل :tenant للفاتورة #:invoice_id تنتظر المراجعة'
+                'body' => 'دفعة جديدة بقيمة :amount :currency من العميل :tenant للفاتورة #:invoice_id تنتظر المراجعة',
             ],
             'payment_partially_approved' => [
                 'title' => '[إدارة النظام] موافقة على دفعة جزئية',
-                'body' => 'تمت الموافقة على دفعة جزئية بقيمة :amount :currency من أصل :total :currency للعميل :tenant'
+                'body' => 'تمت الموافقة على دفعة جزئية بقيمة :amount :currency من أصل :total :currency للعميل :tenant',
             ],
             'usage_limit_warning' => [
                 'title' => '[إدارة النظام] تحذير حد الاستخدام',
-                'body' => 'العميل :tenant يقترب من حد الاستخدام لوحدة :module (:current من :limit)'
+                'body' => 'العميل :tenant يقترب من حد الاستخدام لوحدة :module (:current من :limit)',
             ],
             'usage_limit_exceeded' => [
                 'title' => '[إدارة النظام] تجاوز حد الاستخدام',
-                'body' => 'العميل :tenant تجاوز حد الاستخدام لوحدة :module (:current من :limit)'
+                'body' => 'العميل :tenant تجاوز حد الاستخدام لوحدة :module (:current من :limit)',
             ],
             'subscription_status_changed' => [
                 'title' => '[إدارة النظام] تغيير حالة اشتراك',
-                'body' => 'تم تغيير حالة اشتراك العميل :tenant من ":old_status" إلى ":new_status"'
+                'body' => 'تم تغيير حالة اشتراك العميل :tenant من ":old_status" إلى ":new_status"',
             ],
             'subscription_renewed' => [
                 'title' => '[إدارة النظام] تجديد اشتراك',
@@ -793,17 +809,96 @@ return [
             ],
             'invoice_generated' => [
                 'title' => '[إدارة النظام] إصدار فاتورة جديدة',
-                'body' => 'تم إصدار فاتورة جديدة #:invoice_id للعميل :tenant بقيمة :amount :currency'
+                'body' => 'تم إصدار فاتورة جديدة #:invoice_id للعميل :tenant بقيمة :amount :currency',
             ],
             'subscription_cancelled' => [
                 'title' => '[إدارة النظام] تم إلغاء اشتراك',
                 'body' => 'قام العميل :tenant بإلغاء اشتراكه في خطة :plan بتاريخ :date',
             ],
-        ]
+        ],
     ],
     'alerts' => [
         'total' => 'تنبيهات في المجموع',
         'expand' => 'عرض كل التنبيهات',
         'collapse' => 'إخفاء التنبيهات',
+    ],
+    'payments' => [
+        'amount_due' => 'المبلغ المستحق',
+        'secure_redirect_notice' => 'دفع آمن ومشفّر',
+        'proceed_to_payment' => 'متابعة الدفع',
+        'pay_now' => 'ادفع الآن',
+        'step_choose_card' => 'اختر بطاقتك',
+        'step_pay_secure' => 'ادفع عبر صفحة Tap الآمنة',
+        'step_instant_confirm' => 'تأكيد فوري لاشتراكك',
+        'checkout_failed_title' => 'تعذر بدء عملية الدفع',
+        'payment_link' => 'رابط الدفع',
+        'click_to_copy' => 'اضغط على الرابط لنسخه',
+        'link_copied' => 'تم نسخ الرابط',
+        'payment_link_help' => 'شارك هذا الرابط لدفع الفاتورة رقم :id إلكترونياً. الرابط صالح لمدة :days يوماً.',
+        'charge_description' => 'دفع فاتورة الاشتراك رقم :id',
+        'gateways' => [
+            'tap' => 'بطاقة / مدى (Tap)',
+        ],
+        'errors' => [
+            'online_payment_unavailable' => 'الدفع الإلكتروني غير متاح حالياً. يرجى استخدام التحويل البنكي أو التواصل مع الدعم.',
+            'invoice_not_payable' => 'لا يمكن دفع هذه الفاتورة إلكترونياً — قد تكون مدفوعة أو ملغاة.',
+            'missing_contact' => 'لا يوجد بريد إلكتروني أو رقم هاتف للفوترة في حسابكم. يرجى تحديث البيانات أو التواصل مع الدعم.',
+            'checkout_failed' => 'تعذر بدء عملية الدفع. يرجى المحاولة مرة أخرى أو التواصل مع الدعم.',
+        ],
+        'checkout_statuses' => [
+            'pending' => 'قيد الإنشاء',
+            'initiated' => 'بانتظار الدفع',
+            'paid' => 'مدفوع',
+            'failed' => 'فشل',
+            'expired' => 'منتهي الصلاحية',
+            'cancelled' => 'ملغي',
+            'error' => 'يحتاج مراجعة',
+        ],
+        'result' => [
+            'invoice_reference' => 'فاتورة رقم :id',
+            'amount_label' => 'المبلغ',
+            'footer' => 'تتم معالجة المدفوعات بشكل آمن لصالح :company.',
+            'success_title' => 'تمت عملية الدفع بنجاح',
+            'success_body' => 'شكراً لكم! تم استلام دفعتكم للفاتورة رقم :id وتم تحديث اشتراككم.',
+            'pending_title' => 'الدفع قيد المعالجة',
+            'pending_body' => 'دفعتكم للفاتورة رقم :id ما زالت قيد المعالجة، وسيتم تحديث الحالة تلقائياً فور تأكيدها.',
+            'failed_title' => 'فشلت عملية الدفع',
+            'failed_body' => 'لم تكتمل عملية دفع الفاتورة رقم :id ولم يتم خصم أي مبلغ — يرجى المحاولة مرة أخرى أو استخدام بطاقة أخرى.',
+            'expired_title' => 'انتهت صلاحية صفحة الدفع',
+            'expired_body' => 'انتهت صلاحية صفحة الدفع للفاتورة رقم :id قبل إتمام العملية. افتح رابط الدفع مرة أخرى لإعادة المحاولة.',
+            'cancelled_title' => 'تم إلغاء عملية الدفع',
+            'cancelled_body' => 'تم إلغاء عملية دفع الفاتورة رقم :id. يمكنكم إعادة المحاولة في أي وقت.',
+            'error_title' => 'حدث خطأ ما',
+            'error_body' => 'تعذر تأكيد عملية دفع الفاتورة رقم :id. تم إشعار فريقنا — يرجى التواصل مع الدعم.',
+            'already_paid_title' => 'الفاتورة مدفوعة بالفعل',
+            'already_paid_body' => 'الفاتورة رقم :id مدفوعة بالكامل، ولا حاجة لأي دفعة إضافية.',
+            'retry' => 'إعادة المحاولة',
+        ],
+    ],
+    'period_bonus' => [
+        'starts_label' => 'البداية',
+        'paid_until_label' => 'نهاية المدفوع',
+        'ends_label' => 'النهاية',
+        'and' => ' و',
+        'years_count' => '{1} سنة واحدة|{2} سنتان|[3,10] :count سنوات|[11,*] :count سنة',
+        'section_title' => 'فترة إضافية هدية 🎁',
+        'section_description' => 'امنح الأكاديمية فترة مجانية إضافية فوق مدة الاشتراك المدفوعة',
+        'invoice_section_description' => 'أضف فترة مجانية إلى هذه الفاتورة — تظهر كبند هدية بقيمة صفر ويُمدَّد الاشتراك بها عند سداد الفاتورة',
+        'gift_period' => 'فترة الهدية',
+        'no_gift' => 'بدون هدية',
+        'plus_one_month' => '+ شهر',
+        'plus_two_months' => '+ شهرين',
+        'plus_three_months' => '+ 3 أشهر',
+        'custom' => 'مخصص',
+        'duration' => 'المدة',
+        'unit' => 'الوحدة',
+        'coverage_title' => 'مدة التغطية الإجمالية',
+        'paid_segment' => 'مدفوع — :period',
+        'pays_chip' => 'يدفع :amount :currency',
+        'gets_chip' => 'يحصل على :period حتى :date',
+        'gift_value_chip' => 'قيمة الهدية :amount :currency مجاناً',
+        'gift_line' => 'فترة إضافية مجانية — :period',
+        'months_count' => '{1} شهر واحد|{2} شهران|[3,10] :count أشهر|[11,*] :count شهراً',
+        'days_count' => '{0} 0 يوم|{1} يوم واحد|{2} يومان|[3,10] :count أيام|[11,*] :count يوماً',
     ],
 ];
