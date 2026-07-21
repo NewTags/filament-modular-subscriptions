@@ -16,10 +16,10 @@ trait CanGenerateInvoices
 {
     protected function generateInvoice($subscription, InvoiceService $invoiceService, SubscriptionLogService $logService): void
     {
-        $this->info("Generating invoice for subscription {$subscription->subscribable->name}");
+        $this->info("Generating invoice for subscription {$subscription->subscribable?->name}");
 
         if ($invoice = $invoiceService->generate($subscription)) {
-            $this->info("Invoice generated successfully for subscription {$subscription->subscribable->name}");
+            $this->info("Invoice generated successfully for subscription {$subscription->subscribable?->name}");
             $this->updateSubscriptionStatus($subscription, $invoice, $logService);
             if ($subscription->subscribable) {
                 $subscription->subscribable->clearFmsCache();
@@ -53,7 +53,7 @@ trait CanGenerateInvoices
         );
     }
 
-    protected function handleError($subscription, SubscriptionLogService $logService, Exception $e): void
+    protected function handleError($subscription, SubscriptionLogService $logService, \Throwable $e): void
     {
         $logService->log(
             $subscription,
@@ -70,7 +70,7 @@ trait CanGenerateInvoices
         $this->logError($subscription, $e);
     }
 
-    protected function notifyError($subscription, Exception $e): void
+    protected function notifyError($subscription, \Throwable $e): void
     {
         if ($subscription->subscribable) {
             $subscription->subscribable->notifySuperAdmins('invoice_generation_failed', [
@@ -83,7 +83,7 @@ trait CanGenerateInvoices
         $this->error("Error generating invoice for subscription {$subscription->id}: {$e->getMessage()}");
     }
 
-    protected function logError($subscription, Exception $e): void
+    protected function logError($subscription, \Throwable $e): void
     {
         Log::error("Invoice generation error for subscription {$subscription->id}", [
             'error' => $e->getMessage(),
