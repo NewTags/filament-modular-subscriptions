@@ -69,7 +69,7 @@ class PlanResource extends Resource
                             ->schema([
                                 TextInput::make('name')
                                     ->required()
-                                    ->translatable(true, config('filament-modular-subscriptions.locales'))
+                                    ->translatable(true, supportedLocales: config('filament-modular-subscriptions.locales'))
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(fn (Set $set, $state) => $set('slug', str($state['name'][config('filament-modular-subscriptions.locales')[0] ?? app()->getLocale()])->slug()))
                                     ->columnSpanFull()
@@ -80,7 +80,7 @@ class PlanResource extends Resource
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.slug')),
                                 Textarea::make('description')
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.description'))
-                                    ->translatable(true, config('filament-modular-subscriptions.locales'))
+                                    ->translatable(true, supportedLocales: config('filament-modular-subscriptions.locales'))
                                     ->columnSpanFull(),
                                 Toggle::make('is_active')
                                     ->default(true)
