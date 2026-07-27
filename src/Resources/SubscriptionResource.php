@@ -204,7 +204,7 @@ class SubscriptionResource extends Resource
                 EditAction::make(),
                 DeleteAction::make()
                     ->after(function ($record) {
-                        $record->subscribable->clearFmsCache();
+                        $record->subscribable?->clearFmsCache();
                     }),
             ])
             ->toolbarActions([
@@ -213,7 +213,7 @@ class SubscriptionResource extends Resource
                         ->after(function () {
                             $subscriptions = config('filament-modular-subscriptions.models.subscription');
                             foreach ($subscriptions::all() as $subscription) {
-                                $subscription->subscribable->clearFmsCache();
+                                $subscription->subscribable?->clearFmsCache();
                             }
                         }),
                 ]),
