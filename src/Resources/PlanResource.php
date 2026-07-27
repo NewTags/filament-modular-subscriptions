@@ -69,11 +69,18 @@ class PlanResource extends Resource
                             ->schema([
                                 TextInput::make('name')
                                     ->required()
-                                    ->translatable(true, supportedLocales: config('filament-modular-subscriptions.locales'))
+                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.name'))
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn (Set $set, $state) => $set('slug', str($state['name'][config('filament-modular-subscriptions.locales')[0] ?? app()->getLocale()])->slug()))
+                                    ->afterStateUpdated(function (Set $set, Get $get): void {
+                                        $name = $get('name');
+                                        $value = is_array($name)
+                                            ? (collect($name)->filter()->first() ?? '')
+                                            : (string) $name;
+
+                                        $set('slug', str($value)->slug());
+                                    })
                                     ->columnSpanFull()
-                                    ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.name')),
+                                    ->translatable(true, supportedLocales: config('filament-modular-subscriptions.locales')),
                                 TextInput::make('slug')
                                     ->required()
                                     ->unique(ignoreRecord: true)
@@ -115,6 +122,8 @@ class PlanResource extends Resource
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.price')),
                                 TextInput::make('setup_fee')
                                     ->numeric()
+                                    ->default(0)
+                                    ->dehydrateStateUsing(fn ($state): float => (float) ($state ?? 0))
                                     ->helperText(__('filament-modular-subscriptions::fms.resources.plan.hints.setup_fee'))
                                     ->hidden(fn (Get $get) => $get('is_trial_plan'))
                                     ->label(__('filament-modular-subscriptions::fms.resources.plan.fields.setup_fee')),
@@ -174,7 +183,7 @@ class PlanResource extends Resource
                             ->icon('heroicon-o-puzzle-piece')
                             ->schema([
                                 Repeater::make('planModules')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->relationship()
                                     ->columns(3)
                                     ->schema([
