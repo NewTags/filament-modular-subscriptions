@@ -357,7 +357,7 @@ class InvoiceResource extends Resource
 
         return [
             Placeholder::make('pending_payment_warning')
-                ->label('')
+                ->hiddenLabel()
                 ->content(fn () => new HtmlString('<div class="rounded-xl border border-warning-300 bg-warning-50 px-4 py-3 text-sm font-medium text-warning-700 dark:border-warning-400/30 dark:bg-warning-500/10 dark:text-warning-300">' . e(__('filament-modular-subscriptions::fms.resources.payment.pending_payment_warning')) . '</div>'))
                 ->columnSpanFull()
                 ->visible(fn () => $invoice->payments()->where('status', PaymentStatus::PENDING)->exists()),
@@ -385,7 +385,7 @@ class InvoiceResource extends Resource
 
             Group::make([
                 Placeholder::make('checkout_summary')
-                    ->label('')
+                    ->hiddenLabel()
                     ->content(fn () => view('filament-modular-subscriptions::filament.components.online-checkout-summary', ['invoice' => $invoice]))
                     ->columnSpanFull(),
 
@@ -406,7 +406,7 @@ class InvoiceResource extends Resource
 
             Group::make([
                 Placeholder::make('bank_card')
-                    ->label('')
+                    ->hiddenLabel()
                     ->content(fn () => view('filament-modular-subscriptions::filament.components.bank-card'))
                     ->columnSpanFull(),
                 TextInput::make('amount')

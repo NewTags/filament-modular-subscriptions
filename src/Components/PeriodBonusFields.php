@@ -120,7 +120,7 @@ class PeriodBonusFields
                         ->afterStateUpdated($applyBonus),
                 ]),
             Placeholder::make('period_bonus_timeline')
-                ->label('')
+                ->hiddenLabel()
                 ->visible(fn (Get $get): bool => $resolvePlan($get) !== null)
                 ->content(function (Get $get) use ($resolvePlan, $resolveStart, $resolvePaidDays, $resolveAmount): HtmlString {
                     $plan = $resolvePlan($get);
