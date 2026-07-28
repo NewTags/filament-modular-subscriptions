@@ -434,7 +434,7 @@
                         }
                     @endphp
 
-                    @if ($currentSubscription && $currentSubscription->moduleUsages->count() > 0)
+                    @if ($currentSubscription && $currentSubscription->moduleUsages->count() > 0 && \NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget::canView())
                         @livewire(\NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget::class)
                     @else
                         <x-filament::section>
