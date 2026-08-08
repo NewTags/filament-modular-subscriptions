@@ -3,15 +3,15 @@
 namespace NewTags\FilamentModularSubscriptions\Components;
 
 use Closure;
-use Filament\Forms\Components\Component;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\HtmlString;
 use NewTags\FilamentModularSubscriptions\Models\Plan;
@@ -120,7 +120,7 @@ class PeriodBonusFields
                         ->afterStateUpdated($applyBonus),
                 ]),
             Placeholder::make('period_bonus_timeline')
-                ->label('')
+                ->hiddenLabel()
                 ->visible(fn (Get $get): bool => $resolvePlan($get) !== null)
                 ->content(function (Get $get) use ($resolvePlan, $resolveStart, $resolvePaidDays, $resolveAmount): HtmlString {
                     $plan = $resolvePlan($get);

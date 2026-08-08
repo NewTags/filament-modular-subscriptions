@@ -2,7 +2,7 @@
 
 namespace NewTags\FilamentModularSubscriptions\Resources\ModuleResource\Pages;
 
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use NewTags\FilamentModularSubscriptions\Resources\ModuleResource;
 
@@ -13,8 +13,8 @@ class EditModule extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
-                ->visible(fn($record) => $record->whereHas('plans')->count() === 0),
+            DeleteAction::make()
+                ->visible(fn ($record) => $record->whereHas('plans')->count() === 0),
         ];
     }
 }

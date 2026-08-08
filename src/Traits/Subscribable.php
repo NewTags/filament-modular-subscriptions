@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use NewTags\FilamentModularSubscriptions\Enums\Interval;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
@@ -74,12 +75,11 @@ trait Subscribable
     {
         $cacheKey = self::ACTIVE_SUBSCRIPTION_CACHE_KEY . $this->id;
 
-        return Cache::remember(
+        $subscriptionId = Cache::remember(
             $cacheKey,
             self::CACHE_TTL,
             function () {
                 return $this->subscription()
-                    ->with(['plan', 'moduleUsages.module']) // Eager load relationships
                     ->whereDate('starts_at', '<=', now())
                     ->where(function ($query) {
                         $this->loadMissing('plan');
@@ -90,9 +90,25 @@ trait Subscribable
                             ));
                     })
                     ->where('status', SubscriptionStatus::ACTIVE)
-                    ->first();
+                    ->value('id');
             }
         );
+
+        if ($subscriptionId === null) {
+            return null;
+        }
+
+        if (! is_scalar($subscriptionId)) {
+            Cache::forget($cacheKey);
+
+            return null;
+        }
+
+        $subscriptionModel = config('filament-modular-subscriptions.models.subscription');
+
+        return $subscriptionModel::query()
+            ->with(['plan', 'moduleUsages.module'])
+            ->find($subscriptionId);
     }
 
     /**
@@ -492,7 +508,7 @@ trait Subscribable
     /**
      * Convert interval period to days.
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     private function calculateDaysFromInterval(int $period, Interval $interval): int
     {
@@ -506,7 +522,7 @@ trait Subscribable
             case Interval::YEAR:
                 return $period * 365;
             default:
-                throw new \InvalidArgumentException('Invalid interval');
+                throw new InvalidArgumentException('Invalid interval');
         }
     }
 

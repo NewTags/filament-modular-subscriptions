@@ -2,15 +2,15 @@
 
 namespace NewTags\FilamentModularSubscriptions\Traits;
 
-
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Notifications\Notification;
+use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
+use InvalidArgumentException;
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
+use NewTags\FilamentModularSubscriptions\Models\Module;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use NewTags\FilamentModularSubscriptions\Modules\BaseModule;
+use RuntimeException;
 
 trait HasSubscriptionModules
 {
@@ -22,6 +22,7 @@ trait HasSubscriptionModules
     public function canUseModule(string $moduleClass): bool
     {
         $cacheKey = $this->getCacheKey($moduleClass);
+
         return Cache::remember(
             $cacheKey,
             self::MODULE_ACCESS_CACHE_TTL,
@@ -31,9 +32,8 @@ trait HasSubscriptionModules
                     return false;
                 }
 
-
                 $moduleModel = config('filament-modular-subscriptions.models.module');
-                /** @var \NewTags\FilamentModularSubscriptions\Models\Module $module */
+                /** @var Module $module */
                 $module = $moduleModel::where('class', $moduleClass)
                     ->with(['planModules' => function ($query) use ($subscription) {
                         $query->where('plan_id', $subscription->plan_id);
@@ -43,7 +43,6 @@ trait HasSubscriptionModules
                 if (! $module) {
                     return false;
                 }
-
 
                 return $module->canUse($subscription);
             }
@@ -103,8 +102,8 @@ trait HasSubscriptionModules
     /**
      * Record usage for a specific module.
      *
-     * @throws \RuntimeException
-     * @throws \InvalidArgumentException
+     * @throws RuntimeException
+     * @throws InvalidArgumentException
      */
     public function recordUsage(string $moduleClass, int $quantity = 1, bool $incremental = true): void
     {
@@ -122,7 +121,6 @@ trait HasSubscriptionModules
         }
     }
 
-
     public function clearModuleCache(BaseModule $module): void
     {
         Cache::forget($this->getCacheKey($module::class));
@@ -137,7 +135,7 @@ trait HasSubscriptionModules
         }])->where('class', $moduleClass)->first();
 
         if (! $module) {
-            throw new \InvalidArgumentException("Module {$moduleClass} not found");
+            throw new InvalidArgumentException("Module {$moduleClass} not found");
         }
 
         DB::transaction(function () use ($activeSubscription, $module, $quantity, $incremental): void {
@@ -240,13 +238,12 @@ trait HasSubscriptionModules
             $moduleUsagePricing = $activeSubscription->moduleUsages()->sum('pricing');
 
             return (float) number_format($basePlanPrice + $moduleUsagePricing, 2, '.', '');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             report($e);
 
             return 0.0;
         }
     }
-
 
     public function decrementUsage(string $moduleClass, int $quantity = 1): void
     {
@@ -276,6 +273,7 @@ trait HasSubscriptionModules
 
         $this->clearFmsCache();
     }
+
     public function remainingUsage(string $moduleClass): int
     {
         $activeSubscription = $this->activeSubscription();
@@ -312,18 +310,18 @@ trait HasSubscriptionModules
         $subscription->plan->modules->each(function ($module) use ($subscription) {
             $plan = $subscription->plan;
 
-            if ($plan->moduleLimit($module) == 0 && !$plan->is_pay_as_you_go) {
+            if ($plan->moduleLimit($module) == 0 && ! $plan->is_pay_as_you_go) {
                 return;
             }
 
-                $subscription->moduleUsages()->firstOrCreate(
-                    ['module_id' => $module->id],
-                    [
-                        'usage' => 0,
-                        'calculated_at' => now(),
-                    ]
-                );
-            
+            $subscription->moduleUsages()->firstOrCreate(
+                ['module_id' => $module->id],
+                [
+                    'usage' => 0,
+                    'calculated_at' => now(),
+                ]
+            );
+
         });
     }
 }

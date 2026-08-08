@@ -1,7 +1,8 @@
 <?php
 
-use NewTags\FilamentModularSubscriptions\FmsPlugin;
 use Illuminate\Support\Facades\Cache;
+use NewTags\FilamentModularSubscriptions\FmsPlugin;
+
 if (! function_exists('clear_fms_cache')) {
     function clear_fms_cache(): bool
     {
@@ -15,7 +16,7 @@ if (! function_exists('clear_fms_cache')) {
             $tenant->clearFmsCache();
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             report($e);
 
             return false;
@@ -36,7 +37,7 @@ if (! function_exists('clear_fms_module_cache')) {
             Cache::forget($tenant->getCacheKey($moduleClass));
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             report($e);
 
             return false;

@@ -17,7 +17,8 @@ use NewTags\FilamentModularSubscriptions\Models\Module;
 use NewTags\FilamentModularSubscriptions\Models\Subscription;
 use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
 use NewTags\FilamentModularSubscriptions\Widgets\ModuleUsageWidget;
-use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
+use Outerweb\FilamentTranslatableFields\TranslatableFieldsPlugin;
+use Throwable;
 
 class FmsPlugin implements Plugin
 {
@@ -105,7 +106,7 @@ class FmsPlugin implements Plugin
     {
         if (! $this->onTenantPanel) {
             $panel
-                ->plugin(FilamentTranslatableFieldsPlugin::make())
+                ->plugin(TranslatableFieldsPlugin::make())
                 ->resources(config('filament-modular-subscriptions.resources'));
         } else {
             $panel
@@ -114,7 +115,7 @@ class FmsPlugin implements Plugin
                     MenuItem::make()
                         ->label(fn () => $this->getSubscriptionNavigationLabel())
                         ->url(fn () => TenantSubscription::getUrl())
-                        ->color(fn () => Color::Emerald)
+                        ->color('success')
                         ->visible(fn () => $this->subscriptionPageInTenantMenu && $this->canSeeTenantSubscription())
                         ->icon('heroicon-o-credit-card'),
                 ])
@@ -201,7 +202,7 @@ class FmsPlugin implements Plugin
                 now()->addMinutes(60),
                 fn () => $tenant->admins()->where('users.id', $auth->id)->exists()
             );
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return false;
         }
     }

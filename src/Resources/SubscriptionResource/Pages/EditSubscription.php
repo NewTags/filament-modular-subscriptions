@@ -2,7 +2,7 @@
 
 namespace NewTags\FilamentModularSubscriptions\Resources\SubscriptionResource\Pages;
 
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use NewTags\FilamentModularSubscriptions\Resources\SubscriptionResource;
 
@@ -13,7 +13,7 @@ class EditSubscription extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
+            DeleteAction::make()
                 ->after(function ($record) {
                     $record->subscribable->clearFmsCache();
                 }),

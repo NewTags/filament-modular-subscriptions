@@ -2,24 +2,27 @@
 
 namespace NewTags\FilamentModularSubscriptions\Resources;
 
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
-use NewTags\FilamentModularSubscriptions\ModularSubscription;
-use NewTags\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages;
+use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use NewTags\FilamentModularSubscriptions\FmsPlugin;
+use NewTags\FilamentModularSubscriptions\ModularSubscription;
+use NewTags\FilamentModularSubscriptions\Resources\ModuleUsageResource\Pages\ListModuleUsages;
 
 class ModuleUsageResource extends Resource
 {
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chart-bar';
 
     public static function getModel(): string
     {
@@ -41,12 +44,12 @@ class ModuleUsageResource extends Resource
         return FmsPlugin::get()->getNavigationGroup();
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
         $currency = config('filament-modular-subscriptions.main_currency');
 
-        return $infolist
-            ->schema([
+        return $schema
+            ->components([
                 TextEntry::make('subscription.subscribable.name')
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.subscription_id')),
                 TextEntry::make('module.name')
@@ -61,7 +64,7 @@ class ModuleUsageResource extends Resource
             ]);
     }
 
-    public static function table(Tables\Table $table): Tables\Table
+    public static function table(Table $table): Table
     {
         return $table
             ->heading(__('filament-modular-subscriptions::fms.resources.module_usage.name'))
@@ -69,27 +72,28 @@ class ModuleUsageResource extends Resource
             ->pluralModelLabel(__('filament-modular-subscriptions::fms.resources.module_usage.name'))
             ->modifyQueryUsing(fn ($query) => $query->with(['subscription.plan', 'module']))
             ->columns([
-                Tables\Columns\TextColumn::make('subscription.subscribable.name')
+                TextColumn::make('subscription.subscribable.name')
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.subscriber'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('subscription.plan.name')
-                    ->getStateUsing(fn($record) => $record->subscription->plan?->trans_name ?? __('filament-modular-subscriptions::fms.tenant_subscription.no_plan'))
+                TextColumn::make('subscription.plan.name')
+                    ->getStateUsing(fn ($record) => $record->subscription->plan?->trans_name ?? __('filament-modular-subscriptions::fms.tenant_subscription.no_plan'))
                     ->label(__('filament-modular-subscriptions::fms.resources.invoice.fields.plan'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('module.name')
-                    ->getStateUsing(fn($record) => $record->module->getLabel())
+                TextColumn::make('module.name')
+                    ->getStateUsing(fn ($record) => $record->module->getLabel())
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.module_id'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('usage')
+                TextColumn::make('usage')
                     ->getStateUsing(function ($record) {
                         $module = $record->module;
                         $moduleInstance = $module->getInstance();
                         $usage = $moduleInstance->calculateUsage($record->subscription);
+
                         return $usage;
                     })
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.usage'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('pricing')
+                TextColumn::make('pricing')
                     ->prefix(config('filament-modular-subscriptions.main_currency'))
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.pricing'))
                     ->getStateUsing(function ($record) {
@@ -97,6 +101,7 @@ class ModuleUsageResource extends Resource
                         $moduleInstance = $module->getInstance();
                         $usage = $moduleInstance->calculateUsage($record->subscription);
                         $pricing = $moduleInstance->getPrice($record->subscription);
+
                         return $usage * $pricing;
                     })
                     ->sortable(),
@@ -109,7 +114,7 @@ class ModuleUsageResource extends Resource
                     ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.subscriber'))
                     ->relationship('subscription.subscriber', 'name'),
                 Filter::make('usage')
-                    ->form([
+                    ->schema([
                         TextInput::make('usage_from')
                             ->numeric()
                             ->label(__('filament-modular-subscriptions::fms.resources.module_usage.fields.usage_from')),
@@ -121,15 +126,15 @@ class ModuleUsageResource extends Resource
                         return $query
                             ->when(
                                 $data['usage_from'],
-                                fn(Builder $query, $usage): Builder => $query->where('usage', '>=', $usage),
+                                fn (Builder $query, $usage): Builder => $query->where('usage', '>=', $usage),
                             )
                             ->when(
                                 $data['usage_to'],
-                                fn(Builder $query, $usage): Builder => $query->where('usage', '<=', $usage),
+                                fn (Builder $query, $usage): Builder => $query->where('usage', '<=', $usage),
                             );
                     }),
                 Filter::make('calculated_at')
-                    ->form([
+                    ->schema([
                         DatePicker::make('calculated_from')
                             ->label(__('filament-modular-subscriptions::fms.resources.payment.fields.created_from')),
                         DatePicker::make('calculated_until')
@@ -139,16 +144,16 @@ class ModuleUsageResource extends Resource
                         return $query
                             ->when(
                                 $data['calculated_from'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('calculated_at', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('calculated_at', '>=', $date),
                             )
                             ->when(
                                 $data['calculated_until'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('calculated_at', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('calculated_at', '<=', $date),
                             );
                     }),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make()
+            ->recordActions([
+                ViewAction::make()
                     ->modal(),
             ])
             ->headerActions([
@@ -164,7 +169,7 @@ class ModuleUsageResource extends Resource
                 //             ->send();
                 //     }),
             ])
-            ->bulkActions([]);
+            ->toolbarActions([]);
     }
 
     public static function getRelations(): array
@@ -177,7 +182,7 @@ class ModuleUsageResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListModuleUsages::route('/'),
+            'index' => ListModuleUsages::route('/'),
         ];
     }
 }
