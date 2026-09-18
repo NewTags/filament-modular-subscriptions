@@ -3,6 +3,7 @@
 namespace NewTags\FilamentModularSubscriptions\Commands\Concerns;
 
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use NewTags\FilamentModularSubscriptions\Enums\InvoiceStatus;
 use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;

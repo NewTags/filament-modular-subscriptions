@@ -2,10 +2,11 @@
 
 namespace NewTags\FilamentModularSubscriptions\Models;
 
-use NewTags\FilamentModularSubscriptions\Enums\PaymentMethod;
-use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use NewTags\FilamentModularSubscriptions\Enums\PaymentMethod;
+use NewTags\FilamentModularSubscriptions\Enums\PaymentStatus;
 
 class Payment extends Model
 {
@@ -42,6 +43,6 @@ class Payment extends Model
 
     public function reviewer(): BelongsTo
     {
-        return $this->belongsTo(config('auth.providers.users.model') ?? \App\Models\User::class, 'reviewed_by');
+        return $this->belongsTo(config('auth.providers.users.model') ?? User::class, 'reviewed_by');
     }
 }

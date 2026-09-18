@@ -2,10 +2,9 @@
 
 namespace NewTags\FilamentModularSubscriptions\Traits;
 
-use Filament\Notifications\Actions\Action;
-use Illuminate\Database\Eloquent\Builder;
+use Exception;
 use Filament\Notifications\Notification;
-use NewTags\FilamentModularSubscriptions\Pages\TenantSubscription;
+use Illuminate\Database\Eloquent\Builder;
 
 trait HasSubscriptionNotifications
 {
@@ -18,7 +17,8 @@ trait HasSubscriptionNotifications
         if (method_exists($this, 'admins')) {
             return $this->admins();
         }
-        throw new \Exception('The tenant model must implement getShouldNotifyUsersQuery() or have a admins() relationship');
+
+        throw new Exception('The tenant model must implement getShouldNotifyUsersQuery() or have a admins() relationship');
     }
 
     /**

@@ -5,6 +5,7 @@ namespace NewTags\FilamentModularSubscriptions\Pages;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -24,9 +25,9 @@ class TenantSubscription extends Page implements HasTable
 
     protected static ?int $navigationSort = 500;
 
-    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-credit-card';
 
-    protected static string $view = 'filament-modular-subscriptions::filament.pages.tenant-subscription';
+    protected string $view = 'filament-modular-subscriptions::filament.pages.tenant-subscription';
 
     public function getTitle(): string | Htmlable
     {
@@ -148,11 +149,11 @@ class TenantSubscription extends Page implements HasTable
     {
         return Action::make('switchPlanAction')
             ->requiresConfirmation()
-            ->form(function ($arguments) {
+            ->schema(function ($arguments) {
                 $plan = config('filament-modular-subscriptions.models.plan')::find($arguments['plan_id']);
 
                 return [
-                    \Filament\Forms\Components\TextInput::make('confirmation')
+                    TextInput::make('confirmation')
                         ->label(function () use ($plan) {
                             if (! $plan) {
                                 return __('filament-modular-subscriptions::fms.tenant_subscription.invalid_plan');
@@ -281,8 +282,8 @@ class TenantSubscription extends Page implements HasTable
             ->requiresConfirmation()
             ->modalHeading(__('filament-modular-subscriptions::fms.tenant_subscription.confirm_cancellation'))
             ->modalDescription(__('filament-modular-subscriptions::fms.tenant_subscription.cancel_subscription_warning'))
-            ->form([
-                \Filament\Forms\Components\TextInput::make('confirmation')
+            ->schema([
+                TextInput::make('confirmation')
                     ->label(__('filament-modular-subscriptions::fms.tenant_subscription.type_to_confirm_cancel'))
                     ->required()
                     ->rules([
@@ -346,7 +347,7 @@ class TenantSubscription extends Page implements HasTable
             ->modalDescription(__('filament-modular-subscriptions::fms.resources.payment.choose_method'))
             ->modalSubmitActionLabel(__('filament-modular-subscriptions::fms.payments.proceed_to_payment'))
             ->fillForm(fn (array $arguments): array => InvoiceResource::paymentFormDefaults($this->resolvePayableInvoice($arguments)))
-            ->form(fn (array $arguments): array => InvoiceResource::paymentFormSchema($this->resolvePayableInvoice($arguments)))
+            ->schema(fn (array $arguments): array => InvoiceResource::paymentFormSchema($this->resolvePayableInvoice($arguments)))
             ->action(fn (array $data, array $arguments, $livewire) => InvoiceResource::handlePayment($data, $this->resolvePayableInvoice($arguments), $livewire));
     }
 

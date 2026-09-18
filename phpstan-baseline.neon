@@ -1,0 +1,751 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Commands/ScheduleInvoiceGeneration.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$due_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Commands/ScheduleInvoiceGeneration.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$period\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Components/PeriodBonusFields.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Components/PeriodBonusFields.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/FmsPlugin.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$subscription\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/FmsPlugin.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:moduleLimit\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/FmsPlugin.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/FmsPlugin.php
+
+		-
+			message: '#^Variable \$alerts might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/FmsPlugin.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$charge_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Http/Controllers/PaymentCallbackController.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$invoice_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Http/Controllers/PaymentCallbackController.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$return_url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Http/Controllers/PaymentCallbackController.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Http/Controllers/PaymentCallbackController.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$uuid\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Http/Controllers/PaymentCallbackController.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$checkout_url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Http/Controllers/PublicPaymentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$subscriber\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Module\:\:\$class\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Module.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Module\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Module.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_persistent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/ModuleUsage.php
+
+		-
+			message: '#^Class App\\Models\\User not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Models/Payment.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$processed_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/PaymentCheckout.php
+
+		-
+			message: '#^Class App\\Models\\User not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Models/PaymentCheckout.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$limit\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Plan.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Plan.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$grace_interval\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Plan.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$grace_period\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Plan.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$invoice_interval\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Plan.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$invoice_period\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Plan.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$is_pay_as_you_go\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Plan.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$is_trial_plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Plan.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$trial_interval\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Plan.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$trial_period\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Plan.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PlanModule\:\:\$settings\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Models/PlanModule.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_pay_as_you_go\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Subscription.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$period_grace\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Subscription.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Subscription\:\:\$bonus_days\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Subscription.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Subscription\:\:\$ends_at\.$#'
+			identifier: property.notFound
+			count: 4
+			path: src/Models/Subscription.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Subscription\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Subscription.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Subscription\:\:\$trial_ends_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Models/Subscription.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:renew\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Models/Subscription.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$due_date\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Modules/BaseModule.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Subscription\:\:\$ends_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Modules/BaseModule.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Subscription\:\:\$is_pay_as_you_go\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Modules/BaseModule.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Subscription\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Modules/BaseModule.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:hasModule\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Modules/BaseModule.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:moduleLimit\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Modules/BaseModule.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:modulePrice\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Modules/BaseModule.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Pages/TenantSubscription.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$trans_name\.$#'
+			identifier: property.notFound
+			count: 4
+			path: src/Pages/TenantSubscription.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Subscription\:\:\$ends_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Pages/TenantSubscription.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Subscription\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Pages/TenantSubscription.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Subscription\:\:\$trial_ends_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Pages/TenantSubscription.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notifySubscriptionChange\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Pages/TenantSubscription.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$remaining_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Payments/CheckoutService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Payments/CheckoutService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$subscription_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Payments/CheckoutService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Payments/CheckoutService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Payments/CheckoutService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Payments/CheckoutService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$gateway\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Payments/CheckoutService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$uuid\.$#'
+			identifier: property.notFound
+			count: 4
+			path: src/Payments/CheckoutService.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 4
+			path: src/Payments/Exceptions/CheckoutException.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 2
+			path: src/Payments/Exceptions/GatewayRequestException.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Payments/SettlementService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$charge_id\.$#'
+			identifier: property.notFound
+			count: 5
+			path: src/Payments/SettlementService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 4
+			path: src/Payments/SettlementService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$gateway\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Payments/SettlementService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$invoice_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Payments/SettlementService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$processed_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Payments/SettlementService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$source\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Payments/SettlementService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$uuid\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Payments/SettlementService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:paid\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Payments/SettlementService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:payments\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Payments/SettlementService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\PaymentCheckout\:\:\$checkout_url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Resources/InvoiceResource.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isDeletable\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Resources/InvoiceResource.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:items\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Resources/InvoiceResource.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:payments\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Resources/InvoiceResource.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:plans\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Resources/ModuleResource.php
+
+		-
+			message: '#^Call to an undefined method Filament\\Forms\\Components\\TextInput\:\:translatable\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Resources/PlanResource.php
+
+		-
+			message: '#^Call to an undefined method Filament\\Forms\\Components\\Textarea\:\:translatable\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Resources/PlanResource.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:subscriptions\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Resources/PlanResource.php
+
+		-
+			message: '#^Cannot access property \$subscriptions on Illuminate\\Database\\Eloquent\\Model\|int\|string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: src/Resources/PlanResource/Pages/EditPlan.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, NewTags\\FilamentModularSubscriptions\\Models\\Plan\>\|NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$is_trial_plan\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Resources/SubscriptionResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, NewTags\\FilamentModularSubscriptions\\Models\\Plan\>\|NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$period\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Resources/SubscriptionResource.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Resources/SubscriptionResource.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$period\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Resources/SubscriptionResource.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$period_trial\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Resources/SubscriptionResource.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Resources/SubscriptionResource.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Plan\:\:\$trans_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Resources/SubscriptionResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Resources/SubscriptionResource/Pages/CreateSubscription.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$subscribable\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Resources/SubscriptionResource/Pages/CreateSubscription.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$subscribable\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Resources/SubscriptionResource/Pages/EditSubscription.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, NewTags\\FilamentModularSubscriptions\\Models\\Invoice\>\|NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, NewTags\\FilamentModularSubscriptions\\Models\\Invoice\>\|NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$bonus_days\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, NewTags\\FilamentModularSubscriptions\\Models\\Invoice\>\|NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, NewTags\\FilamentModularSubscriptions\\Models\\Invoice\>\|NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$subtotal\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, NewTags\\FilamentModularSubscriptions\\Models\\Invoice\>\|NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$tax\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ends_at\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fixed_invoice_day\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_pay_as_you_go\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$modules\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$period_grace\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$plan_id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$setup_fee\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$starts_at\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$subscribable\.$#'
+			identifier: property.notFound
+			count: 5
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$trans_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$due_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$subtotal\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Invoice\:\:\$tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Module\:\:\$is_persistent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Payment\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property NewTags\\FilamentModularSubscriptions\\Models\\Subscription\:\:\$subscribable_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:clearFmsCache\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notifySubscriptionChange\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notifySuperAdmins\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Services/InvoiceService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:renew\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Services/InvoiceService.php

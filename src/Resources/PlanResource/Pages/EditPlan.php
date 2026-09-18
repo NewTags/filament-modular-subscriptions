@@ -2,7 +2,7 @@
 
 namespace NewTags\FilamentModularSubscriptions\Resources\PlanResource\Pages;
 
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use NewTags\FilamentModularSubscriptions\Resources\PlanResource;
 
@@ -13,16 +13,14 @@ class EditPlan extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
-                ->visible(fn($record) => $record->subscriptions()->exists()),
+            DeleteAction::make()
+                ->visible(fn ($record) => $record->subscriptions()->exists()),
         ];
     }
 
     public function afterSave(): void
     {
-        $this->record->subscriptions->each(function ($subscription) {
-            $subscription->loadMissing('subscribable');
-            $subscription->subscribable->clearFmsCache();
-        });
+        $this->record->subscriptions->loadMissing('subscribable')
+            ->each(fn ($subscription) => $subscription->subscribable?->clearFmsCache());
     }
 }

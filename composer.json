@@ -30,12 +30,12 @@
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.0",
-        "filament/filament": "^3.0 || ^4.0",
+        "filament/filament": "^4.0|^5.0",
         "khaled.alshamaa/ar-php": "^6.3",
-        "laravel/framework": "^10.0 || ^11.0 || ^12.0",
+        "laravel/framework": "^10.0 || ^11.0 || ^12.0 || ^13.0",
         "mpdf/mpdf": "^8.2",
-        "outerweb/filament-translatable-fields": "^2.0 || ^3.0 || ^4.0",
-        "salla/zatca": "^3.0",
+        "outerweb/filament-translatable-fields": "^4.0",
+        "salla/zatca": "dev-dependabot/composer/chillerlan/php-qrcode-tw-4.3or-tw-5.0 as 3.0.4",
         "spatie/laravel-package-tools": "^1.15.0"
     },
     "require-dev": {

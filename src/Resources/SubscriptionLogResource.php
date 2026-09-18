@@ -2,11 +2,11 @@
 
 namespace NewTags\FilamentModularSubscriptions\Resources;
 
-use Filament\Infolists;
+use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use NewTags\FilamentModularSubscriptions\Enums\SubscriptionStatus;
@@ -18,7 +18,7 @@ class SubscriptionLogResource extends Resource
 {
     protected static ?string $model = SubscriptionLog::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     public static function getNavigationGroup(): ?string
     {
@@ -67,18 +67,18 @@ class SubscriptionLogResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make()
+            ->recordActions([
+                ViewAction::make()
                     ->slideOver()
                     ->modalWidth('5xl'),
             ]);
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema([
-                Infolists\Components\Section::make()
+        return $schema
+            ->components([
+                Section::make()
                     ->schema([
                         TextEntry::make('subscription.subscribable.name')
                             ->label(__('filament-modular-subscriptions::fms.resources.subscription_log.fields.subscription_id')),
